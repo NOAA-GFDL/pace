@@ -6,8 +6,8 @@ import numpy as np
 import pytest
 
 import fv3core
-import fv3gfs.util as fv3util
-from fv3core.utils import gt4py_utils as utils
+import pace.util as fv3util
+from pace.dsl import gt4py_utils as utils
 
 from .translate import TranslateFortranData2Py, read_serialized_data
 
