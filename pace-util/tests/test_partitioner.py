@@ -608,7 +608,7 @@ def test_subtile_slice(
     array_dims, tile_extent, layout, rank, subtile_slice, overlap, edge_interior_ratio
 ):
     partitioner = pace.util.TilePartitioner(layout, edge_interior_ratio)
-    result = pace.util.partitioner.subtile_slice(rank, array_dims, tile_extent, overlap)
+    result = partitioner.subtile_slice(rank, array_dims, tile_extent, overlap)
     assert result == subtile_slice
 
 
