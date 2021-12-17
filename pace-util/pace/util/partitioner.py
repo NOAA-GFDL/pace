@@ -1,6 +1,5 @@
 import abc
 import copy
-import dataclasses
 import functools
 from typing import Callable, Optional, Sequence, Tuple, Union, cast
 
@@ -856,14 +855,17 @@ def subtile_extents_from_tile_metadata(
             and boundary tile sizes. Default is 1.0, meaning equal subtiles.
 
     Returns:
-        subtile_extents: the extents of first all interior tiles, then all edge tiles along all dimensions.
+        subtile_extents: the extents of first all interior tiles, then all edge tiles
+        along all dimensions.
     """
 
     def _valid_edge_tile_sizes(
         dim_extent: int, subtile_count: int, start: int
     ) -> Sequence[int]:
-        """Returns a list of valid edge tile sizes, counting down from the starting edge size to the smallest possible one
-        that lets the interior tile sizes still be an integer. After that, it counts up from the starting edge size.
+        """
+        Returns a list of valid edge tile sizes, counting down from the starting
+        edge size to the smallest possible one that lets the interior tile sizes
+        still be an integer. After that, it counts up from the starting edge size.
         """
         bottom = 1
         top = int((dim_extent - subtile_count + 2) / 2) + 1
@@ -874,7 +876,8 @@ def subtile_extents_from_tile_metadata(
         offset = 0
         factor = -1
 
-        # steps through all valid sizes to sort them: [start, counting down to 1, counting up from start]
+        # steps through all valid sizes to sort them:
+        # [start, counting down to 1, counting up from start]
         for i in range(len(unsorted_valid_sizes) + 1):
             index = start + factor * offset
             if index in unsorted_valid_sizes and index not in valid_sizes:
@@ -891,14 +894,16 @@ def subtile_extents_from_tile_metadata(
 
     return_extents = []
     edge_extents = []
-    # for each dimension, find a valid edge:interior decomposition that has a ratio close to the desired edge_interior_ratio
+    # for each dimension, find a valid edge:interior decomposition that
+    # has a ratio close to the desired edge_interior_ratio
     for dim, subtile_count, dim_extent in zip(dims, layout_factors, tile_extent):
         dim_edge_interior_ratio = edge_interior_ratio
         if dim in constants.INTERFACE_DIMS:
             dim_extent = dim_extent - 1
         if (not subtile_count % 2) and dim_extent % 2:
             raise ValueError(
-                f"Cannot find valid decomposition for odd ({dim_extent}) gridpoints along an even count ({subtile_count}) of ranks."
+                f"Cannot find valid decomposition for odd ({dim_extent}) "
+                f"gridpoints along an even count ({subtile_count}) of ranks."
             )
 
         # only do shrinked edges in x,y and if there is interior
@@ -908,7 +913,8 @@ def subtile_extents_from_tile_metadata(
                 dim_extent / (2 + (subtile_count - 2) / dim_edge_interior_ratio)
             )
 
-            # searching of a valid integer pair for edge and interior tile sizes that add up to the entire dimension extent.
+            # searching of a valid integer pair for edge and interior tile sizes that
+            # add up to the entire dimension extent.
             found = False
             for edge_size in _valid_edge_tile_sizes(
                 dim_extent, subtile_count, edge_subtile_size
@@ -916,8 +922,10 @@ def subtile_extents_from_tile_metadata(
                 dim_edge_interior_ratio = edge_size / (
                     (dim_extent - 2 * edge_size) / (subtile_count - 2)
                 )
-                # validation that the integer pair (edge_subtile_size, int(edge_size / dim_edge_interior_ratio))
-                # multiplied by their respective subtile counts together add up to the entire dimension's extent
+                # validation that the integer pair
+                # (edge_subtile_size, int(edge_size / dim_edge_interior_ratio))
+                # multiplied by their respective subtile counts together add up to the
+                # entire dimension's extent
                 if (
                     edge_size * 2
                     + (subtile_count - 2) * int(edge_size / dim_edge_interior_ratio)
@@ -927,7 +935,8 @@ def subtile_extents_from_tile_metadata(
                     break
             if not found:
                 raise ValueError(
-                    f"No valid subdomain assignment found for dimension {dim} with {dim_extent} gridpoints along {subtile_count} ranks."
+                    f"No valid subdomain assignment found for dimension {dim} "
+                    f"with {dim_extent} gridpoints along {subtile_count} ranks."
                 )
             return_extents.append(int(edge_size / dim_edge_interior_ratio))
             edge_extents.append(int(edge_size))
@@ -999,8 +1008,9 @@ def subtile_slice(
                 subtile_index[horizontal_dim_index] == 0
                 or layout[horizontal_dim_index] < 3
             ):  # case distinction: rank 0 or no special handling
-                # this is technically not the edge tile size, but does not matter as subtile_index for that dim is 0.
-                # alternatively equal sized tiles go here, which can take both subdomain sizes.
+                # this is technically not the edge tile size, but does not matter as
+                # the subtile_index for that dim is 0. alternatively equal sized tiles
+                # go here, which can take both subdomain sizes.
                 start = subtile_index[horizontal_dim_index] * subtile_extent[num_dim]
             else:  # case distinction: interior or end tile
                 start = (subtile_index[horizontal_dim_index] - 1) * subtile_extent[
@@ -1034,7 +1044,10 @@ def subtile_slice(
 
 
 def _interface_overlap_extent(dim: str, is_end_index: bool, extent: int, overlap: bool):
-    """In an interface dimension, adds a potential grid point for overlap or the end index tile."""
+    """
+    In an interface dimension, adds a potential grid point for overlap or the
+    end index tile.
+    """
     if dim in constants.INTERFACE_DIMS and (is_end_index or overlap):
         extent_plus_overlap_gridcell_count = 1
     else:

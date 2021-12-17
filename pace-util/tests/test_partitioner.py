@@ -109,7 +109,8 @@ def test_tile_extent_from_rank_metadata(array_extent, array_dims, layout, tile_e
 
 
 @pytest.mark.parametrize(
-    "array_dims, tile_extent, layout, rank, subtile_slice, overlap, edge_interior_ratio",
+    "array_dims, tile_extent, layout, rank, subtile_slice, overlap, "
+    "edge_interior_ratio",
     [
         pytest.param(
             [pace.util.Y_DIM, pace.util.X_DIM],
@@ -479,7 +480,8 @@ def test_tile_extent_from_rank_metadata(array_extent, array_dims, layout, tile_e
             (slice(0, 5), slice(2, 8), slice(8, 14)),
             False,
             float(1.0 / 3),
-            id="96_rank_closebotcloseright_right_no_overlap_square_layout_third_edge_tiles_3d",
+            id="96_rank_closebotcloseright_right_no_overlap_square_layout_"
+            "third_edge_tiles_3d",
         ),
         pytest.param(
             [pace.util.Z_INTERFACE_DIM, pace.util.Y_DIM, pace.util.X_DIM],
@@ -613,7 +615,8 @@ def test_subtile_slice(
 
 
 @pytest.mark.parametrize(
-    "array_dims, tile_extent, layout, rank, subtile_slice, overlap, edge_interior_ratio",
+    "array_dims, tile_extent, layout, rank, subtile_slice, overlap, "
+    "edge_interior_ratio",
     [
         pytest.param(
             [pace.util.Y_DIM, pace.util.X_DIM],
@@ -727,14 +730,16 @@ def test_subtile_slice_even_grid_odd_layout(
 
 
 @pytest.mark.parametrize(
-    "array_dims, tile_extent, layout, rank, expected_error_string, overlap, edge_interior_ratio",
+    "array_dims, tile_extent, layout, rank, expected_error_string, overlap, "
+    "edge_interior_ratio",
     [
         pytest.param(
             [pace.util.Y_DIM, pace.util.X_DIM],
             (13, 19),
             (4, 4),
             24,
-            "Cannot find valid decomposition for odd \\(13\\) gridpoints along an even count \\(4\\) of ranks.",
+            "Cannot find valid decomposition for odd \\(13\\) gridpoints "
+            "along an even count \\(4\\) of ranks.",
             False,
             0.5,
             id="48_rank_odd_grid_even_layout_y",
@@ -744,7 +749,8 @@ def test_subtile_slice_even_grid_odd_layout(
             (12, 19),
             (4, 2),
             24,
-            "Cannot find valid decomposition for odd \\(19\\) gridpoints along an even count \\(2\\) of ranks.",
+            "Cannot find valid decomposition for odd \\(19\\) gridpoints "
+            "along an even count \\(2\\) of ranks.",
             False,
             1.0,
             id="48_rank_odd_grid_even_layout_x",
@@ -850,7 +856,8 @@ def test_subtile_extents_from_tile_metadata(
 
 
 @pytest.mark.parametrize(
-    "array_dims, tile_extent, layout, full_edge_interior_ratio, half_edge_interior_ratio, expected_slice, expected_extent, expected_error_string",
+    "array_dims, tile_extent, layout, full_edge_interior_ratio, "
+    "half_edge_interior_ratio, expected_slice, expected_extent, expected_error_string",
     [
         pytest.param(
             [pace.util.Y_DIM, pace.util.X_DIM],
@@ -860,7 +867,8 @@ def test_subtile_extents_from_tile_metadata(
             0.5,
             (slice(0, 3, None), slice(0, 2, None)),
             (9, 8),
-            "Only equal sized subdomains are supported, was given an edge_interior_ratio of 0.5",
+            "Only equal sized subdomains are supported, was given an "
+            "edge_interior_ratio of 0.5",
             id="72_rank_half_edge_tiles",
         ),
     ],
@@ -894,7 +902,8 @@ def test_tile_extent_from_metadata(
 
 
 @pytest.mark.parametrize(
-    "array_dims, tile_extent, layout, edge_interior_ratio, rank, tile_expected, cubedsphere_expected",
+    "array_dims, tile_extent, layout, edge_interior_ratio, rank, tile_expected, "
+    "cubedsphere_expected",
     [
         pytest.param(
             [

@@ -1,9 +1,8 @@
+import pytest
 
 import pace.util
-import numpy as np
 from fv3core.grid import MetricTerms
 from fv3core.utils.null_comm import NullComm
-import pytest
 
 
 @pytest.mark.parametrize(
@@ -31,10 +30,6 @@ import pytest
         ),
     ],
 )
-
-
-
-
 def test_metric_terms(rank: int, edge_interior_ratio: float):
     layout = [3, 3]
     npx, npy, npz = 129, 129, 79
@@ -42,14 +37,11 @@ def test_metric_terms(rank: int, edge_interior_ratio: float):
     backend = "numpy"
 
     mpi_comm = NullComm(rank, total_ranks)
-    partitioner = pace.util.CubedSpherePartitioner(pace.util.TilePartitioner(layout, edge_interior_ratio))
+    partitioner = pace.util.CubedSpherePartitioner(
+        pace.util.TilePartitioner(layout, edge_interior_ratio)
+    )
     communicator = pace.util.CubedSphereCommunicator(mpi_comm, partitioner)
 
-    print(f"begin_metric_terms")
     terms = MetricTerms.from_tile_sizing(
-        npx=npx,
-        npy=npy,
-        npz=npz,
-        communicator=communicator,
-        backend=backend
+        npx=npx, npy=npy, npz=npz, communicator=communicator, backend=backend
     )

@@ -54,7 +54,8 @@ class SubtileGridSizer(GridSizer):
                 such as land or radiation dimensions
             layout: (y, x) number of ranks along tile edges
             tile_partitioner (optional): partitioner object for the tile. By default, a
-                TilePartitioner is created with the given layout and equal sized subtiles
+                TilePartitioner is created with the given layout and equal sized
+                subtiles
             tile_rank (optional): rank of this subtile.
         """
         if tile_partitioner is None:
