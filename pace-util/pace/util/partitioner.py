@@ -694,8 +694,8 @@ class CubedSpherePartitioner(Partitioner):
         """
         if global_dims[0] != constants.TILE_DIM:
             raise NotImplementedError(
-                "currently only supports tile dimension {constants.TILE_DIM} as the "
-                "first dimension, got dims {cube_metadata.dims}"
+                f"currently only supports tile dimension {constants.TILE_DIM} as the "
+                f"first dimension, got dims {global_dims}"
             )
         i_tile = self.tile_index(rank)
         return (i_tile,) + self.tile.subtile_slice(
