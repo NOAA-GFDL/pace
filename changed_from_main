@@ -55,7 +55,7 @@ def add_nested_dependencies(dependency_map: Dict[str, Set[str]]) -> Dict[str, Se
                 dependencies.update(dependency_map[dependent_key])
 
 
-def parse_args(subdir_dependencies: Dict[str, Any]):
+def parse_args(subdir_dependencies: Dict[str, Any]) -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description=(
             "Determines whether one of the projects in the repo or any of its "
@@ -73,19 +73,19 @@ def parse_args(subdir_dependencies: Dict[str, Any]):
     return parser.parse_args()
 
 
-def unstaged_files(dirname) -> bool:
+def unstaged_files(dirname: str) -> bool:
     result = subprocess.check_output(
         ["git", "ls-files", "--other", "--directory", "--exclude-standard", dirname]
     )
     return len(result) > 0
 
 
-def staged_files_changed(dirname) -> bool:
+def staged_files_changed(dirname: str) -> bool:
     result = subprocess.check_output(["git", "diff", "main", dirname])
     return len(result) > 0
 
 
-def changed(dirname) -> bool:
+def changed(dirname: str) -> bool:
     return unstaged_files(dirname) or staged_files_changed(dirname)
 
 
@@ -99,11 +99,10 @@ if __name__ == "__main__":
     subdir_dependencies = get_dependencies()
     args = parse_args(subdir_dependencies)
     if changed(args.project_name) or top_level_files_changed():
-        print("true")
+        exit(1)
     else:
         for dependency_subdir in subdir_dependencies[args.project_name]:
             if changed(dependency_subdir):
-                print("true")
-                break
+                exit(1)
         else:
-            print("false")
+            exit(0)

@@ -35,7 +35,7 @@ jobs:
       - run:
           name: install tox and MPI
           command: |
-            if [ $(python changed_from_main.py pace-util) != false ]; then
+            if ./changed_from_main pace-util; then
               sudo apt-get update
               sudo apt-get install libopenmpi3 libopenmpi-dev
               python3 -m venv pace-util/venv
@@ -45,7 +45,7 @@ jobs:
       - run:
           name: run tests
           command: |
-            if [ $(python changed_from_main.py pace-util) != false ]; then
+            if ./changed_from_main pace-util; then
               cd pace-util && tox -e test -e test_no_extras
             fi
       - save_cache:
@@ -67,7 +67,7 @@ jobs:
       - run:
           name: install tox
           command: |
-            if [ $(python changed_from_main.py fv3core) != false ]; then
+            if ./changed_from_main fv3core; then
               python3 -m venv fv3core/venv
               . fv3core/venv/bin/activate
               sudo pip3 install tox -c fv3core/constraints.txt
@@ -75,7 +75,7 @@ jobs:
       - run:
           name: run tests
           command: |
-            if [ $(python changed_from_main.py fv3core) != false ]; then
+            if ./changed_from_main fv3core; then
               cd fv3core && tox -e test
             fi
       - save_cache:
