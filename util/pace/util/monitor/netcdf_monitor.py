@@ -37,6 +37,7 @@ class _TimeChunkedVariable:
             data=self._data[: self._i_time, ...],
             dims=("time",) + tuple(self._dims),
             units=self._units,
+            allow_mismatch_float_precision=True,
         )
 
 

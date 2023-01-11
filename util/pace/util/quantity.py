@@ -1,6 +1,6 @@
 import dataclasses
 import warnings
-from typing import Any, Dict, Iterable, Sequence, Tuple, Union, cast
+from typing import Any, Dict, Iterable, Optional, Sequence, Tuple, Union, cast
 
 import numpy as np
 
@@ -8,6 +8,7 @@ from . import _xarray, constants
 from ._boundary_utils import bound_default_slice, shift_boundary_slice_tuple
 from ._optional_imports import cupy, dace, gt4py
 from .types import NumpyModule
+from .utils import pfloat
 
 
 if cupy is None:
@@ -256,6 +257,16 @@ def _validate_quantity_property_lengths(shape, dims, origin, extent):
             )
 
 
+def _is_float(dtype):
+    """Expected floating point type for Pace"""
+    return (
+        dtype == float
+        or dtype == np.float32
+        or dtype == np.float64
+        or dtype == np.float16
+    )
+
+
 class Quantity:
     """
     Data container for physical quantities.
@@ -266,9 +277,10 @@ class Quantity:
         data,
         dims: Sequence[str],
         units: str,
-        origin: Sequence[int] = None,
-        extent: Sequence[int] = None,
+        origin: Optional[Sequence[int]] = None,
+        extent: Optional[Sequence[int]] = None,
         gt4py_backend: Union[str, None] = None,
+        allow_mismatch_float_precision: bool = False,
     ):
         """
         Initialize a Quantity.
@@ -284,6 +296,15 @@ class Quantity:
                 storage attribute is disabled and will raise an exception. Will raise
                 a TypeError if this is given with a gt4py storage type as data
         """
+        if (
+            not allow_mismatch_float_precision
+            and _is_float(data.dtype)
+            and data.dtype != pfloat()
+        ):
+            raise ValueError(
+                f"Floating-point data type mismatch, asked for {data.dtype}, "
+                f"Pace configured for {pfloat()}"
+            )
         if origin is None:
             origin = (0,) * len(dims)  # default origin at origin of array
         else:
