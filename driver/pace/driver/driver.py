@@ -675,7 +675,7 @@ class Driver:
         )
         if (
             self.comm.Get_size()
-            >= self.config.performance_config.json_all_rank_threshold
+            <= self.config.performance_config.json_all_rank_threshold
         ):
             self._write_performance_json_output()
         self.diagnostics.store_grid(

@@ -982,9 +982,21 @@ class DelnFlux:
         nk = grid_indexing.domain[2]
         self._origin = grid_indexing.origin_full()
 
-        self._fx2 = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="undefined")
-        self._fy2 = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="undefined")
-        self._d2 = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="undefined")
+        self._fx2 = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_DIM],
+            units="undefined",
+            dtype=pace.util.pfloat(),
+        )
+        self._fy2 = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_DIM],
+            units="undefined",
+            dtype=pace.util.pfloat(),
+        )
+        self._d2 = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_DIM],
+            units="undefined",
+            dtype=pace.util.pfloat(),
+        )
 
         self._add_diffusive_stencil = stencil_factory.from_dims_halo(
             func=add_diffusive_component,

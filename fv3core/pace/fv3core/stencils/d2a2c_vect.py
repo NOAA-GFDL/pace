@@ -419,8 +419,16 @@ class DGrid2AGrid2CGridVectors:
         npt = 4 if not nested else 0
         if npt > grid_indexing.domain[0] - 1 or npt > grid_indexing.domain[1] - 1:
             npt = 0
-        self._utmp = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="m/s")
-        self._vtmp = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="m/s")
+        self._utmp = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_DIM],
+            units="m/s",
+            dtype=pace.util.pfloat(),
+        )
+        self._vtmp = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_DIM],
+            units="m/s",
+            dtype=pace.util.pfloat(),
+        )
 
         js1 = npt + OFFSET if grid_indexing.south_edge else grid_indexing.jsc - 1
         je1 = ny - npt if grid_indexing.north_edge else grid_indexing.jec + 1

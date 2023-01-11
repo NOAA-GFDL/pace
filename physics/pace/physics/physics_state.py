@@ -290,7 +290,7 @@ class PhysicsState:
             tendency = quantity_factory.zeros(
                 [pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM],
                 "unknown",
-                dtype=float,
+                dtype=pace.util.pfloat(),
             )
             self.microphysics: Optional[MicrophysicsState] = MicrophysicsState(
                 pt=self.pt,
@@ -321,7 +321,9 @@ class PhysicsState:
         for _field in fields(cls):
             if "dims" in _field.metadata.keys():
                 initial_arrays[_field.name] = quantity_factory.zeros(
-                    _field.metadata["dims"], _field.metadata["units"], dtype=float
+                    _field.metadata["dims"],
+                    _field.metadata["units"],
+                    dtype=pace.util.pfloat(),
                 ).data
         return cls(
             **initial_arrays,

@@ -49,7 +49,7 @@ class TendencyState:
             initial_quantities[_field.name] = quantity_factory.zeros(
                 _field.metadata["dims"],
                 _field.metadata["units"],
-                dtype=float,
+                dtype=pace.util.pfloat(),
             )
         return cls(**initial_quantities)
 

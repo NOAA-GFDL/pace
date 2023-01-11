@@ -136,8 +136,16 @@ class FillNegativeTracerValues:
         # Setting initial value of upper_fix to zero is only needed for validation.
         # The values in the compute domain are set to zero in the stencil.
         self._zfix = quantity_factory.zeros([X_DIM, Y_DIM], units="unknown", dtype=int)
-        self._sum0 = quantity_factory.zeros([X_DIM, Y_DIM], units="unknown")
-        self._sum1 = quantity_factory.zeros([X_DIM, Y_DIM], units="unknown")
+        self._sum0 = quantity_factory.zeros(
+            [X_DIM, Y_DIM],
+            units="unknown",
+            dtype=pace.util.pfloat(),
+        )
+        self._sum1 = quantity_factory.zeros(
+            [X_DIM, Y_DIM],
+            units="unknown",
+            dtype=pace.util.pfloat(),
+        )
 
         self._filtered_tracer_dict = {
             name: tracers[name] for name in utils.tracer_variables[0 : self._nq]

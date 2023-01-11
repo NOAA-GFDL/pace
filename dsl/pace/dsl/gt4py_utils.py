@@ -6,6 +6,7 @@ import gt4py
 import numpy as np
 
 from pace.dsl.typing import DTypes, Field, Float
+from pace.util.utils import pfloat
 
 
 try:
@@ -83,7 +84,7 @@ def make_storage_data(
     origin: Tuple[int, ...] = origin,
     *,
     backend: str,
-    dtype: DTypes = np.float64,
+    dtype: DTypes = pfloat(),
     mask: Optional[Tuple[bool, ...]] = None,
     start: Tuple[int, ...] = (0, 0, 0),
     dummy: Optional[Tuple[int, ...]] = None,
@@ -261,7 +262,7 @@ def make_storage_from_shape(
     origin: Tuple[int, ...] = origin,
     *,
     backend: str,
-    dtype: DTypes = np.float64,
+    dtype: DTypes = pfloat(),
     mask: Optional[Tuple[bool, ...]] = None,
 ) -> Field:
     """Create a new gt4py storage of a given shape filled with zeros.

@@ -55,7 +55,11 @@ class PK3Halo:
             origin=origin,
             domain=domain,
         )
-        self._pe_tmp = quantity_factory.zeros([X_DIM, Y_DIM], units="unknown")
+        self._pe_tmp = quantity_factory.zeros(
+            [X_DIM, Y_DIM],
+            units="unknown",
+            dtype=pace.util.pfloat(),
+        )
 
     def __call__(self, pk3: FloatField, delp: FloatField, ptop: float, akap: float):
         """Update pressure raised to the kappa (pk3) in halo region.

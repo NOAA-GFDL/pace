@@ -148,7 +148,11 @@ class FiniteVolumeTransport:
         origin = idx.origin_compute()
 
         def make_quantity():
-            return quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="unknown")
+            return quantity_factory.zeros(
+                [X_DIM, Y_DIM, Z_DIM],
+                units="unknown",
+                dtype=pace.util.pfloat(),
+            )
 
         self._q_advected_y = make_quantity()
         self._q_advected_x = make_quantity()

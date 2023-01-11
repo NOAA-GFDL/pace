@@ -140,10 +140,14 @@ class NonHydrostaticPressureGradient:
         self._rdy = grid_data.rdy
 
         self._tmp_wk = quantity_factory.zeros(
-            [X_DIM, Y_DIM, Z_INTERFACE_DIM], units="unknown"
+            [X_DIM, Y_DIM, Z_INTERFACE_DIM],
+            units="unknown",
+            dtype=pace.util.pfloat(),
         )
         self._tmp_wk1 = quantity_factory.zeros(
-            [X_DIM, Y_DIM, Z_INTERFACE_DIM], units="unknown"
+            [X_DIM, Y_DIM, Z_INTERFACE_DIM],
+            units="unknown",
+            dtype=pace.util.pfloat(),
         )
 
         self.a2b_k1 = AGrid2BGridFourthOrder(

@@ -500,11 +500,19 @@ class CGridShallowWaterDynamics:
         self._fC = self.grid_data.fC
         # TODO: double-check the dimensions on these, they may be incorrect
         # as they are only documentation and not used by the code
-        self.delpc = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="unknown")
+        self.delpc = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_DIM],
+            units="unknown",
+            dtype=pace.util.pfloat(),
+        )
         """
         pressure thickness on c-grid forward step
         """
-        self.ptc = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="unknown")
+        self.ptc = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_DIM],
+            units="unknown",
+            dtype=pace.util.pfloat(),
+        )
         """
         potential temperature on c-grid forward step
         """
@@ -524,7 +532,11 @@ class CGridShallowWaterDynamics:
         )
 
         def make_quantity() -> pace.util.Quantity:
-            return quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="unknown")
+            return quantity_factory.zeros(
+                [X_DIM, Y_DIM, Z_DIM],
+                units="unknown",
+                dtype=pace.util.pfloat(),
+            )
 
         # TODO: double-check the dimensions on these, they may be incorrect
         # as they are only documentation and not used by the code

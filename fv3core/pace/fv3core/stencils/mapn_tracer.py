@@ -30,7 +30,11 @@ class MapNTracer:
             dace_compiletime_args=["tracers"],
         )
         self._nq = int(nq)
-        self._qs = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="unknown")
+        self._qs = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_DIM],
+            units="unknown",
+            dtype=pace.util.pfloat(),
+        )
 
         kord_tracer = [kord] * self._nq
         kord_tracer[5] = 9  # qcld

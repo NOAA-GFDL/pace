@@ -197,23 +197,37 @@ def dyncore_temporaries(
         # TODO: the dimensions of ut and vt may not be correct,
         #       because they are not used. double-check and correct as needed.
         temporaries[name] = quantity_factory.zeros(
-            dims=[X_DIM, Y_DIM, Z_DIM], units="unknown"
+            dims=[X_DIM, Y_DIM, Z_DIM],
+            units="unknown",
+            dtype=pace.util.pfloat(),
         )
     for name in ["gz", "pkc", "zh"]:
         temporaries[name] = quantity_factory.zeros(
-            dims=[X_DIM, Y_DIM, Z_INTERFACE_DIM], units="unknown"
+            dims=[X_DIM, Y_DIM, Z_INTERFACE_DIM],
+            units="unknown",
+            dtype=pace.util.pfloat(),
         )
     temporaries["divgd"] = quantity_factory.zeros(
-        dims=[X_INTERFACE_DIM, Y_INTERFACE_DIM, Z_DIM], units="unknown"
+        dims=[X_INTERFACE_DIM, Y_INTERFACE_DIM, Z_DIM],
+        units="unknown",
+        dtype=pace.util.pfloat(),
     )
-    temporaries["ws3"] = quantity_factory.zeros(dims=[X_DIM, Y_DIM], units="unknown")
+    temporaries["ws3"] = quantity_factory.zeros(
+        dims=[X_DIM, Y_DIM],
+        units="unknown",
+        dtype=pace.util.pfloat(),
+    )
     for name in ["crx", "xfx"]:
         temporaries[name] = quantity_factory.zeros(
-            dims=[X_INTERFACE_DIM, Y_DIM, Z_DIM], units="unknown"
+            dims=[X_INTERFACE_DIM, Y_DIM, Z_DIM],
+            units="unknown",
+            dtype=pace.util.pfloat(),
         )
     for name in ["cry", "yfx"]:
         temporaries[name] = quantity_factory.zeros(
-            dims=[X_DIM, Y_INTERFACE_DIM, Z_DIM], units="unknown"
+            dims=[X_DIM, Y_INTERFACE_DIM, Z_DIM],
+            units="unknown",
+            dtype=pace.util.pfloat(),
         )
     return temporaries
 
@@ -245,22 +259,27 @@ class AcousticDynamics:
             full_size_xyz_halo_spec = quantity_factory.get_quantity_halo_spec(
                 dims=[fv3util.X_DIM, fv3util.Y_DIM, fv3util.Z_DIM],
                 n_halo=grid_indexing.n_halo,
+                dtype=pace.util.pfloat(),
             )
             full_size_xyiz_halo_spec = quantity_factory.get_quantity_halo_spec(
                 dims=[fv3util.X_DIM, fv3util.Y_INTERFACE_DIM, fv3util.Z_DIM],
                 n_halo=grid_indexing.n_halo,
+                dtype=pace.util.pfloat(),
             )
             full_size_xiyz_halo_spec = quantity_factory.get_quantity_halo_spec(
                 dims=[fv3util.X_INTERFACE_DIM, fv3util.Y_DIM, fv3util.Z_DIM],
                 n_halo=grid_indexing.n_halo,
+                dtype=pace.util.pfloat(),
             )
             full_size_xyzi_halo_spec = quantity_factory.get_quantity_halo_spec(
                 dims=[fv3util.X_DIM, fv3util.Y_DIM, fv3util.Z_INTERFACE_DIM],
                 n_halo=grid_indexing.n_halo,
+                dtype=pace.util.pfloat(),
             )
             full_size_xiyiz_halo_spec = quantity_factory.get_quantity_halo_spec(
                 dims=[fv3util.X_INTERFACE_DIM, fv3util.Y_INTERFACE_DIM, fv3util.Z_DIM],
                 n_halo=grid_indexing.n_halo,
+                dtype=pace.util.pfloat(),
             )
 
             # Build the HaloUpdater. We could build one updater per specification group
@@ -322,6 +341,7 @@ class AcousticDynamics:
                 full_3Dfield_2pts_halo_spec = quantity_factory.get_quantity_halo_spec(
                     dims=[fv3util.X_DIM, fv3util.Y_DIM, fv3util.Z_INTERFACE_DIM],
                     n_halo=2,
+                    dtype=pace.util.pfloat(),
                 )
                 self.pkc = WrappedHaloUpdater(
                     comm.get_scalar_halo_updater([full_3Dfield_2pts_halo_spec]),
@@ -457,7 +477,11 @@ class AcousticDynamics:
             # To write lower dimensional storages, these need to be 3D
             # then converted to lower dimensional
             self._dp_ref = grid_data.dp_ref
-            self._zs = quantity_factory.zeros([X_DIM, Y_DIM], units="m")
+            self._zs = quantity_factory.zeros(
+                [X_DIM, Y_DIM],
+                units="m",
+                dtype=pace.util.pfloat(),
+            )
             self._zs.data[:] = self._zs.np.asarray(phis.data / constants.GRAV)
 
             self.update_height_on_d_grid = updatedzd.UpdateHeightOnDGrid(

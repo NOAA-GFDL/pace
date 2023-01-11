@@ -652,7 +652,11 @@ def get_column_namelist(
     col: Dict[str, pace.util.Quantity] = {}
     for name in all_names:
         # TODO: fill units information
-        col[name] = quantity_factory.zeros(dims=[Z_DIM], units="unknown")
+        col[name] = quantity_factory.zeros(
+            dims=[Z_DIM],
+            units="unknown",
+            dtype=pace.util.pfloat(),
+        )
     for name in direct_namelist:
         col[name].view[:] = getattr(config, name)
 
@@ -760,7 +764,11 @@ class DGridShallowWaterLagrangianDynamics:
         self.hydrostatic = config.hydrostatic
 
         def make_quantity():
-            return quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="unknown")
+            return quantity_factory.zeros(
+                [X_DIM, Y_DIM, Z_DIM],
+                units="unknown",
+                dtype=pace.util.pfloat(),
+            )
 
         self._tmp_heat_s = make_quantity()
         self._vort_x_delta = make_quantity()

@@ -101,12 +101,20 @@ class HyperdiffusionDamping:
         # the units of these temporaries are relative to the input units,
         # so they are undefined
         self._fx = quantity_factory.zeros(
-            dims=[X_INTERFACE_DIM, Y_DIM, Z_DIM], units="undefined"
+            dims=[X_INTERFACE_DIM, Y_DIM, Z_DIM],
+            units="undefined",
+            dtype=pace.util.pfloat(),
         )
         self._fy = quantity_factory.zeros(
-            dims=[X_DIM, Y_INTERFACE_DIM, Z_DIM], units="undefined"
+            dims=[X_DIM, Y_INTERFACE_DIM, Z_DIM],
+            units="undefined",
+            dtype=pace.util.pfloat(),
         )
-        self._q = quantity_factory.zeros(dims=[X_DIM, Y_DIM, Z_DIM], units="undefined")
+        self._q = quantity_factory.zeros(
+            dims=[X_DIM, Y_DIM, Z_DIM],
+            units="undefined",
+            dtype=pace.util.pfloat(),
+        )
 
         self._corner_fill = stencil_factory.from_dims_halo(
             func=corner_fill,

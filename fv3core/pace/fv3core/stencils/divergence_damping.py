@@ -348,8 +348,16 @@ class DivergenceDamping:
             compute_halos=(0, 0),
         )
 
-        self.u_contra_dyc = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="m^2/s")
-        self.v_contra_dxc = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="m^2/s")
+        self.u_contra_dyc = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_DIM],
+            units="m^2/s",
+            dtype=pace.util.pfloat(),
+        )
+        self.v_contra_dxc = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_DIM],
+            units="m^2/s",
+            dtype=pace.util.pfloat(),
+        )
 
         self._damping = low_k_stencil_factory.from_dims_halo(
             damping,

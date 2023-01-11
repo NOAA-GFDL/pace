@@ -548,15 +548,21 @@ class AGrid2BGridFourthOrder:
         self.replace = replace
 
         self._tmp_qx = quantity_factory.zeros(
-            dims=[X_INTERFACE_DIM, Y_DIM, z_dim], units="unknown"
+            dims=[X_INTERFACE_DIM, Y_DIM, z_dim],
+            units="unknown",
+            dtype=pace.util.pfloat(),
         )
         self._tmp_qy = quantity_factory.zeros(
-            dims=[X_DIM, Y_INTERFACE_DIM, z_dim], units="unknown"
+            dims=[X_DIM, Y_INTERFACE_DIM, z_dim],
+            units="unknown",
+            dtype=pace.util.pfloat(),
         )
         # TODO: the dimensions of tmp_qout_edges may not be correct, verify
         # with Lucas and either update the code or remove this comment
         self._tmp_qout_edges = quantity_factory.zeros(
-            dims=[X_DIM, Y_DIM, z_dim], units="unknown"
+            dims=[X_DIM, Y_DIM, z_dim],
+            units="unknown",
+            dtype=pace.util.pfloat(),
         )
 
         _, (z_domain,) = self._idx.get_origin_domain([z_dim])

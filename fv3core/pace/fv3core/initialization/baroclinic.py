@@ -428,7 +428,10 @@ def empty_numpy_dycore_state(shape):
     numpy_dict = {}
     for _field in fields(DycoreState):
         if "dims" in _field.metadata.keys():
-            numpy_dict[_field.name] = np.zeros(shape[: len(_field.metadata["dims"])])
+            numpy_dict[_field.name] = np.zeros(
+                shape[: len(_field.metadata["dims"])],
+                dtype=fv3util.pfloat(),
+            )
     numpy_state = SimpleNamespace(**numpy_dict)
     return numpy_state
 

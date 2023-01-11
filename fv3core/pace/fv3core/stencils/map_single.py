@@ -103,14 +103,22 @@ class MapSingle:
         grid_indexing = stencil_factory.grid_indexing
 
         def make_quantity():
-            return quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="unknown")
+            return quantity_factory.zeros(
+                [X_DIM, Y_DIM, Z_DIM],
+                units="unknown",
+                dtype=pace.util.pfloat(),
+            )
 
         self._dp1 = make_quantity()
         self._q4_1 = make_quantity()
         self._q4_2 = make_quantity()
         self._q4_3 = make_quantity()
         self._q4_4 = make_quantity()
-        self._tmp_qs = quantity_factory.zeros([X_DIM, Y_DIM], units="unknown")
+        self._tmp_qs = quantity_factory.zeros(
+            [X_DIM, Y_DIM],
+            units="unknown",
+            dtype=pace.util.pfloat(),
+        )
         self._lev = quantity_factory.zeros([X_DIM, Y_DIM], units="", dtype=int)
 
         self._copy_stencil = stencil_factory.from_dims_halo(

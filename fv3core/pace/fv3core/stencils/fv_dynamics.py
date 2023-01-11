@@ -70,13 +70,16 @@ def fvdyn_temporaries(
     tmps = {}
     for name in ["te_2d", "te0_2d", "wsd"]:
         quantity = quantity_factory.zeros(
-            dims=[pace.util.X_DIM, pace.util.Y_DIM], units="unknown"
+            dims=[pace.util.X_DIM, pace.util.Y_DIM],
+            units="unknown",
+            dtype=pace.util.pfloat(),
         )
         tmps[name] = quantity
     for name in ["dp1", "cvm"]:
         quantity = quantity_factory.zeros(
             dims=[pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM],
             units="unknown",
+            dtype=pace.util.pfloat(),
         )
         tmps[name] = quantity
     return tmps
@@ -304,6 +307,7 @@ class DynamicalCore:
         full_xyz_spec = quantity_factory.get_quantity_halo_spec(
             dims=[pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM],
             n_halo=grid_indexing.n_halo,
+            dtype=pace.util.pfloat(),
         )
         self._omega_halo_updater = WrappedHaloUpdater(
             comm.get_scalar_halo_updater([full_xyz_spec]), state, ["omga"], comm=comm

@@ -149,10 +149,12 @@ class CubedToLatLon:
         full_size_xyiz_halo_spec = quantity_factory.get_quantity_halo_spec(
             dims=[X_DIM, Y_INTERFACE_DIM, Z_DIM],
             n_halo=grid_indexing.n_halo,
+            dtype=pace.util.pfloat(),
         )
         full_size_xiyz_halo_spec = quantity_factory.get_quantity_halo_spec(
             dims=[X_INTERFACE_DIM, Y_DIM, Z_DIM],
             n_halo=grid_indexing.n_halo,
+            dtype=pace.util.pfloat(),
         )
         self.u__v = WrappedHaloUpdater(
             comm.get_vector_halo_updater(

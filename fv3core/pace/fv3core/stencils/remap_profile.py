@@ -594,9 +594,21 @@ class RemapProfile:
         assert kord <= 10, f"kord {kord} not implemented."
         self._kord = kord
 
-        self._gam = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="unknown")
-        self._q = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="unknown")
-        self._q_bot = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="unknown")
+        self._gam = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_DIM],
+            units="unknown",
+            dtype=pace.util.pfloat(),
+        )
+        self._q = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_DIM],
+            units="unknown",
+            dtype=pace.util.pfloat(),
+        )
+        self._q_bot = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_DIM],
+            units="unknown",
+            dtype=pace.util.pfloat(),
+        )
         self._extm = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="", dtype=bool)
         self._ext5 = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="", dtype=bool)
         self._ext6 = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="", dtype=bool)

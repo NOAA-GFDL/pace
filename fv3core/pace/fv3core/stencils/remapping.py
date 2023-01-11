@@ -324,16 +324,52 @@ class LagrangianToEulerian:
             grid_indexing.domain[2] + 1,
         )
 
-        self._pe1 = quantity_factory.zeros([X_DIM, Y_DIM, Z_INTERFACE_DIM], units="Pa")
-        self._pe2 = quantity_factory.zeros([X_DIM, Y_DIM, Z_INTERFACE_DIM], units="Pa")
-        self._pe3 = quantity_factory.zeros([X_DIM, Y_DIM, Z_INTERFACE_DIM], units="Pa")
-        self._dp2 = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="Pa")
-        self._pn2 = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="Pa")
-        self._pe0 = quantity_factory.zeros([X_DIM, Y_DIM, Z_INTERFACE_DIM], units="Pa")
-        self._pe3 = quantity_factory.zeros([X_DIM, Y_DIM, Z_INTERFACE_DIM], units="Pa")
+        self._pe1 = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_INTERFACE_DIM],
+            units="Pa",
+            dtype=pace.util.pfloat(),
+        )
+        self._pe2 = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_INTERFACE_DIM],
+            units="Pa",
+            dtype=pace.util.pfloat(),
+        )
+        self._pe3 = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_INTERFACE_DIM],
+            units="Pa",
+            dtype=pace.util.pfloat(),
+        )
+        self._dp2 = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_DIM],
+            units="Pa",
+            dtype=pace.util.pfloat(),
+        )
+        self._pn2 = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_DIM],
+            units="Pa",
+            dtype=pace.util.pfloat(),
+        )
+        self._pe0 = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_INTERFACE_DIM],
+            units="Pa",
+            dtype=pace.util.pfloat(),
+        )
+        self._pe3 = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_INTERFACE_DIM],
+            units="Pa",
+            dtype=pace.util.pfloat(),
+        )
 
-        self._gz = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="m^2 s^-2")
-        self._cvm = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="unknown")
+        self._gz = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_DIM],
+            units="m^2 s^-2",
+            dtype=pace.util.pfloat(),
+        )
+        self._cvm = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_DIM],
+            units="unknown",
+            dtype=pace.util.pfloat(),
+        )
 
         self._kord_tm = abs(config.kord_tm)
         self._kord_wz = config.kord_wz

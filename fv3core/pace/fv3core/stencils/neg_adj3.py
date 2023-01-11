@@ -340,8 +340,16 @@ class AdjustNegativeTracerMixingRatio:
         hydrostatic: bool,
     ):
         grid_indexing = stencil_factory.grid_indexing
-        self._sum1 = quantity_factory.zeros([X_DIM, Y_DIM], units="unknown")
-        self._sum2 = quantity_factory.zeros([X_DIM, Y_DIM], units="unknown")
+        self._sum1 = quantity_factory.zeros(
+            [X_DIM, Y_DIM],
+            units="unknown",
+            dtype=pace.util.pfloat(),
+        )
+        self._sum2 = quantity_factory.zeros(
+            [X_DIM, Y_DIM],
+            units="unknown",
+            dtype=pace.util.pfloat(),
+        )
         if check_negative:
             raise NotImplementedError(
                 "Unimplemented namelist value check_negative=True"

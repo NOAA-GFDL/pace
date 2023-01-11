@@ -175,20 +175,38 @@ class NonhydrostaticVerticalSolver:
         if config.a_imp <= 0.999:
             raise NotImplementedError("a_imp <= 0.999 is not implemented")
 
-        self._delta_mass = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="kg")
-        self._tmp_pe_init = quantity_factory.zeros(
-            [X_DIM, Y_DIM, Z_INTERFACE_DIM], units="Pa"
+        self._delta_mass = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_DIM],
+            units="kg",
+            dtype=pace.util.pfloat(),
         )
-        self._p_gas = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="Pa")
+        self._tmp_pe_init = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_INTERFACE_DIM],
+            units="Pa",
+            dtype=pace.util.pfloat(),
+        )
+        self._p_gas = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_DIM],
+            units="Pa",
+            dtype=pace.util.pfloat(),
+        )
         self._p_interface = quantity_factory.zeros(
-            [X_DIM, Y_DIM, Z_INTERFACE_DIM], units="Pa"
+            [X_DIM, Y_DIM, Z_INTERFACE_DIM],
+            units="Pa",
+            dtype=pace.util.pfloat(),
         )
         self._log_p_interface = quantity_factory.zeros(
-            [X_DIM, Y_DIM, Z_INTERFACE_DIM], units="log(Pa)"
+            [X_DIM, Y_DIM, Z_INTERFACE_DIM],
+            units="log(Pa)",
+            dtype=pace.util.pfloat(),
         )
 
         # gamma parameter is (cp/cv)
-        self._gamma = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="")
+        self._gamma = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_DIM],
+            units="",
+            dtype=pace.util.pfloat(),
+        )
 
         riemorigin = grid_indexing.origin_compute()
         domain = grid_indexing.domain_compute(add=(0, 0, 1))
