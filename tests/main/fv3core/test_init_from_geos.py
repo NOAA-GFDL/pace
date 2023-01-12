@@ -82,7 +82,9 @@ def test_geos_wrapper():
     comm = NullComm(rank=0, total_ranks=6, fill_value=0.0)
     backend = "numpy"
 
-    wrapper = fv3core.GeosDycoreWrapper(namelist, comm, backend)
+    wrapper = fv3core.GeosDycoreWrapper(
+        namelist, comm, namelist_dict["dt_atmos"], backend
+    )
     nhalo = 3
     shape_centered = (
         namelist["nx_tile"] + 2 * nhalo,
