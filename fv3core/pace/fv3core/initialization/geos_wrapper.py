@@ -1,3 +1,4 @@
+import os
 from datetime import timedelta
 from typing import Dict
 
@@ -19,6 +20,10 @@ class GeosDycoreWrapper:
     def __init__(
         self, namelist: f90nml.Namelist, bdt: float, comm: pace.util.Comm, backend: str
     ):
+        gtfv3_single_rank_override = int(os.getenv("GTFV3_SINGLE_RANK_OVERRIDE", -1))
+        if gtfv3_single_rank_override >= 0:
+            comm = pace.util.NullComm(gtfv3_single_rank_override, 6, 42)
+
         # Make a custom performance collector for the GEOS wrapper
         self.perf_collector = PerformanceCollector("GEOS wrapper", comm)
 

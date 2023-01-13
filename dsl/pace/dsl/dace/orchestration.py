@@ -280,6 +280,11 @@ def _parse_sdfg(
         daceprog: the DaceProgram carrying reference to the original method/function
         config: the DaceConfig configuration for this execution
     """
+    # Check cache for already loaded SDFG
+    if daceprog in config.loaded_precompiled_SDFG:
+        return config.loaded_precompiled_SDFG[daceprog]
+
+    # Build expected path
     sdfg_path = get_sdfg_path(daceprog.name, config)
     if sdfg_path is None:
         if DEACTIVATE_DISTRIBUTED_DACE_COMPILE:
@@ -307,6 +312,7 @@ def _parse_sdfg(
         else:
             with DaCeProgress(config, "Load precompiled .sdfg (.so)"):
                 csdfg, _ = daceprog.load_precompiled_sdfg(sdfg_path, *args, **kwargs)
+                config.loaded_precompiled_SDFG[daceprog] = csdfg
             return csdfg
 
 

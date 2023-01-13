@@ -2,6 +2,8 @@ import enum
 from typing import Any, Dict, Optional
 
 import dace.config
+from dace import SDFG
+from dace.frontend.python.parser import DaceProgram
 
 from pace.dsl.gt4py_utils import is_gpu_backend
 from pace.util.communicator import CubedSphereCommunicator
@@ -38,6 +40,11 @@ class DaceConfig:
         tile_nz: int = 0,
         orchestration: Optional[DaCeOrchestration] = None,
     ):
+        # Recording SDFG loaded for fast re-access
+        # ToDo: DaceConfig becomes a bit more than a read-only config
+        #       with this. Should be refactor into a DaceConfig & DaceRuntime
+        self.loaded_precompiled_SDFG: Dict[DaceProgram, SDFG] = {}
+
         # Temporary. This is a bit too out of the ordinary for the common user.
         # We should refactor the architecture to allow for a `gtc:orchestrated:dace:X`
         # backend that would signify both the `CPU|GPU` split and the orchestration mode
