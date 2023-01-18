@@ -2,7 +2,7 @@ import enum
 from typing import Any, Dict, Optional
 
 import dace.config
-from dace import SDFG
+from dace.codegen.compiled_sdfg import CompiledSDFG
 from dace.frontend.python.parser import DaceProgram
 
 from pace.dsl.gt4py_utils import is_gpu_backend
@@ -31,6 +31,28 @@ class DaCeOrchestration(enum.Enum):
     Run = 3
 
 
+class FrozenCompiledSDFG:
+    """
+    Cache transform args to allow direct execution of the CSDFG
+
+    Args:
+        csdfg: compiled SDFG, e.g. loaded .so
+        sdfg_args: transformed args to align for CSDFG direct execution
+
+    WARNING: No checks are done on arguments, any memory swap (free/realloc)
+    will lead to difficult to debug misbehavior
+    """
+
+    def __init__(
+        self, daceprog: DaceProgram, csdfg: CompiledSDFG, args, kwargs
+    ) -> None:
+        self.csdfg = csdfg
+        self.sdfg_args = daceprog._create_sdfg_args(csdfg.sdfg, args, kwargs)
+
+    def __call__(self):
+        return self.csdfg(**self.sdfg_args)
+
+
 class DaceConfig:
     def __init__(
         self,
@@ -42,8 +64,8 @@ class DaceConfig:
     ):
         # Recording SDFG loaded for fast re-access
         # ToDo: DaceConfig becomes a bit more than a read-only config
-        #       with this. Should be refactor into a DaceConfig & DaceRuntime
-        self.loaded_precompiled_SDFG: Dict[DaceProgram, SDFG] = {}
+        #       with this. Should be refactor into a DaceExecutor carrying a config
+        self.loaded_precompiled_SDFG: Dict[DaceProgram, FrozenCompiledSDFG] = {}
 
         # Temporary. This is a bit too out of the ordinary for the common user.
         # We should refactor the architecture to allow for a `gtc:orchestrated:dace:X`

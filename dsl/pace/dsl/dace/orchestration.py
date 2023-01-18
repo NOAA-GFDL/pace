@@ -21,6 +21,7 @@ from pace.dsl.dace.dace_config import (
     DEACTIVATE_DISTRIBUTED_DACE_COMPILE,
     DaceConfig,
     DaCeOrchestration,
+    FrozenCompiledSDFG,
 )
 from pace.dsl.dace.sdfg_debug_passes import (
     negative_delp_checker,
@@ -114,11 +115,11 @@ def _to_gpu(sdfg: dace.SDFG):
         sd.openmp_sections = False
 
 
-def _run_sdfg(daceprog: DaceProgram, config: DaceConfig, args, kwargs):
+def _run_sdfg(dace_executable: DaceProgram, config: DaceConfig, args, kwargs):
     """Execute a compiled SDFG - do not check for compilation"""
     if config.is_gpu_backend():
         _upload_to_device(list(args) + list(kwargs.values()))
-    res = daceprog(*args, **kwargs)
+    res = dace_executable(*args, **kwargs)
     return _download_results_from_dace(config, res, list(args) + list(kwargs.values()))
 
 
@@ -252,19 +253,33 @@ def _call_sdfg(
     daceprog: DaceProgram, sdfg: dace.SDFG, config: DaceConfig, args, kwargs
 ):
     """Dispatch the SDFG execution and/or build"""
-    if (
-        config.get_orchestrate() == DaCeOrchestration.Build
-        or config.get_orchestrate() == DaCeOrchestration.BuildAndRun
-    ):
-        return _build_sdfg(daceprog, sdfg, config, args, kwargs)
-    elif config.get_orchestrate() == DaCeOrchestration.Run:
+    # Pre-compiled SDFG code path does away with any data checks and
+    # cached the marshalling - leading to almost direct C call
+    # DaceProgram performs argument transformation & checks for a cost ~200ms
+    # of overhead
+    if daceprog in config.loaded_precompiled_SDFG:
         with DaCeProgress(config, "Run"):
-            res = _run_sdfg(daceprog, config, args, kwargs)
+            if config.is_gpu_backend():
+                _upload_to_device(list(args) + list(kwargs.values()))
+            res = config.loaded_precompiled_SDFG[daceprog]()
+            res = _download_results_from_dace(
+                config, res, list(args) + list(kwargs.values())
+            )
         return res
     else:
-        raise NotImplementedError(
-            f"Mode {config.get_orchestrate()} unimplemented at call time"
-        )
+        if (
+            config.get_orchestrate() == DaCeOrchestration.Build
+            or config.get_orchestrate() == DaCeOrchestration.BuildAndRun
+        ):
+            res = _build_sdfg(daceprog, sdfg, config, args, kwargs)
+        elif config.get_orchestrate() == DaCeOrchestration.Run:
+            with DaCeProgress(config, "Run"):
+                res = _run_sdfg(daceprog, config, args, kwargs)
+        else:
+            raise NotImplementedError(
+                f"Mode {config.get_orchestrate()} unimplemented at call time"
+            )
+        return res
 
 
 def _parse_sdfg(
@@ -312,7 +327,9 @@ def _parse_sdfg(
         else:
             with DaCeProgress(config, "Load precompiled .sdfg (.so)"):
                 csdfg, _ = daceprog.load_precompiled_sdfg(sdfg_path, *args, **kwargs)
-                config.loaded_precompiled_SDFG[daceprog] = csdfg
+                config.loaded_precompiled_SDFG[daceprog] = FrozenCompiledSDFG(
+                    daceprog, csdfg, args, kwargs
+                )
             return csdfg
 
 
