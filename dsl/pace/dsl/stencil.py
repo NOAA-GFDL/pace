@@ -342,6 +342,7 @@ class FrozenStencil(SDFGConvertible):
             self.stencil_object = gtscript.lazy_stencil(
                 definition=func,
                 externals=externals,
+                dtypes={float: pace.util.pfloat()},
                 **stencil_kwargs,
                 build_info=(build_info := {}),  # type: ignore
             )
@@ -357,6 +358,7 @@ class FrozenStencil(SDFGConvertible):
             self.stencil_object = gtscript.stencil(
                 definition=func,
                 externals=externals,
+                dtypes={float: pace.util.pfloat()},
                 **stencil_kwargs,
                 build_info=(build_info := {}),
             )
