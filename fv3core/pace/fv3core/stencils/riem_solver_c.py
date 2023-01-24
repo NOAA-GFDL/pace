@@ -95,7 +95,7 @@ def finalize(
     dz: FloatField,
     pef: FloatField,
     gz: FloatField,
-    ptop: float,
+    ptop: Float,
 ):
     """
     Enforce vertical boundary conditions.
@@ -139,7 +139,7 @@ class NonhydrostaticVerticalSolverCGrid:
         self,
         stencil_factory: StencilFactory,
         quantity_factory: pace.util.QuantityFactory,
-        p_fac: float,
+        p_fac: Float,
     ):
         grid_indexing = stencil_factory.grid_indexing
         origin = grid_indexing.origin_compute(add=(-1, -1, 0))
@@ -199,9 +199,9 @@ class NonhydrostaticVerticalSolverCGrid:
 
     def __call__(
         self,
-        dt2: float,
+        dt2: Float,
         cappa: FloatField,
-        ptop: float,
+        ptop: Float,
         hs: FloatFieldIJ,
         ws: FloatFieldIJ,
         ptc: FloatField,

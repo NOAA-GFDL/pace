@@ -9,7 +9,7 @@ from pace.util.grid import GridData
 
 
 def set_k0_and_calc_wk(
-    pp: FloatField, pk3: FloatField, wk: FloatField, top_value: float
+    pp: FloatField, pk3: FloatField, wk: FloatField, top_value: Float
 ):
     """
     Args:
@@ -34,7 +34,7 @@ def calc_u(
     pk3: FloatField,
     pp: FloatField,
     rdx: FloatFieldIJ,
-    dt: float,
+    dt: Float,
 ):
     """
     Args:
@@ -77,7 +77,7 @@ def calc_v(
     pk3: FloatField,
     pp: FloatField,
     rdy: FloatFieldIJ,
-    dt: float,
+    dt: Float,
 ):
     """
     Args:
@@ -199,9 +199,9 @@ class NonHydrostaticPressureGradient:
         gz: FloatField,
         pk3: FloatField,
         delp: FloatField,
-        dt: float,
-        ptop: float,
-        akap: float,
+        dt: Float,
+        ptop: Float,
+        akap: Float,
     ):
         """
         Updates the U and V winds due to pressure gradients,

@@ -779,7 +779,7 @@ class DryConvectiveAdjustment:
         stencil_factory: StencilFactory,
         quantity_factory: pace.util.QuantityFactory,
         nwat: int,
-        fv_sg_adj: float,
+        fv_sg_adj: Float,
         n_sponge: int,
         hydrostatic: bool,
     ):
@@ -853,7 +853,7 @@ class DryConvectiveAdjustment:
         state: DycoreState,
         u_dt: pace.util.Quantity,
         v_dt: pace.util.Quantity,
-        timestep: float,
+        timestep: Float,
     ):
         """
         Performs dry convective adjustment mixing on the subgrid vertical scale.

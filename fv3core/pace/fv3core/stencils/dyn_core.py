@@ -97,7 +97,7 @@ def gz_from_surface_height_and_thicknesses(
 
 
 def interface_pressure_from_toa_pressure_and_thickness(
-    delp: FloatField, pem: FloatField, ptop: float
+    delp: FloatField, pem: FloatField, ptop: Float
 ):
     """
     Args:
@@ -125,7 +125,7 @@ def p_grad_c_stencil(
     delpc: FloatField,
     pkc: FloatField,
     gz: FloatField,
-    dt2: float,
+    dt2: Float,
 ):
     """
     Update C-grid winds from the backwards-in-time pressure gradient force
@@ -696,7 +696,7 @@ class AcousticDynamics:
     def __call__(
         self,
         state: DycoreState,
-        timestep: float,  # time to step forward by in seconds
+        timestep: Float,  # time to step forward by in seconds
         n_map=1,  # [DaCe] replaces state.n_map
     ):
         # u, v, w, delz, delp, pt, pe, pk, phis, wsd, omga, ua, va, uc, vc, mfxd,
@@ -975,7 +975,7 @@ class AcousticDynamics:
         if self._do_del2cubed:
             self._halo_updaters.heat_source.update()
             # TODO: move dependence on da_min into init of hyperdiffusion class
-            da_min: float = self._get_da_min()
+            da_min: Float = self._get_da_min()
             cd = constants.CNST_0P20 * da_min
             # we want to diffuse the heat source from damping before we apply it,
             # so that we don't reinforce the same grid-scale patterns we're trying

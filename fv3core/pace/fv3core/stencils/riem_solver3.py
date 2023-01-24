@@ -37,9 +37,9 @@ def precompute(
     gamma: FloatField,
     dz: FloatField,
     p_gas: FloatField,
-    ptop: float,
-    peln1: float,
-    ptk: float,
+    ptop: Float,
+    peln1: Float,
+    ptk: Float,
 ):
     """
     Args:
@@ -225,9 +225,9 @@ class NonhydrostaticVerticalSolver:
     def __call__(
         self,
         last_call: bool,
-        dt: float,
+        dt: Float,
         cappa: FloatField,
-        ptop: float,
+        ptop: Float,
         zs: FloatFieldIJ,
         ws: FloatFieldIJ,
         delz: FloatField,

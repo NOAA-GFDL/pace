@@ -19,7 +19,7 @@ from pace.util.grid import DampingCoefficients
 
 
 def calc_damp(
-    damp_c: pace.util.Quantity, da_min: float, nord: pace.util.Quantity
+    damp_c: pace.util.Quantity, da_min: Float, nord: pace.util.Quantity
 ) -> pace.util.Quantity:
     if damp_c.dims != nord.dims or damp_c.data.shape != nord.data.shape:
         raise NotImplementedError(
@@ -1139,10 +1139,10 @@ class DelnFluxNoSG:
             domains_fy.append((nt_nx - 2, nt_ny - 1, nk))
 
         nord_dictionary = {
-            "nord0": float(nord.view[0]),
-            "nord1": float(nord.view[1]),
-            "nord2": float(nord.view[2]),
-            "nord3": float(nord.view[3]),
+            "nord0": Float(nord.view[0]),
+            "nord1": Float(nord.view[1]),
+            "nord2": Float(nord.view[2]),
+            "nord3": Float(nord.view[3]),
         }
 
         self._d2_damp = stencil_factory.from_origin_domain(

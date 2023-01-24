@@ -1,9 +1,9 @@
 from gt4py.cartesian.gtscript import FORWARD, computation, horizontal, interval, region
 
-from pace.dsl.typing import FloatField
+from pace.dsl.typing import Float, FloatField
 
 
-def edge_pe(pe: FloatField, delp: FloatField, ptop: float):
+def edge_pe(pe: FloatField, delp: FloatField, ptop: Float):
     """
     This corresponds to the pe_halo routine in FV3core
     Updading the interface pressure from the pressure differences

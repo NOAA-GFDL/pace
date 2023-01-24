@@ -69,7 +69,7 @@ def corner_fill(q_in: FloatField, q_out: FloatField):
 # Q update stencil
 # ------------------
 def update_q(
-    q: FloatField, rarea: FloatFieldIJ, fx: FloatField, fy: FloatField, cd: float
+    q: FloatField, rarea: FloatFieldIJ, fx: FloatField, fy: FloatField, cd: Float
 ):
     with computation(PARALLEL), interval(...):
         q += cd * rarea * (fx - fx[1, 0, 0] + fy - fy[0, 1, 0])
@@ -170,7 +170,7 @@ class HyperdiffusionDamping:
             update_q, origins, domains, stencil_factory=stencil_factory
         )
 
-    def __call__(self, qdel: FloatField, cd: float):
+    def __call__(self, qdel: FloatField, cd: Float):
         """
         Perform hyperdiffusion damping/filtering.
 

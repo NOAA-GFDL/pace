@@ -15,7 +15,7 @@ from gt4py.cartesian.gtscript import (
 import pace.util.constants as constants
 from pace.dsl.dace.orchestration import orchestrate
 from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import FloatField, FloatFieldK
+from pace.dsl.typing import Float, FloatField, FloatFieldK
 from pace.util import X_INTERFACE_DIM, Y_INTERFACE_DIM, Z_DIM
 
 
@@ -51,9 +51,9 @@ def ray_fast_wind_compute(
     w: FloatField,
     delta_p_ref: FloatFieldK,  # reference delta pressure
     pfull: FloatFieldK,  # input layer pressure reference?
-    dt: float,
-    ptop: float,
-    rf_cutoff_nudge: float,
+    dt: Float,
+    ptop: Float,
+    rf_cutoff_nudge: Float,
 ):
     """
     Args:
@@ -188,8 +188,8 @@ class RayleighDamping:
         w: FloatField,
         dp: FloatFieldK,
         pfull: FloatFieldK,
-        dt: float,
-        ptop: float,
+        dt: Float,
+        ptop: Float,
     ):
 
         rf_cutoff_nudge = self._rf_cutoff + min(100.0, 10.0 * ptop)

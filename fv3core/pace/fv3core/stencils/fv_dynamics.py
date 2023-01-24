@@ -580,7 +580,7 @@ class DynamicalCore:
                 # TODO: can we pull this block out of the loop intead of
                 # using an if-statement?
                 if last_step:
-                    da_min: float = self._get_da_min()
+                    da_min: Float = self._get_da_min()
                     if not self.config.hydrostatic:
                         if __debug__:
                             log_on_rank_0("Omega")

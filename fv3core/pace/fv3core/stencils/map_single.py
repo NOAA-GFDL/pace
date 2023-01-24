@@ -158,7 +158,7 @@ class MapSingle:
         pe1: FloatField,
         pe2: FloatField,
         qs: Optional["FloatFieldIJ"] = None,
-        qmin: float = 0.0,
+        qmin: Float = 0.0,
     ):
         """
         Compute x-flux using the PPM method.

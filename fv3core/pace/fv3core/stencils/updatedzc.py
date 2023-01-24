@@ -69,7 +69,7 @@ def update_dz_c(
     gz_y: FloatField,
     ws: FloatFieldIJ,
     *,
-    dt: float,
+    dt: Float,
 ):
     """
     Step dz forward on c-grid
@@ -183,7 +183,7 @@ class UpdateGeopotentialHeightOnCGrid:
         vt: FloatField,
         gz: FloatField,
         ws: FloatFieldIJ,
-        dt: float,
+        dt: Float,
     ):
         """
         Args:

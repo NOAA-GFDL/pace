@@ -70,7 +70,7 @@ def heat_diss(
     dw: FloatField,
     damp_w: FloatFieldK,
     ke_bg: FloatFieldK,
-    dt: float,
+    dt: Float,
 ):
     """
     Calculate heat generation due to loss of kinetic energy
@@ -217,7 +217,7 @@ def compute_kinetic_energy(
     dya: FloatFieldIJ,
     rdy: FloatFieldIJ,
     dt_kinetic_energy_on_cell_corners: FloatField,
-    dt: float,
+    dt: Float,
 ):
     """
     Args:

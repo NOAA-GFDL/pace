@@ -161,7 +161,7 @@ def geoadjust_ut(
     dy: FloatFieldIJ,
     sin_sg3: FloatFieldIJ,
     sin_sg1: FloatFieldIJ,
-    dt2: float,
+    dt2: Float,
 ):
     """
     take c-grid contravariant wind to compute the 1st order upwind flux
@@ -187,7 +187,7 @@ def geoadjust_vt(
     dx: FloatFieldIJ,
     sin_sg4: FloatFieldIJ,
     sin_sg2: FloatFieldIJ,
-    dt2: float,
+    dt2: Float,
 ):
     """
     Args:
@@ -288,7 +288,7 @@ def transportdelp_update_vorticity_and_kineticenergy(
     cos_sg3: FloatFieldIJ,
     sin_sg4: FloatFieldIJ,
     cos_sg4: FloatFieldIJ,
-    dt2: float,
+    dt2: Float,
 ):
     """Transport delp then update vorticity and kinetic energy
 
@@ -416,7 +416,7 @@ def update_x_velocity(
     cosa: FloatFieldIJ,
     sina: FloatFieldIJ,
     rdxc: FloatFieldIJ,
-    dt2: float,
+    dt2: Float,
 ):
     """
     Args:
@@ -450,7 +450,7 @@ def update_y_velocity(
     cosa: FloatFieldIJ,
     sina: FloatFieldIJ,
     rdyc: FloatFieldIJ,
-    dt2: float,
+    dt2: Float,
 ):
     """
     Args:
@@ -631,7 +631,7 @@ class CGridShallowWaterDynamics:
         vt: FloatField,
         divgd: FloatField,
         omga: FloatField,
-        dt2: float,
+        dt2: Float,
     ):
         """
         C-grid shallow water routine.

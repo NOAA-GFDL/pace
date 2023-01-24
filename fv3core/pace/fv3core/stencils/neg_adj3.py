@@ -100,8 +100,8 @@ def fix_neg_water(
     qsnow: FloatField,
     qice: FloatField,
     qgraupel: FloatField,
-    lv00: float,
-    d0_vap: float,
+    lv00: Float,
+    d0_vap: Float,
 ):
     """
     Args:

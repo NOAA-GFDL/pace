@@ -21,7 +21,7 @@ K = gtscript.K  # noqa: E741
 DTypes = Union[bool, np.bool_, int, np.int32, np.int64, float, np.float32, np.float64]
 
 # Default float and int types
-Float = np.float_
+Float = np.float32
 Int = np.int_
 Bool = np.bool_
 

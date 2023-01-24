@@ -17,7 +17,7 @@ c3 = 5.0 / 14.0
 OFFSET = 2
 
 
-def set_tmps(utmp: FloatField, vtmp: FloatField, big_number: float):
+def set_tmps(utmp: FloatField, vtmp: FloatField, big_number: Float):
     with computation(PARALLEL), interval(...):
         utmp = big_number
         vtmp = big_number

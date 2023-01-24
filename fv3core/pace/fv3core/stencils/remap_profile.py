@@ -346,7 +346,7 @@ def set_interpolation_coefficients(
     ext5: BoolField,
     ext6: BoolField,
     extm: BoolField,
-    qmin: float,
+    qmin: Float,
 ):
     """
     Args:
@@ -639,7 +639,7 @@ class RemapProfile:
         a4_3: FloatField,
         a4_4: FloatField,
         delp: FloatField,
-        qmin: float = 0.0,
+        qmin: Float = 0.0,
     ):
         """
         Calculates the interpolation coefficients for a cubic-spline which models the

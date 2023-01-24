@@ -78,7 +78,7 @@ def apply_height_fluxes(
     gz_y_diffusive_flux: FloatField,
     surface_height: FloatFieldIJ,
     ws: FloatFieldIJ,
-    dt: float,
+    dt: Float,
 ):
     """
     Apply all computed fluxes to height profile.
@@ -321,7 +321,7 @@ class UpdateHeightOnDGrid:
         x_area_flux: FloatField,
         y_area_flux: FloatField,
         ws: FloatFieldIJ,
-        dt: float,
+        dt: Float,
     ):
         """
         Advect height on D-grid.

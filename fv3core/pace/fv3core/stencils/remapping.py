@@ -39,7 +39,7 @@ from pace.util import (
 CONSV_MIN = 0.001
 
 
-def init_pe(pe: FloatField, pe1: FloatField, pe2: FloatField, ptop: float):
+def init_pe(pe: FloatField, pe1: FloatField, pe2: FloatField, ptop: Float):
     """
     Args:
         pe (in):
@@ -102,7 +102,7 @@ def moist_cv_pt_pressure(
     ps: FloatFieldIJ,
     pn2: FloatField,
     peln: FloatField,
-    r_vir: float,
+    r_vir: Float,
 ):
     """
     Computes Eulerian reference pressures as targets for remapping.
@@ -177,7 +177,7 @@ def pn2_pk_delp(
     pe2: FloatField,
     pn2: FloatField,
     pk: FloatField,
-    akap: float,
+    akap: Float,
 ):
     """
     Args:
@@ -540,12 +540,12 @@ class LagrangianToEulerian:
         ak: FloatFieldK,
         bk: FloatFieldK,
         dp1: FloatField,
-        ptop: float,
-        akap: float,
-        zvir: float,
+        ptop: Float,
+        akap: Float,
+        zvir: Float,
         last_step: bool,
-        consv_te: float,
-        mdt: float,
+        consv_te: Float,
+        mdt: Float,
     ):
         """
         Remap the deformed Lagrangian surfaces onto the reference, or "Eulerian",
