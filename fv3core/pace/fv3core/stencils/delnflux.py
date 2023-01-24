@@ -1139,11 +1139,15 @@ class DelnFluxNoSG:
             domains_fy.append((nt_nx - 2, nt_ny - 1, nk))
 
         nord_dictionary = {
-            "nord0": nord.view[0],
-            "nord1": nord.view[1],
-            "nord2": nord.view[2],
-            "nord3": nord.view[3],
+            "nord0": float(nord.view[0]),
+            "nord1": float(nord.view[1]),
+            "nord2": float(nord.view[2]),
+            "nord3": float(nord.view[3]),
         }
+        nord_dictionary["nord0"] = Float(nord_dictionary["nord0"])
+        nord_dictionary["nord1"] = Float(nord_dictionary["nord1"])
+        nord_dictionary["nord2"] = Float(nord_dictionary["nord2"])
+        nord_dictionary["nord3"] = Float(nord_dictionary["nord3"])
 
         self._d2_damp = stencil_factory.from_origin_domain(
             d2_damp_interval,
