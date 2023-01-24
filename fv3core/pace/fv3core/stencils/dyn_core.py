@@ -449,6 +449,7 @@ class AcousticDynamics:
                 grid_type=config.grid_type,
             )
         )
+        self._akap = Float(constants.KAPPA)
 
         temporaries = dyncore_temporaries(quantity_factory)
         self._heat_source = temporaries["heat_source"]
@@ -703,10 +704,9 @@ class AcousticDynamics:
         # mfyd, cxd, cyd, pkz, peln, q_con, ak, bk, diss_estd, cappa, mdt, n_split,
         # akap, ptop, n_map, comm):
         end_step = n_map == self.config.k_split
-        akap = Float(constants.KAPPA)
         # dt = state.mdt / self.config.n_split
         dt_acoustic_substep = timestep / self.config.n_split
-        dt2 = Float(0.5) * dt_acoustic_substep
+        dt2 = 0.5 * dt_acoustic_substep
         n_split = self.config.n_split
         # NOTE: In Fortran model the halo update starts happens in fv_dynamics, not here
         self._halo_updaters.q_con__cappa.start()
@@ -927,7 +927,7 @@ class AcousticDynamics:
                         "unimplemented namelist option use_logp=True"
                     )
                 else:
-                    self._pk3_halo(self._pk3, state.delp, self._ptop, akap)
+                    self._pk3_halo(self._pk3, state.delp, self._ptop, self._akap)
             if not self.config.hydrostatic:
                 self._halo_updaters.zh.wait()
                 self._compute_geopotential_stencil(
@@ -945,7 +945,7 @@ class AcousticDynamics:
                     state.delp,
                     dt_acoustic_substep,
                     self._ptop,
-                    akap,
+                    self._akap,
                 )
 
             if self.config.rf_fast:
