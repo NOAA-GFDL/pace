@@ -703,10 +703,10 @@ class AcousticDynamics:
         # mfyd, cxd, cyd, pkz, peln, q_con, ak, bk, diss_estd, cappa, mdt, n_split,
         # akap, ptop, n_map, comm):
         end_step = n_map == self.config.k_split
-        akap = constants.KAPPA
+        akap = Float(constants.KAPPA)
         # dt = state.mdt / self.config.n_split
         dt_acoustic_substep = timestep / self.config.n_split
-        dt2 = 0.5 * dt_acoustic_substep
+        dt2 = Float(0.5) * dt_acoustic_substep
         n_split = self.config.n_split
         # NOTE: In Fortran model the halo update starts happens in fv_dynamics, not here
         self._halo_updaters.q_con__cappa.start()
