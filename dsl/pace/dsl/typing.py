@@ -28,7 +28,7 @@ Bool = np.bool_
 
 def global_set_floating_point_precision(precision_in_bit: int):
     if precision_in_bit == 64:
-        pass
+        return
     if precision_in_bit == 32:
         global Float
         Float = np.float32
