@@ -5,6 +5,7 @@ import xarray as xr
 
 import pace.dsl.gt4py_utils as gt_utils
 import pace.util
+from pace.dsl.typing import Float
 
 
 @dataclass()
@@ -306,7 +307,7 @@ class DycoreState:
                 initial_storages[_field.name] = quantity_factory.zeros(
                     _field.metadata["dims"],
                     _field.metadata["units"],
-                    dtype=pace.util.pfloat(),
+                    dtype=Float,
                 ).data
         return cls.init_from_storages(
             storages=initial_storages, sizer=quantity_factory.sizer

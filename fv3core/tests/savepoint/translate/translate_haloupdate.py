@@ -167,6 +167,7 @@ class TranslateHaloVectorUpdate(ParallelTranslate):
             logger.debug(f"starting on {communicator.rank}")
             req_list.append(
                 communicator.start_vector_halo_update(
+                    state["x_wind_on_c_grid"].data.dtype,
                     state["x_wind_on_c_grid"],
                     state["y_wind_on_c_grid"],
                     n_points=utils.halo,

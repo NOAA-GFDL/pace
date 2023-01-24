@@ -26,7 +26,7 @@ import pace.util.constants as constants
 from pace.dsl.dace.orchestration import dace_inhibitor, orchestrate
 from pace.dsl.dace.wrapped_halo_exchange import WrappedHaloUpdater
 from pace.dsl.stencil import GridIndexing, StencilFactory
-from pace.dsl.typing import FloatField, FloatFieldIJ
+from pace.dsl.typing import Float, FloatField, FloatFieldIJ
 from pace.fv3core._config import AcousticDynamicsConfig
 from pace.fv3core.initialization.dycore_state import DycoreState
 from pace.fv3core.stencils.c_sw import CGridShallowWaterDynamics
@@ -199,35 +199,35 @@ def dyncore_temporaries(
         temporaries[name] = quantity_factory.zeros(
             dims=[X_DIM, Y_DIM, Z_DIM],
             units="unknown",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
     for name in ["gz", "pkc", "zh"]:
         temporaries[name] = quantity_factory.zeros(
             dims=[X_DIM, Y_DIM, Z_INTERFACE_DIM],
             units="unknown",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
     temporaries["divgd"] = quantity_factory.zeros(
         dims=[X_INTERFACE_DIM, Y_INTERFACE_DIM, Z_DIM],
         units="unknown",
-        dtype=pace.util.pfloat(),
+        dtype=Float,
     )
     temporaries["ws3"] = quantity_factory.zeros(
         dims=[X_DIM, Y_DIM],
         units="unknown",
-        dtype=pace.util.pfloat(),
+        dtype=Float,
     )
     for name in ["crx", "xfx"]:
         temporaries[name] = quantity_factory.zeros(
             dims=[X_INTERFACE_DIM, Y_DIM, Z_DIM],
             units="unknown",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
     for name in ["cry", "yfx"]:
         temporaries[name] = quantity_factory.zeros(
             dims=[X_DIM, Y_INTERFACE_DIM, Z_DIM],
             units="unknown",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
     return temporaries
 
@@ -259,27 +259,27 @@ class AcousticDynamics:
             full_size_xyz_halo_spec = quantity_factory.get_quantity_halo_spec(
                 dims=[fv3util.X_DIM, fv3util.Y_DIM, fv3util.Z_DIM],
                 n_halo=grid_indexing.n_halo,
-                dtype=pace.util.pfloat(),
+                dtype=Float,
             )
             full_size_xyiz_halo_spec = quantity_factory.get_quantity_halo_spec(
                 dims=[fv3util.X_DIM, fv3util.Y_INTERFACE_DIM, fv3util.Z_DIM],
                 n_halo=grid_indexing.n_halo,
-                dtype=pace.util.pfloat(),
+                dtype=Float,
             )
             full_size_xiyz_halo_spec = quantity_factory.get_quantity_halo_spec(
                 dims=[fv3util.X_INTERFACE_DIM, fv3util.Y_DIM, fv3util.Z_DIM],
                 n_halo=grid_indexing.n_halo,
-                dtype=pace.util.pfloat(),
+                dtype=Float,
             )
             full_size_xyzi_halo_spec = quantity_factory.get_quantity_halo_spec(
                 dims=[fv3util.X_DIM, fv3util.Y_DIM, fv3util.Z_INTERFACE_DIM],
                 n_halo=grid_indexing.n_halo,
-                dtype=pace.util.pfloat(),
+                dtype=Float,
             )
             full_size_xiyiz_halo_spec = quantity_factory.get_quantity_halo_spec(
                 dims=[fv3util.X_INTERFACE_DIM, fv3util.Y_INTERFACE_DIM, fv3util.Z_DIM],
                 n_halo=grid_indexing.n_halo,
-                dtype=pace.util.pfloat(),
+                dtype=Float,
             )
 
             # Build the HaloUpdater. We could build one updater per specification group
@@ -341,7 +341,7 @@ class AcousticDynamics:
                 full_3Dfield_2pts_halo_spec = quantity_factory.get_quantity_halo_spec(
                     dims=[fv3util.X_DIM, fv3util.Y_DIM, fv3util.Z_INTERFACE_DIM],
                     n_halo=2,
-                    dtype=pace.util.pfloat(),
+                    dtype=Float,
                 )
                 self.pkc = WrappedHaloUpdater(
                     comm.get_scalar_halo_updater([full_3Dfield_2pts_halo_spec]),
@@ -480,9 +480,11 @@ class AcousticDynamics:
             self._zs = quantity_factory.zeros(
                 [X_DIM, Y_DIM],
                 units="m",
-                dtype=pace.util.pfloat(),
+                dtype=Float,
             )
-            self._zs.data[:] = self._zs.np.asarray(phis.data / constants.GRAV)
+            self._zs.data[:] = self._zs.np.asarray(
+                phis.data / constants.GRAV, dtype=self._zs.data.dtype
+            )
 
             self.update_height_on_d_grid = updatedzd.UpdateHeightOnDGrid(
                 stencil_factory,

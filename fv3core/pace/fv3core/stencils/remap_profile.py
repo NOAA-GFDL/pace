@@ -13,7 +13,7 @@ from gt4py.cartesian.gtscript import (
 import pace.util
 from pace.dsl.dace.orchestration import orchestrate
 from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import BoolField, FloatField, FloatFieldIJ
+from pace.dsl.typing import BoolField, Float, FloatField, FloatFieldIJ
 from pace.util import X_DIM, Y_DIM, Z_DIM, Z_INTERFACE_DIM
 
 
@@ -597,17 +597,17 @@ class RemapProfile:
         self._gam = quantity_factory.zeros(
             [X_DIM, Y_DIM, Z_DIM],
             units="unknown",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
         self._q = quantity_factory.zeros(
             [X_DIM, Y_DIM, Z_DIM],
             units="unknown",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
         self._q_bot = quantity_factory.zeros(
             [X_DIM, Y_DIM, Z_DIM],
             units="unknown",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
         self._extm = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="", dtype=bool)
         self._ext5 = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="", dtype=bool)

@@ -4,7 +4,7 @@ from gt4py.cartesian.gtscript import PARALLEL, computation, horizontal, interval
 import pace.util
 from pace.dsl.dace.orchestration import orchestrate
 from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import FloatField, FloatFieldIJ
+from pace.dsl.typing import Float, FloatField, FloatFieldIJ
 from pace.fv3core.stencils.a2b_ord4 import a1, a2, lagrange_x_func, lagrange_y_func
 from pace.stencils import corners
 from pace.util import X_DIM, Y_DIM, Z_DIM
@@ -422,12 +422,12 @@ class DGrid2AGrid2CGridVectors:
         self._utmp = quantity_factory.zeros(
             [X_DIM, Y_DIM, Z_DIM],
             units="m/s",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
         self._vtmp = quantity_factory.zeros(
             [X_DIM, Y_DIM, Z_DIM],
             units="m/s",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
 
         js1 = npt + OFFSET if grid_indexing.south_edge else grid_indexing.jsc - 1

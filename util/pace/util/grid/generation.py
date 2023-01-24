@@ -6,6 +6,7 @@ from typing import Tuple
 from pace import util
 from pace.dsl.gt4py_utils import asarray
 from pace.dsl.stencil import GridIndexing
+from pace.dsl.typing import Float
 from pace.stencils.corners import (
     fill_corners_2d,
     fill_corners_agrid,
@@ -237,7 +238,7 @@ class MetricTerms:
         self._grid = self.quantity_factory.zeros(
             self._grid_dims,
             "radians",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         npx, npy, ndims = self._tile_partitioner.global_extent(self._grid)
         self._npx = npx
@@ -246,7 +247,7 @@ class MetricTerms:
         self._agrid = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_DIM, self.LON_OR_LAT_DIM],
             "radians",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         self._np = self._grid.np
         self._dx = None
@@ -1480,17 +1481,17 @@ class MetricTerms:
         grid_mirror_ew = self.quantity_factory.zeros(
             self._grid_dims,
             "radians",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         grid_mirror_ns = self.quantity_factory.zeros(
             self._grid_dims,
             "radians",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         grid_mirror_diag = self.quantity_factory.zeros(
             self._grid_dims,
             "radians",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
 
         local_west_edge = self._tile_partitioner.on_tile_left(self._rank)
@@ -1647,7 +1648,7 @@ class MetricTerms:
         dx = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_INTERFACE_DIM],
             "m",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
 
         dx.view[:, :] = great_circle_distance_along_axis(
@@ -1660,7 +1661,7 @@ class MetricTerms:
         dy = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_DIM],
             "m",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         dy.view[:, :] = great_circle_distance_along_axis(
             self._grid.view[:, :, 0],
@@ -1690,12 +1691,12 @@ class MetricTerms:
         dx_agrid = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_DIM],
             "m",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         dy_agrid = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_DIM],
             "m",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         lon, lat = self._grid.data[:, :, 0], self._grid.data[:, :, 1]
         lon_y_center, lat_y_center = lon_lat_midpoint(
@@ -1733,12 +1734,12 @@ class MetricTerms:
         dx_center = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_DIM],
             "m",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         dy_center = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_INTERFACE_DIM],
             "m",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
 
         lon_agrid, lat_agrid = (
@@ -1801,7 +1802,7 @@ class MetricTerms:
         area = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_DIM],
             "m^2",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         area.data[:, :] = -1.0e8
 
@@ -1818,7 +1819,7 @@ class MetricTerms:
         area_cgrid = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_INTERFACE_DIM],
             "m^2",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         area_cgrid.data[3:-3, 3:-3] = get_area(
             self._agrid.data[2:-3, 2:-3, 0],
@@ -1861,17 +1862,17 @@ class MetricTerms:
         ptop = self.quantity_factory.zeros(
             [],
             "Pa",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         ak = self.quantity_factory.zeros(
             [util.Z_INTERFACE_DIM],
             "Pa",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         bk = self.quantity_factory.zeros(
             [util.Z_INTERFACE_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         pressure_coefficients = set_hybrid_pressure_coefficients(self._npz)
         ptop = pressure_coefficients.ptop
@@ -1883,12 +1884,12 @@ class MetricTerms:
         ec1 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_DIM, self.CARTESIAN_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         ec2 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_DIM, self.CARTESIAN_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         ec1.data[:] = self._np.nan
         ec2.data[:] = self._np.nan
@@ -1906,12 +1907,12 @@ class MetricTerms:
         ew1 = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_DIM, self.CARTESIAN_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         ew2 = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_DIM, self.CARTESIAN_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         ew1.data[:] = self._np.nan
         ew2.data[:] = self._np.nan
@@ -1930,12 +1931,12 @@ class MetricTerms:
         es1 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_INTERFACE_DIM, self.CARTESIAN_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         es2 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_INTERFACE_DIM, self.CARTESIAN_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         es1.data[:] = self._np.nan
         es2.data[:] = self._np.nan
@@ -1954,57 +1955,57 @@ class MetricTerms:
         cosa_u = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         cosa_v = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_INTERFACE_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         cosa_s = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         sina_u = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         sina_v = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_INTERFACE_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         rsin_u = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         rsin_v = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_INTERFACE_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         rsina = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_INTERFACE_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         rsin2 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         cosa = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_INTERFACE_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         sina = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_INTERFACE_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         (
             cosa.data[:, :],
@@ -2046,57 +2047,57 @@ class MetricTerms:
         self._cosa_u = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         self._cosa_v = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_INTERFACE_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         self._cosa_s = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         self._sina_u = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         self._sina_v = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_INTERFACE_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         self._rsin_u = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         self._rsin_v = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_INTERFACE_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         self._rsina = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_INTERFACE_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         self._rsin2 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         self._cosa = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_INTERFACE_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         self._sina = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_INTERFACE_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
 
         # This section calculates the cos_sg and sin_sg terms, which describe the
@@ -2150,13 +2151,13 @@ class MetricTerms:
             supergrid_trig[f"cos_sg{i}"] = self.quantity_factory.zeros(
                 [util.X_DIM, util.Y_DIM],
                 "",
-                dtype=util.pfloat(),
+                dtype=Float,
             )
             supergrid_trig[f"cos_sg{i}"].data[:-1, :-1] = cos_sg[:, :, i - 1]
             supergrid_trig[f"sin_sg{i}"] = self.quantity_factory.zeros(
                 [util.X_DIM, util.Y_DIM],
                 "",
-                dtype=util.pfloat(),
+                dtype=Float,
             )
             supergrid_trig[f"sin_sg{i}"].data[:-1, :-1] = sin_sg[:, :, i - 1]
 
@@ -2187,53 +2188,53 @@ class MetricTerms:
         self._cosa_u = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         self._cosa_v = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_INTERFACE_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         self._cosa_s = self.quantity_factory.zeros([util.X_DIM, util.Y_DIM], "")
         self._sina_u = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         self._sina_v = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_INTERFACE_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         self._rsin_u = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         self._rsin_v = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_INTERFACE_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         self._rsina = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_INTERFACE_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         self._rsin2 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         self._cosa = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_INTERFACE_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         self._sina = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_INTERFACE_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
 
         cos_sg = self._np.array(
@@ -2289,12 +2290,12 @@ class MetricTerms:
         l2c_v = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         l2c_u = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_INTERFACE_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         (
             l2c_v.data[self._halo : -self._halo, self._halo : -self._halo - 1],
@@ -2306,12 +2307,12 @@ class MetricTerms:
         ee1 = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_INTERFACE_DIM, self.CARTESIAN_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         ee2 = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_INTERFACE_DIM, self.CARTESIAN_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         ee1.data[:] = self._np.nan
         ee2.data[:] = self._np.nan
@@ -2327,22 +2328,22 @@ class MetricTerms:
         del6_u = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_INTERFACE_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         del6_v = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         divg_u = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_INTERFACE_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         divg_v = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         sin_sg = [
             self.sin_sg1.data[:-1, :-1],
@@ -2388,22 +2389,22 @@ class MetricTerms:
         del6_u = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_INTERFACE_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         del6_v = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         divg_u = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_INTERFACE_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         divg_v = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         sin_sg = [
             self.sin_sg1.data[:-1, :-1],
@@ -2439,12 +2440,12 @@ class MetricTerms:
         vlon = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_DIM, self.CARTESIAN_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         vlat = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_DIM, self.CARTESIAN_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
 
         vlon.data[:-1, :-1], vlat.data[:-1, :-1] = unit_vector_lonlat(
@@ -2456,22 +2457,22 @@ class MetricTerms:
         z11 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         z12 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         z21 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         z22 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         (
             z11.data[:-1, :-1],
@@ -2491,22 +2492,22 @@ class MetricTerms:
         a11 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         a12 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         a21 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         a22 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         (
             a11.data[:-1, :-1],
@@ -2527,22 +2528,22 @@ class MetricTerms:
         edge_s = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         edge_n = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         edge_e = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_INTERFACE_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         edge_w = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_INTERFACE_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         (
             edge_w.data[:, nhalo:-nhalo],
@@ -2565,22 +2566,22 @@ class MetricTerms:
         edge_vect_s = self.quantity_factory.zeros(
             [util.X_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         edge_vect_n = self.quantity_factory.zeros(
             [util.X_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         edge_vect_e = self.quantity_factory.zeros(
             [util.Y_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         edge_vect_w = self.quantity_factory.zeros(
             [util.Y_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         (
             edge_vect_w.data[:-1],
@@ -2603,12 +2604,12 @@ class MetricTerms:
         edge_vect_e_2d = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         edge_vect_w_2d = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_DIM],
             "",
-            dtype=util.pfloat(),
+            dtype=Float,
         )
         shape = self.lon.data.shape
         east_edge_data = self.edge_vect_e_1d.data[self._np.newaxis, ...]

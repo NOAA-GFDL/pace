@@ -4,7 +4,7 @@ from gt4py.cartesian.gtscript import BACKWARD, FORWARD, PARALLEL, computation, i
 import pace.util
 import pace.util.constants as constants
 from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import FloatField, FloatFieldIJ
+from pace.dsl.typing import Float, FloatField, FloatFieldIJ
 from pace.util import X_DIM, Y_DIM
 
 
@@ -343,12 +343,12 @@ class AdjustNegativeTracerMixingRatio:
         self._sum1 = quantity_factory.zeros(
             [X_DIM, Y_DIM],
             units="unknown",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
         self._sum2 = quantity_factory.zeros(
             [X_DIM, Y_DIM],
             units="unknown",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
         if check_negative:
             raise NotImplementedError(

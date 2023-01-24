@@ -14,7 +14,7 @@ import pace.fv3core.stencils.delnflux as delnflux
 import pace.util
 from pace.dsl.dace.orchestration import orchestrate
 from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import FloatField, FloatFieldIJ, FloatFieldK
+from pace.dsl.typing import Float, FloatField, FloatFieldIJ, FloatFieldK
 from pace.fv3core._config import DGridShallowWaterLagrangianDynamicsConfig
 from pace.fv3core.stencils.d2a2c_vect import contravariant
 from pace.fv3core.stencils.delnflux import DelnFluxNoSG
@@ -655,7 +655,7 @@ def get_column_namelist(
         col[name] = quantity_factory.zeros(
             dims=[Z_DIM],
             units="unknown",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
     for name in direct_namelist:
         col[name].view[:] = getattr(config, name)
@@ -767,7 +767,7 @@ class DGridShallowWaterLagrangianDynamics:
             return quantity_factory.zeros(
                 [X_DIM, Y_DIM, Z_DIM],
                 units="unknown",
-                dtype=pace.util.pfloat(),
+                dtype=Float,
             )
 
         self._tmp_heat_s = make_quantity()

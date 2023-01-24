@@ -17,7 +17,7 @@ import pace.fv3core.stencils.moist_cv as moist_cv
 import pace.util
 from pace.dsl.dace.orchestration import orchestrate
 from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import FloatField, FloatFieldIJ, FloatFieldK
+from pace.dsl.typing import Float, FloatField, FloatFieldIJ, FloatFieldK
 from pace.fv3core._config import RemappingConfig
 from pace.fv3core.stencils.basic_operations import adjust_divide_stencil
 from pace.fv3core.stencils.map_single import MapSingle
@@ -327,48 +327,48 @@ class LagrangianToEulerian:
         self._pe1 = quantity_factory.zeros(
             [X_DIM, Y_DIM, Z_INTERFACE_DIM],
             units="Pa",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
         self._pe2 = quantity_factory.zeros(
             [X_DIM, Y_DIM, Z_INTERFACE_DIM],
             units="Pa",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
         self._pe3 = quantity_factory.zeros(
             [X_DIM, Y_DIM, Z_INTERFACE_DIM],
             units="Pa",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
         self._dp2 = quantity_factory.zeros(
             [X_DIM, Y_DIM, Z_DIM],
             units="Pa",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
         self._pn2 = quantity_factory.zeros(
             [X_DIM, Y_DIM, Z_DIM],
             units="Pa",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
         self._pe0 = quantity_factory.zeros(
             [X_DIM, Y_DIM, Z_INTERFACE_DIM],
             units="Pa",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
         self._pe3 = quantity_factory.zeros(
             [X_DIM, Y_DIM, Z_INTERFACE_DIM],
             units="Pa",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
 
         self._gz = quantity_factory.zeros(
             [X_DIM, Y_DIM, Z_DIM],
             units="m^2 s^-2",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
         self._cvm = quantity_factory.zeros(
             [X_DIM, Y_DIM, Z_DIM],
             units="unknown",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
 
         self._kord_tm = abs(config.kord_tm)

@@ -21,11 +21,6 @@ else:
 T = TypeVar("T")
 
 
-def pfloat():
-    """Parametric float to switch precision mode real numbers."""
-    return np.float64
-
-
 def list_by_dims(
     dims: Sequence[str], horizontal_list: Sequence[T], non_horizontal_value: T
 ) -> Tuple[T, ...]:

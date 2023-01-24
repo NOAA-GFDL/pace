@@ -21,7 +21,7 @@ from .cuda_kernels import (
 from .quantity import Quantity, QuantityHaloSpec
 from .rotate import rotate_scalar_data, rotate_vector_data
 from .types import NumpyModule
-from .utils import device_synchronize, pfloat
+from .utils import device_synchronize
 
 
 # ------------------------------------------------------------------------
@@ -249,6 +249,18 @@ class HaloDataTransformer(abc.ABC):
         Returns:
             an initialized packed buffer.
         """
+        if len(exchange_descriptors_x) == 0:
+            raise RuntimeError("Attempting to init an empty halo exchange")
+
+        dtype = exchange_descriptors_x[0].specification.dtype
+        for desc in exchange_descriptors_x:
+            if dtype != desc.specification.dtype:
+                raise NotImplementedError("Halo exchange process mixed precision")
+        if exchange_descriptors_y:
+            for desc in exchange_descriptors_y:
+                if dtype != desc.specification.dtype:
+                    raise NotImplementedError("Halo exchange process mixed precision")
+
         if np_module is np:
             return HaloDataTransformerCPU(
                 np,
@@ -717,14 +729,17 @@ class HaloDataTransformerGPU(HaloDataTransformer):
                 grid_x = (info_x.pack_buffer_size // blocks) + 1
                 # Pick a kernel looking at the precision set
                 pack_kernel = None
-                if pfloat() == np.float32:
+                if info_x.specification.dtype == np.float32:
                     pack_kernel = pack_scalar_f32_kernel
-                elif pfloat() == np.float64 or pfloat() == float:
+                elif (
+                    info_x.specification.dtype == np.float64
+                    or info_x.specification.dtype == float
+                ):
                     pack_kernel = pack_scalar_f64_kernel
                 else:
                     RuntimeError(
-                        f"Halo exchange pack kernel for precision {pfloat()} "
-                        "isn't implemented."
+                        "Halo exchange pack kernel for precision "
+                        f" {info_x.specification.dtype} isn't implemented."
                     )
 
                 # Check compile hasn't failed silently if this is the first
@@ -783,14 +798,17 @@ class HaloDataTransformerGPU(HaloDataTransformer):
                 grid_x = (transformer_size // blocks) + 1
                 # Pick a kernel looking at the precision set
                 pack_kernel = None
-                if pfloat() == np.float32:
+                if info_x.specification.dtype == np.float32:
                     pack_kernel = pack_vector_f32_kernel
-                elif pfloat() == np.float64 or pfloat() == float:
+                elif (
+                    info_x.specification.dtype == np.float64
+                    or info_x.specification.dtype == float
+                ):
                     pack_kernel = pack_vector_f64_kernel
                 else:
                     RuntimeError(
-                        f"Halo exchange pack kernel for precision {pfloat()} "
-                        "isn't implemented."
+                        "Halo exchange pack kernel for precision "
+                        f"{info_x.specification.dtype} isn't implemented."
                     )
 
                 # Check compile hasn't failed silently if this is the first
@@ -863,14 +881,17 @@ class HaloDataTransformerGPU(HaloDataTransformer):
                 grid_x = (info_x._unpack_buffer_size // blocks) + 1
                 # Pick a kernel looking at the precision set
                 unpack_kernel = None
-                if pfloat() == np.float32:
+                if info_x.specification.dtype == np.float32:
                     unpack_kernel = unpack_scalar_f32_kernel
-                elif pfloat() == np.float64 or pfloat() == float:
+                elif (
+                    info_x.specification.dtype == np.float64
+                    or info_x.specification.dtype == float
+                ):
                     unpack_kernel = unpack_scalar_f64_kernel
                 else:
                     RuntimeError(
-                        f"Halo exchange pack kernel for precision {pfloat()} "
-                        "isn't implemented."
+                        "Halo exchange pack kernel for precision "
+                        f"{info_x.specification.dtype} isn't implemented."
                     )
 
                 # Check compile hasn't failed silently if this is the first
@@ -930,14 +951,17 @@ class HaloDataTransformerGPU(HaloDataTransformer):
                 grid_x = (edge_size // blocks) + 1
                 # Pick a kernel looking at the precision set
                 unpack_kernel = None
-                if pfloat() == np.float32:
+                if info_x.specification.dtype == np.float32:
                     unpack_kernel = unpack_vector_f32_kernel
-                elif pfloat() == np.float64 or pfloat() == float:
+                elif (
+                    info_x.specification.dtype == np.float64
+                    or info_x.specification.dtype == float
+                ):
                     unpack_kernel = unpack_vector_f64_kernel
                 else:
                     RuntimeError(
-                        f"Halo exchange pack kernel for precision {pfloat()} "
-                        "isn't implemented."
+                        "Halo exchange pack kernel for precision "
+                        f"{info_x.specification.dtype} isn't implemented."
                     )
 
                 # Check compile hasn't failed silently if this is the first

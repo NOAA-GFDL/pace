@@ -7,7 +7,7 @@ import pace.util
 import pace.util.constants as constants
 from pace.dsl.dace.orchestration import orchestrate
 from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import FloatField, FloatFieldIJ, FloatFieldK
+from pace.dsl.typing import Float, FloatField, FloatFieldIJ, FloatFieldK
 from pace.fv3core.stencils.delnflux import DelnFluxNoSG
 from pace.fv3core.stencils.fvtp2d import FiniteVolumeTransport
 from pace.util import (
@@ -144,17 +144,17 @@ def cubic_spline_interpolation_constants(
     gk = quantity_factory.zeros(
         [Z_DIM],
         units="",
-        dtype=pace.util.pfloat(),
+        dtype=Float,
     )
     beta = quantity_factory.zeros(
         [Z_DIM],
         units="",
-        dtype=pace.util.pfloat(),
+        dtype=Float,
     )
     gamma = quantity_factory.zeros(
         [Z_DIM],
         units="",
-        dtype=pace.util.pfloat(),
+        dtype=Float,
     )
     gk.view[0] = dp0.view[1] / dp0.view[0]
     beta.view[0] = gk.view[0] * (gk.view[0] + 0.5)
@@ -269,47 +269,47 @@ class UpdateHeightOnDGrid:
         self._crx_interface = quantity_factory.zeros(
             [X_INTERFACE_DIM, Y_DIM, Z_INTERFACE_DIM],
             "",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
         self._cry_interface = quantity_factory.zeros(
             [X_DIM, Y_INTERFACE_DIM, Z_INTERFACE_DIM],
             "",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
         self._x_area_flux_interface = quantity_factory.zeros(
             [X_INTERFACE_DIM, Y_DIM, Z_INTERFACE_DIM],
             "m^2",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
         self._y_area_flux_interface = quantity_factory.zeros(
             [X_DIM, Y_INTERFACE_DIM, Z_INTERFACE_DIM],
             "m^2",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
         self._wk = quantity_factory.zeros(
             [X_DIM, Y_DIM, Z_INTERFACE_DIM],
             "unknown",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
         self._height_x_diffusive_flux = quantity_factory.zeros(
             [X_DIM, Y_DIM, Z_INTERFACE_DIM],
             "unknown",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
         self._height_y_diffusive_flux = quantity_factory.zeros(
             [X_DIM, Y_DIM, Z_INTERFACE_DIM],
             "unknown",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
         self._fx = quantity_factory.zeros(
             [X_INTERFACE_DIM, Y_DIM, Z_INTERFACE_DIM],
             "unknown",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
         self._fy = quantity_factory.zeros(
             [X_DIM, Y_INTERFACE_DIM, Z_INTERFACE_DIM],
             "unknown",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
 
     def __call__(

@@ -4,7 +4,7 @@ from gt4py.cartesian.gtscript import BACKWARD, FORWARD, PARALLEL, computation, i
 import pace.util
 import pace.util.constants as constants
 from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import FloatField, FloatFieldIJ, FloatFieldK
+from pace.dsl.typing import Float, FloatField, FloatFieldIJ, FloatFieldK
 from pace.stencils import corners
 from pace.util import X_DIM, Y_DIM, Z_DIM
 
@@ -136,18 +136,18 @@ class UpdateGeopotentialHeightOnCGrid:
         self._dp_ref = quantity_factory.zeros(
             dp_ref.dims,
             units=dp_ref.units,
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
         self._dp_ref.view[:] = dp_ref.view[:]
         self._gz_x = quantity_factory.zeros(
             [X_DIM, Y_DIM, Z_DIM],
             units="m**2/s**2",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
         self._gz_y = quantity_factory.zeros(
             [X_DIM, Y_DIM, Z_DIM],
             units="m**2/s**2",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
         full_origin = grid_indexing.origin_full()
         full_domain = grid_indexing.domain_full(add=(0, 0, 1))

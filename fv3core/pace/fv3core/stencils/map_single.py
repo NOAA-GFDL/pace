@@ -5,7 +5,7 @@ from gt4py.cartesian.gtscript import FORWARD, PARALLEL, computation, interval
 import pace.util
 from pace.dsl.dace import orchestrate
 from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import FloatField, FloatFieldIJ, IntFieldIJ  # noqa: F401
+from pace.dsl.typing import Float, FloatField, FloatFieldIJ, IntFieldIJ  # noqa: F401
 from pace.fv3core.stencils.basic_operations import copy_defn
 from pace.fv3core.stencils.remap_profile import RemapProfile
 from pace.util import X_DIM, Y_DIM, Z_DIM
@@ -106,7 +106,7 @@ class MapSingle:
             return quantity_factory.zeros(
                 [X_DIM, Y_DIM, Z_DIM],
                 units="unknown",
-                dtype=pace.util.pfloat(),
+                dtype=Float,
             )
 
         self._dp1 = make_quantity()
@@ -117,7 +117,7 @@ class MapSingle:
         self._tmp_qs = quantity_factory.zeros(
             [X_DIM, Y_DIM],
             units="unknown",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
         self._lev = quantity_factory.zeros([X_DIM, Y_DIM], units="", dtype=int)
 

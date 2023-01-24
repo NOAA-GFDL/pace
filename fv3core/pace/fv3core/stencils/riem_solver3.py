@@ -16,7 +16,7 @@ import pace.util
 import pace.util.constants as constants
 from pace.dsl.dace import orchestrate
 from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import FloatField, FloatFieldIJ
+from pace.dsl.typing import Float, FloatField, FloatFieldIJ
 from pace.fv3core._config import RiemannConfig
 from pace.fv3core.stencils.sim1_solver import Sim1Solver
 from pace.util import X_DIM, Y_DIM, Z_DIM, Z_INTERFACE_DIM
@@ -178,34 +178,34 @@ class NonhydrostaticVerticalSolver:
         self._delta_mass = quantity_factory.zeros(
             [X_DIM, Y_DIM, Z_DIM],
             units="kg",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
         self._tmp_pe_init = quantity_factory.zeros(
             [X_DIM, Y_DIM, Z_INTERFACE_DIM],
             units="Pa",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
         self._p_gas = quantity_factory.zeros(
             [X_DIM, Y_DIM, Z_DIM],
             units="Pa",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
         self._p_interface = quantity_factory.zeros(
             [X_DIM, Y_DIM, Z_INTERFACE_DIM],
             units="Pa",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
         self._log_p_interface = quantity_factory.zeros(
             [X_DIM, Y_DIM, Z_INTERFACE_DIM],
             units="log(Pa)",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
 
         # gamma parameter is (cp/cv)
         self._gamma = quantity_factory.zeros(
             [X_DIM, Y_DIM, Z_DIM],
             units="",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
 
         riemorigin = grid_indexing.origin_compute()

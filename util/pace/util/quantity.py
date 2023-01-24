@@ -4,11 +4,12 @@ from typing import Any, Dict, Iterable, Optional, Sequence, Tuple, Union, cast
 
 import numpy as np
 
+from pace.dsl.typing import Float
+
 from . import _xarray, constants
 from ._boundary_utils import bound_default_slice, shift_boundary_slice_tuple
 from ._optional_imports import cupy, dace, gt4py
 from .types import NumpyModule
-from .utils import pfloat
 
 
 if cupy is None:
@@ -299,11 +300,11 @@ class Quantity:
         if (
             not allow_mismatch_float_precision
             and _is_float(data.dtype)
-            and data.dtype != pfloat()
+            and data.dtype != Float
         ):
             raise ValueError(
                 f"Floating-point data type mismatch, asked for {data.dtype}, "
-                f"Pace configured for {pfloat()}"
+                f"Pace configured for {Float}"
             )
         if origin is None:
             origin = (0,) * len(dims)  # default origin at origin of array

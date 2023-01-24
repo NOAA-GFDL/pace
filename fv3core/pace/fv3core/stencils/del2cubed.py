@@ -4,7 +4,7 @@ import pace.stencils.corners as corners
 import pace.util
 from pace.dsl.dace.orchestration import orchestrate
 from pace.dsl.stencil import StencilFactory, get_stencils_with_varied_bounds
-from pace.dsl.typing import FloatField, FloatFieldIJ, cast_to_index3d
+from pace.dsl.typing import Float, FloatField, FloatFieldIJ, cast_to_index3d
 from pace.fv3core.stencils.basic_operations import copy_defn
 from pace.util import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_DIM
 from pace.util.grid import DampingCoefficients
@@ -103,17 +103,17 @@ class HyperdiffusionDamping:
         self._fx = quantity_factory.zeros(
             dims=[X_INTERFACE_DIM, Y_DIM, Z_DIM],
             units="undefined",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
         self._fy = quantity_factory.zeros(
             dims=[X_DIM, Y_INTERFACE_DIM, Z_DIM],
             units="undefined",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
         self._q = quantity_factory.zeros(
             dims=[X_DIM, Y_DIM, Z_DIM],
             units="undefined",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
 
         self._corner_fill = stencil_factory.from_dims_halo(

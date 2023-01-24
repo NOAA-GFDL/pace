@@ -10,7 +10,7 @@ from gt4py.cartesian.gtscript import (
 import pace.util
 from pace.dsl.dace.orchestration import orchestrate
 from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import FloatField, FloatFieldIJ
+from pace.dsl.typing import Float, FloatField, FloatFieldIJ
 from pace.fv3core.stencils.d2a2c_vect import DGrid2AGrid2CGridVectors
 from pace.stencils import corners
 from pace.util import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_DIM
@@ -503,7 +503,7 @@ class CGridShallowWaterDynamics:
         self.delpc = quantity_factory.zeros(
             [X_DIM, Y_DIM, Z_DIM],
             units="unknown",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
         """
         pressure thickness on c-grid forward step
@@ -511,7 +511,7 @@ class CGridShallowWaterDynamics:
         self.ptc = quantity_factory.zeros(
             [X_DIM, Y_DIM, Z_DIM],
             units="unknown",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
         """
         potential temperature on c-grid forward step
@@ -535,7 +535,7 @@ class CGridShallowWaterDynamics:
             return quantity_factory.zeros(
                 [X_DIM, Y_DIM, Z_DIM],
                 units="unknown",
-                dtype=pace.util.pfloat(),
+                dtype=Float,
             )
 
         # TODO: double-check the dimensions on these, they may be incorrect

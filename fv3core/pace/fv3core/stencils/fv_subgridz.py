@@ -13,7 +13,7 @@ from gt4py.cartesian.gtscript import (
 import pace.dsl.gt4py_utils as utils
 import pace.util
 from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import FloatField
+from pace.dsl.typing import Float, FloatField
 from pace.fv3core.initialization.dycore_state import DycoreState
 from pace.fv3core.stencils.basic_operations import dim
 from pace.util import X_DIM, Y_DIM, Z_DIM
@@ -249,8 +249,8 @@ def m_loop(
     total_energy: FloatField,
     cpm: FloatField,
     cvm: FloatField,
-    t_min: float,
-    ratio: float,
+    t_min: Float,
+    ratio: Float,
 ):
     from __externals__ import t_max, xvir
 
@@ -693,7 +693,7 @@ def finalize(
     qo3mr: FloatField,
     qsgs_tke: FloatField,
     qcld: FloatField,
-    timestep: float,
+    timestep: Float,
 ):
     from __externals__ import fv_sg_adj, hydrostatic
 

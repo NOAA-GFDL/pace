@@ -13,7 +13,7 @@ from gt4py.cartesian.gtscript import (
 import pace.util
 from pace.dsl.dace.orchestration import orchestrate
 from pace.dsl.stencil import StencilFactory, get_stencils_with_varied_bounds
-from pace.dsl.typing import FloatField, FloatFieldIJ, FloatFieldK
+from pace.dsl.typing import Float, FloatField, FloatFieldIJ, FloatFieldK
 from pace.util import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_DIM
 from pace.util.grid import DampingCoefficients
 
@@ -985,17 +985,17 @@ class DelnFlux:
         self._fx2 = quantity_factory.zeros(
             [X_DIM, Y_DIM, Z_DIM],
             units="undefined",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
         self._fy2 = quantity_factory.zeros(
             [X_DIM, Y_DIM, Z_DIM],
             units="undefined",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
         self._d2 = quantity_factory.zeros(
             [X_DIM, Y_DIM, Z_DIM],
             units="undefined",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
 
         self._add_diffusive_stencil = stencil_factory.from_dims_halo(

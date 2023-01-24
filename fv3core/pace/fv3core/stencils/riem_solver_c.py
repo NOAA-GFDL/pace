@@ -12,7 +12,7 @@ from gt4py.cartesian.gtscript import (
 import pace.util
 import pace.util.constants as constants
 from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import FloatField, FloatFieldIJ
+from pace.dsl.typing import Float, FloatField, FloatFieldIJ
 from pace.fv3core.stencils.sim1_solver import Sim1Solver
 from pace.util import X_DIM, Y_DIM, Z_DIM, Z_INTERFACE_DIM
 
@@ -30,7 +30,7 @@ def precompute(
     dz: FloatField,  # is actually delta of gz
     gm: FloatField,
     pm: FloatField,
-    ptop: float,
+    ptop: Float,
 ):
     """
     Args:
@@ -148,37 +148,37 @@ class NonhydrostaticVerticalSolverCGrid:
         self._dm = quantity_factory.zeros(
             [X_DIM, Y_DIM, Z_DIM],
             units="kg",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
         self._w = quantity_factory.zeros(
             [X_DIM, Y_DIM, Z_DIM],
             units="m/s",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
         self._pem = quantity_factory.zeros(
             [X_DIM, Y_DIM, Z_INTERFACE_DIM],
             units="Pa",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
         self._pe = quantity_factory.zeros(
             [X_DIM, Y_DIM, Z_INTERFACE_DIM],
             units="Pa",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
         self._gm = quantity_factory.zeros(
             [X_DIM, Y_DIM, Z_DIM],
             units="",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
         self._dz = quantity_factory.zeros(
             [X_DIM, Y_DIM, Z_DIM],
             units="m",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
         self._pm = quantity_factory.zeros(
             [X_DIM, Y_DIM, Z_DIM],
             units="Pa",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
 
         self._precompute_stencil = stencil_factory.from_origin_domain(

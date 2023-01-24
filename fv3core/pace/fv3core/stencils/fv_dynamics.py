@@ -12,7 +12,7 @@ import pace.util.constants as constants
 from pace.dsl.dace.orchestration import dace_inhibitor, orchestrate
 from pace.dsl.dace.wrapped_halo_exchange import WrappedHaloUpdater
 from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import FloatField
+from pace.dsl.typing import Float, FloatField
 from pace.fv3core._config import DynamicalCoreConfig
 from pace.fv3core.initialization.dycore_state import DycoreState
 from pace.fv3core.stencils import fvtp2d, tracer_2d_1l
@@ -72,14 +72,14 @@ def fvdyn_temporaries(
         quantity = quantity_factory.zeros(
             dims=[pace.util.X_DIM, pace.util.Y_DIM],
             units="unknown",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
         tmps[name] = quantity
     for name in ["dp1", "cvm"]:
         quantity = quantity_factory.zeros(
             dims=[pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM],
             units="unknown",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
         tmps[name] = quantity
     return tmps
@@ -307,7 +307,7 @@ class DynamicalCore:
         full_xyz_spec = quantity_factory.get_quantity_halo_spec(
             dims=[pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM],
             n_halo=grid_indexing.n_halo,
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
         self._omega_halo_updater = WrappedHaloUpdater(
             comm.get_scalar_halo_updater([full_xyz_spec]), state, ["omga"], comm=comm

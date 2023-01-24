@@ -7,7 +7,7 @@ import pace.dsl.gt4py_utils as utils
 import pace.util
 from pace.dsl.dace import orchestrate
 from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import FloatField, FloatFieldIJ, IntFieldIJ
+from pace.dsl.typing import Float, FloatField, FloatFieldIJ, IntFieldIJ
 from pace.util import X_DIM, Y_DIM, Z_DIM
 
 
@@ -139,12 +139,12 @@ class FillNegativeTracerValues:
         self._sum0 = quantity_factory.zeros(
             [X_DIM, Y_DIM],
             units="unknown",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
         self._sum1 = quantity_factory.zeros(
             [X_DIM, Y_DIM],
             units="unknown",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
 
         self._filtered_tracer_dict = {

@@ -2,7 +2,7 @@ from gt4py.cartesian.gtscript import PARALLEL, computation, interval
 
 import pace.util
 from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import FloatField, FloatFieldIJ
+from pace.dsl.typing import Float, FloatField, FloatFieldIJ
 from pace.fv3core.stencils.a2b_ord4 import AGrid2BGridFourthOrder
 from pace.util import X_DIM, Y_DIM, Z_INTERFACE_DIM
 from pace.util.grid import GridData
@@ -142,12 +142,12 @@ class NonHydrostaticPressureGradient:
         self._tmp_wk = quantity_factory.zeros(
             [X_DIM, Y_DIM, Z_INTERFACE_DIM],
             units="unknown",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
         self._tmp_wk1 = quantity_factory.zeros(
             [X_DIM, Y_DIM, Z_INTERFACE_DIM],
             units="unknown",
-            dtype=pace.util.pfloat(),
+            dtype=Float,
         )
 
         self.a2b_k1 = AGrid2BGridFourthOrder(

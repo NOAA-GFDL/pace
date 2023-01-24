@@ -21,6 +21,7 @@ from pace.driver.safety_checks import SafetyChecker
 from pace.dsl.dace.dace_config import DaceConfig
 from pace.dsl.dace.orchestration import dace_inhibitor, orchestrate
 from pace.dsl.stencil_config import CompilationConfig, RunMode
+from pace.dsl.typing import Float
 
 # TODO: move update_atmos_state into pace.driver
 from pace.stencils import update_atmos_state
@@ -607,7 +608,7 @@ class Driver:
         self,
         steps_count: int,
         timer: pace.util.Timer,
-        dt: float,
+        dt: Float,
     ):
         """Start of code path where performance is critical.
 
@@ -626,17 +627,17 @@ class Driver:
                         dycore_state=self.state.dycore_state,
                         physics_state=self.state.physics_state,
                         tendency_state=self.state.tendency_state,
-                        timestep=float(dt),
+                        timestep=dt,
                     )
                     if not self.config.dycore_only:
-                        self.physics(self.state.physics_state, timestep=float(dt))
+                        self.physics(self.state.physics_state, timestep=dt)
                     self.end_of_step_update(
                         dycore_state=self.state.dycore_state,
                         phy_state=self.state.physics_state,
                         u_dt=self.state.tendency_state.u_dt,
                         v_dt=self.state.tendency_state.v_dt,
                         pt_dt=self.state.tendency_state.pt_dt,
-                        dt=float(dt),
+                        dt=dt,
                     )
             self._end_of_step_actions(step)
 
@@ -649,7 +650,7 @@ class Driver:
             self._critical_path_step_all(
                 steps_count=self.config.n_timesteps(),
                 timer=self.performance_collector.timestep_timer,
-                dt=self.config.timestep.total_seconds(),
+                dt=Float(self.config.timestep.total_seconds()),
             )
             PerformanceCollector.stop_cuda_profiler()
             self.profiler.dump_stats(
