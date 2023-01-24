@@ -26,6 +26,16 @@ Int = np.int_
 Bool = np.bool_
 
 
+def global_set_floating_point_precision(precision_in_bit: int):
+    if precision_in_bit == 64:
+        pass
+    if precision_in_bit == 32:
+        global Float
+        Float = np.float32
+    else:
+        raise NotImplementedError(f"Precision of {precision_in_bit} bit is untested")
+
+
 FloatField = Field[gtscript.IJK, Float]
 FloatFieldI = Field[gtscript.I, Float]
 FloatFieldJ = Field[gtscript.J, Float]

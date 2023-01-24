@@ -21,7 +21,7 @@ from pace.driver.safety_checks import SafetyChecker
 from pace.dsl.dace.dace_config import DaceConfig
 from pace.dsl.dace.orchestration import dace_inhibitor, orchestrate
 from pace.dsl.stencil_config import CompilationConfig, RunMode
-from pace.dsl.typing import Float
+from pace.dsl.typing import Float, global_set_floating_point_precision
 
 # TODO: move update_atmos_state into pace.driver
 from pace.stencils import update_atmos_state
@@ -92,6 +92,7 @@ class DriverConfig:
     nz: int
     layout: Tuple[int, int]
     dt_atmos: float
+    floating_point_precision_in_bit: int = 64
     grid_config: GridInitializerSelector = dataclasses.field(
         default_factory=lambda: GridInitializerSelector(
             type="generated", config=GeneratedGridConfig()
@@ -384,6 +385,7 @@ class Driver:
         """
         logger.info("initializing driver")
         self.config: DriverConfig = config
+        global_set_floating_point_precision(config.floating_point_precision_in_bit)
         self.time = self.config.start_time
         self.comm_config = config.comm_config
         global_comm = config.comm_config.get_comm()

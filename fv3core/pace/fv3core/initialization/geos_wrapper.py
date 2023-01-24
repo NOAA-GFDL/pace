@@ -8,6 +8,7 @@ import pace.util
 from pace import fv3core
 from pace.driver.performance.collector import PerformanceCollector
 from pace.dsl.dace.dace_config import DaceConfig
+from pace.dsl.typing import global_set_floating_point_precision
 
 
 class GeosDycoreWrapper:
@@ -16,7 +17,16 @@ class GeosDycoreWrapper:
     Takes numpy arrays as inputs, returns a dictionary of numpy arrays as outputs
     """
 
-    def __init__(self, namelist: f90nml.Namelist, comm: pace.util.Comm, backend: str):
+    def __init__(
+        self,
+        namelist: f90nml.Namelist,
+        comm: pace.util.Comm,
+        backend: str,
+        fprecision: int = 64,
+    ):
+        # Set floating point precision of the dycore
+        global_set_floating_point_precision(fprecision)
+
         # Make a custom performance collector for the GEOS wrapper
         self.perf_collector = PerformanceCollector("GEOS wrapper", comm)
 
