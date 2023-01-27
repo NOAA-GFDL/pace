@@ -16,7 +16,7 @@ class GeosDycoreWrapper:
     Takes numpy arrays as inputs, returns a dictionary of numpy arrays as outputs
     """
 
-    def __init__(self, namelist: f90nml.Namelist, comm: pace.util.Comm, backend: str):
+    def __init__(self, namelist: f90nml.Namelist, bdt: float, comm: pace.util.Comm, backend: str):
         # Make a custom performance collector for the GEOS wrapper
         self.perf_collector = PerformanceCollector("GEOS wrapper", comm)
 
@@ -69,17 +69,18 @@ class GeosDycoreWrapper:
             quantity_factory=quantity_factory
         )
 
-        self.dycore_state.bdt = float(namelist["dt_atmos"])
-        if "fv_core_nml" in namelist.keys():
-            self.dycore_state.bdt = (
-                float(namelist["dt_atmos"]) / namelist["fv_core_nml"]["k_split"]
-            )
-        elif "dycore_config" in namelist.keys():
-            self.dycore_state.bdt = (
-                float(namelist["dt_atmos"]) / namelist["dycore_config"]["k_split"]
-            )
-        else:
-            raise KeyError("Cannot find k_split in namelist")
+        # self.dycore_state.bdt = float(namelist["dt_atmos"])
+        # if "fv_core_nml" in namelist.keys():
+        #     self.dycore_state.bdt = (
+        #         float(namelist["dt_atmos"]) / namelist["fv_core_nml"]["k_split"]
+        #     )
+        # elif "dycore_config" in namelist.keys():
+        #     self.dycore_state.bdt = (
+        #         float(namelist["dt_atmos"]) / namelist["dycore_config"]["k_split"]
+        #     )
+        # else:
+        #     raise KeyError("Cannot find k_split in namelist")
+        self.dycore_state.bdt = bdt
 
         damping_coefficients = pace.util.grid.DampingCoefficients.new_from_metric_terms(
             metric_terms
@@ -92,7 +93,7 @@ class GeosDycoreWrapper:
             quantity_factory=quantity_factory,
             damping_coefficients=damping_coefficients,
             config=self.dycore_config,
-            timestep=timedelta(seconds=self.dycore_config.dt_atmos),
+            timestep=timedelta(seconds=self.dycore_state.bdt),
             phis=self.dycore_state.phis,
             state=self.dycore_state,
         )
@@ -128,7 +129,7 @@ class GeosDycoreWrapper:
         diss_estd: np.ndarray,
     ) -> Dict[str, np.ndarray]:
 
-        with self.perf_collector.timestep_timer.clock("move_to_pace"):
+        with self.perf_collector.timestep_timer.clock("numpy-to-dycore"):
             self.dycore_state = self._put_fortran_data_in_dycore(
                 u,
                 v,
@@ -156,21 +157,20 @@ class GeosDycoreWrapper:
                 diss_estd,
             )
 
-        with self.perf_collector.timestep_timer.clock("dycore"):
+        with self.perf_collector.timestep_timer.clock("DynamicalCore"):
             self.dynamical_core.step_dynamics(
                 state=self.dycore_state, timer=self.perf_collector.timestep_timer
             )
 
-        with self.perf_collector.timestep_timer.clock("move_to_fortran"):
+        with self.perf_collector.timestep_timer.clock("dycore-to-numpy"):
             self.output_dict = self._prep_outputs_for_geos()
 
-        # Collect performance of the timestep and write
-        # a json file for rank 0
+        # Collect performance of the timestep and write a json file for rank 0
         self.perf_collector.collect_performance()
         self.perf_collector.write_out_rank_0(
             backend=self.backend,
-            is_orchestrated=False,  # could be infered from config
-            dt_atmos=self.dycore_config.dt_atmos,
+            is_orchestrated=False,  # could be inferred from config
+            dt_atmos=self.dycore_state.bdt,
             sim_status="Ongoing",
         )
 
