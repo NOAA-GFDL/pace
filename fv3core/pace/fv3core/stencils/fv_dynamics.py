@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 # ncnst = Atm(mytile)%ncnst
 # pnats = Atm(mytile)%flagstruct%pnats
 # here we hard-coded it because 8 is the only supported value, refactor this later!
-NQ = 8  # state.nq_tot - spec.namelist.dnats
+NQ = 9  # state.nq_tot - spec.namelist.dnats
 
 
 def pt_adjust(
@@ -555,6 +555,7 @@ class DynamicalCore:
                         state.w,
                         self._cappa,
                         state.q_con,
+                        # Since NQ=9, we shouldn't need to pass qcld explicitly
                         state.qcld,
                         state.pkz,
                         state.pk,
