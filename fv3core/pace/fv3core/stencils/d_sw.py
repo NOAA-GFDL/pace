@@ -94,8 +94,6 @@ def heat_diss(
         ke_bg (in):
     """
     with computation(PARALLEL), interval(...):
-        heat_source = 0.0
-        diss_est = 0.0
         if damp_w > 1e-5:
             dd8 = ke_bg * abs(dt)
             dw = (fx2 - fx2[1, 0, 0] + fy2 - fy2[0, 1, 0]) * rarea
@@ -503,7 +501,6 @@ def heat_source_from_vorticity_damping(
     rdx: FloatFieldIJ,
     rdy: FloatFieldIJ,
     heat_source: FloatField,
-    heat_source_total: FloatField,
     dissipation_estimate: FloatField,
     kinetic_energy_fraction_to_damp: FloatFieldK,
 ):
@@ -526,8 +523,7 @@ def heat_source_from_vorticity_damping(
         rdy (in): 1 / dy
         heat_source (inout): heat source from vorticity damping
             implied by energy conservation
-        heat_source_total (inout): accumulated heat source
-        dissipation_estimate (out): dissipation estimate, only calculated if
+        dissipation_estimate (inout): dissipation estimate, only calculated if
             calculate_dissipation_estimate is 1. Used for stochastic kinetic
             energy backscatter (skeb) routine.
         kinetic_energy_fraction_to_damp (in): the fraction of kinetic energy
@@ -572,9 +568,19 @@ def heat_source_from_vorticity_damping(
 
         if __INLINED((d_con > dcon_threshold) or do_stochastic_ke_backscatter):
             with horizontal(region[local_is : local_ie + 1, local_js : local_je + 1]):
-                heat_source_total = heat_source_total + heat_source
                 if __INLINED(do_stochastic_ke_backscatter):
                     dissipation_estimate -= dampterm
+
+
+def accumulate_heat_source_and_dissipation_estimate(
+    heat_source: FloatField,
+    heat_source_total: FloatField,
+    diss_est: FloatField,
+    diss_est_total: FloatField,
+):
+    with computation(PARALLEL), interval(...):
+        heat_source_total += heat_source
+        diss_est_total += diss_est
 
 
 # TODO(eddied): Had to split this into a separate stencil to get this to validate
@@ -763,6 +769,7 @@ class DGridShallowWaterLagrangianDynamics:
             return quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="unknown")
 
         self._tmp_heat_s = make_quantity()
+        self._tmp_diss_e = make_quantity()
         self._vort_x_delta = make_quantity()
         self._vort_y_delta = make_quantity()
         self._dt_kinetic_energy_on_cell_corners = make_quantity()
@@ -912,6 +919,12 @@ class DGridShallowWaterLagrangianDynamics:
                 },
             )
         )
+        self._accumulate_heat_source_and_dissipation_estimate_stencil = (
+            stencil_factory.from_dims_halo(
+                func=accumulate_heat_source_and_dissipation_estimate,
+                compute_dims=[X_DIM, Y_DIM, Z_DIM],
+            )
+        )
         self._compute_vorticity_stencil = stencil_factory.from_dims_halo(
             compute_vorticity,
             compute_dims=[X_DIM, Y_DIM, Z_DIM],
@@ -1046,7 +1059,7 @@ class DGridShallowWaterLagrangianDynamics:
             w,
             self.grid_data.rarea,
             self._tmp_heat_s,
-            diss_est,
+            self._tmp_diss_e,
             self._tmp_dw,
             self._column_namelist["damp_w"],
             self._column_namelist["ke_bg"],
@@ -1225,11 +1238,15 @@ class DGridShallowWaterLagrangianDynamics:
             self.grid_data.rdx,
             self.grid_data.rdy,
             self._tmp_heat_s,
-            heat_source,
-            diss_est,
+            self._tmp_diss_e,
             self._column_namelist["d_con"],
         )
-
+        self._accumulate_heat_source_and_dissipation_estimate_stencil(
+            self._tmp_heat_s,
+            heat_source,
+            self._tmp_diss_e,
+            diss_est
+        )
         self._update_u_and_v_stencil(
             self._tmp_ut,
             self._tmp_vt,
