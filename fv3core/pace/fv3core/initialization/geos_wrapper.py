@@ -9,7 +9,6 @@ import pace.util
 from pace import fv3core
 from pace.driver.performance.collector import PerformanceCollector
 from pace.dsl.dace import DaceConfig, orchestrate
-from pace.dsl.typing import global_set_floating_point_precision
 
 
 class GeosDycoreWrapper:
@@ -25,9 +24,6 @@ class GeosDycoreWrapper:
         backend: str,
         fprecision: int = 64,
     ):
-        # Set floating point precision of the dycore
-        global_set_floating_point_precision(fprecision)
-
         # Look for an override to run on a single node
         gtfv3_single_rank_override = int(os.getenv("GTFV3_SINGLE_RANK_OVERRIDE", -1))
         if gtfv3_single_rank_override >= 0:

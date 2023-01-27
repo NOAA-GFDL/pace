@@ -1,3 +1,4 @@
+import os
 from typing import Tuple, Union, cast
 
 import gt4py.cartesian.gtscript as gtscript
@@ -20,21 +21,24 @@ K = gtscript.K  # noqa: E741
 # Union of valid data types (from gt4py.cartesian.gtscript)
 DTypes = Union[bool, np.bool_, int, np.int32, np.int64, float, np.float32, np.float64]
 
-# Default float and int types
-Float = np.float64
-Int = np.int_
-Bool = np.bool_
 
-
-def global_set_floating_point_precision(precision_in_bit: int):
+def global_set_floating_point_precision():
+    global Float
+    precision_in_bit = int(os.getenv("PACE_FLOAT_PRECISION", "64"))
     if precision_in_bit == 64:
-        return
-    if precision_in_bit == 32:
-        global Float
+        Float = np.float64
+    elif precision_in_bit == 32:
         Float = np.float32
     else:
-        raise NotImplementedError(f"Precision of {precision_in_bit} bit is untested")
+        NotImplementedError(
+            f"{precision_in_bit} bit precision not implemented or tested"
+        )
 
+
+# Default float and int types
+Float = global_set_floating_point_precision()
+Int = np.int_
+Bool = np.bool_
 
 FloatField = Field[gtscript.IJK, Float]
 FloatFieldI = Field[gtscript.I, Float]
