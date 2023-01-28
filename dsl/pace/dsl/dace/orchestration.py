@@ -115,14 +115,6 @@ def _to_gpu(sdfg: dace.SDFG):
         sd.openmp_sections = False
 
 
-def _run_sdfg(dace_executable: DaceProgram, config: DaceConfig, args, kwargs):
-    """Execute a compiled SDFG - do not check for compilation"""
-    if config.is_gpu_backend():
-        _upload_to_device(list(args) + list(kwargs.values()))
-    res = dace_executable(*args, **kwargs)
-    return _download_results_from_dace(config, res, list(args) + list(kwargs.values()))
-
-
 def _build_sdfg(
     daceprog: DaceProgram, sdfg: dace.SDFG, config: DaceConfig, args, kwargs
 ):
@@ -228,11 +220,13 @@ def _build_sdfg(
                 DaCeProgress.log(
                     DaCeProgress.default_prefix(config), "Build folder exchanged."
                 )
-            with DaCeProgress(config, "Run"):
-                res = sdfg(**sdfg_kwargs)
-                res = _download_results_from_dace(
-                    config, res, list(args) + list(kwargs.values())
-                )
+            csdfg, _ = daceprog.load_precompiled_sdfg(
+                sdfg.build_folder, *args, **kwargs
+            )
+            config.loaded_precompiled_SDFG[daceprog] = FrozenCompiledSDFG(
+                daceprog, csdfg, args, kwargs
+            )
+
         else:
             source_rank = config.target_rank
             # wait for compilation to be done
@@ -241,12 +235,15 @@ def _build_sdfg(
                 "Rank is not compiling. Waiting for build dir...",
             )
             sdfg_path = MPI.COMM_WORLD.recv(source=source_rank)
-            DaCeProgress.log(DaCeProgress.default_prefix(config), "Build dir received.")
-            daceprog.load_precompiled_sdfg(sdfg_path, *args, **kwargs)
-            with DaCeProgress(config, "Run"):
-                res = _run_sdfg(daceprog, config, args, kwargs)
+            DaCeProgress.log(
+                DaCeProgress.default_prefix(config), "Build dir received, loading .so."
+            )
+            csdfg, _ = daceprog.load_precompiled_sdfg(sdfg_path, *args, **kwargs)
+            config.loaded_precompiled_SDFG[daceprog] = FrozenCompiledSDFG(
+                daceprog, csdfg, args, kwargs
+            )
 
-        return res
+        return _call_sdfg(daceprog, sdfg, config, args, kwargs)
 
 
 def _call_sdfg(
@@ -273,8 +270,9 @@ def _call_sdfg(
         ):
             res = _build_sdfg(daceprog, sdfg, config, args, kwargs)
         elif config.get_orchestrate() == DaCeOrchestration.Run:
-            with DaCeProgress(config, "Run"):
-                res = _run_sdfg(daceprog, config, args, kwargs)
+            # We should never hit this, it should be caught by the
+            # loaded_precompiled_SDFG check above
+            raise RuntimeError("Unexpected call - csdfg didn't get caught")
         else:
             raise NotImplementedError(
                 f"Mode {config.get_orchestrate()} unimplemented at call time"

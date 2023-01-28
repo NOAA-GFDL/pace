@@ -1,4 +1,3 @@
-import logging
 from datetime import timedelta
 from typing import Mapping, Optional
 
@@ -24,10 +23,9 @@ from pace.fv3core.stencils.remapping import LagrangianToEulerian
 from pace.stencils.c2l_ord import CubedToLatLon
 from pace.util import X_DIM, Y_DIM, Z_INTERFACE_DIM, Timer
 from pace.util.grid import DampingCoefficients, GridData
+from pace.util.logging import pace_log
 from pace.util.mpi import MPI
 
-
-logger = logging.getLogger(__name__)
 
 # nq is actually given by ncnst - pnats, where those are given in atmosphere.F90 by:
 # ncnst = Atm(mytile)%ncnst
@@ -89,7 +87,7 @@ def fvdyn_temporaries(
 def log_on_rank_0(msg: str):
     """Print when rank is 0 - outside of DaCe critical path"""
     if not MPI or MPI.COMM_WORLD.Get_rank() == 0:
-        logger.info(msg)
+        pace_log.info(msg)
 
 
 class DynamicalCore:

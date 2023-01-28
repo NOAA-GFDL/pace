@@ -1,6 +1,5 @@
 import abc
 import dataclasses
-import logging
 import os
 import pathlib
 from datetime import datetime
@@ -26,9 +25,6 @@ from pace.util.namelist import Namelist
 
 from .registry import Registry
 from .state import DriverState, TendencyState, _restart_driver_state
-
-
-logger = logging.getLogger(__name__)
 
 
 class Initializer(abc.ABC):

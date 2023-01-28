@@ -1,5 +1,4 @@
 import copy
-import logging
 from typing import List, Tuple
 
 import dace
@@ -10,8 +9,7 @@ from dace.sdfg import graph as gr
 from dace.sdfg import utils as sdutil
 from dace.transformation.helpers import get_parent_map
 
-
-logger = logging.getLogger(__name__)
+from pace.util.logging import pace_log
 
 
 def _filter_all_maps(
@@ -179,7 +177,7 @@ def trace_all_outputs_at_index(sdfg: dace.SDFG, i: int, j: int, k: int):
             assert_out=False,
         )
 
-    logger.info(f"Added {len(all_maps_filtered)} outputs trace at {i},{j},{k}")
+    pace_log.info(f"Added {len(all_maps_filtered)} outputs trace at {i},{j},{k}")
 
 
 def negative_delp_checker(sdfg: dace.SDFG) -> None:
@@ -205,7 +203,7 @@ def negative_delp_checker(sdfg: dace.SDFG) -> None:
             assert_out=True,
         )
 
-    logger.info(f"Added {len(all_maps_filtered)} delp* < 0 checks")
+    pace_log.info(f"Added {len(all_maps_filtered)} delp* < 0 checks")
 
 
 def negative_qtracers_checker(sdfg: dace.SDFG):
@@ -241,7 +239,7 @@ def negative_qtracers_checker(sdfg: dace.SDFG):
             assert_out=True,
         )
 
-    logger.info(f"Added {len(all_maps_filtered)} tracer < 0 checks")
+    pace_log.info(f"Added {len(all_maps_filtered)} tracer < 0 checks")
 
 
 def sdfg_nan_checker(sdfg: dace.SDFG):
@@ -266,4 +264,4 @@ def sdfg_nan_checker(sdfg: dace.SDFG):
             assert_out=True,
         )
 
-    logger.info(f"Added {len(all_maps_filtered)} NaN checks")
+    pace_log.info(f"Added {len(all_maps_filtered)} NaN checks")
