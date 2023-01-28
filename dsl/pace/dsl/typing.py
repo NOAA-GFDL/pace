@@ -26,13 +26,14 @@ def global_set_floating_point_precision():
     global Float
     precision_in_bit = int(os.getenv("PACE_FLOAT_PRECISION", "64"))
     if precision_in_bit == 64:
-        Float = np.float64
+        return np.float64
     elif precision_in_bit == 32:
-        Float = np.float32
+        return np.float32
     else:
         NotImplementedError(
             f"{precision_in_bit} bit precision not implemented or tested"
         )
+    return None
 
 
 # Default float and int types
