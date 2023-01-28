@@ -22,7 +22,6 @@ class GeosDycoreWrapper:
         namelist: f90nml.Namelist,
         comm: pace.util.Comm,
         backend: str,
-        fprecision: int = 64,
     ):
         # Look for an override to run on a single node
         gtfv3_single_rank_override = int(os.getenv("GTFV3_SINGLE_RANK_OVERRIDE", -1))
