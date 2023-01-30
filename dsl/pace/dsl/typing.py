@@ -23,6 +23,8 @@ DTypes = Union[bool, np.bool_, int, np.int32, np.int64, float, np.float32, np.fl
 
 
 def global_set_floating_point_precision():
+    """Set the global floating point precision for all reference
+    to Float in the codebase. Defaults to 64 bit."""
     global Float
     precision_in_bit = int(os.getenv("PACE_FLOAT_PRECISION", "64"))
     if precision_in_bit == 64:
