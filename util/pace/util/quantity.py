@@ -4,8 +4,6 @@ from typing import Any, Dict, Iterable, Optional, Sequence, Tuple, Union, cast
 
 import numpy as np
 
-from pace.dsl.typing import Float
-
 from . import _xarray, constants
 from ._boundary_utils import bound_default_slice, shift_boundary_slice_tuple
 from ._optional_imports import cupy, dace, gt4py
@@ -297,6 +295,11 @@ class Quantity:
                 storage attribute is disabled and will raise an exception. Will raise
                 a TypeError if this is given with a gt4py storage type as data
         """
+        # This include so deep in pace.util can lead to circular include
+        # Since Quantity builds should not be in the critical path, this
+        # is "fine" to do here
+        from pace.dsl.typing import Float
+
         if (
             not allow_mismatch_float_precision
             and _is_float(data.dtype)
@@ -533,7 +536,11 @@ class Quantity:
                 "DaCe module is not available."
             )
 
-    def transpose(self, target_dims: Sequence[Union[str, Iterable[str]]]) -> "Quantity":
+    def transpose(
+        self,
+        target_dims: Sequence[Union[str, Iterable[str]]],
+        allow_mismatch_float_precision: bool = False,
+    ) -> "Quantity":
         """Change the dimension order of this Quantity.
 
         Args:
@@ -582,6 +589,7 @@ class Quantity:
             origin=transpose_sequence(self.origin, transpose_order),
             extent=transpose_sequence(self.extent, transpose_order),
             gt4py_backend=self.gt4py_backend,
+            allow_mismatch_float_precision=allow_mismatch_float_precision,
         )
         transposed._attrs = self._attrs
         return transposed
