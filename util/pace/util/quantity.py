@@ -295,9 +295,26 @@ class Quantity:
                 storage attribute is disabled and will raise an exception. Will raise
                 a TypeError if this is given with a gt4py storage type as data
         """
-        # This include so deep in pace.util can lead to circular include
+        # [Florian 01/23] This include so deep in pace.util can lead to circular include
         # Since Quantity builds should not be in the critical path, this
-        # is "fine" to do here
+        # is "fine" to do here.
+        # Strategies that seems obvious (but aren't)
+        #  - move Float in a seperate file, e.g. pace.dsl.typing_float
+        #    Problem: circular dependency is on the import of anything
+        #    under pace.dsl here
+        #  - Remove boundary import (the culprit of circular)
+        #    Problem: it's a legit need of Communicator which is also a legit need
+        #    upstream
+        #  - Make the Float a parameter to the __init__ of Quantity
+        #    Probably the _actual_ way to fix this, lots of changes might have
+        #    heavy side-effect and be bug prone.
+        #    Therefore will require a seperate full review
+        # Apologies to whoever founds this. If it's future me... I deserved it.
+        #
+        # With deep regrets,
+        # Past Florian.
+        #
+        # ToDo: fix it
         from pace.dsl.typing import Float
 
         if (
