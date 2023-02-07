@@ -20,11 +20,8 @@ asttokens==2.0.5
     # via
     #   devtools
     #   stack-data
-astunparse==1.6.3 ; python_version < "3.9"
-    # via
-    #   dace
-    #   gt4py
-    #   gt4py (external/gt4py/setup.cfg)
+astunparse==1.6.3
+    # via dace
 async-timeout==3.0.1
     # via aiohttp
 attrs==22.1.0
@@ -90,7 +87,7 @@ cytoolz==0.11.2
     # via
     #   gt4py
     #   gt4py (external/gt4py/setup.cfg)
-dace==0.14
+dace==0.14.1
     # via
     #   -r requirements_dev.txt
     #   pace-dsl
@@ -604,9 +601,7 @@ zarr==2.9.2
     #   pace-driver
     #   pace-driver (driver/setup.py)
 zipp==3.8.0
-    # via
-    #   importlib-metadata
-    #   importlib-resources
+    # via importlib-metadata
 
 # The following packages are considered to be unsafe in a requirements file:
 # setuptools

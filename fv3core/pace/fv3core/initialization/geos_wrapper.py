@@ -20,6 +20,7 @@ class GeosDycoreWrapper:
     def __init__(
         self,
         namelist: f90nml.Namelist,
+        bdt: int,
         comm: pace.util.Comm,
         backend: str,
     ):
@@ -34,6 +35,8 @@ class GeosDycoreWrapper:
         self.backend = backend
         self.namelist = namelist
         self.dycore_config = fv3core.DynamicalCoreConfig.from_f90nml(self.namelist)
+        self.dycore_config.dt_atmos = bdt
+        assert self.dycore_config.dt_atmos != 0
 
         self.layout = self.dycore_config.layout
         partitioner = pace.util.CubedSpherePartitioner(
