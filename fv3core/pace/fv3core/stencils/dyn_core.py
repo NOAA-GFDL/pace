@@ -694,6 +694,17 @@ class AcousticDynamics:
                 mfyd=state.mfyd,
             )
 
+    # TODO: fix me - we shouldn't need a function here, Dace is fudging the types
+    # See https://github.com/GEOS-ESM/pace/issues/9
+    @dace_inhibitor
+    def dt_acoustic_substep(self, timestep: Float) -> Float:
+        return timestep / self.config.n_split
+
+    # TODO: Same as above
+    @dace_inhibitor
+    def dt2(self, dt_acoustic_substep: Float) -> Float:
+        return 0.5 * dt_acoustic_substep
+
     def __call__(
         self,
         state: DycoreState,
@@ -705,8 +716,8 @@ class AcousticDynamics:
         # akap, ptop, n_map, comm):
         end_step = n_map == self.config.k_split
         # dt = state.mdt / self.config.n_split
-        dt_acoustic_substep = timestep / self.config.n_split
-        dt2 = 0.5 * dt_acoustic_substep
+        dt_acoustic_substep: Float = self.dt_acoustic_substep(timestep)
+        dt2: Float = self.dt2(dt_acoustic_substep)
         n_split = self.config.n_split
         # NOTE: In Fortran model the halo update starts happens in fv_dynamics, not here
         self._halo_updaters.q_con__cappa.start()
