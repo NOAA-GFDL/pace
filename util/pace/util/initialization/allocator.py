@@ -60,31 +60,41 @@ class QuantityFactory:
         self,
         dims: Sequence[str],
         units: str,
-        dtype: type = float,
+        dtype: type = np.float64,
+        allow_mismatch_float_precision: bool = False,
     ):
-        return self._allocate(self._numpy.empty, dims, units, dtype)
+        return self._allocate(
+            self._numpy.empty, dims, units, dtype, allow_mismatch_float_precision
+        )
 
     def zeros(
         self,
         dims: Sequence[str],
         units: str,
-        dtype: type = float,
+        dtype: type = np.float64,
+        allow_mismatch_float_precision: bool = False,
     ):
-        return self._allocate(self._numpy.zeros, dims, units, dtype)
+        return self._allocate(
+            self._numpy.zeros, dims, units, dtype, allow_mismatch_float_precision
+        )
 
     def ones(
         self,
         dims: Sequence[str],
         units: str,
-        dtype: type = float,
+        dtype: type = np.float64,
+        allow_mismatch_float_precision: bool = False,
     ):
-        return self._allocate(self._numpy.ones, dims, units, dtype)
+        return self._allocate(
+            self._numpy.ones, dims, units, dtype, allow_mismatch_float_precision
+        )
 
     def from_array(
         self,
         data: np.ndarray,
         dims: Sequence[str],
         units: str,
+        allow_mismatch_float_precision: bool = False,
     ):
         """
         Create a Quantity from a numpy array.
@@ -92,7 +102,12 @@ class QuantityFactory:
         That numpy array must correspond to the correct shape and extent
         for the given dims.
         """
-        base = self.empty(dims=dims, units=units, dtype=data.dtype)
+        base = self.empty(
+            dims=dims,
+            units=units,
+            dtype=data.dtype,
+            allow_mismatch_float_precision=allow_mismatch_float_precision,
+        )
         base.data[:] = base.np.asarray(data)
         return base
 
@@ -101,7 +116,8 @@ class QuantityFactory:
         allocator: Callable,
         dims: Sequence[str],
         units: str,
-        dtype: type = float,
+        dtype: type = np.float64,
+        allow_mismatch_float_precision: bool = False,
     ):
         origin = self.sizer.get_origin(dims)
         extent = self.sizer.get_extent(dims)
@@ -127,10 +143,14 @@ class QuantityFactory:
             origin=origin,
             extent=extent,
             gt4py_backend=self._backend(),
+            allow_mismatch_float_precision=allow_mismatch_float_precision,
         )
 
     def get_quantity_halo_spec(
-        self, dims: Sequence[str], n_halo: Optional[int] = None, dtype: type = float
+        self,
+        dims: Sequence[str],
+        n_halo: Optional[int] = None,
+        dtype: type = np.float64,
     ) -> QuantityHaloSpec:
         """Build memory specifications for the halo update.
 
