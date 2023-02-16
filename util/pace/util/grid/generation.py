@@ -3,6 +3,8 @@ import functools
 import warnings
 from typing import Tuple
 
+import numpy as np
+
 from pace import util
 from pace.dsl.gt4py_utils import asarray
 from pace.dsl.stencil import GridIndexing
@@ -67,6 +69,15 @@ def ignore_zero_division(func):
             return func(*args, **kwargs)
 
     return wrapped
+
+
+def quantity_cast_to_model_float(
+    quantity_factory: util.QuantityFactory, qty_64: util.Quantity
+) -> util.Quantity:
+    """Copy & cast from 64-bit float to model precision if need be"""
+    qty = quantity_factory.empty(qty_64.dims, qty_64.units, dtype=Float)
+    qty.data[:] = qty_64.data[:]
+    return qty
 
 
 @dataclasses.dataclass
@@ -235,21 +246,29 @@ class MetricTerms:
             util.Y_INTERFACE_DIM,
             self.LON_OR_LAT_DIM,
         ]
-        self._grid = self.quantity_factory.zeros(
+        self._grid_64 = self.quantity_factory.zeros(
             self._grid_dims,
             "radians",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        npx, npy, ndims = self._tile_partitioner.global_extent(self._grid)
+        # This will carry the public version of the grid
+        # for the selected floating point precision
+        self._grid = None
+        npx, npy, ndims = self._tile_partitioner.global_extent(self._grid_64)
         self._npx = npx
         self._npy = npy
         self._npz = self.quantity_factory.sizer.get_extent(util.Z_DIM)[0]
-        self._agrid = self.quantity_factory.zeros(
+        self._agrid_64 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_DIM, self.LON_OR_LAT_DIM],
             "radians",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        self._np = self._grid.np
+        # This will carry the public version of the agrid
+        # for the selected floating point precision
+        self._agrid = None
+        self._np = self._grid_64.np
         self._dx = None
         self._dy = None
         self._dx_agrid = None
@@ -361,6 +380,10 @@ class MetricTerms:
 
     @property
     def grid(self):
+        if not self._grid:
+            self._grid = quantity_cast_to_model_float(
+                self.quantity_factory, self._grid_64
+            )
         return self._grid
 
     @property
@@ -368,14 +391,18 @@ class MetricTerms:
         """
         the longitudes and latitudes of the cell corners
         """
-        return self._grid
+        return self.grid
 
     @property
     def gridvar(self):
-        return self._grid
+        return self.grid
 
     @property
     def agrid(self):
+        if not self._agrid:
+            self._agrid = quantity_cast_to_model_float(
+                self.quantity_factory, self._agrid_64
+            )
         return self._agrid
 
     @property
@@ -383,7 +410,7 @@ class MetricTerms:
         """
         the longitudes and latitudes of the cell centers
         """
-        return self._agrid
+        return self.agrid
 
     @property
     def lon(self):
@@ -1344,7 +1371,7 @@ class MetricTerms:
         cartesian coordinates of each dgrid cell center
         """
         return lon_lat_to_xyz(
-            self._grid.data[:, :, 0], self._grid.data[:, :, 1], self._np
+            self._grid_64.data[:, :, 0], self._grid_64.data[:, :, 1], self._np
         )
 
     @cached_property
@@ -1353,8 +1380,8 @@ class MetricTerms:
         cartesian coordinates of each agrid cell center
         """
         return lon_lat_to_xyz(
-            self._agrid.data[:-1, :-1, 0],
-            self._agrid.data[:-1, :-1, 1],
+            self._agrid_64.data[:-1, :-1, 0],
+            self._agrid_64.data[:-1, :-1, 1],
             self._np,
         )
 
@@ -1481,17 +1508,20 @@ class MetricTerms:
         grid_mirror_ew = self.quantity_factory.zeros(
             self._grid_dims,
             "radians",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
         grid_mirror_ns = self.quantity_factory.zeros(
             self._grid_dims,
             "radians",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
         grid_mirror_diag = self.quantity_factory.zeros(
             self._grid_dims,
             "radians",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
 
         local_west_edge = self._tile_partitioner.on_tile_left(self._rank)
@@ -1500,7 +1530,7 @@ class MetricTerms:
         local_north_edge = self._tile_partitioner.on_tile_top(self._rank)
         # information on position of subtile in full tile
         slice_x, slice_y = self._tile_partitioner.subtile_slice(
-            self._rank, self._grid.dims, (self._npx, self._npy), overlap=True
+            self._rank, self._grid_64.dims, (self._npx, self._npy), overlap=True
         )
         section_global_is = self._halo + slice_x.start
         section_global_js = self._halo + slice_y.start
@@ -1509,8 +1539,8 @@ class MetricTerms:
 
         # compute gnomonic grid for this rank
         local_gnomonic_ed(
-            self._grid.view[:, :, 0],
-            self._grid.view[:, :, 1],
+            self._grid_64.view[:, :, 0],
+            self._grid_64.view[:, :, 1],
             npx=self._npx,
             west_edge=local_west_edge,
             east_edge=local_east_edge,
@@ -1587,7 +1617,7 @@ class MetricTerms:
         # Average the mirrored gnomonic grids
         tile_index = self._partitioner.tile_index(self._rank)
         mirror_data = {
-            "local": self._grid.data,
+            "local": self._grid_64.data,
             "east-west": grid_mirror_ew.data,
             "north-south": grid_mirror_ns.data,
             "diagonal": grid_mirror_diag.data,
@@ -1602,7 +1632,7 @@ class MetricTerms:
             global_is=section_global_is,
             global_js=section_global_js,
             ng=self._halo,
-            np=self._grid.np,
+            np=self._grid_64.np,
             right_hand_grid=self.RIGHT_HAND_GRID,
         )
 
@@ -1610,95 +1640,103 @@ class MetricTerms:
         # This will result in the corner close to east coast of China
         # TODO if not config.do_schmidt and config.shift_fac > 1.0e-4
         shift_fac = 18
-        self._grid.view[:, :, 0] -= PI / shift_fac
-        tile0_lon = self._grid.data[:, :, 0]
+        self._grid_64.view[:, :, 0] -= PI / shift_fac
+        tile0_lon = self._grid_64.data[:, :, 0]
         tile0_lon[tile0_lon < 0] += 2 * PI
-        self._grid.data[self._np.abs(self._grid.data[:]) < 1e-10] = 0.0
+        self._grid_64.data[self._np.abs(self._grid_64.data[:]) < 1e-10] = 0.0
 
-        self._comm.halo_update(self._grid, n_points=self._halo)
+        self._comm.halo_update(self._grid_64, n_points=self._halo)
 
         fill_corners_2d(
-            self._grid.data, self._grid_indexing, gridtype="B", direction="x"
+            self._grid_64.data, self._grid_indexing, gridtype="B", direction="x"
         )
 
     def _init_agrid(self):
         # Set up lat-lon a-grid, calculate side lengths on a-grid
         lon_agrid, lat_agrid = lon_lat_corner_to_cell_center(
-            self._grid.data[:, :, 0], self._grid.data[:, :, 1], self._np
+            self._grid_64.data[:, :, 0], self._grid_64.data[:, :, 1], self._np
         )
-        self._agrid.data[:-1, :-1, 0], self._agrid.data[:-1, :-1, 1] = (
+        self._agrid_64.data[:-1, :-1, 0], self._agrid_64.data[:-1, :-1, 1] = (
             lon_agrid,
             lat_agrid,
         )
-        self._comm.halo_update(self._agrid, n_points=self._halo)
+        self._comm.halo_update(self._agrid_64, n_points=self._halo)
         fill_corners_2d(
-            self._agrid.data[:, :, 0][:, :, None],
+            self._agrid_64.data[:, :, 0][:, :, None],
             self._grid_indexing,
             gridtype="A",
             direction="x",
         )
         fill_corners_2d(
-            self._agrid.data[:, :, 1][:, :, None],
+            self._agrid_64.data[:, :, 1][:, :, None],
             self._grid_indexing,
             gridtype="A",
             direction="y",
         )
 
     def _compute_dxdy(self):
-        dx = self.quantity_factory.zeros(
+        dx_64 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_INTERFACE_DIM],
             "m",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
 
-        dx.view[:, :] = great_circle_distance_along_axis(
-            self._grid.view[:, :, 0],
-            self._grid.view[:, :, 1],
+        dx_64.view[:, :] = great_circle_distance_along_axis(
+            self._grid_64.view[:, :, 0],
+            self._grid_64.view[:, :, 1],
             RADIUS,
             self._np,
             axis=0,
         )
-        dy = self.quantity_factory.zeros(
+        dy_64 = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_DIM],
             "m",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        dy.view[:, :] = great_circle_distance_along_axis(
-            self._grid.view[:, :, 0],
-            self._grid.view[:, :, 1],
+        dy_64.view[:, :] = great_circle_distance_along_axis(
+            self._grid_64.view[:, :, 0],
+            self._grid_64.view[:, :, 1],
             RADIUS,
             self._np,
             axis=1,
         )
-        self._comm.vector_halo_update(dx, dy, n_points=self._halo)
+        self._comm.vector_halo_update(dx_64, dy_64, n_points=self._halo)
 
         # at this point the Fortran code copies in the west and east edges from
         # the halo for dy and performs a halo update,
         # to ensure dx and dy mirror across the boundary.
         # Not doing it here at the moment.
-        dx.data[dx.data < 0] *= -1
-        dy.data[dy.data < 0] *= -1
+        dx_64.data[dx_64.data < 0] *= -1
+        dy_64.data[dy_64.data < 0] *= -1
         fill_corners_dgrid(
-            dx.data[:, :, None],
-            dy.data[:, :, None],
+            dx_64.data[:, :, None],
+            dy_64.data[:, :, None],
             self._grid_indexing,
             vector=False,
         )
+
+        dx = quantity_cast_to_model_float(self.quantity_factory, dx_64)
+        dy = quantity_cast_to_model_float(self.quantity_factory, dy_64)
+
         return dx, dy
 
     def _compute_dxdy_agrid(self):
 
-        dx_agrid = self.quantity_factory.zeros(
+        dx_agrid_64 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_DIM],
             "m",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        dy_agrid = self.quantity_factory.zeros(
+        dy_agrid_64 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_DIM],
             "m",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        lon, lat = self._grid.data[:, :, 0], self._grid.data[:, :, 1]
+        lon, lat = self._grid_64.data[:, :, 0], self._grid_64.data[:, :, 1]
         lon_y_center, lat_y_center = lon_lat_midpoint(
             lon[:, :-1], lon[:, 1:], lat[:, :-1], lat[:, 1:], self._np
         )
@@ -1718,33 +1756,39 @@ class MetricTerms:
             vector=False,
         )
 
-        dx_agrid.data[:-1, :-1] = dx_agrid_tmp
-        dy_agrid.data[:-1, :-1] = dy_agrid_tmp
-        self._comm.vector_halo_update(dx_agrid, dy_agrid, n_points=self._halo)
+        dx_agrid_64.data[:-1, :-1] = dx_agrid_tmp
+        dy_agrid_64.data[:-1, :-1] = dy_agrid_tmp
+        self._comm.vector_halo_update(dx_agrid_64, dy_agrid_64, n_points=self._halo)
 
         # at this point the Fortran code copies in the west and east edges from
         # the halo for dy and performs a halo update,
         # to ensure dx and dy mirror across the boundary.
         # Not doing it here at the moment.
-        dx_agrid.data[dx_agrid.data < 0] *= -1
-        dy_agrid.data[dy_agrid.data < 0] *= -1
+        dx_agrid_64.data[dx_agrid_64.data < 0] *= -1
+        dy_agrid_64.data[dy_agrid_64.data < 0] *= -1
+
+        dx_agrid = quantity_cast_to_model_float(self.quantity_factory, dx_agrid_64)
+        dy_agrid = quantity_cast_to_model_float(self.quantity_factory, dy_agrid_64)
+
         return dx_agrid, dy_agrid
 
     def _compute_dxdy_center(self):
-        dx_center = self.quantity_factory.zeros(
+        dx_center_64 = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_DIM],
             "m",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        dy_center = self.quantity_factory.zeros(
+        dy_center_64 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_INTERFACE_DIM],
             "m",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
 
         lon_agrid, lat_agrid = (
-            self._agrid.data[:-1, :-1, 0],
-            self._agrid.data[:-1, :-1, 1],
+            self._agrid_64.data[:-1, :-1, 0],
+            self._agrid_64.data[:-1, :-1, 1],
         )
         dx_center_tmp = great_circle_distance_along_axis(
             lon_agrid, lat_agrid, RADIUS, self._np, axis=0
@@ -1755,19 +1799,19 @@ class MetricTerms:
         # copying the second-to-last values to the last values is what the Fortran
         # code does, but is this correct/valid?
         # Maybe we want to change this to use halo updates?
-        dx_center.data[1:-1, :-1] = dx_center_tmp
-        dx_center.data[0, :-1] = dx_center_tmp[0, :]
-        dx_center.data[-1, :-1] = dx_center_tmp[-1, :]
+        dx_center_64.data[1:-1, :-1] = dx_center_tmp
+        dx_center_64.data[0, :-1] = dx_center_tmp[0, :]
+        dx_center_64.data[-1, :-1] = dx_center_tmp[-1, :]
 
-        dy_center.data[:-1, 1:-1] = dy_center_tmp
-        dy_center.data[:-1, 0] = dy_center_tmp[:, 0]
-        dy_center.data[:-1, -1] = dy_center_tmp[:, -1]
+        dy_center_64.data[:-1, 1:-1] = dy_center_tmp
+        dy_center_64.data[:-1, 0] = dy_center_tmp[:, 0]
+        dy_center_64.data[:-1, -1] = dy_center_tmp[:, -1]
 
         set_tile_border_dxc(
             self._dgrid_xyz[3:-3, 3:-3, :],
             self._agrid_xyz[3:-3, 3:-3, :],
             RADIUS,
-            dx_center.data[3:-3, 3:-4],
+            dx_center_64.data[3:-3, 3:-4],
             self._tile_partitioner,
             self._rank,
             self._np,
@@ -1776,63 +1820,69 @@ class MetricTerms:
             self._dgrid_xyz[3:-3, 3:-3, :],
             self._agrid_xyz[3:-3, 3:-3, :],
             RADIUS,
-            dy_center.data[3:-4, 3:-3],
+            dy_center_64.data[3:-4, 3:-3],
             self._tile_partitioner,
             self._rank,
             self._np,
         )
-        self._comm.vector_halo_update(dx_center, dy_center, n_points=self._halo)
+        self._comm.vector_halo_update(dx_center_64, dy_center_64, n_points=self._halo)
 
         # TODO: Add support for unsigned vector halo updates
         # instead of handling ad-hoc here
-        dx_center.data[dx_center.data < 0] *= -1
-        dy_center.data[dy_center.data < 0] *= -1
+        dx_center_64.data[dx_center_64.data < 0] *= -1
+        dy_center_64.data[dy_center_64.data < 0] *= -1
 
         # TODO: fix issue with interface dimensions causing validation errors
         fill_corners_cgrid(
-            dx_center.data[:, :, None],
-            dy_center.data[:, :, None],
+            dx_center_64.data[:, :, None],
+            dy_center_64.data[:, :, None],
             self._grid_indexing,
             vector=False,
         )
 
+        dx_center = quantity_cast_to_model_float(self.quantity_factory, dx_center_64)
+        dy_center = quantity_cast_to_model_float(self.quantity_factory, dy_center_64)
+
         return dx_center, dy_center
 
     def _compute_area(self):
-        area = self.quantity_factory.zeros(
+        area_64 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_DIM],
             "m^2",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        area.data[:, :] = -1.0e8
+        area_64.data[:, :] = -1.0e8
 
-        area.data[3:-4, 3:-4] = get_area(
-            self._grid.data[3:-3, 3:-3, 0],
-            self._grid.data[3:-3, 3:-3, 1],
+        area_64.data[3:-4, 3:-4] = get_area(
+            self._grid_64.data[3:-3, 3:-3, 0],
+            self._grid_64.data[3:-3, 3:-3, 1],
             RADIUS,
             self._np,
         )
-        self._comm.halo_update(area, n_points=self._halo)
-        return area
+        self._comm.halo_update(area_64, n_points=self._halo)
+
+        return quantity_cast_to_model_float(self.quantity_factory, area_64)
 
     def _compute_area_c(self):
-        area_cgrid = self.quantity_factory.zeros(
+        area_cgrid_64 = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_INTERFACE_DIM],
             "m^2",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        area_cgrid.data[3:-3, 3:-3] = get_area(
-            self._agrid.data[2:-3, 2:-3, 0],
-            self._agrid.data[2:-3, 2:-3, 1],
+        area_cgrid_64.data[3:-3, 3:-3] = get_area(
+            self._agrid_64.data[2:-3, 2:-3, 0],
+            self._agrid_64.data[2:-3, 2:-3, 1],
             RADIUS,
             self._np,
         )
         # TODO -- this does not seem to matter? running with or without does
         # not change whether it validates
         set_corner_area_to_triangle_area(
-            lon=self._agrid.data[2:-3, 2:-3, 0],
-            lat=self._agrid.data[2:-3, 2:-3, 1],
-            area=area_cgrid.data[3:-3, 3:-3],
+            lon=self._agrid_64.data[2:-3, 2:-3, 0],
+            lat=self._agrid_64.data[2:-3, 2:-3, 1],
+            area=area_cgrid_64.data[3:-3, 3:-3],
             tile_partitioner=self._tile_partitioner,
             rank=self._rank,
             radius=RADIUS,
@@ -1843,20 +1893,20 @@ class MetricTerms:
             self._dgrid_xyz[2:-2, 2:-2, :],
             self._agrid_xyz[2:-2, 2:-2, :],
             RADIUS,
-            area_cgrid.data[3:-3, 3:-3],
+            area_cgrid_64.data[3:-3, 3:-3],
             self._tile_partitioner,
             self._rank,
             self._np,
         )
-        self._comm.halo_update(area_cgrid, n_points=self._halo)
+        self._comm.halo_update(area_cgrid_64, n_points=self._halo)
 
         fill_corners_2d(
-            area_cgrid.data[:, :, None],
+            area_cgrid_64.data[:, :, None],
             self._grid_indexing,
             gridtype="B",
             direction="x",
         )
-        return area_cgrid
+        return quantity_cast_to_model_float(self.quantity_factory, area_cgrid_64)
 
     def _set_hybrid_pressure_coefficients(self):
         ptop = self.quantity_factory.zeros(
@@ -1881,19 +1931,21 @@ class MetricTerms:
         return ptop, ak, bk
 
     def _calculate_center_vectors(self):
-        ec1 = self.quantity_factory.zeros(
+        ec1_64 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_DIM, self.CARTESIAN_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        ec2 = self.quantity_factory.zeros(
+        ec2_64 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_DIM, self.CARTESIAN_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        ec1.data[:] = self._np.nan
-        ec2.data[:] = self._np.nan
-        ec1.data[:-1, :-1, :3], ec2.data[:-1, :-1, :3] = get_center_vector(
+        ec1_64.data[:] = self._np.nan
+        ec2_64.data[:] = self._np.nan
+        ec1_64.data[:-1, :-1, :3], ec2_64.data[:-1, :-1, :3] = get_center_vector(
             self._dgrid_xyz,
             self._grid_type,
             self._halo,
@@ -1901,22 +1953,27 @@ class MetricTerms:
             self._rank,
             self._np,
         )
+
+        ec1 = quantity_cast_to_model_float(self.quantity_factory, ec1_64)
+        ec2 = quantity_cast_to_model_float(self.quantity_factory, ec2_64)
         return ec1, ec2
 
     def _calculate_vectors_west(self):
-        ew1 = self.quantity_factory.zeros(
+        ew1_64 = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_DIM, self.CARTESIAN_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        ew2 = self.quantity_factory.zeros(
+        ew2_64 = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_DIM, self.CARTESIAN_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        ew1.data[:] = self._np.nan
-        ew2.data[:] = self._np.nan
-        ew1.data[1:-1, :-1, :3], ew2.data[1:-1, :-1, :3] = calc_unit_vector_west(
+        ew1_64.data[:] = self._np.nan
+        ew2_64.data[:] = self._np.nan
+        ew1_64.data[1:-1, :-1, :3], ew2_64.data[1:-1, :-1, :3] = calc_unit_vector_west(
             self._dgrid_xyz,
             self._agrid_xyz,
             self._grid_type,
@@ -1925,22 +1982,25 @@ class MetricTerms:
             self._rank,
             self._np,
         )
+
+        ew1 = quantity_cast_to_model_float(self.quantity_factory, ew1_64)
+        ew2 = quantity_cast_to_model_float(self.quantity_factory, ew2_64)
         return ew1, ew2
 
     def _calculate_vectors_south(self):
-        es1 = self.quantity_factory.zeros(
+        es1_64 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_INTERFACE_DIM, self.CARTESIAN_DIM],
             "",
-            dtype=Float,
+            allow_mismatch_float_precision=True,
         )
-        es2 = self.quantity_factory.zeros(
+        es2_64 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_INTERFACE_DIM, self.CARTESIAN_DIM],
             "",
-            dtype=Float,
+            allow_mismatch_float_precision=True,
         )
-        es1.data[:] = self._np.nan
-        es2.data[:] = self._np.nan
-        es1.data[:-1, 1:-1, :3], es2.data[:-1, 1:-1, :3] = calc_unit_vector_south(
+        es1_64.data[:] = self._np.nan
+        es2_64.data[:] = self._np.nan
+        es1_64.data[:-1, 1:-1, :3], es2_64.data[:-1, 1:-1, :3] = calc_unit_vector_south(
             self._dgrid_xyz,
             self._agrid_xyz,
             self._grid_type,
@@ -1949,76 +2009,90 @@ class MetricTerms:
             self._rank,
             self._np,
         )
+
+        es1 = quantity_cast_to_model_float(self.quantity_factory, es1_64)
+        es2 = quantity_cast_to_model_float(self.quantity_factory, es2_64)
         return es1, es2
 
     def _calculate_more_trig_terms(self, cos_sg, sin_sg):
-        cosa_u = self.quantity_factory.zeros(
+        cosa_u_64 = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        cosa_v = self.quantity_factory.zeros(
+        cosa_v_64 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_INTERFACE_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        cosa_s = self.quantity_factory.zeros(
+        cosa_s_64 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        sina_u = self.quantity_factory.zeros(
+        sina_u_64 = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        sina_v = self.quantity_factory.zeros(
+        sina_v_64 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_INTERFACE_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        rsin_u = self.quantity_factory.zeros(
+        rsin_u_64 = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        rsin_v = self.quantity_factory.zeros(
+        rsin_v_64 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_INTERFACE_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        rsina = self.quantity_factory.zeros(
+        rsina_64 = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_INTERFACE_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        rsin2 = self.quantity_factory.zeros(
+        rsin2_64 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        cosa = self.quantity_factory.zeros(
+        cosa_64 = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_INTERFACE_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        sina = self.quantity_factory.zeros(
+        sina_64 = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_INTERFACE_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
         (
-            cosa.data[:, :],
-            sina.data[:, :],
-            cosa_u.data[:, :-1],
-            cosa_v.data[:-1, :],
-            cosa_s.data[:-1, :-1],
-            sina_u.data[:, :-1],
-            sina_v.data[:-1, :],
-            rsin_u.data[:, :-1],
-            rsin_v.data[:-1, :],
-            rsina.data[self._halo : -self._halo, self._halo : -self._halo],
-            rsin2.data[:-1, :-1],
+            cosa_64.data[:, :],
+            sina_64.data[:, :],
+            cosa_u_64.data[:, :-1],
+            cosa_v_64.data[:-1, :],
+            cosa_s_64.data[:-1, :-1],
+            sina_u_64.data[:, :-1],
+            sina_v_64.data[:-1, :],
+            rsin_u_64.data[:, :-1],
+            rsin_v_64.data[:-1, :],
+            rsina_64.data[self._halo : -self._halo, self._halo : -self._halo],
+            rsin2_64.data[:-1, :-1],
         ) = calculate_trig_uv(
             self._dgrid_xyz,
             cos_sg,
@@ -2029,75 +2103,86 @@ class MetricTerms:
             self._np,
         )
         return (
-            cosa,
-            sina,
-            cosa_u,
-            cosa_v,
-            cosa_s,
-            sina_u,
-            sina_v,
-            rsin_u,
-            rsin_v,
-            rsina,
-            rsin2,
+            quantity_cast_to_model_float(self.quantity_factory, cosa_64),
+            quantity_cast_to_model_float(self.quantity_factory, sina_64),
+            quantity_cast_to_model_float(self.quantity_factory, cosa_u_64),
+            quantity_cast_to_model_float(self.quantity_factory, cosa_v_64),
+            quantity_cast_to_model_float(self.quantity_factory, cosa_s_64),
+            quantity_cast_to_model_float(self.quantity_factory, sina_u_64),
+            quantity_cast_to_model_float(self.quantity_factory, sina_v_64),
+            quantity_cast_to_model_float(self.quantity_factory, rsin_u_64),
+            quantity_cast_to_model_float(self.quantity_factory, rsin_v_64),
+            quantity_cast_to_model_float(self.quantity_factory, rsina_64),
+            quantity_cast_to_model_float(self.quantity_factory, rsin2_64),
         )
 
     def _init_cell_trigonometry(self):
 
-        self._cosa_u = self.quantity_factory.zeros(
+        cosa_u_64 = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        self._cosa_v = self.quantity_factory.zeros(
+        cosa_v_64 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_INTERFACE_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        self._cosa_s = self.quantity_factory.zeros(
+        cosa_s_64 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        self._sina_u = self.quantity_factory.zeros(
+        sina_u_64 = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        self._sina_v = self.quantity_factory.zeros(
+        sina_v_64 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_INTERFACE_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        self._rsin_u = self.quantity_factory.zeros(
+        rsin_u_64 = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        self._rsin_v = self.quantity_factory.zeros(
+        rsin_v_64 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_INTERFACE_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        self._rsina = self.quantity_factory.zeros(
+        rsina_64 = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_INTERFACE_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        self._rsin2 = self.quantity_factory.zeros(
+        rsin2_64 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        self._cosa = self.quantity_factory.zeros(
+        cosa_64 = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_INTERFACE_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        self._sina = self.quantity_factory.zeros(
+        sina_64 = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_INTERFACE_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
 
         # This section calculates the cos_sg and sin_sg terms, which describe the
@@ -2121,17 +2206,17 @@ class MetricTerms:
         )
 
         (
-            self._cosa.data[:, :],
-            self._sina.data[:, :],
-            self._cosa_u.data[:, :-1],
-            self._cosa_v.data[:-1, :],
-            self._cosa_s.data[:-1, :-1],
-            self._sina_u.data[:, :-1],
-            self._sina_v.data[:-1, :],
-            self._rsin_u.data[:, :-1],
-            self._rsin_v.data[:-1, :],
-            self._rsina.data[self._halo : -self._halo, self._halo : -self._halo],
-            self._rsin2.data[:-1, :-1],
+            cosa_64.data[:, :],
+            sina_64.data[:, :],
+            cosa_u_64.data[:, :-1],
+            cosa_v_64.data[:-1, :],
+            cosa_s_64.data[:-1, :-1],
+            sina_u_64.data[:, :-1],
+            sina_v_64.data[:-1, :],
+            rsin_u_64.data[:, :-1],
+            rsin_v_64.data[:-1, :],
+            rsina_64.data[self._halo : -self._halo, self._halo : -self._halo],
+            rsin2_64.data[:-1, :-1],
         ) = calculate_trig_uv(
             self._dgrid_xyz,
             cos_sg,
@@ -2151,90 +2236,156 @@ class MetricTerms:
             supergrid_trig[f"cos_sg{i}"] = self.quantity_factory.zeros(
                 [util.X_DIM, util.Y_DIM],
                 "",
-                dtype=Float,
+                dtype=np.float64,
+                allow_mismatch_float_precision=True,
             )
             supergrid_trig[f"cos_sg{i}"].data[:-1, :-1] = cos_sg[:, :, i - 1]
             supergrid_trig[f"sin_sg{i}"] = self.quantity_factory.zeros(
                 [util.X_DIM, util.Y_DIM],
                 "",
-                dtype=Float,
+                dtype=np.float64,
+                allow_mismatch_float_precision=True,
             )
             supergrid_trig[f"sin_sg{i}"].data[:-1, :-1] = sin_sg[:, :, i - 1]
 
-        self._cos_sg1 = supergrid_trig["cos_sg1"]
-        self._cos_sg2 = supergrid_trig["cos_sg2"]
-        self._cos_sg3 = supergrid_trig["cos_sg3"]
-        self._cos_sg4 = supergrid_trig["cos_sg4"]
-        self._cos_sg5 = supergrid_trig["cos_sg5"]
-        self._cos_sg6 = supergrid_trig["cos_sg6"]
-        self._cos_sg7 = supergrid_trig["cos_sg7"]
-        self._cos_sg8 = supergrid_trig["cos_sg8"]
-        self._cos_sg9 = supergrid_trig["cos_sg9"]
-        self._sin_sg1 = supergrid_trig["sin_sg1"]
-        self._sin_sg2 = supergrid_trig["sin_sg2"]
-        self._sin_sg3 = supergrid_trig["sin_sg3"]
-        self._sin_sg4 = supergrid_trig["sin_sg4"]
-        self._sin_sg5 = supergrid_trig["sin_sg5"]
-        self._sin_sg6 = supergrid_trig["sin_sg6"]
-        self._sin_sg7 = supergrid_trig["sin_sg7"]
-        self._sin_sg8 = supergrid_trig["sin_sg8"]
-        self._sin_sg9 = supergrid_trig["sin_sg9"]
+        self._cos_sg1 = quantity_cast_to_model_float(
+            self.quantity_factory, supergrid_trig["cos_sg1"]
+        )
+        self._cos_sg2 = quantity_cast_to_model_float(
+            self.quantity_factory, supergrid_trig["cos_sg2"]
+        )
+        self._cos_sg3 = quantity_cast_to_model_float(
+            self.quantity_factory, supergrid_trig["cos_sg3"]
+        )
+        self._cos_sg4 = quantity_cast_to_model_float(
+            self.quantity_factory, supergrid_trig["cos_sg4"]
+        )
+        self._cos_sg5 = quantity_cast_to_model_float(
+            self.quantity_factory, supergrid_trig["cos_sg5"]
+        )
+        self._cos_sg6 = quantity_cast_to_model_float(
+            self.quantity_factory, supergrid_trig["cos_sg6"]
+        )
+        self._cos_sg7 = quantity_cast_to_model_float(
+            self.quantity_factory, supergrid_trig["cos_sg7"]
+        )
+        self._cos_sg8 = quantity_cast_to_model_float(
+            self.quantity_factory, supergrid_trig["cos_sg8"]
+        )
+        self._cos_sg9 = quantity_cast_to_model_float(
+            self.quantity_factory, supergrid_trig["cos_sg9"]
+        )
+        self._sin_sg1 = quantity_cast_to_model_float(
+            self.quantity_factory, supergrid_trig["sin_sg1"]
+        )
+        self._sin_sg2 = quantity_cast_to_model_float(
+            self.quantity_factory, supergrid_trig["sin_sg2"]
+        )
+        self._sin_sg3 = quantity_cast_to_model_float(
+            self.quantity_factory, supergrid_trig["sin_sg3"]
+        )
+        self._sin_sg4 = quantity_cast_to_model_float(
+            self.quantity_factory, supergrid_trig["sin_sg4"]
+        )
+        self._sin_sg5 = quantity_cast_to_model_float(
+            self.quantity_factory, supergrid_trig["sin_sg5"]
+        )
+        self._sin_sg6 = quantity_cast_to_model_float(
+            self.quantity_factory, supergrid_trig["sin_sg6"]
+        )
+        self._sin_sg7 = quantity_cast_to_model_float(
+            self.quantity_factory, supergrid_trig["sin_sg7"]
+        )
+        self._sin_sg8 = quantity_cast_to_model_float(
+            self.quantity_factory, supergrid_trig["sin_sg8"]
+        )
+        self._sin_sg9 = quantity_cast_to_model_float(
+            self.quantity_factory, supergrid_trig["sin_sg9"]
+        )
+
+        # Casting
+        self._cosa_u = quantity_cast_to_model_float(self.quantity_factory, cosa_u_64)
+        self._cosa_v = quantity_cast_to_model_float(self.quantity_factory, cosa_v_64)
+        self._cosa_s = quantity_cast_to_model_float(self.quantity_factory, cosa_s_64)
+        self._sina_u = quantity_cast_to_model_float(self.quantity_factory, sina_u_64)
+        self._sina_v = quantity_cast_to_model_float(self.quantity_factory, sina_v_64)
+        self._rsin_u = quantity_cast_to_model_float(self.quantity_factory, rsin_u_64)
+        self._rsin_v = quantity_cast_to_model_float(self.quantity_factory, rsin_v_64)
+        self._rsina = quantity_cast_to_model_float(self.quantity_factory, rsina_64)
+        self._rsin2 = quantity_cast_to_model_float(self.quantity_factory, rsin2_64)
+        self._cosa = quantity_cast_to_model_float(self.quantity_factory, cosa_64)
+        self._sina = quantity_cast_to_model_float(self.quantity_factory, sina_64)
 
     def _calculate_derived_trig_terms_for_testing(self):
         """
         As _calculate_derived_trig_terms_for_testing but updates trig attributes
         in-place without the halo updates. For use only in validation tests.
         """
-        self._cosa_u = self.quantity_factory.zeros(
+        cosa_u_64 = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        self._cosa_v = self.quantity_factory.zeros(
+        cosa_v_64 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_INTERFACE_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        self._cosa_s = self.quantity_factory.zeros([util.X_DIM, util.Y_DIM], "")
-        self._sina_u = self.quantity_factory.zeros(
-            [util.X_INTERFACE_DIM, util.Y_DIM],
-            "",
-            dtype=Float,
-        )
-        self._sina_v = self.quantity_factory.zeros(
-            [util.X_DIM, util.Y_INTERFACE_DIM],
-            "",
-            dtype=Float,
-        )
-        self._rsin_u = self.quantity_factory.zeros(
-            [util.X_INTERFACE_DIM, util.Y_DIM],
-            "",
-            dtype=Float,
-        )
-        self._rsin_v = self.quantity_factory.zeros(
-            [util.X_DIM, util.Y_INTERFACE_DIM],
-            "",
-            dtype=Float,
-        )
-        self._rsina = self.quantity_factory.zeros(
-            [util.X_INTERFACE_DIM, util.Y_INTERFACE_DIM],
-            "",
-            dtype=Float,
-        )
-        self._rsin2 = self.quantity_factory.zeros(
+        cosa_s_64 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        self._cosa = self.quantity_factory.zeros(
+        sina_u_64 = self.quantity_factory.zeros(
+            [util.X_INTERFACE_DIM, util.Y_DIM],
+            "",
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
+        )
+        sina_v_64 = self.quantity_factory.zeros(
+            [util.X_DIM, util.Y_INTERFACE_DIM],
+            "",
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
+        )
+        rsin_u_64 = self.quantity_factory.zeros(
+            [util.X_INTERFACE_DIM, util.Y_DIM],
+            "",
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
+        )
+        rsin_v_64 = self.quantity_factory.zeros(
+            [util.X_DIM, util.Y_INTERFACE_DIM],
+            "",
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
+        )
+        rsina_64 = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_INTERFACE_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        self._sina = self.quantity_factory.zeros(
+        rsin2_64 = self.quantity_factory.zeros(
+            [util.X_DIM, util.Y_DIM],
+            "",
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
+        )
+        cosa_64 = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_INTERFACE_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
+        )
+        sina_64 = self.quantity_factory.zeros(
+            [util.X_INTERFACE_DIM, util.Y_INTERFACE_DIM],
+            "",
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
 
         cos_sg = self._np.array(
@@ -2265,17 +2416,17 @@ class MetricTerms:
         ).transpose([1, 2, 0])
 
         (
-            self._cosa.data[:, :],
-            self._sina.data[:, :],
-            self._cosa_u.data[:, :-1],
-            self._cosa_v.data[:-1, :],
-            self._cosa_s.data[:-1, :-1],
-            self._sina_u.data[:, :-1],
-            self._sina_v.data[:-1, :],
-            self._rsin_u.data[:, :-1],
-            self._rsin_v.data[:-1, :],
-            self._rsina.data[self._halo : -self._halo, self._halo : -self._halo],
-            self._rsin2.data[:-1, :-1],
+            cosa_64.data[:, :],
+            sina_64.data[:, :],
+            cosa_u_64.data[:, :-1],
+            cosa_v_64.data[:-1, :],
+            cosa_s_64.data[:-1, :-1],
+            sina_u_64.data[:, :-1],
+            sina_v_64.data[:-1, :],
+            rsin_u_64.data[:, :-1],
+            rsin_v_64.data[:-1, :],
+            rsina_64.data[self._halo : -self._halo, self._halo : -self._halo],
+            rsin2_64.data[:-1, :-1],
         ) = calculate_trig_uv(
             self._dgrid_xyz,
             cos_sg,
@@ -2286,64 +2437,92 @@ class MetricTerms:
             self._np,
         )
 
+        self._cosa = quantity_cast_to_model_float(self.quantity_factory, cosa_64)
+        self._sina = quantity_cast_to_model_float(self.quantity_factory, sina_64)
+        self._cosa_u = quantity_cast_to_model_float(self.quantity_factory, cosa_u_64)
+        self._cosa_v = quantity_cast_to_model_float(self.quantity_factory, cosa_v_64)
+        self._cosa_s = quantity_cast_to_model_float(self.quantity_factory, cosa_s_64)
+        self._sina_u = quantity_cast_to_model_float(self.quantity_factory, sina_u_64)
+        self._sina_v = quantity_cast_to_model_float(self.quantity_factory, sina_v_64)
+        self._rsin_u = quantity_cast_to_model_float(self.quantity_factory, rsin_u_64)
+        self._rsin_v = quantity_cast_to_model_float(self.quantity_factory, rsin_v_64)
+        self._rsina = quantity_cast_to_model_float(self.quantity_factory, rsina_64)
+        self._rsin2 = quantity_cast_to_model_float(self.quantity_factory, rsin2_64)
+
     def _calculate_latlon_momentum_correction(self):
-        l2c_v = self.quantity_factory.zeros(
+        l2c_v_64 = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_DIM],
             "",
             dtype=Float,
+            allow_mismatch_float_precision=True,
         )
-        l2c_u = self.quantity_factory.zeros(
+        l2c_u_64 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_INTERFACE_DIM],
             "",
             dtype=Float,
+            allow_mismatch_float_precision=True,
         )
         (
-            l2c_v.data[self._halo : -self._halo, self._halo : -self._halo - 1],
-            l2c_u.data[self._halo : -self._halo - 1, self._halo : -self._halo],
-        ) = calculate_l2c_vu(self._grid.data[:], self._halo, self._np)
+            l2c_v_64.data[self._halo : -self._halo, self._halo : -self._halo - 1],
+            l2c_u_64.data[self._halo : -self._halo - 1, self._halo : -self._halo],
+        ) = calculate_l2c_vu(self._grid_64.data[:], self._halo, self._np)
+
+        l2c_u = quantity_cast_to_model_float(self.quantity_factory, l2c_u_64)
+        l2c_v = quantity_cast_to_model_float(self.quantity_factory, l2c_v_64)
+
         return l2c_v, l2c_u
 
     def _calculate_xy_unit_vectors(self):
-        ee1 = self.quantity_factory.zeros(
+        ee1_64 = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_INTERFACE_DIM, self.CARTESIAN_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        ee2 = self.quantity_factory.zeros(
+        ee2_64 = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_INTERFACE_DIM, self.CARTESIAN_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        ee1.data[:] = self._np.nan
-        ee2.data[:] = self._np.nan
+        ee1_64.data[:] = self._np.nan
+        ee2_64.data[:] = self._np.nan
         (
-            ee1.data[self._halo : -self._halo, self._halo : -self._halo, :],
-            ee2.data[self._halo : -self._halo, self._halo : -self._halo, :],
+            ee1_64.data[self._halo : -self._halo, self._halo : -self._halo, :],
+            ee2_64.data[self._halo : -self._halo, self._halo : -self._halo, :],
         ) = calculate_xy_unit_vectors(
             self._dgrid_xyz, self._halo, self._tile_partitioner, self._rank, self._np
         )
+
+        ee1 = quantity_cast_to_model_float(self.quantity_factory, ee1_64)
+        ee2 = quantity_cast_to_model_float(self.quantity_factory, ee2_64)
+
         return ee1, ee2
 
     def _calculate_divg_del6(self):
-        del6_u = self.quantity_factory.zeros(
+        del6_u_64 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_INTERFACE_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        del6_v = self.quantity_factory.zeros(
+        del6_v_64 = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        divg_u = self.quantity_factory.zeros(
+        divg_u_64 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_INTERFACE_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        divg_v = self.quantity_factory.zeros(
+        divg_v_64 = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
         sin_sg = [
             self.sin_sg1.data[:-1, :-1],
@@ -2354,10 +2533,10 @@ class MetricTerms:
         ]
         sin_sg = self._np.array(sin_sg).transpose(1, 2, 0)
         (
-            divg_u.data[:-1, :],
-            divg_v.data[:, :-1],
-            del6_u.data[:-1, :],
-            del6_v.data[:, :-1],
+            divg_u_64.data[:-1, :],
+            divg_v_64.data[:, :-1],
+            del6_u_64.data[:-1, :],
+            del6_v_64.data[:, :-1],
         ) = calculate_divg_del6(
             sin_sg,
             self.sina_u.data[:, :-1],
@@ -2371,14 +2550,20 @@ class MetricTerms:
             self._rank,
         )
         if self._grid_type < 3:
-            self._comm.vector_halo_update(divg_v, divg_u, n_points=self._halo)
-            self._comm.vector_halo_update(del6_v, del6_u, n_points=self._halo)
+            self._comm.vector_halo_update(divg_v_64, divg_u_64, n_points=self._halo)
+            self._comm.vector_halo_update(del6_v_64, del6_u_64, n_points=self._halo)
             # TODO: Add support for unsigned vector halo updates
             # instead of handling ad-hoc here
-            divg_v.data[divg_v.data < 0] *= -1
-            divg_u.data[divg_u.data < 0] *= -1
-            del6_v.data[del6_v.data < 0] *= -1
-            del6_u.data[del6_u.data < 0] *= -1
+            divg_v_64.data[divg_v_64.data < 0] *= -1
+            divg_u_64.data[divg_u_64.data < 0] *= -1
+            del6_v_64.data[del6_v_64.data < 0] *= -1
+            del6_u_64.data[del6_u_64.data < 0] *= -1
+
+        divg_v = quantity_cast_to_model_float(self.quantity_factory, divg_v_64)
+        divg_u = quantity_cast_to_model_float(self.quantity_factory, divg_u_64)
+        del6_v = quantity_cast_to_model_float(self.quantity_factory, del6_v_64)
+        del6_u = quantity_cast_to_model_float(self.quantity_factory, del6_u_64)
+
         return del6_u, del6_v, divg_u, divg_v
 
     def _calculate_divg_del6_nohalos_for_testing(self):
@@ -2386,25 +2571,29 @@ class MetricTerms:
         As _calculate_divg_del6 but updates self.divg and self.del6 attributes
         in-place without the halo updates. For use only in validation tests.
         """
-        del6_u = self.quantity_factory.zeros(
+        del6_u_64 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_INTERFACE_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        del6_v = self.quantity_factory.zeros(
+        del6_v_64 = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        divg_u = self.quantity_factory.zeros(
+        divg_u_64 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_INTERFACE_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        divg_v = self.quantity_factory.zeros(
+        divg_v_64 = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
         sin_sg = [
             self.sin_sg1.data[:-1, :-1],
@@ -2415,10 +2604,10 @@ class MetricTerms:
         ]
         sin_sg = self._np.array(sin_sg).transpose(1, 2, 0)
         (
-            divg_u.data[:-1, :],
-            divg_v.data[:, :-1],
-            del6_u.data[:-1, :],
-            del6_v.data[:, :-1],
+            divg_u_64.data[:-1, :],
+            divg_v_64.data[:, :-1],
+            del6_u_64.data[:-1, :],
+            del6_v_64.data[:, :-1],
         ) = calculate_divg_del6(
             sin_sg,
             self.sina_u.data[:, :-1],
@@ -2431,54 +2620,64 @@ class MetricTerms:
             self._tile_partitioner,
             self._rank,
         )
-        self._divg_v = divg_v
-        self._divg_u = divg_u
-        self._del6_v = del6_v
-        self._del6_u = del6_u
+        self._divg_v = quantity_cast_to_model_float(self.quantity_factory, divg_v_64)
+        self._divg_u = quantity_cast_to_model_float(self.quantity_factory, divg_u_64)
+        self._del6_v = quantity_cast_to_model_float(self.quantity_factory, del6_v_64)
+        self._del6_u = quantity_cast_to_model_float(self.quantity_factory, del6_u_64)
 
     def _calculate_unit_vectors_lonlat(self):
-        vlon = self.quantity_factory.zeros(
+        vlon_64 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_DIM, self.CARTESIAN_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        vlat = self.quantity_factory.zeros(
+        vlat_64 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_DIM, self.CARTESIAN_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
 
-        vlon.data[:-1, :-1], vlat.data[:-1, :-1] = unit_vector_lonlat(
-            self._agrid.data[:-1, :-1], self._np
+        vlon_64.data[:-1, :-1], vlat_64.data[:-1, :-1] = unit_vector_lonlat(
+            self._agrid_64.data[:-1, :-1], self._np
         )
+
+        vlon = quantity_cast_to_model_float(self.quantity_factory, vlon_64)
+        vlat = quantity_cast_to_model_float(self.quantity_factory, vlat_64)
+
         return vlon, vlat
 
     def _calculate_grid_z(self):
-        z11 = self.quantity_factory.zeros(
+        z11_64 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        z12 = self.quantity_factory.zeros(
+        z12_64 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        z21 = self.quantity_factory.zeros(
+        z21_64 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        z22 = self.quantity_factory.zeros(
+        z22_64 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
         (
-            z11.data[:-1, :-1],
-            z12.data[:-1, :-1],
-            z21.data[:-1, :-1],
-            z22.data[:-1, :-1],
+            z11_64.data[:-1, :-1],
+            z12_64.data[:-1, :-1],
+            z21_64.data[:-1, :-1],
+            z22_64.data[:-1, :-1],
         ) = calculate_grid_z(
             self.ec1.data[:-1, :-1],
             self.ec2.data[:-1, :-1],
@@ -2486,34 +2685,44 @@ class MetricTerms:
             self.vlat.data[:-1, :-1],
             self._np,
         )
+
+        z11 = quantity_cast_to_model_float(self.quantity_factory, z11_64)
+        z12 = quantity_cast_to_model_float(self.quantity_factory, z12_64)
+        z21 = quantity_cast_to_model_float(self.quantity_factory, z21_64)
+        z22 = quantity_cast_to_model_float(self.quantity_factory, z22_64)
+
         return z11, z12, z21, z22
 
     def _calculate_grid_a(self):
-        a11 = self.quantity_factory.zeros(
+        a11_64 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        a12 = self.quantity_factory.zeros(
+        a12_64 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        a21 = self.quantity_factory.zeros(
+        a21_64 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        a22 = self.quantity_factory.zeros(
+        a22_64 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
         (
-            a11.data[:-1, :-1],
-            a12.data[:-1, :-1],
-            a21.data[:-1, :-1],
-            a22.data[:-1, :-1],
+            a11_64.data[:-1, :-1],
+            a12_64.data[:-1, :-1],
+            a21_64.data[:-1, :-1],
+            a22_64.data[:-1, :-1],
         ) = calculate_grid_a(
             self.z11.data[:-1, :-1],
             self.z12.data[:-1, :-1],
@@ -2521,35 +2730,45 @@ class MetricTerms:
             self.z22.data[:-1, :-1],
             self.sin_sg5.data[:-1, :-1],
         )
+
+        a11 = quantity_cast_to_model_float(self.quantity_factory, a11_64)
+        a12 = quantity_cast_to_model_float(self.quantity_factory, a12_64)
+        a21 = quantity_cast_to_model_float(self.quantity_factory, a21_64)
+        a22 = quantity_cast_to_model_float(self.quantity_factory, a22_64)
+
         return a11, a12, a21, a22
 
     def _calculate_edge_factors(self):
         nhalo = self._halo
-        edge_s = self.quantity_factory.zeros(
+        edge_s_64 = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        edge_n = self.quantity_factory.zeros(
+        edge_n_64 = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        edge_e = self.quantity_factory.zeros(
+        edge_e_64 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_INTERFACE_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        edge_w = self.quantity_factory.zeros(
+        edge_w_64 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_INTERFACE_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
         (
-            edge_w.data[:, nhalo:-nhalo],
-            edge_e.data[:, nhalo:-nhalo],
-            edge_s.data[nhalo:-nhalo],
-            edge_n.data[nhalo:-nhalo],
+            edge_w_64.data[:, nhalo:-nhalo],
+            edge_e_64.data[:, nhalo:-nhalo],
+            edge_s_64.data[nhalo:-nhalo],
+            edge_n_64.data[nhalo:-nhalo],
         ) = edge_factors(
             self.gridvar,
             self.agrid.data[:-1, :-1],
@@ -2560,34 +2779,44 @@ class MetricTerms:
             RADIUS,
             self._np,
         )
+
+        edge_w = quantity_cast_to_model_float(self.quantity_factory, edge_w_64)
+        edge_e = quantity_cast_to_model_float(self.quantity_factory, edge_e_64)
+        edge_s = quantity_cast_to_model_float(self.quantity_factory, edge_s_64)
+        edge_n = quantity_cast_to_model_float(self.quantity_factory, edge_n_64)
+
         return edge_w, edge_e, edge_s, edge_n
 
     def _calculate_edge_a2c_vect_factors(self):
-        edge_vect_s = self.quantity_factory.zeros(
+        edge_vect_s_64 = self.quantity_factory.zeros(
             [util.X_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        edge_vect_n = self.quantity_factory.zeros(
+        edge_vect_n_64 = self.quantity_factory.zeros(
             [util.X_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        edge_vect_e = self.quantity_factory.zeros(
+        edge_vect_e_64 = self.quantity_factory.zeros(
             [util.Y_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        edge_vect_w = self.quantity_factory.zeros(
+        edge_vect_w_64 = self.quantity_factory.zeros(
             [util.Y_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
         (
-            edge_vect_w.data[:-1],
-            edge_vect_e.data[:-1],
-            edge_vect_s.data[:-1],
-            edge_vect_n.data[:-1],
+            edge_vect_w_64.data[:-1],
+            edge_vect_e_64.data[:-1],
+            edge_vect_s_64.data[:-1],
+            edge_vect_n_64.data[:-1],
         ) = efactor_a2c_v(
             self.gridvar,
             self.agrid.data[:-1, :-1],
@@ -2598,27 +2827,49 @@ class MetricTerms:
             RADIUS,
             self._np,
         )
+
+        edge_vect_w = quantity_cast_to_model_float(
+            self.quantity_factory, edge_vect_w_64
+        )
+        edge_vect_e = quantity_cast_to_model_float(
+            self.quantity_factory, edge_vect_e_64
+        )
+        edge_vect_s = quantity_cast_to_model_float(
+            self.quantity_factory, edge_vect_s_64
+        )
+        edge_vect_n = quantity_cast_to_model_float(
+            self.quantity_factory, edge_vect_n_64
+        )
         return edge_vect_w, edge_vect_e, edge_vect_s, edge_vect_n
 
     def _calculate_2d_edge_a2c_vect_factors(self):
-        edge_vect_e_2d = self.quantity_factory.zeros(
+        edge_vect_e_2d_64 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
-        edge_vect_w_2d = self.quantity_factory.zeros(
+        edge_vect_w_2d_64 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_DIM],
             "",
-            dtype=Float,
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
         )
         shape = self.lon.data.shape
         east_edge_data = self.edge_vect_e_1d.data[self._np.newaxis, ...]
         east_edge_data = self._np.repeat(east_edge_data, shape[0], axis=0)
         west_edge_data = self.edge_vect_w_1d.data[self._np.newaxis, ...]
         west_edge_data = self._np.repeat(west_edge_data, shape[0], axis=0)
-        edge_vect_e_2d.data[:-1, :-1], edge_vect_w_2d.data[:-1, :-1] = (
+        edge_vect_e_2d_64.data[:-1, :-1], edge_vect_w_2d_64.data[:-1, :-1] = (
             east_edge_data[:-1, :-1],
             west_edge_data[:-1, :-1],
+        )
+
+        edge_vect_e_2d = quantity_cast_to_model_float(
+            self.quantity_factory, edge_vect_e_2d_64
+        )
+        edge_vect_w_2d = quantity_cast_to_model_float(
+            self.quantity_factory, edge_vect_w_2d_64
         )
         return edge_vect_e_2d, edge_vect_w_2d
 
