@@ -346,6 +346,23 @@ class MetricTerms:
         self._da_min_c = None
         self._da_max_c = None
 
+        # Data held for calculation only
+        self._dx_64 = None
+        self._dy_64 = None
+        self._dxc_64 = None
+        self._dyc_64 = None
+        self._z11_64 = None
+        self._z12_64 = None
+        self._z21_64 = None
+        self._z22_64 = None
+        self._sina_u_64 = None
+        self._sina_v_64 = None
+        self._ec1_64 = None
+        self._ec2_64 = None
+        self._sin_sg5_64 = None
+        self._vlon_64 = None
+        self._vlat_64 = None
+
         self._init_dgrid()
         self._init_agrid()
 
@@ -1366,7 +1383,7 @@ class MetricTerms:
         return self._compute_area_c()
 
     @cached_property
-    def _dgrid_xyz(self) -> util.Quantity:
+    def _dgrid_xyz_64(self) -> util.Quantity:
         """
         cartesian coordinates of each dgrid cell center
         """
@@ -1375,7 +1392,7 @@ class MetricTerms:
         )
 
     @cached_property
-    def _agrid_xyz(self) -> util.Quantity:
+    def _agrid_xyz_64(self) -> util.Quantity:
         """
         cartesian coordinates of each agrid cell center
         """
@@ -1718,7 +1735,9 @@ class MetricTerms:
         )
 
         dx = quantity_cast_to_model_float(self.quantity_factory, dx_64)
+        self._dx_64 = dx_64
         dy = quantity_cast_to_model_float(self.quantity_factory, dy_64)
+        self._dy_64 = dy_64
 
         return dx, dy
 
@@ -1808,8 +1827,8 @@ class MetricTerms:
         dy_center_64.data[:-1, -1] = dy_center_tmp[:, -1]
 
         set_tile_border_dxc(
-            self._dgrid_xyz[3:-3, 3:-3, :],
-            self._agrid_xyz[3:-3, 3:-3, :],
+            self._dgrid_xyz_64[3:-3, 3:-3, :],
+            self._agrid_xyz_64[3:-3, 3:-3, :],
             RADIUS,
             dx_center_64.data[3:-3, 3:-4],
             self._tile_partitioner,
@@ -1817,8 +1836,8 @@ class MetricTerms:
             self._np,
         )
         set_tile_border_dyc(
-            self._dgrid_xyz[3:-3, 3:-3, :],
-            self._agrid_xyz[3:-3, 3:-3, :],
+            self._dgrid_xyz_64[3:-3, 3:-3, :],
+            self._agrid_xyz_64[3:-3, 3:-3, :],
             RADIUS,
             dy_center_64.data[3:-4, 3:-3],
             self._tile_partitioner,
@@ -1841,7 +1860,9 @@ class MetricTerms:
         )
 
         dx_center = quantity_cast_to_model_float(self.quantity_factory, dx_center_64)
+        self._dxc_64 = dx_center_64
         dy_center = quantity_cast_to_model_float(self.quantity_factory, dy_center_64)
+        self._dyc_64 = dy_center_64
 
         return dx_center, dy_center
 
@@ -1890,8 +1911,8 @@ class MetricTerms:
         )
 
         set_c_grid_tile_border_area(
-            self._dgrid_xyz[2:-2, 2:-2, :],
-            self._agrid_xyz[2:-2, 2:-2, :],
+            self._dgrid_xyz_64[2:-2, 2:-2, :],
+            self._agrid_xyz_64[2:-2, 2:-2, :],
             RADIUS,
             area_cgrid_64.data[3:-3, 3:-3],
             self._tile_partitioner,
@@ -1946,7 +1967,7 @@ class MetricTerms:
         ec1_64.data[:] = self._np.nan
         ec2_64.data[:] = self._np.nan
         ec1_64.data[:-1, :-1, :3], ec2_64.data[:-1, :-1, :3] = get_center_vector(
-            self._dgrid_xyz,
+            self._dgrid_xyz_64,
             self._grid_type,
             self._halo,
             self._tile_partitioner,
@@ -1955,7 +1976,9 @@ class MetricTerms:
         )
 
         ec1 = quantity_cast_to_model_float(self.quantity_factory, ec1_64)
+        self._ec1_64 = ec1_64
         ec2 = quantity_cast_to_model_float(self.quantity_factory, ec2_64)
+        self._ec2_64 = ec2_64
         return ec1, ec2
 
     def _calculate_vectors_west(self):
@@ -1974,8 +1997,8 @@ class MetricTerms:
         ew1_64.data[:] = self._np.nan
         ew2_64.data[:] = self._np.nan
         ew1_64.data[1:-1, :-1, :3], ew2_64.data[1:-1, :-1, :3] = calc_unit_vector_west(
-            self._dgrid_xyz,
-            self._agrid_xyz,
+            self._dgrid_xyz_64,
+            self._agrid_xyz_64,
             self._grid_type,
             self._halo,
             self._tile_partitioner,
@@ -2001,8 +2024,8 @@ class MetricTerms:
         es1_64.data[:] = self._np.nan
         es2_64.data[:] = self._np.nan
         es1_64.data[:-1, 1:-1, :3], es2_64.data[:-1, 1:-1, :3] = calc_unit_vector_south(
-            self._dgrid_xyz,
-            self._agrid_xyz,
+            self._dgrid_xyz_64,
+            self._agrid_xyz_64,
             self._grid_type,
             self._halo,
             self._tile_partitioner,
@@ -2094,7 +2117,7 @@ class MetricTerms:
             rsina_64.data[self._halo : -self._halo, self._halo : -self._halo],
             rsin2_64.data[:-1, :-1],
         ) = calculate_trig_uv(
-            self._dgrid_xyz,
+            self._dgrid_xyz_64,
             cos_sg,
             sin_sg,
             self._halo,
@@ -2193,11 +2216,14 @@ class MetricTerms:
         #  |       |
         #  6---2---7
 
+        if self._ec1_64 is None:
+            self._ec1, self._ec2 = self._calculate_center_vectors()
+
         cos_sg, sin_sg = calculate_supergrid_cos_sin(
-            self._dgrid_xyz,
-            self._agrid_xyz,
-            self.ec1.data[:-1, :-1],
-            self.ec2.data[:-1, :-1],
+            self._dgrid_xyz_64,
+            self._agrid_xyz_64,
+            self._ec1_64.data[:-1, :-1],
+            self._ec2_64.data[:-1, :-1],
             self._grid_type,
             self._halo,
             self._tile_partitioner,
@@ -2218,7 +2244,7 @@ class MetricTerms:
             rsina_64.data[self._halo : -self._halo, self._halo : -self._halo],
             rsin2_64.data[:-1, :-1],
         ) = calculate_trig_uv(
-            self._dgrid_xyz,
+            self._dgrid_xyz_64,
             cos_sg,
             sin_sg,
             self._halo,
@@ -2290,6 +2316,7 @@ class MetricTerms:
         self._sin_sg5 = quantity_cast_to_model_float(
             self.quantity_factory, supergrid_trig["sin_sg5"]
         )
+        self._sin_sg5_64 = supergrid_trig["sin_sg5"]
         self._sin_sg6 = quantity_cast_to_model_float(
             self.quantity_factory, supergrid_trig["sin_sg6"]
         )
@@ -2308,7 +2335,9 @@ class MetricTerms:
         self._cosa_v = quantity_cast_to_model_float(self.quantity_factory, cosa_v_64)
         self._cosa_s = quantity_cast_to_model_float(self.quantity_factory, cosa_s_64)
         self._sina_u = quantity_cast_to_model_float(self.quantity_factory, sina_u_64)
+        self._sina_u_64 = sina_u_64
         self._sina_v = quantity_cast_to_model_float(self.quantity_factory, sina_v_64)
+        self._sina_v_64 = sina_v_64
         self._rsin_u = quantity_cast_to_model_float(self.quantity_factory, rsin_u_64)
         self._rsin_v = quantity_cast_to_model_float(self.quantity_factory, rsin_v_64)
         self._rsina = quantity_cast_to_model_float(self.quantity_factory, rsina_64)
@@ -2428,7 +2457,7 @@ class MetricTerms:
             rsina_64.data[self._halo : -self._halo, self._halo : -self._halo],
             rsin2_64.data[:-1, :-1],
         ) = calculate_trig_uv(
-            self._dgrid_xyz,
+            self._dgrid_xyz_64,
             cos_sg,
             sin_sg,
             self._halo,
@@ -2491,7 +2520,7 @@ class MetricTerms:
             ee1_64.data[self._halo : -self._halo, self._halo : -self._halo, :],
             ee2_64.data[self._halo : -self._halo, self._halo : -self._halo, :],
         ) = calculate_xy_unit_vectors(
-            self._dgrid_xyz, self._halo, self._tile_partitioner, self._rank, self._np
+            self._dgrid_xyz_64, self._halo, self._tile_partitioner, self._rank, self._np
         )
 
         ee1 = quantity_cast_to_model_float(self.quantity_factory, ee1_64)
@@ -2532,6 +2561,12 @@ class MetricTerms:
             self.sin_sg5.data[:-1, :-1],
         ]
         sin_sg = self._np.array(sin_sg).transpose(1, 2, 0)
+        if self._sina_u_64 is None:
+            self._init_cell_trigonometry()
+        if self._dx_64 is None:
+            self._dx, self._dy = self._compute_dxdy()
+        if self._dxc_64 is None:
+            self._dx_center, self._dy_center = self._compute_dxdy_center()
         (
             divg_u_64.data[:-1, :],
             divg_v_64.data[:, :-1],
@@ -2539,16 +2574,17 @@ class MetricTerms:
             del6_v_64.data[:, :-1],
         ) = calculate_divg_del6(
             sin_sg,
-            self.sina_u.data[:, :-1],
-            self.sina_v.data[:-1, :],
-            self.dx.data[:-1, :],
-            self.dy.data[:, :-1],
-            self.dxc.data[:, :-1],
-            self.dyc.data[:-1, :],
+            self._sina_u_64.data[:, :-1],
+            self._sina_v_64.data[:-1, :],
+            self._dx_64.data[:-1, :],
+            self._dy_64.data[:, :-1],
+            self._dxc_64.data[:, :-1],
+            self._dyc_64.data[:-1, :],
             self._halo,
             self._tile_partitioner,
             self._rank,
         )
+
         if self._grid_type < 3:
             self._comm.vector_halo_update(divg_v_64, divg_u_64, n_points=self._halo)
             self._comm.vector_halo_update(del6_v_64, del6_u_64, n_points=self._halo)
@@ -2603,6 +2639,12 @@ class MetricTerms:
             self.sin_sg5.data[:-1, :-1],
         ]
         sin_sg = self._np.array(sin_sg).transpose(1, 2, 0)
+        if self._sina_u_64 is None:
+            self._init_cell_trigonometry()
+        if self._dx_64 is None:
+            self._dx, self._dy = self._compute_dxdy()
+        if self._dxc_64 is None:
+            self._dx_center, self._dy_center = self._compute_dxdy_center()
         (
             divg_u_64.data[:-1, :],
             divg_v_64.data[:, :-1],
@@ -2610,12 +2652,12 @@ class MetricTerms:
             del6_v_64.data[:, :-1],
         ) = calculate_divg_del6(
             sin_sg,
-            self.sina_u.data[:, :-1],
-            self.sina_v.data[:-1, :],
-            self.dx.data[:-1, :],
-            self.dy.data[:, :-1],
-            self.dxc.data[:, :-1],
-            self.dyc.data[:-1, :],
+            self._sina_u_64.data[:, :-1],
+            self._sina_v_64.data[:-1, :],
+            self._dx_64.data[:-1, :],
+            self._dy_64.data[:, :-1],
+            self._dxc_64.data[:, :-1],
+            self._dyc_64.data[:-1, :],
             self._halo,
             self._tile_partitioner,
             self._rank,
@@ -2644,7 +2686,9 @@ class MetricTerms:
         )
 
         vlon = quantity_cast_to_model_float(self.quantity_factory, vlon_64)
+        self._vlon_64 = vlon_64
         vlat = quantity_cast_to_model_float(self.quantity_factory, vlat_64)
+        self._vlat_64 = vlat_64
 
         return vlon, vlat
 
@@ -2673,23 +2717,33 @@ class MetricTerms:
             dtype=np.float64,
             allow_mismatch_float_precision=True,
         )
+
+        if self._ec1_64 is None:
+            self._ec1, self._ec2 = self._calculate_center_vectors()
+        if self._vlon_64 is None:
+            self._vlon, self._vlat = self._calculate_unit_vectors_lonlat()
+
         (
             z11_64.data[:-1, :-1],
             z12_64.data[:-1, :-1],
             z21_64.data[:-1, :-1],
             z22_64.data[:-1, :-1],
         ) = calculate_grid_z(
-            self.ec1.data[:-1, :-1],
-            self.ec2.data[:-1, :-1],
-            self.vlon.data[:-1, :-1],
-            self.vlat.data[:-1, :-1],
+            self._ec1_64.data[:-1, :-1],
+            self._ec2_64.data[:-1, :-1],
+            self._vlon_64.data[:-1, :-1],
+            self._vlat_64.data[:-1, :-1],
             self._np,
         )
 
         z11 = quantity_cast_to_model_float(self.quantity_factory, z11_64)
+        self._z11_64 = z11_64
         z12 = quantity_cast_to_model_float(self.quantity_factory, z12_64)
+        self._z12_64 = z12_64
         z21 = quantity_cast_to_model_float(self.quantity_factory, z21_64)
+        self._z21_64 = z21_64
         z22 = quantity_cast_to_model_float(self.quantity_factory, z22_64)
+        self._z22_64 = z22_64
 
         return z11, z12, z21, z22
 
@@ -2718,17 +2772,23 @@ class MetricTerms:
             dtype=np.float64,
             allow_mismatch_float_precision=True,
         )
+
+        if self._z11_64 is None:
+            self._z11, self._z12, self._z21, self._z22 = self._calculate_grid_z()
+        if self._sin_sg5_64 is None:
+            self._init_cell_trigonometry()
+
         (
             a11_64.data[:-1, :-1],
             a12_64.data[:-1, :-1],
             a21_64.data[:-1, :-1],
             a22_64.data[:-1, :-1],
         ) = calculate_grid_a(
-            self.z11.data[:-1, :-1],
-            self.z12.data[:-1, :-1],
-            self.z21.data[:-1, :-1],
-            self.z22.data[:-1, :-1],
-            self.sin_sg5.data[:-1, :-1],
+            self._z11_64.data[:-1, :-1],
+            self._z12_64.data[:-1, :-1],
+            self._z21_64.data[:-1, :-1],
+            self._z22_64.data[:-1, :-1],
+            self._sin_sg5_64.data[:-1, :-1],
         )
 
         a11 = quantity_cast_to_model_float(self.quantity_factory, a11_64)
@@ -2771,7 +2831,7 @@ class MetricTerms:
             edge_n_64.data[nhalo:-nhalo],
         ) = edge_factors(
             self.gridvar,
-            self.agrid.data[:-1, :-1],
+            self._agrid_64.data[:-1, :-1],
             self._grid_type,
             nhalo,
             self._tile_partitioner,
@@ -2819,7 +2879,7 @@ class MetricTerms:
             edge_vect_n_64.data[:-1],
         ) = efactor_a2c_v(
             self.gridvar,
-            self.agrid.data[:-1, :-1],
+            self._agrid_64.data[:-1, :-1],
             self._grid_type,
             self._halo,
             self._tile_partitioner,
