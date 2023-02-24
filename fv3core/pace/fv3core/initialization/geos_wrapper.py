@@ -1,3 +1,4 @@
+import enum
 import os
 from datetime import timedelta
 from typing import Dict
@@ -9,6 +10,17 @@ import pace.util
 from pace import fv3core
 from pace.driver.performance.collector import PerformanceCollector
 from pace.dsl.dace import DaceConfig, orchestrate
+from pace.dsl.gt4py_utils import is_gpu_backend
+
+
+@enum.unique
+class MemorySpace(enum.Enum):
+    HOST = 0
+    DEVICE = 1
+
+
+def assign_no_copy(A, B):
+    A = B
 
 
 class GeosDycoreWrapper:
@@ -23,6 +35,7 @@ class GeosDycoreWrapper:
         bdt: int,
         comm: pace.util.Comm,
         backend: str,
+        fortran_mem_space: MemorySpace = MemorySpace.HOST,
     ):
         # Look for an override to run on a single node
         gtfv3_single_rank_override = int(os.getenv("GTFV3_SINGLE_RANK_OVERRIDE", -1))
@@ -110,6 +123,11 @@ class GeosDycoreWrapper:
             timestep=timedelta(seconds=self.dycore_config.dt_atmos),
             phis=self.dycore_state.phis,
             state=self.dycore_state,
+        )
+
+        self._fortran_mem_space = fortran_mem_space
+        self._pace_mem_space = (
+            MemorySpace.DEVICE if is_gpu_backend(backend) else MemorySpace.HOST
         )
 
         self.output_dict: Dict[str, np.ndarray] = {}
@@ -300,162 +318,232 @@ class GeosDycoreWrapper:
         iec = self._grid_indexing.iec + 1
         jec = self._grid_indexing.jec + 1
 
-        pace.util.utils.safe_assign_array(
-            output_dict["u"], self.dycore_state.u.data[:-1, :, :-1]
-        )
-        pace.util.utils.safe_assign_array(
-            output_dict["v"], self.dycore_state.v.data[:, :-1, :-1]
-        )
-        pace.util.utils.safe_assign_array(
-            output_dict["w"], self.dycore_state.w.data[:-1, :-1, :-1]
-        )
-        pace.util.utils.safe_assign_array(
-            output_dict["ua"], self.dycore_state.ua.data[:-1, :-1, :-1]
-        )
-        pace.util.utils.safe_assign_array(
-            output_dict["va"], self.dycore_state.va.data[:-1, :-1, :-1]
-        )
-        pace.util.utils.safe_assign_array(
-            output_dict["uc"], self.dycore_state.uc.data[:, :-1, :-1]
-        )
-        pace.util.utils.safe_assign_array(
-            output_dict["vc"], self.dycore_state.vc.data[:-1, :, :-1]
-        )
+        if self._fortran_mem_space != self._pace_mem_space:
+            pace.util.utils.safe_assign_array(
+                output_dict["u"], self.dycore_state.u.data[:-1, :, :-1]
+            )
+            pace.util.utils.safe_assign_array(
+                output_dict["v"], self.dycore_state.v.data[:, :-1, :-1]
+            )
+            pace.util.utils.safe_assign_array(
+                output_dict["w"], self.dycore_state.w.data[:-1, :-1, :-1]
+            )
+            pace.util.utils.safe_assign_array(
+                output_dict["ua"], self.dycore_state.ua.data[:-1, :-1, :-1]
+            )
+            pace.util.utils.safe_assign_array(
+                output_dict["va"], self.dycore_state.va.data[:-1, :-1, :-1]
+            )
+            pace.util.utils.safe_assign_array(
+                output_dict["uc"], self.dycore_state.uc.data[:, :-1, :-1]
+            )
+            pace.util.utils.safe_assign_array(
+                output_dict["vc"], self.dycore_state.vc.data[:-1, :, :-1]
+            )
 
-        pace.util.utils.safe_assign_array(
-            output_dict["delz"], self.dycore_state.delz.data[:-1, :-1, :-1]
-        )
-        pace.util.utils.safe_assign_array(
-            output_dict["pt"], self.dycore_state.pt.data[:-1, :-1, :-1]
-        )
-        pace.util.utils.safe_assign_array(
-            output_dict["delp"], self.dycore_state.delp.data[:-1, :-1, :-1]
-        )
+            pace.util.utils.safe_assign_array(
+                output_dict["delz"], self.dycore_state.delz.data[:-1, :-1, :-1]
+            )
+            pace.util.utils.safe_assign_array(
+                output_dict["pt"], self.dycore_state.pt.data[:-1, :-1, :-1]
+            )
+            pace.util.utils.safe_assign_array(
+                output_dict["delp"], self.dycore_state.delp.data[:-1, :-1, :-1]
+            )
 
-        pace.util.utils.safe_assign_array(
-            output_dict["mfxd"],
-            self.dycore_state.mfxd.data[isc : iec + 1, jsc:jec, :-1],
-        )
-        pace.util.utils.safe_assign_array(
-            output_dict["mfyd"],
-            self.dycore_state.mfyd.data[isc:iec, jsc : jec + 1, :-1],
-        )
-        pace.util.utils.safe_assign_array(
-            output_dict["cxd"], self.dycore_state.cxd.data[isc : iec + 1, :-1, :-1]
-        )
-        pace.util.utils.safe_assign_array(
-            output_dict["cyd"], self.dycore_state.cyd.data[:-1, jsc : jec + 1, :-1]
-        )
+            pace.util.utils.safe_assign_array(
+                output_dict["mfxd"],
+                self.dycore_state.mfxd.data[isc : iec + 1, jsc:jec, :-1],
+            )
+            pace.util.utils.safe_assign_array(
+                output_dict["mfyd"],
+                self.dycore_state.mfyd.data[isc:iec, jsc : jec + 1, :-1],
+            )
+            pace.util.utils.safe_assign_array(
+                output_dict["cxd"], self.dycore_state.cxd.data[isc : iec + 1, :-1, :-1]
+            )
+            pace.util.utils.safe_assign_array(
+                output_dict["cyd"], self.dycore_state.cyd.data[:-1, jsc : jec + 1, :-1]
+            )
 
-        pace.util.utils.safe_assign_array(
-            output_dict["ps"], self.dycore_state.ps.data[:-1, :-1]
-        )
-        pace.util.utils.safe_assign_array(
-            output_dict["pe"],
-            self.dycore_state.pe.data[isc - 1 : iec + 1, jsc - 1 : jec + 1, :],
-        )
-        pace.util.utils.safe_assign_array(
-            output_dict["pk"], self.dycore_state.pk.data[isc:iec, jsc:jec, :]
-        )
-        pace.util.utils.safe_assign_array(
-            output_dict["peln"], self.dycore_state.peln.data[isc:iec, jsc:jec, :]
-        )
-        pace.util.utils.safe_assign_array(
-            output_dict["pkz"], self.dycore_state.pkz.data[isc:iec, jsc:jec, :-1]
-        )
-        pace.util.utils.safe_assign_array(
-            output_dict["phis"], self.dycore_state.phis.data[:-1, :-1]
-        )
-        pace.util.utils.safe_assign_array(
-            output_dict["q_con"], self.dycore_state.q_con.data[:-1, :-1, :-1]
-        )
-        pace.util.utils.safe_assign_array(
-            output_dict["omga"], self.dycore_state.omga.data[:-1, :-1, :-1]
-        )
-        pace.util.utils.safe_assign_array(
-            output_dict["diss_estd"], self.dycore_state.diss_estd.data[:-1, :-1, :-1]
-        )
+            pace.util.utils.safe_assign_array(
+                output_dict["ps"], self.dycore_state.ps.data[:-1, :-1]
+            )
+            pace.util.utils.safe_assign_array(
+                output_dict["pe"],
+                self.dycore_state.pe.data[isc - 1 : iec + 1, jsc - 1 : jec + 1, :],
+            )
+            pace.util.utils.safe_assign_array(
+                output_dict["pk"], self.dycore_state.pk.data[isc:iec, jsc:jec, :]
+            )
+            pace.util.utils.safe_assign_array(
+                output_dict["peln"], self.dycore_state.peln.data[isc:iec, jsc:jec, :]
+            )
+            pace.util.utils.safe_assign_array(
+                output_dict["pkz"], self.dycore_state.pkz.data[isc:iec, jsc:jec, :-1]
+            )
+            pace.util.utils.safe_assign_array(
+                output_dict["phis"], self.dycore_state.phis.data[:-1, :-1]
+            )
+            pace.util.utils.safe_assign_array(
+                output_dict["q_con"], self.dycore_state.q_con.data[:-1, :-1, :-1]
+            )
+            pace.util.utils.safe_assign_array(
+                output_dict["omga"], self.dycore_state.omga.data[:-1, :-1, :-1]
+            )
+            pace.util.utils.safe_assign_array(
+                output_dict["diss_estd"],
+                self.dycore_state.diss_estd.data[:-1, :-1, :-1],
+            )
 
-        pace.util.utils.safe_assign_array(
-            output_dict["qvapor"], self.dycore_state.qvapor.data[:-1, :-1, :-1]
-        )
-        pace.util.utils.safe_assign_array(
-            output_dict["qliquid"], self.dycore_state.qliquid.data[:-1, :-1, :-1]
-        )
-        pace.util.utils.safe_assign_array(
-            output_dict["qice"], self.dycore_state.qice.data[:-1, :-1, :-1]
-        )
-        pace.util.utils.safe_assign_array(
-            output_dict["qrain"], self.dycore_state.qrain.data[:-1, :-1, :-1]
-        )
-        pace.util.utils.safe_assign_array(
-            output_dict["qsnow"], self.dycore_state.qsnow.data[:-1, :-1, :-1]
-        )
-        pace.util.utils.safe_assign_array(
-            output_dict["qgraupel"], self.dycore_state.qgraupel.data[:-1, :-1, :-1]
-        )
-        pace.util.utils.safe_assign_array(
-            output_dict["qcld"], self.dycore_state.qcld.data[:-1, :-1, :-1]
-        )
+            pace.util.utils.safe_assign_array(
+                output_dict["qvapor"], self.dycore_state.qvapor.data[:-1, :-1, :-1]
+            )
+            pace.util.utils.safe_assign_array(
+                output_dict["qliquid"], self.dycore_state.qliquid.data[:-1, :-1, :-1]
+            )
+            pace.util.utils.safe_assign_array(
+                output_dict["qice"], self.dycore_state.qice.data[:-1, :-1, :-1]
+            )
+            pace.util.utils.safe_assign_array(
+                output_dict["qrain"], self.dycore_state.qrain.data[:-1, :-1, :-1]
+            )
+            pace.util.utils.safe_assign_array(
+                output_dict["qsnow"], self.dycore_state.qsnow.data[:-1, :-1, :-1]
+            )
+            pace.util.utils.safe_assign_array(
+                output_dict["qgraupel"], self.dycore_state.qgraupel.data[:-1, :-1, :-1]
+            )
+            pace.util.utils.safe_assign_array(
+                output_dict["qcld"], self.dycore_state.qcld.data[:-1, :-1, :-1]
+            )
+        else:
+            output_dict["u"] = self.dycore_state.u.data[:-1, :, :-1]
+            output_dict["v"] = self.dycore_state.v.data[:, :-1, :-1]
+            output_dict["w"] = self.dycore_state.w.data[:-1, :-1, :-1]
+            output_dict["ua"] = self.dycore_state.ua.data[:-1, :-1, :-1]
+            output_dict["va"] = self.dycore_state.va.data[:-1, :-1, :-1]
+            output_dict["uc"] = self.dycore_state.uc.data[:, :-1, :-1]
+            output_dict["vc"] = self.dycore_state.vc.data[:-1, :, :-1]
+            output_dict["delz"] = self.dycore_state.delz.data[:-1, :-1, :-1]
+            output_dict["pt"] = self.dycore_state.pt.data[:-1, :-1, :-1]
+            output_dict["delp"] = self.dycore_state.delp.data[:-1, :-1, :-1]
+            output_dict["mfxd"] = self.dycore_state.mfxd.data[
+                isc : iec + 1, jsc:jec, :-1
+            ]
+            output_dict["mfyd"] = self.dycore_state.mfyd.data[
+                isc:iec, jsc : jec + 1, :-1
+            ]
+            output_dict["cxd"] = self.dycore_state.cxd.data[isc : iec + 1, :-1, :-1]
+            output_dict["cyd"] = self.dycore_state.cyd.data[:-1, jsc : jec + 1, :-1]
+            output_dict["ps"] = self.dycore_state.ps.data[:-1, :-1]
+            output_dict["pe"] = self.dycore_state.pe.data[
+                isc - 1 : iec + 1, jsc - 1 : jec + 1, :
+            ]
+            output_dict["pk"] = self.dycore_state.pk.data[isc:iec, jsc:jec, :]
+            output_dict["peln"] = self.dycore_state.peln.data[isc:iec, jsc:jec, :]
+            output_dict["pkz"] = self.dycore_state.pkz.data[isc:iec, jsc:jec, :-1]
+            output_dict["phis"] = self.dycore_state.phis.data[:-1, :-1]
+            output_dict["q_con"] = self.dycore_state.q_con.data[:-1, :-1, :-1]
+            output_dict["omga"] = self.dycore_state.omga.data[:-1, :-1, :-1]
+            output_dict["diss_estd"] = self.dycore_state.diss_estd.data[:-1, :-1, :-1]
+            output_dict["qvapor"] = self.dycore_state.qvapor.data[:-1, :-1, :-1]
+            output_dict["qliquid"] = self.dycore_state.qliquid.data[:-1, :-1, :-1]
+            output_dict["qice"] = self.dycore_state.qice.data[:-1, :-1, :-1]
+            output_dict["qrain"] = self.dycore_state.qrain.data[:-1, :-1, :-1]
+            output_dict["qsnow"] = self.dycore_state.qsnow.data[:-1, :-1, :-1]
+            output_dict["qgraupel"] = self.dycore_state.qgraupel.data[:-1, :-1, :-1]
+            output_dict["qcld"] = self.dycore_state.qcld.data[:-1, :-1, :-1]
 
         return output_dict
 
     def _allocate_output_dir(self):
+        if self._fortran_mem_space != self._pace_mem_space:
+            nhalo = self._grid_indexing.n_halo
+            shape_centered = self._grid_indexing.domain_full(add=(0, 0, 0))
+            shape_x_interface = self._grid_indexing.domain_full(add=(1, 0, 0))
+            shape_y_interface = self._grid_indexing.domain_full(add=(0, 1, 0))
+            shape_z_interface = self._grid_indexing.domain_full(add=(0, 0, 1))
+            shape_2d = shape_centered[:-1]
 
-        nhalo = self._grid_indexing.n_halo
-        shape_centered = self._grid_indexing.domain_full(add=(0, 0, 0))
-        shape_x_interface = self._grid_indexing.domain_full(add=(1, 0, 0))
-        shape_y_interface = self._grid_indexing.domain_full(add=(0, 1, 0))
-        shape_z_interface = self._grid_indexing.domain_full(add=(0, 0, 1))
-        shape_2d = shape_centered[:-1]
+            self.output_dict["u"] = np.empty((shape_y_interface))
+            self.output_dict["v"] = np.empty((shape_x_interface))
+            self.output_dict["w"] = np.empty((shape_centered))
+            self.output_dict["ua"] = np.empty((shape_centered))
+            self.output_dict["va"] = np.empty((shape_centered))
+            self.output_dict["uc"] = np.empty((shape_x_interface))
+            self.output_dict["vc"] = np.empty((shape_y_interface))
 
-        self.output_dict["u"] = np.empty((shape_y_interface))
-        self.output_dict["v"] = np.empty((shape_x_interface))
-        self.output_dict["w"] = np.empty((shape_centered))
-        self.output_dict["ua"] = np.empty((shape_centered))
-        self.output_dict["va"] = np.empty((shape_centered))
-        self.output_dict["uc"] = np.empty((shape_x_interface))
-        self.output_dict["vc"] = np.empty((shape_y_interface))
+            self.output_dict["delz"] = np.empty((shape_centered))
+            self.output_dict["pt"] = np.empty((shape_centered))
+            self.output_dict["delp"] = np.empty((shape_centered))
 
-        self.output_dict["delz"] = np.empty((shape_centered))
-        self.output_dict["pt"] = np.empty((shape_centered))
-        self.output_dict["delp"] = np.empty((shape_centered))
+            self.output_dict["mfxd"] = np.empty(
+                (self._grid_indexing.domain_full(add=(1 - 2 * nhalo, -2 * nhalo, 0)))
+            )
+            self.output_dict["mfyd"] = np.empty(
+                (self._grid_indexing.domain_full(add=(-2 * nhalo, 1 - 2 * nhalo, 0)))
+            )
+            self.output_dict["cxd"] = np.empty(
+                (self._grid_indexing.domain_full(add=(1 - 2 * nhalo, 0, 0)))
+            )
+            self.output_dict["cyd"] = np.empty(
+                (self._grid_indexing.domain_full(add=(0, 1 - 2 * nhalo, 0)))
+            )
 
-        self.output_dict["mfxd"] = np.empty(
-            (self._grid_indexing.domain_full(add=(1 - 2 * nhalo, -2 * nhalo, 0)))
-        )
-        self.output_dict["mfyd"] = np.empty(
-            (self._grid_indexing.domain_full(add=(-2 * nhalo, 1 - 2 * nhalo, 0)))
-        )
-        self.output_dict["cxd"] = np.empty(
-            (self._grid_indexing.domain_full(add=(1 - 2 * nhalo, 0, 0)))
-        )
-        self.output_dict["cyd"] = np.empty(
-            (self._grid_indexing.domain_full(add=(0, 1 - 2 * nhalo, 0)))
-        )
+            self.output_dict["ps"] = np.empty((shape_2d))
+            self.output_dict["pe"] = np.empty(
+                (self._grid_indexing.domain_full(add=(2 - 2 * nhalo, 2 - 2 * nhalo, 1)))
+            )
+            self.output_dict["pk"] = np.empty(
+                (self._grid_indexing.domain_full(add=(-2 * nhalo, -2 * nhalo, 1)))
+            )
+            self.output_dict["peln"] = np.empty(
+                (self._grid_indexing.domain_full(add=(-2 * nhalo, -2 * nhalo, 1)))
+            )
+            self.output_dict["pkz"] = np.empty(
+                (self._grid_indexing.domain_full(add=(-2 * nhalo, -2 * nhalo, 0)))
+            )
+            self.output_dict["phis"] = np.empty((shape_2d))
+            self.output_dict["q_con"] = np.empty((shape_centered))
+            self.output_dict["omga"] = np.empty((shape_centered))
+            self.output_dict["diss_estd"] = np.empty((shape_centered))
 
-        self.output_dict["ps"] = np.empty((shape_2d))
-        self.output_dict["pe"] = np.empty(
-            (self._grid_indexing.domain_full(add=(2 - 2 * nhalo, 2 - 2 * nhalo, 1)))
-        )
-        self.output_dict["pk"] = np.empty(
-            (self._grid_indexing.domain_full(add=(-2 * nhalo, -2 * nhalo, 1)))
-        )
-        self.output_dict["peln"] = np.empty(
-            (self._grid_indexing.domain_full(add=(-2 * nhalo, -2 * nhalo, 1)))
-        )
-        self.output_dict["pkz"] = np.empty(
-            (self._grid_indexing.domain_full(add=(-2 * nhalo, -2 * nhalo, 0)))
-        )
-        self.output_dict["phis"] = np.empty((shape_2d))
-        self.output_dict["q_con"] = np.empty((shape_centered))
-        self.output_dict["omga"] = np.empty((shape_centered))
-        self.output_dict["diss_estd"] = np.empty((shape_centered))
-
-        self.output_dict["qvapor"] = np.empty((shape_centered))
-        self.output_dict["qliquid"] = np.empty((shape_centered))
-        self.output_dict["qice"] = np.empty((shape_centered))
-        self.output_dict["qrain"] = np.empty((shape_centered))
-        self.output_dict["qsnow"] = np.empty((shape_centered))
-        self.output_dict["qgraupel"] = np.empty((shape_centered))
-        self.output_dict["qcld"] = np.empty((shape_centered))
+            self.output_dict["qvapor"] = np.empty((shape_centered))
+            self.output_dict["qliquid"] = np.empty((shape_centered))
+            self.output_dict["qice"] = np.empty((shape_centered))
+            self.output_dict["qrain"] = np.empty((shape_centered))
+            self.output_dict["qsnow"] = np.empty((shape_centered))
+            self.output_dict["qgraupel"] = np.empty((shape_centered))
+            self.output_dict["qcld"] = np.empty((shape_centered))
+        else:
+            self.output_dict["u"] = None
+            self.output_dict["v"] = None
+            self.output_dict["w"] = None
+            self.output_dict["ua"] = None
+            self.output_dict["va"] = None
+            self.output_dict["uc"] = None
+            self.output_dict["vc"] = None
+            self.output_dict["delz"] = None
+            self.output_dict["pt"] = None
+            self.output_dict["delp"] = None
+            self.output_dict["mfxd"] = None
+            self.output_dict["mfyd"] = None
+            self.output_dict["cxd"] = None
+            self.output_dict["cyd"] = None
+            self.output_dict["ps"] = None
+            self.output_dict["pe"] = None
+            self.output_dict["pk"] = None
+            self.output_dict["peln"] = None
+            self.output_dict["pkz"] = None
+            self.output_dict["phis"] = None
+            self.output_dict["q_con"] = None
+            self.output_dict["omga"] = None
+            self.output_dict["diss_estd"] = None
+            self.output_dict["qvapor"] = None
+            self.output_dict["qliquid"] = None
+            self.output_dict["qice"] = None
+            self.output_dict["qrain"] = None
+            self.output_dict["qsnow"] = None
+            self.output_dict["qgraupel"] = None
+            self.output_dict["qcld"] = None
