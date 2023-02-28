@@ -1,7 +1,7 @@
 import enum
 import os
 from datetime import timedelta
-from typing import Dict
+from typing import Dict, List, Tuple
 
 import f90nml
 import numpy as np
@@ -135,7 +135,7 @@ class GeosDycoreWrapper:
 
     def _critical_path(self):
         """Top-level orchestration function"""
-        with self.perf_collector.timestep_timer.clock("dycore"):
+        with self.perf_collector.timestep_timer.clock("step_dynamics"):
             self.dynamical_core.step_dynamics(
                 state=self.dycore_state,
                 timer=self.perf_collector.timestep_timer,
@@ -143,6 +143,7 @@ class GeosDycoreWrapper:
 
     def __call__(
         self,
+        timings: Dict[str, List[float]],
         u: np.ndarray,
         v: np.ndarray,
         w: np.ndarray,
@@ -167,7 +168,7 @@ class GeosDycoreWrapper:
         cxd: np.ndarray,
         cyd: np.ndarray,
         diss_estd: np.ndarray,
-    ) -> Dict[str, np.ndarray]:
+    ) -> Tuple[Dict[str, np.ndarray], Dict[str, List[float]]]:
 
         with self.perf_collector.timestep_timer.clock("move_to_pace"):
             self.dycore_state = self._put_fortran_data_in_dycore(
@@ -206,14 +207,14 @@ class GeosDycoreWrapper:
         # Collect performance of the timestep and write
         # a json file for rank 0
         self.perf_collector.collect_performance()
-        self.perf_collector.write_out_rank_0(
-            backend=self.backend,
-            is_orchestrated=self._is_orchestrated,
-            dt_atmos=self.dycore_config.dt_atmos,
-            sim_status="Ongoing",
-        )
+        for k, v in self.perf_collector.times_per_step[0].items():
+            if k not in timings.keys():
+                timings[k] = [v]
+            else:
+                timings[k].append(v)
+        self.perf_collector.clear()
 
-        return self.output_dict
+        return self.output_dict, timings
 
     def _put_fortran_data_in_dycore(
         self,
