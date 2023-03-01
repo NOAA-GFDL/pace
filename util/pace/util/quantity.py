@@ -1,6 +1,6 @@
 import dataclasses
 import warnings
-from typing import Any, Dict, Iterable, Sequence, Tuple, Union, cast
+from typing import Any, Dict, Iterable, Optional, Sequence, Tuple, Union, cast
 
 import numpy as np
 
@@ -256,6 +256,16 @@ def _validate_quantity_property_lengths(shape, dims, origin, extent):
             )
 
 
+def _is_float(dtype):
+    """Expected floating point type for Pace"""
+    return (
+        dtype == float
+        or dtype == np.float32
+        or dtype == np.float64
+        or dtype == np.float16
+    )
+
+
 class Quantity:
     """
     Data container for physical quantities.
@@ -266,9 +276,10 @@ class Quantity:
         data,
         dims: Sequence[str],
         units: str,
-        origin: Sequence[int] = None,
-        extent: Sequence[int] = None,
+        origin: Optional[Sequence[int]] = None,
+        extent: Optional[Sequence[int]] = None,
         gt4py_backend: Union[str, None] = None,
+        allow_mismatch_float_precision: bool = False,
     ):
         """
         Initialize a Quantity.
@@ -284,6 +295,19 @@ class Quantity:
                 storage attribute is disabled and will raise an exception. Will raise
                 a TypeError if this is given with a gt4py storage type as data
         """
+        # ToDo: [Florian 01/23] Kill the abomination.
+        # See https://github.com/NOAA-GFDL/pace/issues/3
+        from pace.dsl.typing import Float
+
+        if (
+            not allow_mismatch_float_precision
+            and _is_float(data.dtype)
+            and data.dtype != Float
+        ):
+            raise ValueError(
+                f"Floating-point data type mismatch, asked for {data.dtype}, "
+                f"Pace configured for {Float}"
+            )
         if origin is None:
             origin = (0,) * len(dims)  # default origin at origin of array
         else:
@@ -511,7 +535,11 @@ class Quantity:
                 "DaCe module is not available."
             )
 
-    def transpose(self, target_dims: Sequence[Union[str, Iterable[str]]]) -> "Quantity":
+    def transpose(
+        self,
+        target_dims: Sequence[Union[str, Iterable[str]]],
+        allow_mismatch_float_precision: bool = False,
+    ) -> "Quantity":
         """Change the dimension order of this Quantity.
 
         Args:
@@ -560,6 +588,7 @@ class Quantity:
             origin=transpose_sequence(self.origin, transpose_order),
             extent=transpose_sequence(self.extent, transpose_order),
             gt4py_backend=self.gt4py_backend,
+            allow_mismatch_float_precision=allow_mismatch_float_precision,
         )
         transposed._attrs = self._attrs
         return transposed

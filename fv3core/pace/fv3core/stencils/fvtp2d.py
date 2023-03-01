@@ -7,7 +7,7 @@ import pace.stencils.corners as corners
 import pace.util
 from pace.dsl.dace.orchestration import orchestrate
 from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import FloatField, FloatFieldIJ
+from pace.dsl.typing import Float, FloatField, FloatFieldIJ
 from pace.fv3core.stencils.delnflux import DelnFlux
 from pace.fv3core.stencils.xppm import XPiecewiseParabolic
 from pace.fv3core.stencils.yppm import YPiecewiseParabolic
@@ -148,7 +148,11 @@ class FiniteVolumeTransport:
         origin = idx.origin_compute()
 
         def make_quantity():
-            return quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="unknown")
+            return quantity_factory.zeros(
+                [X_DIM, Y_DIM, Z_DIM],
+                units="unknown",
+                dtype=Float,
+            )
 
         self._q_advected_y = make_quantity()
         self._q_advected_x = make_quantity()

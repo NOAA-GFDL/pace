@@ -25,7 +25,7 @@ from gt4py.cartesian.gtc.passes.oir_pipeline import DefaultPipeline, OirPipeline
 import pace.util
 from pace.dsl.dace.orchestration import SDFGConvertible
 from pace.dsl.stencil_config import CompilationConfig, RunMode, StencilConfig
-from pace.dsl.typing import Index3D, cast_to_index3d
+from pace.dsl.typing import Float, Index3D, cast_to_index3d
 from pace.util import testing
 from pace.util.decomposition import block_waiting_for_compilation, unblock_waiting_tiles
 from pace.util.mpi import MPI
@@ -342,6 +342,7 @@ class FrozenStencil(SDFGConvertible):
             self.stencil_object = gtscript.lazy_stencil(
                 definition=func,
                 externals=externals,
+                dtypes={float: Float},
                 **stencil_kwargs,
                 build_info=(build_info := {}),  # type: ignore
             )
@@ -357,6 +358,7 @@ class FrozenStencil(SDFGConvertible):
             self.stencil_object = gtscript.stencil(
                 definition=func,
                 externals=externals,
+                dtypes={float: Float},
                 **stencil_kwargs,
                 build_info=(build_info := {}),
             )

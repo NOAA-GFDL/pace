@@ -12,7 +12,7 @@ from gt4py.cartesian.gtscript import (
 import pace.util
 import pace.util.constants as constants
 from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import FloatField, FloatFieldIJ
+from pace.dsl.typing import Float, FloatField, FloatFieldIJ
 from pace.fv3core.stencils.sim1_solver import Sim1Solver
 from pace.util import X_DIM, Y_DIM, Z_DIM, Z_INTERFACE_DIM
 
@@ -30,7 +30,7 @@ def precompute(
     dz: FloatField,  # is actually delta of gz
     gm: FloatField,
     pm: FloatField,
-    ptop: float,
+    ptop: Float,
 ):
     """
     Args:
@@ -95,7 +95,7 @@ def finalize(
     dz: FloatField,
     pef: FloatField,
     gz: FloatField,
-    ptop: float,
+    ptop: Float,
 ):
     """
     Enforce vertical boundary conditions.
@@ -139,19 +139,47 @@ class NonhydrostaticVerticalSolverCGrid:
         self,
         stencil_factory: StencilFactory,
         quantity_factory: pace.util.QuantityFactory,
-        p_fac: float,
+        p_fac: Float,
     ):
         grid_indexing = stencil_factory.grid_indexing
         origin = grid_indexing.origin_compute(add=(-1, -1, 0))
         domain = grid_indexing.domain_compute(add=(2, 2, 1))
 
-        self._dm = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="kg")
-        self._w = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="m/s")
-        self._pem = quantity_factory.zeros([X_DIM, Y_DIM, Z_INTERFACE_DIM], units="Pa")
-        self._pe = quantity_factory.zeros([X_DIM, Y_DIM, Z_INTERFACE_DIM], units="Pa")
-        self._gm = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="")
-        self._dz = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="m")
-        self._pm = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="Pa")
+        self._dm = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_DIM],
+            units="kg",
+            dtype=Float,
+        )
+        self._w = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_DIM],
+            units="m/s",
+            dtype=Float,
+        )
+        self._pem = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_INTERFACE_DIM],
+            units="Pa",
+            dtype=Float,
+        )
+        self._pe = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_INTERFACE_DIM],
+            units="Pa",
+            dtype=Float,
+        )
+        self._gm = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_DIM],
+            units="",
+            dtype=Float,
+        )
+        self._dz = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_DIM],
+            units="m",
+            dtype=Float,
+        )
+        self._pm = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_DIM],
+            units="Pa",
+            dtype=Float,
+        )
 
         self._precompute_stencil = stencil_factory.from_origin_domain(
             precompute,
@@ -171,9 +199,9 @@ class NonhydrostaticVerticalSolverCGrid:
 
     def __call__(
         self,
-        dt2: float,
+        dt2: Float,
         cappa: FloatField,
-        ptop: float,
+        ptop: Float,
         hs: FloatFieldIJ,
         ws: FloatFieldIJ,
         ptc: FloatField,

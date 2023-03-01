@@ -13,7 +13,7 @@ from gt4py.cartesian.gtscript import (
 import pace.util
 from pace.dsl.dace.orchestration import orchestrate
 from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import BoolField, FloatField, FloatFieldIJ
+from pace.dsl.typing import BoolField, Float, FloatField, FloatFieldIJ
 from pace.util import X_DIM, Y_DIM, Z_DIM, Z_INTERFACE_DIM
 
 
@@ -346,7 +346,7 @@ def set_interpolation_coefficients(
     ext5: BoolField,
     ext6: BoolField,
     extm: BoolField,
-    qmin: float,
+    qmin: Float,
 ):
     """
     Args:
@@ -594,9 +594,21 @@ class RemapProfile:
         assert kord <= 10, f"kord {kord} not implemented."
         self._kord = kord
 
-        self._gam = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="unknown")
-        self._q = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="unknown")
-        self._q_bot = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="unknown")
+        self._gam = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_DIM],
+            units="unknown",
+            dtype=Float,
+        )
+        self._q = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_DIM],
+            units="unknown",
+            dtype=Float,
+        )
+        self._q_bot = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_DIM],
+            units="unknown",
+            dtype=Float,
+        )
         self._extm = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="", dtype=bool)
         self._ext5 = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="", dtype=bool)
         self._ext6 = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="", dtype=bool)
@@ -627,7 +639,7 @@ class RemapProfile:
         a4_3: FloatField,
         a4_4: FloatField,
         delp: FloatField,
-        qmin: float = 0.0,
+        qmin: Float = 0.0,
     ):
         """
         Calculates the interpolation coefficients for a cubic-spline which models the

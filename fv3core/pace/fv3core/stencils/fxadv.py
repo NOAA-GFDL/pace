@@ -2,7 +2,7 @@ from gt4py.cartesian.gtscript import PARALLEL, computation, horizontal, interval
 
 from pace.dsl.dace import orchestrate
 from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import FloatField, FloatFieldIJ
+from pace.dsl.typing import Float, FloatField, FloatFieldIJ
 from pace.fv3core.stencils.d2a2c_vect import contravariant
 from pace.util.grid import GridData
 
@@ -419,7 +419,7 @@ def fxadv_stencil(
     vc: FloatField,
     ut: FloatField,
     vt: FloatField,
-    dt: float,
+    dt: Float,
 ):
     with computation(PARALLEL), interval(...):
         ut = main_ut(uc, vc, cosa_u, rsin_u, ut)
@@ -448,7 +448,7 @@ def fxadv_fluxes_stencil(
     y_area_flux: FloatField,
     uc_contra: FloatField,
     vc_contra: FloatField,
-    dt: float,
+    dt: Float,
 ):
     """
     Args:

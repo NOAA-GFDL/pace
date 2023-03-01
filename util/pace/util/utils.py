@@ -18,7 +18,6 @@ if cp is not None:
 else:
     GPU_AVAILABLE = False
 
-
 T = TypeVar("T")
 
 

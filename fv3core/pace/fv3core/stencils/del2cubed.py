@@ -4,7 +4,7 @@ import pace.stencils.corners as corners
 import pace.util
 from pace.dsl.dace.orchestration import orchestrate
 from pace.dsl.stencil import StencilFactory, get_stencils_with_varied_bounds
-from pace.dsl.typing import FloatField, FloatFieldIJ, cast_to_index3d
+from pace.dsl.typing import Float, FloatField, FloatFieldIJ, cast_to_index3d
 from pace.fv3core.stencils.basic_operations import copy_defn
 from pace.util import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_DIM
 from pace.util.grid import DampingCoefficients
@@ -69,7 +69,7 @@ def corner_fill(q_in: FloatField, q_out: FloatField):
 # Q update stencil
 # ------------------
 def update_q(
-    q: FloatField, rarea: FloatFieldIJ, fx: FloatField, fy: FloatField, cd: float
+    q: FloatField, rarea: FloatFieldIJ, fx: FloatField, fy: FloatField, cd: Float
 ):
     with computation(PARALLEL), interval(...):
         q += cd * rarea * (fx - fx[1, 0, 0] + fy - fy[0, 1, 0])
@@ -101,12 +101,20 @@ class HyperdiffusionDamping:
         # the units of these temporaries are relative to the input units,
         # so they are undefined
         self._fx = quantity_factory.zeros(
-            dims=[X_INTERFACE_DIM, Y_DIM, Z_DIM], units="undefined"
+            dims=[X_INTERFACE_DIM, Y_DIM, Z_DIM],
+            units="undefined",
+            dtype=Float,
         )
         self._fy = quantity_factory.zeros(
-            dims=[X_DIM, Y_INTERFACE_DIM, Z_DIM], units="undefined"
+            dims=[X_DIM, Y_INTERFACE_DIM, Z_DIM],
+            units="undefined",
+            dtype=Float,
         )
-        self._q = quantity_factory.zeros(dims=[X_DIM, Y_DIM, Z_DIM], units="undefined")
+        self._q = quantity_factory.zeros(
+            dims=[X_DIM, Y_DIM, Z_DIM],
+            units="undefined",
+            dtype=Float,
+        )
 
         self._corner_fill = stencil_factory.from_dims_halo(
             func=corner_fill,
@@ -162,7 +170,7 @@ class HyperdiffusionDamping:
             update_q, origins, domains, stencil_factory=stencil_factory
         )
 
-    def __call__(self, qdel: FloatField, cd: float):
+    def __call__(self, qdel: FloatField, cd: Float):
         """
         Perform hyperdiffusion damping/filtering.
 

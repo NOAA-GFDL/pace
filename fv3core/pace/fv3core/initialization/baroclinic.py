@@ -8,6 +8,7 @@ import pace.dsl.gt4py_utils as utils
 import pace.fv3core.initialization.baroclinic_jablonowski_williamson as jablo_init
 import pace.util as fv3util
 import pace.util.constants as constants
+from pace.dsl.typing import Float
 from pace.fv3core.initialization.dycore_state import DycoreState
 from pace.util.grid import GridData, lon_lat_midpoint
 
@@ -428,7 +429,10 @@ def empty_numpy_dycore_state(shape):
     numpy_dict = {}
     for _field in fields(DycoreState):
         if "dims" in _field.metadata.keys():
-            numpy_dict[_field.name] = np.zeros(shape[: len(_field.metadata["dims"])])
+            numpy_dict[_field.name] = np.zeros(
+                shape[: len(_field.metadata["dims"])],
+                dtype=Float,
+            )
     numpy_state = SimpleNamespace(**numpy_dict)
     return numpy_state
 

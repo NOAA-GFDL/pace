@@ -2,14 +2,14 @@ from gt4py.cartesian.gtscript import PARALLEL, computation, interval
 
 import pace.util
 from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import FloatField, FloatFieldIJ
+from pace.dsl.typing import Float, FloatField, FloatFieldIJ
 from pace.fv3core.stencils.a2b_ord4 import AGrid2BGridFourthOrder
 from pace.util import X_DIM, Y_DIM, Z_INTERFACE_DIM
 from pace.util.grid import GridData
 
 
 def set_k0_and_calc_wk(
-    pp: FloatField, pk3: FloatField, wk: FloatField, top_value: float
+    pp: FloatField, pk3: FloatField, wk: FloatField, top_value: Float
 ):
     """
     Args:
@@ -34,7 +34,7 @@ def calc_u(
     pk3: FloatField,
     pp: FloatField,
     rdx: FloatFieldIJ,
-    dt: float,
+    dt: Float,
 ):
     """
     Args:
@@ -77,7 +77,7 @@ def calc_v(
     pk3: FloatField,
     pp: FloatField,
     rdy: FloatFieldIJ,
-    dt: float,
+    dt: Float,
 ):
     """
     Args:
@@ -140,10 +140,14 @@ class NonHydrostaticPressureGradient:
         self._rdy = grid_data.rdy
 
         self._tmp_wk = quantity_factory.zeros(
-            [X_DIM, Y_DIM, Z_INTERFACE_DIM], units="unknown"
+            [X_DIM, Y_DIM, Z_INTERFACE_DIM],
+            units="unknown",
+            dtype=Float,
         )
         self._tmp_wk1 = quantity_factory.zeros(
-            [X_DIM, Y_DIM, Z_INTERFACE_DIM], units="unknown"
+            [X_DIM, Y_DIM, Z_INTERFACE_DIM],
+            units="unknown",
+            dtype=Float,
         )
 
         self.a2b_k1 = AGrid2BGridFourthOrder(
@@ -195,9 +199,9 @@ class NonHydrostaticPressureGradient:
         gz: FloatField,
         pk3: FloatField,
         delp: FloatField,
-        dt: float,
-        ptop: float,
-        akap: float,
+        dt: Float,
+        ptop: Float,
+        akap: Float,
     ):
         """
         Updates the U and V winds due to pressure gradients,

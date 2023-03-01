@@ -7,7 +7,7 @@ import pace.util
 import pace.util.constants as constants
 from pace.dsl.dace.orchestration import orchestrate
 from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import FloatField, FloatFieldIJ, FloatFieldK
+from pace.dsl.typing import Float, FloatField, FloatFieldIJ, FloatFieldK
 from pace.fv3core.stencils.delnflux import DelnFluxNoSG
 from pace.fv3core.stencils.fvtp2d import FiniteVolumeTransport
 from pace.util import (
@@ -78,7 +78,7 @@ def apply_height_fluxes(
     gz_y_diffusive_flux: FloatField,
     surface_height: FloatFieldIJ,
     ws: FloatFieldIJ,
-    dt: float,
+    dt: Float,
 ):
     """
     Apply all computed fluxes to height profile.
@@ -141,9 +141,21 @@ def cubic_spline_interpolation_constants(
         beta: interpolation constant on mid levels
         gamma: interpolation constant on mid levels
     """
-    gk = quantity_factory.zeros([Z_DIM], units="")
-    beta = quantity_factory.zeros([Z_DIM], units="")
-    gamma = quantity_factory.zeros([Z_DIM], units="")
+    gk = quantity_factory.zeros(
+        [Z_DIM],
+        units="",
+        dtype=Float,
+    )
+    beta = quantity_factory.zeros(
+        [Z_DIM],
+        units="",
+        dtype=Float,
+    )
+    gamma = quantity_factory.zeros(
+        [Z_DIM],
+        units="",
+        dtype=Float,
+    )
     gk.view[0] = dp0.view[1] / dp0.view[0]
     beta.view[0] = gk.view[0] * (gk.view[0] + 0.5)
     gamma.view[0] = (1.0 + gk.view[0] * (gk.view[0] + 1.5)) / beta.view[0]
@@ -255,29 +267,49 @@ class UpdateHeightOnDGrid:
 
     def _allocate_temporary_storages(self, quantity_factory: pace.util.QuantityFactory):
         self._crx_interface = quantity_factory.zeros(
-            [X_INTERFACE_DIM, Y_DIM, Z_INTERFACE_DIM], ""
+            [X_INTERFACE_DIM, Y_DIM, Z_INTERFACE_DIM],
+            "",
+            dtype=Float,
         )
         self._cry_interface = quantity_factory.zeros(
-            [X_DIM, Y_INTERFACE_DIM, Z_INTERFACE_DIM], ""
+            [X_DIM, Y_INTERFACE_DIM, Z_INTERFACE_DIM],
+            "",
+            dtype=Float,
         )
         self._x_area_flux_interface = quantity_factory.zeros(
-            [X_INTERFACE_DIM, Y_DIM, Z_INTERFACE_DIM], "m^2"
+            [X_INTERFACE_DIM, Y_DIM, Z_INTERFACE_DIM],
+            "m^2",
+            dtype=Float,
         )
         self._y_area_flux_interface = quantity_factory.zeros(
-            [X_DIM, Y_INTERFACE_DIM, Z_INTERFACE_DIM], "m^2"
+            [X_DIM, Y_INTERFACE_DIM, Z_INTERFACE_DIM],
+            "m^2",
+            dtype=Float,
         )
-        self._wk = quantity_factory.zeros([X_DIM, Y_DIM, Z_INTERFACE_DIM], "unknown")
+        self._wk = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_INTERFACE_DIM],
+            "unknown",
+            dtype=Float,
+        )
         self._height_x_diffusive_flux = quantity_factory.zeros(
-            [X_DIM, Y_DIM, Z_INTERFACE_DIM], "unknown"
+            [X_DIM, Y_DIM, Z_INTERFACE_DIM],
+            "unknown",
+            dtype=Float,
         )
         self._height_y_diffusive_flux = quantity_factory.zeros(
-            [X_DIM, Y_DIM, Z_INTERFACE_DIM], "unknown"
+            [X_DIM, Y_DIM, Z_INTERFACE_DIM],
+            "unknown",
+            dtype=Float,
         )
         self._fx = quantity_factory.zeros(
-            [X_INTERFACE_DIM, Y_DIM, Z_INTERFACE_DIM], "unknown"
+            [X_INTERFACE_DIM, Y_DIM, Z_INTERFACE_DIM],
+            "unknown",
+            dtype=Float,
         )
         self._fy = quantity_factory.zeros(
-            [X_DIM, Y_INTERFACE_DIM, Z_INTERFACE_DIM], "unknown"
+            [X_DIM, Y_INTERFACE_DIM, Z_INTERFACE_DIM],
+            "unknown",
+            dtype=Float,
         )
 
     def __call__(
@@ -289,7 +321,7 @@ class UpdateHeightOnDGrid:
         x_area_flux: FloatField,
         y_area_flux: FloatField,
         ws: FloatFieldIJ,
-        dt: float,
+        dt: Float,
     ):
         """
         Advect height on D-grid.

@@ -1,6 +1,5 @@
 import abc
 import dataclasses
-import logging
 from typing import ClassVar, Optional, Tuple
 
 import f90nml
@@ -25,12 +24,10 @@ from pace.util.grid.helper import (
     HorizontalGridData,
     VerticalGridData,
 )
+from pace.util.logging import pace_log
 from pace.util.namelist import Namelist
 
 from .registry import Registry
-
-
-logger = logging.getLogger(__name__)
 
 
 class GridInitializer(abc.ABC):
@@ -179,7 +176,7 @@ class SerialboxGridConfig(GridInitializer):
             dims=[pace.util.X_DIM, pace.util.Y_DIM], units="unknown"
         ).gt4py_backend
 
-        logger.info("Using serialized grid data")
+        pace_log.info("Using serialized grid data")
         grid = self._get_serialized_grid(communicator, backend)
         grid_data = grid.grid_data
         driver_grid_data = grid.driver_grid_data

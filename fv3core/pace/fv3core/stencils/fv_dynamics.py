@@ -1,4 +1,3 @@
-import logging
 from datetime import timedelta
 from typing import Mapping, Optional
 
@@ -12,7 +11,7 @@ import pace.util.constants as constants
 from pace.dsl.dace.orchestration import dace_inhibitor, orchestrate
 from pace.dsl.dace.wrapped_halo_exchange import WrappedHaloUpdater
 from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import FloatField
+from pace.dsl.typing import Float, FloatField
 from pace.fv3core._config import DynamicalCoreConfig
 from pace.fv3core.initialization.dycore_state import DycoreState
 from pace.fv3core.stencils import fvtp2d, tracer_2d_1l
@@ -24,10 +23,9 @@ from pace.fv3core.stencils.remapping import LagrangianToEulerian
 from pace.stencils.c2l_ord import CubedToLatLon
 from pace.util import X_DIM, Y_DIM, Z_INTERFACE_DIM, Timer
 from pace.util.grid import DampingCoefficients, GridData
+from pace.util.logging import pace_log
 from pace.util.mpi import MPI
 
-
-logger = logging.getLogger(__name__)
 
 # nq is actually given by ncnst - pnats, where those are given in atmosphere.F90 by:
 # ncnst = Atm(mytile)%ncnst
@@ -70,13 +68,16 @@ def fvdyn_temporaries(
     tmps = {}
     for name in ["te_2d", "te0_2d", "wsd"]:
         quantity = quantity_factory.zeros(
-            dims=[pace.util.X_DIM, pace.util.Y_DIM], units="unknown"
+            dims=[pace.util.X_DIM, pace.util.Y_DIM],
+            units="unknown",
+            dtype=Float,
         )
         tmps[name] = quantity
     for name in ["dp1", "cvm"]:
         quantity = quantity_factory.zeros(
             dims=[pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM],
             units="unknown",
+            dtype=Float,
         )
         tmps[name] = quantity
     return tmps
@@ -86,7 +87,7 @@ def fvdyn_temporaries(
 def log_on_rank_0(msg: str):
     """Print when rank is 0 - outside of DaCe critical path"""
     if not MPI or MPI.COMM_WORLD.Get_rank() == 0:
-        logger.info(msg)
+        pace_log.info(msg)
 
 
 class DynamicalCore:
@@ -304,6 +305,7 @@ class DynamicalCore:
         full_xyz_spec = quantity_factory.get_quantity_halo_spec(
             dims=[pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM],
             n_halo=grid_indexing.n_halo,
+            dtype=Float,
         )
         self._omega_halo_updater = WrappedHaloUpdater(
             comm.get_scalar_halo_updater([full_xyz_spec]), state, ["omga"], comm=comm
@@ -576,7 +578,7 @@ class DynamicalCore:
                 # TODO: can we pull this block out of the loop intead of
                 # using an if-statement?
                 if last_step:
-                    da_min: float = self._get_da_min()
+                    da_min: Float = self._get_da_min()
                     if not self.config.hydrostatic:
                         if __debug__:
                             log_on_rank_0("Omega")

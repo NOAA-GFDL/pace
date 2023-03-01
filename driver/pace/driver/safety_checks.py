@@ -1,13 +1,9 @@
-import logging
 from typing import ClassVar, Dict, Optional
 
 import numpy as np
 
 from pace.fv3core.initialization.dycore_state import DycoreState
 from pace.util.quantity import Quantity
-
-
-logger = logging.getLogger(__name__)
 
 
 class VariableBounds:

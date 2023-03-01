@@ -9,9 +9,13 @@ import numpy as np
 from ._optional_imports import cupy as cp
 from .buffer import Buffer
 from .cuda_kernels import (
+    pack_scalar_f32_kernel,
     pack_scalar_f64_kernel,
+    pack_vector_f32_kernel,
     pack_vector_f64_kernel,
+    unpack_scalar_f32_kernel,
     unpack_scalar_f64_kernel,
+    unpack_vector_f32_kernel,
     unpack_vector_f64_kernel,
 )
 from .quantity import Quantity, QuantityHaloSpec
@@ -245,6 +249,18 @@ class HaloDataTransformer(abc.ABC):
         Returns:
             an initialized packed buffer.
         """
+        if len(exchange_descriptors_x) == 0:
+            raise RuntimeError("Attempting to init an empty halo exchange")
+
+        dtype = exchange_descriptors_x[0].specification.dtype
+        for desc in exchange_descriptors_x:
+            if dtype != desc.specification.dtype:
+                raise NotImplementedError("Halo exchange process mixed precision")
+        if exchange_descriptors_y:
+            for desc in exchange_descriptors_y:
+                if dtype != desc.specification.dtype:
+                    raise NotImplementedError("Halo exchange process mixed precision")
+
         if np_module is np:
             return HaloDataTransformerCPU(
                 np,
@@ -708,16 +724,30 @@ class HaloDataTransformerGPU(HaloDataTransformer):
 
             # Use private stream
             with self._get_stream(cu_kernel_args.stream):
-                if quantity.metadata.dtype != np.float64:
-                    raise RuntimeError(f"Kernel requires f64 given {np.float64}")
-
                 # Launch kernel
                 blocks = 128
                 grid_x = (info_x.pack_buffer_size // blocks) + 1
-                if pack_scalar_f64_kernel is None:
+                # Pick a kernel looking at the precision set
+                pack_kernel = None
+                if info_x.specification.dtype == np.float32:
+                    pack_kernel = pack_scalar_f32_kernel
+                elif (
+                    info_x.specification.dtype == np.float64
+                    or info_x.specification.dtype == float
+                ):
+                    pack_kernel = pack_scalar_f64_kernel
+                else:
+                    RuntimeError(
+                        "Halo exchange pack kernel for precision "
+                        f" {info_x.specification.dtype} isn't implemented."
+                    )
+
+                # Check compile hasn't failed silently if this is the first
+                # call to the kernel
+                if pack_kernel is None:
                     RuntimeError("CUDA nvrtc failed")
                 else:
-                    pack_scalar_f64_kernel(
+                    pack_kernel(
                         (grid_x,),
                         (blocks,),
                         (
@@ -760,20 +790,33 @@ class HaloDataTransformerGPU(HaloDataTransformer):
 
             # Use private stream
             with self._get_stream(cu_kernel_args.stream):
-
                 # Buffer sizes
                 transformer_size = info_x.pack_buffer_size + info_y.pack_buffer_size
-
-                if quantity_x.metadata.dtype != np.float64:
-                    raise RuntimeError(f"Kernel requires f64 given {np.float64}")
 
                 # Launch kernel
                 blocks = 128
                 grid_x = (transformer_size // blocks) + 1
-                if pack_vector_f64_kernel is None:
+                # Pick a kernel looking at the precision set
+                pack_kernel = None
+                if info_x.specification.dtype == np.float32:
+                    pack_kernel = pack_vector_f32_kernel
+                elif (
+                    info_x.specification.dtype == np.float64
+                    or info_x.specification.dtype == float
+                ):
+                    pack_kernel = pack_vector_f64_kernel
+                else:
+                    RuntimeError(
+                        "Halo exchange pack kernel for precision "
+                        f"{info_x.specification.dtype} isn't implemented."
+                    )
+
+                # Check compile hasn't failed silently if this is the first
+                # call to the kernel
+                if pack_kernel is None:
                     RuntimeError("CUDA nvrtc failed")
                 else:
-                    pack_vector_f64_kernel(
+                    pack_kernel(
                         (grid_x,),
                         (blocks,),
                         (
@@ -836,10 +879,27 @@ class HaloDataTransformerGPU(HaloDataTransformer):
                 # Launch kernel
                 blocks = 128
                 grid_x = (info_x._unpack_buffer_size // blocks) + 1
-                if unpack_scalar_f64_kernel is None:
+                # Pick a kernel looking at the precision set
+                unpack_kernel = None
+                if info_x.specification.dtype == np.float32:
+                    unpack_kernel = unpack_scalar_f32_kernel
+                elif (
+                    info_x.specification.dtype == np.float64
+                    or info_x.specification.dtype == float
+                ):
+                    unpack_kernel = unpack_scalar_f64_kernel
+                else:
+                    RuntimeError(
+                        "Halo exchange pack kernel for precision "
+                        f"{info_x.specification.dtype} isn't implemented."
+                    )
+
+                # Check compile hasn't failed silently if this is the first
+                # call to the kernel
+                if unpack_kernel is None:
                     RuntimeError("CUDA nvrtc failed")
                 else:
-                    unpack_scalar_f64_kernel(
+                    unpack_kernel(
                         (grid_x,),
                         (blocks,),
                         (
@@ -878,10 +938,6 @@ class HaloDataTransformerGPU(HaloDataTransformer):
             info_x,
             info_y,
         ) in zip(quantities_x, quantities_y, self._infos_x, self._infos_y):
-            # We only have writte a f64 kernel
-            if quantity_x.metadata.dtype != np.float64:
-                raise RuntimeError(f"Kernel requires f64 given {np.float64}")
-
             cu_kernel_args = self._cu_kernel_args[info_x._id]
 
             # Use private stream
@@ -893,10 +949,27 @@ class HaloDataTransformerGPU(HaloDataTransformer):
                 # Launch kernel
                 blocks = 128
                 grid_x = (edge_size // blocks) + 1
-                if unpack_vector_f64_kernel is None:
+                # Pick a kernel looking at the precision set
+                unpack_kernel = None
+                if info_x.specification.dtype == np.float32:
+                    unpack_kernel = unpack_vector_f32_kernel
+                elif (
+                    info_x.specification.dtype == np.float64
+                    or info_x.specification.dtype == float
+                ):
+                    unpack_kernel = unpack_vector_f64_kernel
+                else:
+                    RuntimeError(
+                        "Halo exchange pack kernel for precision "
+                        f"{info_x.specification.dtype} isn't implemented."
+                    )
+
+                # Check compile hasn't failed silently if this is the first
+                # call to the kernel
+                if unpack_kernel is None:
                     RuntimeError("CUDA nvrtc failed")
                 else:
-                    unpack_vector_f64_kernel(
+                    unpack_kernel(
                         (grid_x,),
                         (blocks,),
                         (

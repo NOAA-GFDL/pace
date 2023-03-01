@@ -4,7 +4,7 @@ from gt4py.cartesian.gtscript import PARALLEL, computation, horizontal, interval
 import pace.util
 from pace.dsl.dace.orchestration import orchestrate
 from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import FloatField, FloatFieldIJ
+from pace.dsl.typing import Float, FloatField, FloatFieldIJ
 from pace.fv3core.stencils.a2b_ord4 import a1, a2, lagrange_x_func, lagrange_y_func
 from pace.stencils import corners
 from pace.util import X_DIM, Y_DIM, Z_DIM
@@ -17,7 +17,7 @@ c3 = 5.0 / 14.0
 OFFSET = 2
 
 
-def set_tmps(utmp: FloatField, vtmp: FloatField, big_number: float):
+def set_tmps(utmp: FloatField, vtmp: FloatField, big_number: Float):
     with computation(PARALLEL), interval(...):
         utmp = big_number
         vtmp = big_number
@@ -419,8 +419,16 @@ class DGrid2AGrid2CGridVectors:
         npt = 4 if not nested else 0
         if npt > grid_indexing.domain[0] - 1 or npt > grid_indexing.domain[1] - 1:
             npt = 0
-        self._utmp = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="m/s")
-        self._vtmp = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="m/s")
+        self._utmp = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_DIM],
+            units="m/s",
+            dtype=Float,
+        )
+        self._vtmp = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_DIM],
+            units="m/s",
+            dtype=Float,
+        )
 
         js1 = npt + OFFSET if grid_indexing.south_edge else grid_indexing.jsc - 1
         je1 = ny - npt if grid_indexing.north_edge else grid_indexing.jec + 1

@@ -9,7 +9,7 @@ import pace.util
 from pace.dsl.dace.orchestration import orchestrate
 from pace.dsl.dace.wrapped_halo_exchange import WrappedHaloUpdater
 from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import FloatField, FloatFieldIJ
+from pace.dsl.typing import Float, FloatField, FloatFieldIJ
 from pace.fv3core.stencils.fvtp2d import FiniteVolumeTransport
 from pace.util import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_DIM
 
@@ -195,19 +195,35 @@ class TracerAdvection:
         self.grid_data = grid_data
 
         self._x_area_flux = quantity_factory.zeros(
-            [X_INTERFACE_DIM, Y_DIM, Z_DIM], units="unknown"
+            [X_INTERFACE_DIM, Y_DIM, Z_DIM],
+            units="unknown",
+            dtype=Float,
         )
         self._y_area_flux = quantity_factory.zeros(
-            [X_DIM, Y_INTERFACE_DIM, Z_DIM], units="unknown"
+            [X_DIM, Y_INTERFACE_DIM, Z_DIM],
+            units="unknown",
+            dtype=Float,
         )
         self._x_flux = quantity_factory.zeros(
-            [X_INTERFACE_DIM, Y_INTERFACE_DIM, Z_DIM], units="unknown"
+            [X_INTERFACE_DIM, Y_INTERFACE_DIM, Z_DIM],
+            units="unknown",
+            dtype=Float,
         )
         self._y_flux = quantity_factory.zeros(
-            [X_INTERFACE_DIM, Y_INTERFACE_DIM, Z_DIM], units="unknown"
+            [X_INTERFACE_DIM, Y_INTERFACE_DIM, Z_DIM],
+            units="unknown",
+            dtype=Float,
         )
-        self._tmp_dp = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="Pa")
-        self._tmp_dp2 = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="Pa")
+        self._tmp_dp = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_DIM],
+            units="Pa",
+            dtype=Float,
+        )
+        self._tmp_dp2 = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_DIM],
+            units="Pa",
+            dtype=Float,
+        )
 
         ax_offsets = grid_indexing.axis_offsets(
             grid_indexing.origin_full(), grid_indexing.domain_full()
@@ -254,6 +270,7 @@ class TracerAdvection:
         tracer_halo_spec = quantity_factory.get_quantity_halo_spec(
             dims=[pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM],
             n_halo=utils.halo,
+            dtype=Float,
         )
         self._tracers_halo_updater = WrappedHaloUpdater(
             comm.get_scalar_halo_updater([tracer_halo_spec] * self._tracer_count),
