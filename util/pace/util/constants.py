@@ -1,3 +1,32 @@
+import os
+from enum import Enum, EnumMeta
+
+
+CONST_VERSION = os.environ.get("PACE_CONSTANTS", "GFS")
+
+
+class MetaEnum(EnumMeta):
+    def __contains__(cls, item):
+        try:
+            cls(item)
+        except ValueError:
+            return False
+        return True
+
+
+class BaseEnum(Enum, metaclass=MetaEnum):
+    pass
+
+
+class ConstantVersions(BaseEnum):
+    DEFAULT = ""
+    GEOS = "GEOS"
+    GFS = "GFS"
+
+
+if CONST_VERSION not in ConstantVersions:
+    raise NotImplementedError(f"Constant {CONST_VERSION} not implemented")
+
 ROOT_RANK = 0
 X_DIM = "x"
 X_INTERFACE_DIM = "x_interface"
@@ -35,21 +64,21 @@ N_HALO_DEFAULT = 3
 # The FV3GFS model ships with two sets of constants, one used in the GFS physics
 # package and the other used for the Dycore. Their difference are small but significant
 # Our Fortran executable on GCE has GFS_PHYS=True
-CONST_VERSION = 'GEOS'
-if CONST_VERSION == 'GEOS':
+if CONST_VERSION == ConstantVersions.GEOS:
     RADIUS = 6.371e6
     PI = 3.14159265358979323846
-    OMEGA = 2.0*PI/86164.0
+    OMEGA = 2.0 * PI / 86164.0
     GRAV = 9.80665
     RGRAV = 1.0 / GRAV
-    RDGAS = 8314.47/28.965
-    RVGAS = 8314.47/18.015
-    HLV = 2.4665E6
-    HLF = 3.3370E5
-    KAPPA = RDGAS/(3.5*RDGAS)
-    CP_AIR = RDGAS/KAPPA
+    RDGAS = 8314.47 / 28.965
+    RVGAS = 8314.47 / 18.015
+    HLV = 2.4665e6
+    HLF = 3.3370e5
+    KAPPA = RDGAS / (3.5 * RDGAS)
+    CP_AIR = RDGAS / KAPPA
     TFREEZE = 273.15
-elif CONST_VERSION == 'GFS':
+    SAT_ADJUST_THRESHOLD = 1.0e-6
+elif CONST_VERSION == ConstantVersions.GFS:
     RADIUS = 6.3712e6  # Radius of the Earth [m]
     PI = 3.1415926535897931
     OMEGA = 7.2921e-5  # Rotation of the earth
@@ -62,6 +91,7 @@ elif CONST_VERSION == 'GFS':
     CP_AIR = 1004.6
     KAPPA = RDGAS / CP_AIR  # Specific heat capacity of dry air at
     TFREEZE = 273.15
+    SAT_ADJUST_THRESHOLD = 1.0e-8
 else:
     RADIUS = 6371.0e3  # Radius of the Earth [m] #6371.0e3
     PI = 3.14159265358979323846  # 3.14159265358979323846
@@ -75,6 +105,7 @@ else:
     KAPPA = 2.0 / 7.0
     CP_AIR = RDGAS / KAPPA  # Specific heat capacity of dry air at
     TFREEZE = 273.16  # Freezing temperature of fresh water [K]
+    SAT_ADJUST_THRESHOLD = 1.0e-8
 
 DZ_MIN = 2.0
 CV_AIR = CP_AIR - RDGAS  # Heat capacity of dry air at constant volume
