@@ -215,5 +215,5 @@ def _transform_horizontal_grid(
     grid.data[:, :, 0] = lon_transform[:]
     grid.data[:, :, 1] = lat_transform[:]
 
-    metric_terms._grid.data[:] = grid.data[:]
+    metric_terms._grid.data[:] = grid.data[:]  # type: ignore[attr-defined]
     metric_terms._init_agrid()

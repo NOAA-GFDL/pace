@@ -20,7 +20,7 @@ class GeosDycoreWrapper:
     def __init__(
         self,
         namelist: f90nml.Namelist,
-        bdt: float,
+        bdt: int,
         comm: pace.util.Comm,
         backend: str,
     ):
