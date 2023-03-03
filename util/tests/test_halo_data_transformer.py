@@ -427,7 +427,9 @@ def test_data_transformer_vector_pack_unpack(quantity, rotation, n_halos):
     ]
 
     data_transformer = HaloDataTransformer.get(
-        x_quantity.np, exchange_descriptors_x, exchange_descriptors_y
+        x_quantity.np,
+        exchange_descriptors_x,
+        exchange_descriptors_y,
     )
 
     data_transformer.async_pack([x_quantity, x_quantity], [y_quantity, y_quantity])

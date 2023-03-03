@@ -1,12 +1,11 @@
-import logging
 from functools import wraps
-from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union
 
-import gt4py.backend
-import gt4py.storage as gt_storage
+import gt4py
 import numpy as np
 
-from pace.dsl.typing import DTypes, Field, Float, FloatField
+from pace.dsl.typing import DTypes, Field, Float
+from pace.util.logging import pace_log
 
 
 try:
@@ -34,9 +33,6 @@ tracer_variables = [
     "qcld",
 ]
 
-# Logger instance
-logger = logging.getLogger("fv3core")
-
 
 def mark_untested(msg="This is not tested"):
     def inner(func) -> Callable[..., Any]:
@@ -50,13 +46,41 @@ def mark_untested(msg="This is not tested"):
     return inner
 
 
+def _mask_to_dimensions(
+    mask: Tuple[bool, ...], shape: Sequence[int]
+) -> List[Union[str, int]]:
+    assert len(mask) == 3
+    dimensions: List[Union[str, int]] = []
+    for i, axis in enumerate(("I", "J", "K")):
+        if mask[i]:
+            dimensions.append(axis)
+    offset = int(sum(mask))
+    dimensions.extend(shape[offset:])
+    return dimensions
+
+
+def _translate_origin(origin: Sequence[int], mask: Tuple[bool, ...]) -> Sequence[int]:
+    if len(origin) == int(sum(mask)):
+        # Correct length. Assumedd to be correctly specified.
+        return origin
+
+    assert len(mask) == 3
+    final_origin: List[int] = []
+    for i, has_axis in enumerate(mask):
+        if has_axis:
+            final_origin.append(origin[i])
+
+    final_origin.extend(origin[len(mask) :])
+    return final_origin
+
+
 def make_storage_data(
     data: Field,
     shape: Optional[Tuple[int, ...]] = None,
     origin: Tuple[int, ...] = origin,
     *,
     backend: str,
-    dtype: DTypes = np.float64,
+    dtype: DTypes = Float,
     mask: Optional[Tuple[bool, ...]] = None,
     start: Tuple[int, ...] = (0, 0, 0),
     dummy: Optional[Tuple[int, ...]] = None,
@@ -129,14 +153,12 @@ def make_storage_data(
     else:
         data = _make_storage_data_3d(data, shape, start, backend=backend)
 
-    storage = gt_storage.from_array(
-        data=data,
+    storage = gt4py.storage.from_array(
+        data,
+        dtype,
         backend=backend,
-        default_origin=origin,
-        shape=shape,
-        dtype=dtype,
-        mask=mask,
-        managed_memory=managed_memory,
+        aligned_index=_translate_origin(origin, mask),
+        dimensions=_mask_to_dimensions(mask, data.shape),
     )
     return storage
 
@@ -236,7 +258,7 @@ def make_storage_from_shape(
     origin: Tuple[int, ...] = origin,
     *,
     backend: str,
-    dtype: DTypes = np.float64,
+    dtype: DTypes = Float,
     mask: Optional[Tuple[bool, ...]] = None,
 ) -> Field:
     """Create a new gt4py storage of a given shape filled with zeros.
@@ -264,13 +286,12 @@ def make_storage_from_shape(
             mask = (False, False, True)  # Assume 1D is a k-field
         else:
             mask = (n_dims * (True,)) + ((3 - n_dims) * (False,))
-    storage = gt_storage.zeros(
+    storage = gt4py.storage.zeros(
+        shape,
+        dtype,
         backend=backend,
-        default_origin=origin,
-        shape=shape,
-        dtype=dtype,
-        mask=mask,
-        managed_memory=managed_memory,
+        aligned_index=_translate_origin(origin, mask),
+        dimensions=_mask_to_dimensions(mask, shape),
     )
     return storage
 
@@ -333,15 +354,13 @@ def k_split_run(func, data, k_indices, splitvars_values):
         data.update(splitvars)
         data["kstart"] = ki
         data["nk"] = nk
-        logger.debug(
+        pace_log.debug(
             "Running kstart: {}, num k:{}, variables:{}".format(ki, nk, splitvars)
         )
         func(**data)
 
 
 def asarray(array, to_type=np.ndarray, dtype=None, order=None):
-    if isinstance(array, gt_storage.storage.Storage):
-        array = array.data
     if cp and (isinstance(array, list)):
         if to_type is np.ndarray:
             order = "F" if order is None else order
@@ -373,25 +392,21 @@ def asarray(array, to_type=np.ndarray, dtype=None, order=None):
 
 
 def is_gpu_backend(backend: str) -> bool:
-    return gt4py.backend.from_name(backend).storage_info["device"] == "gpu"
+    return gt4py.cartesian.backend.from_name(backend).storage_info["device"] == "gpu"
 
 
 def zeros(shape, dtype=Float, *, backend: str):
     storage_type = cp.ndarray if is_gpu_backend(backend) else np.ndarray
     xp = cp if cp and storage_type is cp.ndarray else np
-    return xp.zeros(shape)
+    return xp.zeros(shape, dtype=dtype)
 
 
 def sum(array, axis=None, dtype=Float, out=None, keepdims=False):
-    if isinstance(array, gt_storage.storage.Storage):
-        array = array.data
     xp = cp if cp and type(array) is cp.ndarray else np
     return xp.sum(array, axis, dtype, out, keepdims)
 
 
 def repeat(array, repeats, axis=None):
-    if isinstance(array, gt_storage.storage.Storage):
-        array = array.data
     xp = cp if cp and type(array) is cp.ndarray else np
     return xp.repeat(array, repeats, axis)
 
@@ -401,22 +416,16 @@ def index(array, key):
 
 
 def moveaxis(array, source: int, destination: int):
-    if isinstance(array, gt_storage.storage.Storage):
-        array = array.data
     xp = cp if cp and type(array) is cp.ndarray else np
     return xp.moveaxis(array, source, destination)
 
 
 def tile(array, reps: Union[int, Tuple[int, ...]]):
-    if isinstance(array, gt_storage.storage.Storage):
-        array = array.data
     xp = cp if cp and type(array) is cp.ndarray else np
     return xp.tile(array, reps)
 
 
 def squeeze(array, axis: Union[int, Tuple[int]] = None):
-    if isinstance(array, gt_storage.storage.Storage):
-        array = array.data
     xp = cp if cp and type(array) is cp.ndarray else np
     return xp.squeeze(array, axis)
 
@@ -444,8 +453,6 @@ def unique(
     return_counts: bool = False,
     axis: Union[int, Tuple[int]] = None,
 ):
-    if isinstance(array, gt_storage.storage.Storage):
-        array = array.data
     xp = cp if cp and type(array) is cp.ndarray else np
     return xp.unique(array, return_index, return_inverse, return_counts, axis)
 
@@ -453,8 +460,6 @@ def unique(
 def stack(tup, axis: int = 0, out=None):
     array_tup = []
     for array in tup:
-        if isinstance(array, gt_storage.storage.Storage):
-            array = array.data
         array_tup.append(array)
     xp = cp if cp and type(array_tup[0]) is cp.ndarray else np
     return xp.stack(array_tup, axis, out)
@@ -465,7 +470,7 @@ def device_sync(backend: str) -> None:
         cp.cuda.Device(0).synchronize()
 
 
-def split_cartesian_into_storages(var: FloatField):
+def split_cartesian_into_storages(var: np.ndarray) -> Sequence[np.ndarray]:
     """
     Provided a storage of dims [X_DIM, Y_DIM, CARTESIAN_DIM]
          or [X_INTERFACE_DIM, Y_INTERFACE_DIM, CARTESIAN_DIM]
@@ -475,10 +480,6 @@ def split_cartesian_into_storages(var: FloatField):
     var_data = []
     for cart in range(3):
         var_data.append(
-            make_storage_data(
-                asarray(var.data, type(var.data))[:, :, cart],
-                var.data.shape[0:2],
-                backend=var.backend,
-            )
+            asarray(var, type(var))[:, :, cart],
         )
     return var_data

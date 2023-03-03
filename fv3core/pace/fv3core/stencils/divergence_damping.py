@@ -1,5 +1,5 @@
-import gt4py.gtscript as gtscript
-from gt4py.gtscript import (
+import gt4py.cartesian.gtscript as gtscript
+from gt4py.cartesian.gtscript import (
     __INLINED,
     PARALLEL,
     computation,
@@ -13,7 +13,7 @@ import pace.stencils.corners as corners
 import pace.util
 from pace.dsl.dace.orchestration import dace_inhibitor, orchestrate
 from pace.dsl.stencil import StencilFactory, get_stencils_with_varied_bounds
-from pace.dsl.typing import FloatField, FloatFieldIJ, FloatFieldK
+from pace.dsl.typing import Float, FloatField, FloatFieldIJ, FloatFieldK
 from pace.fv3core.stencils.a2b_ord4 import AGrid2BGridFourthOrder
 from pace.fv3core.stencils.d2a2c_vect import contravariant
 from pace.util import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_DIM
@@ -140,9 +140,9 @@ def damping(
     vort: FloatField,
     ke: FloatField,
     d2_bg: FloatFieldK,
-    da_min_c: float,
-    dddmp: float,
-    dt: float,
+    da_min_c: Float,
+    dddmp: Float,
+    dt: Float,
 ):
     """
     Args:
@@ -164,9 +164,9 @@ def damping_nord_highorder_stencil(
     delpc: FloatField,
     divg_d: FloatField,
     d2_bg: FloatFieldK,
-    da_min_c: float,
-    dddmp: float,
-    dd8: float,
+    da_min_c: Float,
+    dddmp: Float,
+    dd8: Float,
 ):
     """
     Args:
@@ -236,15 +236,11 @@ def redo_divg_d(
             divg_d = divg_d + uc
 
     with computation(PARALLEL), interval(...):
-        # TODO: this does the wrong thing when stretched_grid is True,
-        # i.e. when do_adjustment = not stretched_grid is False
-        # compare to the Fortran and fix
         if __INLINED(do_adjustment):
-            # reference https://github.com/NOAA-GFDL/GFDL_atmos_cubed_sphere/blob/main/model/sw_core.F90#L1422  # noqa: E501
             divg_d = divg_d * adjustment_factor
 
 
-def smagorinsky_diffusion_approx(delpc: FloatField, vort: FloatField, absdt: float):
+def smagorinsky_diffusion_approx(delpc: FloatField, vort: FloatField, absdt: Float):
     """
     Args:
         delpc (in): divergence on cell corners
@@ -352,8 +348,16 @@ class DivergenceDamping:
             compute_halos=(0, 0),
         )
 
-        self.u_contra_dyc = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="m^2/s")
-        self.v_contra_dxc = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="m^2/s")
+        self.u_contra_dyc = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_DIM],
+            units="m^2/s",
+            dtype=Float,
+        )
+        self.v_contra_dxc = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_DIM],
+            units="m^2/s",
+            dtype=Float,
+        )
 
         self._damping = low_k_stencil_factory.from_dims_halo(
             damping,
@@ -496,7 +500,7 @@ class DivergenceDamping:
         delpc: FloatField,
         ke: FloatField,
         rel_vort_agrid: FloatField,
-        dt: float,
+        dt: Float,
     ):
         """
         Adds another form of diffusive flux that acts on the divergence field.
@@ -569,7 +573,7 @@ class DivergenceDamping:
                 self.v_contra_dxc,
             )
 
-            da_min_c: float = self._get_da_min_c()
+            da_min_c: Float = self._get_da_min_c()
             self._damping(
                 delpc,
                 damped_rel_vort_bgrid,
@@ -617,8 +621,9 @@ class DivergenceDamping:
                 abs(dt),
             )
 
-        da_min: float = self._get_da_min()
+        da_min: Float = self._get_da_min()
         if self._stretched_grid:
+            # reference https://github.com/NOAA-GFDL/GFDL_atmos_cubed_sphere/blob/main/model/sw_core.F90#L1422 # noqa: E501
             dd8 = da_min * self._d4_bg ** (self._nonzero_nord + 1)
         else:
             dd8 = (da_min_c * self._d4_bg) ** (self._nonzero_nord + 1)

@@ -1,3 +1,4 @@
+import os
 from datetime import timedelta
 from typing import Dict
 
@@ -7,7 +8,7 @@ import numpy as np
 import pace.util
 from pace import fv3core
 from pace.driver.performance.collector import PerformanceCollector
-from pace.dsl.dace.dace_config import DaceConfig
+from pace.dsl.dace import DaceConfig, orchestrate
 
 
 class GeosDycoreWrapper:
@@ -17,21 +18,34 @@ class GeosDycoreWrapper:
     """
 
     def __init__(
-        self, namelist: f90nml.Namelist, bdt: float, comm: pace.util.Comm, backend: str
+        self,
+        namelist: f90nml.Namelist,
+        bdt: float,
+        comm: pace.util.Comm,
+        backend: str,
     ):
+        # Look for an override to run on a single node
+        gtfv3_single_rank_override = int(os.getenv("GTFV3_SINGLE_RANK_OVERRIDE", -1))
+        if gtfv3_single_rank_override >= 0:
+            comm = pace.util.NullComm(gtfv3_single_rank_override, 6, 42)
+
         # Make a custom performance collector for the GEOS wrapper
         self.perf_collector = PerformanceCollector("GEOS wrapper", comm)
 
         self.backend = backend
         self.namelist = namelist
         self.dycore_config = fv3core.DynamicalCoreConfig.from_f90nml(self.namelist)
+        self.dycore_config.dt_atmos = bdt
+        assert self.dycore_config.dt_atmos != 0
 
         self.layout = self.dycore_config.layout
         partitioner = pace.util.CubedSpherePartitioner(
             pace.util.TilePartitioner(self.layout)
         )
         self.communicator = pace.util.CubedSphereCommunicator(
-            comm, partitioner, timer=self.perf_collector.timestep_timer
+            comm,
+            partitioner,
+            timer=self.perf_collector.timestep_timer,
         )
 
         sizer = pace.util.SubtileGridSizer.from_namelist(
@@ -53,11 +67,22 @@ class GeosDycoreWrapper:
             ),
         )
 
+        # Build a DaCeConfig for orchestration.
+        # This and all orchestration code are transparent when outside
+        # configuration deactivate orchestration
         stencil_config.dace_config = DaceConfig(
             communicator=self.communicator,
             backend=stencil_config.backend,
             tile_nx=self.dycore_config.npx,
             tile_nz=self.dycore_config.npz,
+        )
+        self._is_orchestrated = stencil_config.dace_config.is_dace_orchestrated()
+
+        # Orchestrate all code called from this function
+        orchestrate(
+            obj=self,
+            config=stencil_config.dace_config,
+            method_to_orchestrate="_critical_path",
         )
 
         self._grid_indexing = pace.dsl.stencil.GridIndexing.from_sizer_and_communicator(
@@ -70,19 +95,6 @@ class GeosDycoreWrapper:
         self.dycore_state = fv3core.DycoreState.init_zeros(
             quantity_factory=quantity_factory
         )
-
-        # self.dycore_state.bdt = float(namelist["dt_atmos"])
-        # if "fv_core_nml" in namelist.keys():
-        #     self.dycore_state.bdt = (
-        #         float(namelist["dt_atmos"]) / namelist["fv_core_nml"]["k_split"]
-        #     )
-        # elif "dycore_config" in namelist.keys():
-        #     self.dycore_state.bdt = (
-        #         float(namelist["dt_atmos"]) / namelist["dycore_config"]["k_split"]
-        #     )
-        # else:
-        #     raise KeyError("Cannot find k_split in namelist")
-        self.dycore_state.bdt = bdt
 
         damping_coefficients = pace.util.grid.DampingCoefficients.new_from_metric_terms(
             metric_terms
@@ -102,6 +114,14 @@ class GeosDycoreWrapper:
 
         self.output_dict: Dict[str, np.ndarray] = {}
         self._allocate_output_dir()
+
+    def _critical_path(self):
+        """Top-level orchestration function"""
+        with self.perf_collector.timestep_timer.clock("dycore"):
+            self.dynamical_core.step_dynamics(
+                state=self.dycore_state,
+                timer=self.perf_collector.timestep_timer,
+            )
 
     def __call__(
         self,
@@ -159,10 +179,8 @@ class GeosDycoreWrapper:
                 diss_estd,
             )
 
-        with self.perf_collector.timestep_timer.clock("DynamicalCore"):
-            self.dynamical_core.step_dynamics(
-                state=self.dycore_state, timer=self.perf_collector.timestep_timer
-            )
+        # Enter orchestrated code - if applicable
+        self._critical_path()
 
         with self.perf_collector.timestep_timer.clock("dycore-to-numpy"):
             self.output_dict = self._prep_outputs_for_geos()
@@ -171,8 +189,8 @@ class GeosDycoreWrapper:
         self.perf_collector.collect_performance()
         self.perf_collector.write_out_rank_0(
             backend=self.backend,
-            is_orchestrated=False,  # could be inferred from config
-            dt_atmos=self.dycore_state.bdt,
+            is_orchestrated=self._is_orchestrated,
+            dt_atmos=self.dycore_config.dt_atmos,
             sim_status="Ongoing",
         )
 

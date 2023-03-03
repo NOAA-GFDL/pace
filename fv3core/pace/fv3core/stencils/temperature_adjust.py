@@ -1,7 +1,7 @@
-from gt4py.gtscript import PARALLEL, computation, exp, interval, log
+from gt4py.cartesian.gtscript import PARALLEL, computation, exp, interval, log
 
 import pace.util.constants as constants
-from pace.dsl.typing import FloatField
+from pace.dsl.typing import Float, FloatField
 from pace.fv3core.stencils.basic_operations import sign
 
 
@@ -11,7 +11,7 @@ def apply_diffusive_heating(
     cappa: FloatField,
     heat_source: FloatField,
     pt: FloatField,
-    delt_time_factor: float,
+    delt_time_factor: Float,
 ):
     """
     Adjust air temperature from heating due to vorticity damping.

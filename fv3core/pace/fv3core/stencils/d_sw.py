@@ -1,7 +1,7 @@
 from typing import Dict, Mapping
 
-import gt4py.gtscript as gtscript
-from gt4py.gtscript import (
+import gt4py.cartesian.gtscript as gtscript
+from gt4py.cartesian.gtscript import (
     __INLINED,
     PARALLEL,
     computation,
@@ -14,7 +14,7 @@ import pace.fv3core.stencils.delnflux as delnflux
 import pace.util
 from pace.dsl.dace.orchestration import orchestrate
 from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import FloatField, FloatFieldIJ, FloatFieldK
+from pace.dsl.typing import Float, FloatField, FloatFieldIJ, FloatFieldK
 from pace.fv3core._config import DGridShallowWaterLagrangianDynamicsConfig
 from pace.fv3core.stencils.d2a2c_vect import contravariant
 from pace.fv3core.stencils.delnflux import DelnFluxNoSG
@@ -70,7 +70,7 @@ def heat_diss(
     dw: FloatField,
     damp_w: FloatFieldK,
     ke_bg: FloatFieldK,
-    dt: float,
+    dt: Float,
 ):
     """
     Calculate heat generation due to loss of kinetic energy
@@ -215,7 +215,7 @@ def compute_kinetic_energy(
     dya: FloatFieldIJ,
     rdy: FloatFieldIJ,
     dt_kinetic_energy_on_cell_corners: FloatField,
-    dt: float,
+    dt: Float,
 ):
     """
     Args:
@@ -658,7 +658,11 @@ def get_column_namelist(
     col: Dict[str, pace.util.Quantity] = {}
     for name in all_names:
         # TODO: fill units information
-        col[name] = quantity_factory.zeros(dims=[Z_DIM], units="unknown")
+        col[name] = quantity_factory.zeros(
+            dims=[Z_DIM],
+            units="unknown",
+            dtype=Float,
+        )
     for name in direct_namelist:
         col[name].view[:] = getattr(config, name)
 
@@ -766,7 +770,11 @@ class DGridShallowWaterLagrangianDynamics:
         self.hydrostatic = config.hydrostatic
 
         def make_quantity():
-            return quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="unknown")
+            return quantity_factory.zeros(
+                [X_DIM, Y_DIM, Z_DIM],
+                units="unknown",
+                dtype=Float,
+            )
 
         self._tmp_heat_s = make_quantity()
         self._tmp_diss_e = make_quantity()
@@ -774,6 +782,7 @@ class DGridShallowWaterLagrangianDynamics:
         self._vort_y_delta = make_quantity()
         self._dt_kinetic_energy_on_cell_corners = make_quantity()
         self._abs_vorticity_agrid = make_quantity()
+        self._damped_rel_vorticity_agrid = make_quantity()
         self._uc_contra = make_quantity()
         self._vc_contra = make_quantity()
         self._tmp_ut = make_quantity()
@@ -1207,15 +1216,12 @@ class DGridShallowWaterLagrangianDynamics:
             self.grid_data.dy,
         )
 
-        # TODO: use a separate temporary/storage for this variable name
-        damped_rel_vorticity_agrid = self._abs_vorticity_agrid
-
         self.delnflux_nosg_v(
             self._vorticity_agrid,
             self._tmp_ut,
             self._tmp_vt,
             self._delnflux_damp_vt,
-            damped_rel_vorticity_agrid,
+            self._damped_rel_vorticity_agrid,
         )
         # TODO(eddied): These stencils were split to ensure GTC verification,
         # merge them if you can

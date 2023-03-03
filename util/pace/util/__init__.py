@@ -54,6 +54,7 @@ from .halo_updater import HaloUpdater, HaloUpdateRequest
 from .initialization import GridSizer, QuantityFactory, SubtileGridSizer
 from .io import read_state, write_state
 from .local_comm import LocalComm
+from .logging import pace_log
 from .monitor import Monitor, NetCDFMonitor, ZarrMonitor
 from .mpi import MPIComm
 from .namelist import Namelist, NamelistDefaults
@@ -70,5 +71,5 @@ from .time import FMS_TO_CFTIME_TYPE, datetime64_to_datetime
 from .units import UnitsError, ensure_equal_units, units_are_equal
 
 
-__version__ = "0.9.0"
+__version__ = "0.10.0"
 __all__ = list(key for key in locals().keys() if not key.startswith("_"))

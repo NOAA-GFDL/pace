@@ -21,6 +21,7 @@ from pace.dsl.dace.dace_config import (
     DEACTIVATE_DISTRIBUTED_DACE_COMPILE,
     DaceConfig,
     DaCeOrchestration,
+    FrozenCompiledSDFG,
 )
 from pace.dsl.dace.sdfg_debug_passes import (
     negative_delp_checker,
@@ -36,16 +37,26 @@ from pace.dsl.dace.utils import (
 from pace.util.mpi import MPI
 
 
+try:
+    import cupy as cp
+except ImportError:
+    cp = None
+
+
 def dace_inhibitor(func: Callable):
     """Triggers callback generation wrapping `func` while doing DaCe parsing."""
     return func
 
 
 def _upload_to_device(host_data: List[Any]):
-    """Make sure any data that are still a gt4py.storage gets uploaded to device"""
-    for data in host_data:
-        if isinstance(data, gt4py.storage.Storage):
-            data.host_to_device()
+    """Make sure any ndarrays gets uploaded to the device
+
+    This will raise an assertion if cupy is not installed.
+    """
+    assert cp is not None
+    for i, data in enumerate(host_data):
+        if isinstance(data, cp.ndarray):
+            host_data[i] = cp.asarray(data)
 
 
 def _download_results_from_dace(
@@ -54,11 +65,6 @@ def _download_results_from_dace(
     """Move all data from DaCe memory space to GT4Py"""
     gt4py_results = None
     if dace_result is not None:
-        for arg in args:
-            if isinstance(arg, gt4py.storage.Storage) and hasattr(
-                arg, "_set_device_modified"
-            ):
-                arg._set_device_modified()
         if config.is_gpu_backend():
             gt4py_results = [
                 gt4py.storage.from_array(
@@ -109,13 +115,6 @@ def _to_gpu(sdfg: dace.SDFG):
         sd.openmp_sections = False
 
 
-def _run_sdfg(daceprog: DaceProgram, config: DaceConfig, args, kwargs):
-    """Execute a compiled SDFG - do not check for compilation"""
-    _upload_to_device(list(args) + list(kwargs.values()))
-    res = daceprog(*args, **kwargs)
-    return _download_results_from_dace(config, res, list(args) + list(kwargs.values()))
-
-
 def _build_sdfg(
     daceprog: DaceProgram, sdfg: dace.SDFG, config: DaceConfig, args, kwargs
 ):
@@ -129,14 +128,14 @@ def _build_sdfg(
         if config.is_gpu_backend():
             _to_gpu(sdfg)
             make_transients_persistent(sdfg=sdfg, device=DaceDeviceType.GPU)
+
+            # Upload args to device
+            _upload_to_device(list(args) + list(kwargs.values()))
         else:
             for sd, _aname, arr in sdfg.arrays_recursive():
                 if arr.shape == (1,):
                     arr.storage = DaceStorageType.Register
             make_transients_persistent(sdfg=sdfg, device=DaceDeviceType.CPU)
-
-        # Upload args to device
-        _upload_to_device(list(args) + list(kwargs.values()))
 
         # Build non-constants & non-transients from the sdfg_kwargs
         sdfg_kwargs = daceprog._create_sdfg_args(sdfg, args, kwargs)
@@ -221,11 +220,13 @@ def _build_sdfg(
                 DaCeProgress.log(
                     DaCeProgress.default_prefix(config), "Build folder exchanged."
                 )
-            with DaCeProgress(config, "Run"):
-                res = sdfg(**sdfg_kwargs)
-                res = _download_results_from_dace(
-                    config, res, list(args) + list(kwargs.values())
-                )
+            csdfg, _ = daceprog.load_precompiled_sdfg(
+                sdfg.build_folder, *args, **kwargs
+            )
+            config.loaded_precompiled_SDFG[daceprog] = FrozenCompiledSDFG(
+                daceprog, csdfg, args, kwargs
+            )
+
         else:
             source_rank = config.target_rank
             # wait for compilation to be done
@@ -234,31 +235,49 @@ def _build_sdfg(
                 "Rank is not compiling. Waiting for build dir...",
             )
             sdfg_path = MPI.COMM_WORLD.recv(source=source_rank)
-            DaCeProgress.log(DaCeProgress.default_prefix(config), "Build dir received.")
-            daceprog.load_precompiled_sdfg(sdfg_path, *args, **kwargs)
-            with DaCeProgress(config, "Run"):
-                res = _run_sdfg(daceprog, config, args, kwargs)
+            DaCeProgress.log(
+                DaCeProgress.default_prefix(config), "Build dir received, loading .so."
+            )
+            csdfg, _ = daceprog.load_precompiled_sdfg(sdfg_path, *args, **kwargs)
+            config.loaded_precompiled_SDFG[daceprog] = FrozenCompiledSDFG(
+                daceprog, csdfg, args, kwargs
+            )
 
-        return res
+        return _call_sdfg(daceprog, sdfg, config, args, kwargs)
 
 
 def _call_sdfg(
     daceprog: DaceProgram, sdfg: dace.SDFG, config: DaceConfig, args, kwargs
 ):
     """Dispatch the SDFG execution and/or build"""
-    if (
-        config.get_orchestrate() == DaCeOrchestration.Build
-        or config.get_orchestrate() == DaCeOrchestration.BuildAndRun
-    ):
-        return _build_sdfg(daceprog, sdfg, config, args, kwargs)
-    elif config.get_orchestrate() == DaCeOrchestration.Run:
+    # Pre-compiled SDFG code path does away with any data checks and
+    # cached the marshalling - leading to almost direct C call
+    # DaceProgram performs argument transformation & checks for a cost ~200ms
+    # of overhead
+    if daceprog in config.loaded_precompiled_SDFG:
         with DaCeProgress(config, "Run"):
-            res = _run_sdfg(daceprog, config, args, kwargs)
+            if config.is_gpu_backend():
+                _upload_to_device(list(args) + list(kwargs.values()))
+            res = config.loaded_precompiled_SDFG[daceprog]()
+            res = _download_results_from_dace(
+                config, res, list(args) + list(kwargs.values())
+            )
         return res
     else:
-        raise NotImplementedError(
-            f"Mode {config.get_orchestrate()} unimplemented at call time"
-        )
+        if (
+            config.get_orchestrate() == DaCeOrchestration.Build
+            or config.get_orchestrate() == DaCeOrchestration.BuildAndRun
+        ):
+            res = _build_sdfg(daceprog, sdfg, config, args, kwargs)
+        elif config.get_orchestrate() == DaCeOrchestration.Run:
+            # We should never hit this, it should be caught by the
+            # loaded_precompiled_SDFG check above
+            raise RuntimeError("Unexpected call - csdfg didn't get caught")
+        else:
+            raise NotImplementedError(
+                f"Mode {config.get_orchestrate()} unimplemented at call time"
+            )
+        return res
 
 
 def _parse_sdfg(
@@ -274,6 +293,11 @@ def _parse_sdfg(
         daceprog: the DaceProgram carrying reference to the original method/function
         config: the DaceConfig configuration for this execution
     """
+    # Check cache for already loaded SDFG
+    if daceprog in config.loaded_precompiled_SDFG:
+        return config.loaded_precompiled_SDFG[daceprog]
+
+    # Build expected path
     sdfg_path = get_sdfg_path(daceprog.name, config)
     if sdfg_path is None:
         if DEACTIVATE_DISTRIBUTED_DACE_COMPILE:
@@ -301,6 +325,9 @@ def _parse_sdfg(
         else:
             with DaCeProgress(config, "Load precompiled .sdfg (.so)"):
                 csdfg, _ = daceprog.load_precompiled_sdfg(sdfg_path, *args, **kwargs)
+                config.loaded_precompiled_SDFG[daceprog] = FrozenCompiledSDFG(
+                    daceprog, csdfg, args, kwargs
+                )
             return csdfg
 
 

@@ -1,11 +1,11 @@
-from gt4py.gtscript import PARALLEL, computation, horizontal, interval, region
+from gt4py.cartesian.gtscript import PARALLEL, computation, horizontal, interval, region
 
 import pace.dsl.gt4py_utils as utils
 import pace.util
 from pace import fv3core
 from pace.dsl.dace.wrapped_halo_exchange import WrappedHaloUpdater
 from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import FloatField, FloatFieldIJ
+from pace.dsl.typing import Float, FloatField, FloatFieldIJ
 from pace.util.constants import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_DIM
 from pace.util.grid import GridData
 
@@ -149,10 +149,12 @@ class CubedToLatLon:
         full_size_xyiz_halo_spec = quantity_factory.get_quantity_halo_spec(
             dims=[X_DIM, Y_INTERFACE_DIM, Z_DIM],
             n_halo=grid_indexing.n_halo,
+            dtype=Float,
         )
         full_size_xiyz_halo_spec = quantity_factory.get_quantity_halo_spec(
             dims=[X_INTERFACE_DIM, Y_DIM, Z_DIM],
             n_halo=grid_indexing.n_halo,
+            dtype=Float,
         )
         self.u__v = WrappedHaloUpdater(
             comm.get_vector_halo_updater(

@@ -28,15 +28,20 @@ class _TimeChunkedVariable:
         self._i_time = 1
 
     def append(self, quantity: Quantity):
-        self._data[self._i_time, ...] = to_numpy(quantity.transpose(self._dims).view[:])
+        # Allow mismatch precision here since this is I/O
+        self._data[self._i_time, ...] = to_numpy(
+            quantity.transpose(self._dims, allow_mismatch_float_precision=True).view[:]
+        )
         self._i_time += 1
 
     @property
     def data(self) -> Quantity:
+        # Allow mismatch precision here since this is I/O
         return Quantity(
             data=self._data[: self._i_time, ...],
             dims=("time",) + tuple(self._dims),
             units=self._units,
+            allow_mismatch_float_precision=True,
         )
 
 

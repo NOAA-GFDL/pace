@@ -1,9 +1,6 @@
-import logging
-
 import dace
 
-
-logger = logging.getLogger(__name__)
+from pace.util.logging import pace_log
 
 
 def splittable_region_expansion(sdfg: dace.SDFG, verbose: bool = False):
@@ -11,7 +8,7 @@ def splittable_region_expansion(sdfg: dace.SDFG, verbose: bool = False):
     Set certain StencilComputation library nodes to expand to a different
     schedule if they contain small splittable regions.
     """
-    from gtc.dace.nodes import StencilComputation
+    from gt4py.cartesian.gtc.dace.nodes import StencilComputation
 
     for node, _ in sdfg.all_nodes_recursive():
         if isinstance(node, StencilComputation):
@@ -24,4 +21,4 @@ def splittable_region_expansion(sdfg: dace.SDFG, verbose: bool = False):
                     "K",
                 ]
                 if verbose:
-                    logger.info(f"Reordered schedule for {node.label}")
+                    pace_log.info(f"Reordered schedule for {node.label}")

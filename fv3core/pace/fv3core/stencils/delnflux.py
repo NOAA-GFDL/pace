@@ -1,7 +1,7 @@
 from typing import Optional
 
-import gt4py.gtscript as gtscript
-from gt4py.gtscript import (
+import gt4py.cartesian.gtscript as gtscript
+from gt4py.cartesian.gtscript import (
     __INLINED,
     PARALLEL,
     computation,
@@ -13,13 +13,13 @@ from gt4py.gtscript import (
 import pace.util
 from pace.dsl.dace.orchestration import orchestrate
 from pace.dsl.stencil import StencilFactory, get_stencils_with_varied_bounds
-from pace.dsl.typing import FloatField, FloatFieldIJ, FloatFieldK
+from pace.dsl.typing import Float, FloatField, FloatFieldIJ, FloatFieldK
 from pace.util import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_DIM
 from pace.util.grid import DampingCoefficients
 
 
 def calc_damp(
-    damp_c: pace.util.Quantity, da_min: float, nord: pace.util.Quantity
+    damp_c: pace.util.Quantity, da_min: Float, nord: pace.util.Quantity
 ) -> pace.util.Quantity:
     if damp_c.dims != nord.dims or damp_c.data.shape != nord.data.shape:
         raise NotImplementedError(
@@ -982,9 +982,21 @@ class DelnFlux:
         nk = grid_indexing.domain[2]
         self._origin = grid_indexing.origin_full()
 
-        self._fx2 = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="undefined")
-        self._fy2 = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="undefined")
-        self._d2 = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="undefined")
+        self._fx2 = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_DIM],
+            units="undefined",
+            dtype=Float,
+        )
+        self._fy2 = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_DIM],
+            units="undefined",
+            dtype=Float,
+        )
+        self._d2 = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_DIM],
+            units="undefined",
+            dtype=Float,
+        )
 
         self._add_diffusive_stencil = stencil_factory.from_dims_halo(
             func=add_diffusive_component,
@@ -1132,6 +1144,10 @@ class DelnFluxNoSG:
             "nord2": float(nord.view[2]),
             "nord3": float(nord.view[3]),
         }
+        nord_dictionary["nord0"] = Float(nord_dictionary["nord0"])
+        nord_dictionary["nord1"] = Float(nord_dictionary["nord1"])
+        nord_dictionary["nord2"] = Float(nord_dictionary["nord2"])
+        nord_dictionary["nord3"] = Float(nord_dictionary["nord3"])
 
         self._d2_damp = stencil_factory.from_origin_domain(
             d2_damp_interval,

@@ -1,10 +1,18 @@
 import typing
 
-from gt4py.gtscript import BACKWARD, FORWARD, PARALLEL, computation, exp, interval, log
+from gt4py.cartesian.gtscript import (
+    BACKWARD,
+    FORWARD,
+    PARALLEL,
+    computation,
+    exp,
+    interval,
+    log,
+)
 
 import pace.util.constants as constants
 from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import FloatField, FloatFieldIJ
+from pace.dsl.typing import Float, FloatField, FloatFieldIJ
 from pace.util import X_DIM, Y_DIM, Z_INTERFACE_DIM
 
 
@@ -20,10 +28,10 @@ def sim1_solver(
     pem: FloatField,
     ws: FloatFieldIJ,
     cp3: FloatField,
-    dt: float,
-    t1g: float,
-    rdt: float,
-    p_fac: float,
+    dt: Float,
+    t1g: Float,
+    rdt: Float,
+    p_fac: Float,
 ):
     """
     Tridiagonal solve for w and dz, handles pressure gradient force and sound waves
@@ -144,7 +152,7 @@ class Sim1Solver:
     def __init__(
         self,
         stencil_factory: StencilFactory,
-        p_fac: float,
+        p_fac: Float,
         n_halo: int,
     ):
         self._pfac = p_fac
@@ -156,7 +164,7 @@ class Sim1Solver:
 
     def __call__(
         self,
-        dt: float,
+        dt: Float,
         gamma: FloatField,
         cp3: FloatField,
         pe: FloatField,

@@ -13,6 +13,8 @@ requirements = [
     "gt4py",
     "numpy",
     "pace-util>=0.4.3",
+    "pace-stencils",
+    "pace-dsl",
     "xarray",
 ]
 
@@ -44,6 +46,6 @@ setup(
     test_suite="tests",
     tests_require=test_requirements,
     url="https://github.com/ai2cm/pace",
-    version="0.1.0",
+    version="0.2.0",
     zip_safe=False,
 )

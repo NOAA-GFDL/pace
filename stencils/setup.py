@@ -5,7 +5,7 @@ from setuptools import find_namespace_packages, setup
 
 setup_requirements: List[str] = []
 
-requirements = ["gt4py", "pace-util"]
+requirements = ["gt4py", "pace-util", "pace-dsl"]
 
 test_requirements: List[str] = []
 
@@ -31,6 +31,6 @@ setup(
     packages=find_namespace_packages(include=["pace.*"]),
     include_package_data=True,
     url="https://github.com/ai2cm/pace",
-    version="0.1.0",
+    version="0.2.0",
     zip_safe=False,
 )

@@ -1,4 +1,3 @@
-import logging
 import time
 from dataclasses import dataclass, field
 from typing import Dict, List
@@ -7,9 +6,8 @@ import dace
 from dace.transformation.helpers import get_parent_map
 
 from pace.dsl.dace.dace_config import DaceConfig
+from pace.util.logging import pace_log
 
-
-logger = logging.getLogger(__name__)
 
 # Rough timer & log for major operations of DaCe build stack
 class DaCeProgress:
@@ -22,7 +20,7 @@ class DaCeProgress:
 
     @classmethod
     def log(cls, prefix: str, message: str):
-        logger.info(f"{prefix} {message}")
+        pace_log.info(f"{prefix} {message}")
 
     @classmethod
     def default_prefix(cls, config: DaceConfig) -> str:

@@ -1,4 +1,4 @@
-from gt4py.gtscript import (
+from gt4py.cartesian.gtscript import (
     PARALLEL,
     compile_assert,
     computation,
@@ -10,7 +10,7 @@ from gt4py.gtscript import (
 import pace.util
 from pace.dsl.dace.orchestration import orchestrate
 from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import FloatField, FloatFieldIJ
+from pace.dsl.typing import Float, FloatField, FloatFieldIJ
 from pace.fv3core.stencils.d2a2c_vect import DGrid2AGrid2CGridVectors
 from pace.stencils import corners
 from pace.util import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_DIM
@@ -161,7 +161,7 @@ def geoadjust_ut(
     dy: FloatFieldIJ,
     sin_sg3: FloatFieldIJ,
     sin_sg1: FloatFieldIJ,
-    dt2: float,
+    dt2: Float,
 ):
     """
     take c-grid contravariant wind to compute the 1st order upwind flux
@@ -187,7 +187,7 @@ def geoadjust_vt(
     dx: FloatFieldIJ,
     sin_sg4: FloatFieldIJ,
     sin_sg2: FloatFieldIJ,
-    dt2: float,
+    dt2: Float,
 ):
     """
     Args:
@@ -288,7 +288,7 @@ def transportdelp_update_vorticity_and_kineticenergy(
     cos_sg3: FloatFieldIJ,
     sin_sg4: FloatFieldIJ,
     cos_sg4: FloatFieldIJ,
-    dt2: float,
+    dt2: Float,
 ):
     """Transport delp then update vorticity and kinetic energy
 
@@ -416,7 +416,7 @@ def update_x_velocity(
     cosa: FloatFieldIJ,
     sina: FloatFieldIJ,
     rdxc: FloatFieldIJ,
-    dt2: float,
+    dt2: Float,
 ):
     """
     Args:
@@ -450,7 +450,7 @@ def update_y_velocity(
     cosa: FloatFieldIJ,
     sina: FloatFieldIJ,
     rdyc: FloatFieldIJ,
-    dt2: float,
+    dt2: Float,
 ):
     """
     Args:
@@ -500,11 +500,19 @@ class CGridShallowWaterDynamics:
         self._fC = self.grid_data.fC
         # TODO: double-check the dimensions on these, they may be incorrect
         # as they are only documentation and not used by the code
-        self.delpc = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="unknown")
+        self.delpc = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_DIM],
+            units="unknown",
+            dtype=Float,
+        )
         """
         pressure thickness on c-grid forward step
         """
-        self.ptc = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="unknown")
+        self.ptc = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_DIM],
+            units="unknown",
+            dtype=Float,
+        )
         """
         potential temperature on c-grid forward step
         """
@@ -524,7 +532,11 @@ class CGridShallowWaterDynamics:
         )
 
         def make_quantity() -> pace.util.Quantity:
-            return quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="unknown")
+            return quantity_factory.zeros(
+                [X_DIM, Y_DIM, Z_DIM],
+                units="unknown",
+                dtype=Float,
+            )
 
         # TODO: double-check the dimensions on these, they may be incorrect
         # as they are only documentation and not used by the code
@@ -619,7 +631,7 @@ class CGridShallowWaterDynamics:
         vt: FloatField,
         divgd: FloatField,
         omga: FloatField,
-        dt2: float,
+        dt2: Float,
     ):
         """
         C-grid shallow water routine.

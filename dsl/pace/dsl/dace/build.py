@@ -1,4 +1,5 @@
 from typing import List, Optional, Tuple
+from warnings import warn
 
 from dace.sdfg import SDFG
 
@@ -124,7 +125,7 @@ def get_sdfg_path(
         return sdfg_file_path
 
     # Case of loading a precompiled .so - lookup using GT_CACHE
-    from gt4py import config as gt_config
+    from gt4py.cartesian import config as gt_config
 
     if config.rank_size > 1:
         rank = config.my_rank
@@ -164,9 +165,9 @@ def get_sdfg_path(
         ):
             can_read = False
         if not can_read:
-            raise RuntimeError(
+            warn(
                 f"SDFG build for layout {build_layout}, "
-                f"cannot be run with current layout {config.layout}"
+                f"cannot be run with current layout {config.layout}, bad layout?"
             )
         # Check resolution per tile
         build_resolution = ast.literal_eval(build_info_file.readline())
@@ -194,7 +195,7 @@ def set_distributed_caches(config: "DaceConfig"):
     if orchestration_mode == DaCeOrchestration.Run:
         import os
 
-        from gt4py import config as gt_config
+        from gt4py.cartesian import config as gt_config
 
         # Check our cache exist
         if config.rank_size > 1:
