@@ -16,7 +16,9 @@ class GeosDycoreWrapper:
     Takes numpy arrays as inputs, returns a dictionary of numpy arrays as outputs
     """
 
-    def __init__(self, namelist: f90nml.Namelist, bdt: float, comm: pace.util.Comm, backend: str):
+    def __init__(
+        self, namelist: f90nml.Namelist, bdt: float, comm: pace.util.Comm, backend: str
+    ):
         # Make a custom performance collector for the GEOS wrapper
         self.perf_collector = PerformanceCollector("GEOS wrapper", comm)
 

@@ -1242,10 +1242,7 @@ class DGridShallowWaterLagrangianDynamics:
             self._column_namelist["d_con"],
         )
         self._accumulate_heat_source_and_dissipation_estimate_stencil(
-            self._tmp_heat_s,
-            heat_source,
-            self._tmp_diss_e,
-            diss_est
+            self._tmp_heat_s, heat_source, self._tmp_diss_e, diss_est
         )
         self._update_u_and_v_stencil(
             self._tmp_ut,
