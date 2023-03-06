@@ -6,6 +6,7 @@ from dace.codegen.compiled_sdfg import CompiledSDFG
 from dace.frontend.python.parser import DaceProgram
 
 from pace.dsl.gt4py_utils import is_gpu_backend
+from pace.util._optional_imports import cupy as cp
 from pace.util.communicator import CubedSphereCommunicator
 
 
@@ -82,6 +83,10 @@ class DaceConfig:
         else:
             self._orchestrate = orchestration
 
+        # Debugging Dace orchestration deeper can be done by turning on `syncdebug`
+        # We control this Dace configuration below with our own override
+        dace_debug_env_var = os.getenv("PACE_DACE_DEBUG", "False") == "True"
+
         # Set the configuration of DaCe to a rigid & tested set of divergence
         # from the defaults when orchestrating
         if orchestration != DaCeOrchestration.Python:
@@ -112,7 +117,11 @@ class DaceConfig:
                 "args",
                 value="-std=c++14 -Xcompiler -fPIC -O3 -Xcompiler -march=native",
             )
-            dace.config.Config.set("compiler", "cuda", "cuda_arch", value="60")
+
+            cuda_sm = 60
+            if cp:
+                cuda_sm = cp.cuda.Device(0).compute_capability
+            dace.config.Config.set("compiler", "cuda", "cuda_arch", value=f"{cuda_sm}")
             dace.config.Config.set(
                 "compiler", "cuda", "default_block_size", value="64,8,1"
             )
@@ -155,7 +164,9 @@ class DaceConfig:
             )
 
             # Enable to debug GPU failures
-            dace.config.Config.set("compiler", "cuda", "syncdebug", value=False)
+            dace.config.Config.set(
+                "compiler", "cuda", "syncdebug", value=dace_debug_env_var
+            )
 
         # attempt to kill the dace.conf to avoid confusion
         if dace.config.Config._cfg_filename:
