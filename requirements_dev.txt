@@ -11,7 +11,7 @@ dask>=2021.10.0
 netCDF4
 cftime
 fv3config>=0.9.0
-dace>=0.14.1
+dace=0.14.1
 f90nml>=1.1.0
 numpy>=1.15
 -e external/gt4py
