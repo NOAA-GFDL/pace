@@ -566,10 +566,9 @@ def heat_source_from_vorticity_damping(
                 heat_source - kinetic_energy_fraction_to_damp * dampterm
             )
 
-        if __INLINED((d_con > dcon_threshold) or do_stochastic_ke_backscatter):
+        if __INLINED(do_stochastic_ke_backscatter):
             with horizontal(region[local_is : local_ie + 1, local_js : local_je + 1]):
-                if __INLINED(do_stochastic_ke_backscatter):
-                    dissipation_estimate -= dampterm
+                dissipation_estimate -= dampterm
 
 
 def accumulate_heat_source_and_dissipation_estimate(
