@@ -19,10 +19,6 @@ class MemorySpace(enum.Enum):
     DEVICE = 1
 
 
-def assign_no_copy(A, B):
-    A = B
-
-
 class GeosDycoreWrapper:
     """
     Provides an interface for the Geos model to access the Pace dycore.
