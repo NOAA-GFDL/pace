@@ -23,12 +23,10 @@ from pace.dsl.dace.dace_config import (
     DaCeOrchestration,
     FrozenCompiledSDFG,
 )
-from pace.dsl.dace.sdfg_debug_passes import (  # noqa
+from pace.dsl.dace.sdfg_debug_passes import (
     negative_delp_checker,
     negative_qtracers_checker,
-    sdfg_execution_progress,
     sdfg_nan_checker,
-    trace_all_outputs_at_index,
 )
 from pace.dsl.dace.sdfg_opt_passes import splittable_region_expansion
 from pace.dsl.dace.utils import (
@@ -182,9 +180,7 @@ def _build_sdfg(
         # is turned on.
         if config.get_sync_debug():
             with DaCeProgress(config, "Tooling the SDFG for debug"):
-                # sdfg_execution_progress(sdfg)
                 sdfg_nan_checker(sdfg)
-                # trace_all_outputs_at_index(sdfg, 10, 34, 17)
                 negative_delp_checker(sdfg)
                 negative_qtracers_checker(sdfg)
 
