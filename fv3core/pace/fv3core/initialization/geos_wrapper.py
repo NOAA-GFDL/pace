@@ -11,6 +11,7 @@ from pace import fv3core
 from pace.driver.performance.collector import PerformanceCollector
 from pace.dsl.dace import DaceConfig, orchestrate
 from pace.dsl.gt4py_utils import is_gpu_backend
+from pace.util.logging import pace_log
 
 
 @enum.unique
@@ -108,6 +109,7 @@ class GeosDycoreWrapper:
         self.dycore_state = fv3core.DycoreState.init_zeros(
             quantity_factory=quantity_factory
         )
+        self.dycore_state.bdt = self.dycore_config.dt_atmos
 
         damping_coefficients = pace.util.grid.DampingCoefficients.new_from_metric_terms(
             metric_terms
@@ -132,6 +134,12 @@ class GeosDycoreWrapper:
 
         self.output_dict: Dict[str, np.ndarray] = {}
         self._allocate_output_dir()
+
+        pace_log.info(
+            "GEOS-Wrapper with: \n"
+            f"  dt     : {self.dycore_state.bdt}\n"
+            f"  bridge : {self._fortran_mem_space} > {self._pace_mem_space}\n"
+        )
 
     def _critical_path(self):
         """Top-level orchestration function"""

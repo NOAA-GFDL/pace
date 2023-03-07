@@ -179,6 +179,8 @@ class DynamicalCore:
             method_to_orchestrate="_checkpoint_tracer_advection_out",
             dace_compiletime_args=["state"],
         )
+        if timestep == timedelta(seconds=0):
+            raise RuntimeError("Bad dynamical core configuration: bdt is 0")
         # nested and stretched_grid are options in the Fortran code which we
         # have not implemented, so they are hard-coded here.
         self.call_checkpointer = checkpointer is not None
