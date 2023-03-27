@@ -1,5 +1,5 @@
 import copy
-from typing import List, Tuple
+from typing import List, Optional, Tuple
 
 import dace
 import sympy as sp
@@ -45,6 +45,7 @@ def _filter_all_maps(
     top_maps = [
         (me, state) for me, state in all_maps if get_parent_map(state, me) is None
     ]
+    dynamic_skipped = 0
     for me, state in top_maps:
         mx = state.exit_node(me)
         for e in state.out_edges(mx):
@@ -62,10 +63,12 @@ def _filter_all_maps(
                         continue
                 # Skip dynamic (region) outputs
                 if skip_dynamic_memlet and state.memlet_path(e)[0].data.dynamic:
-                    print(f"Skip {node.data} (dynamic)")
+                    dynamic_skipped += 1
                     continue
 
                 checks.append((state, node, e))
+    if dynamic_skipped > 0:
+        print(f"Skipped {dynamic_skipped} dynamic Access Nodes")
     return checks
 
 
@@ -78,6 +81,7 @@ def _check_node(
     check_c_code: str,
     comment_c_code: str,
     assert_out: bool = False,
+    array_range: Optional[List[Tuple[int, int, int]]] = None,
 ):
     """
     Grab all maps outputs and filter by variable name (either black or whitelist)
@@ -110,12 +114,22 @@ def _check_node(
     # Add map in between node and new_node
     sdfg = state.parent
     input_array = sdfg.arrays[new_node.data]
+    input_dims = len(input_array.shape)
     index_expr = ", ".join(["__i%d" % i for i in range(len(input_array.shape))])
     index_printf = ", ".join(["%d"] * len(input_array.shape))
 
     # Get range from memlet (which may not be the entire array size)
     def evaluate(expr):
         return expr.subs({sp.Function("int_floor"): symbolic.int_floor})
+
+    # A bug in DaCe can lead to an edge labeled for storage on CPU
+    # wrongly, which can lead to access of device storage on the host
+    # (therefore crash)
+    if (
+        input_array.storage != dace.StorageType.GPU_Global
+        and input_array.storage != dace.StorageType.GPU_Shared
+    ):
+        return
 
     # Infer schedule
     schedule_type = dace.ScheduleType.Default
@@ -126,15 +140,24 @@ def _check_node(
         schedule_type = dace.ScheduleType.GPU_Device
 
     ranges = []
-    for i, (begin, end, step) in enumerate(edge.data.subset):
+    if array_range:
+        for i, range_tuple in enumerate(array_range):
+            if i >= input_dims:
+                break
+            ranges.append((f"__i{i}", (range_tuple)))
+    else:
         # evaluate being used to resolve views & actively read/write domains
-        ranges.append((f"__i{i}", (evaluate(begin), evaluate(end), evaluate(step))))
+        for i, (begin, end, step) in enumerate(edge.data.subset):
+            if i >= input_dims:
+                break
+            ranges.append((f"__i{i}", (evaluate(begin), evaluate(end), evaluate(step))))
+    if_str = f"if({check_c_code})" if check_c_code != "" else "if(true)"
     state.add_mapped_tasklet(
         name=kernel_name,
         map_ranges=ranges,
         inputs={f"{c_varname}": dace.Memlet.simple(new_node.data, index_expr)},
         code=f"""
-        if ({check_c_code}) {{
+        {if_str}{{
             printf("{node.data} value (%f) {comment_c_code} at line %d, index {index_printf}\\n", {c_varname}, __LINE__, {index_expr});
             {'assert(0);' if assert_out else ''}
         }}
@@ -162,7 +185,7 @@ def trace_all_outputs_at_index(sdfg: dace.SDFG, i: int, j: int, k: int):
     """
     all_maps_filtered = _filter_all_maps(
         sdfg,
-        skip_dynamic_memlet=False,
+        skip_dynamic_memlet=True,
     )
 
     for state, node, e in all_maps_filtered:
@@ -170,11 +193,12 @@ def trace_all_outputs_at_index(sdfg: dace.SDFG, i: int, j: int, k: int):
             state,
             node,
             e,
-            "tracer_outputs",
+            "print_all_outputs",
             "_inp",
-            f"__i0 == {i} && __i1 == {j} && __i2 == {k}",
             "",
+            "tracking",
             assert_out=False,
+            array_range=[(i, i, 1), (j, j, 1), (k, k, 1)],
         )
 
     pace_log.info(f"Added {len(all_maps_filtered)} outputs trace at {i},{j},{k}")
@@ -242,15 +266,22 @@ def negative_qtracers_checker(sdfg: dace.SDFG):
     pace_log.info(f"Added {len(all_maps_filtered)} tracer < 0 checks")
 
 
-def sdfg_nan_checker(sdfg: dace.SDFG):
+def sdfg_nan_checker(
+    sdfg: dace.SDFG,
+    i_range: Optional[Tuple[int, int, int]] = None,
+    j_range: Optional[Tuple[int, int, int]] = None,
+    k_range: Optional[Tuple[int, int, int]] = None,
+):
     """
     Insert a check on array after each computational map to check for NaN
     in the domain. Assert when check is True.
     """
-    all_maps_filtered = _filter_all_maps(
-        sdfg,
-        blacklist=["diss_estd"],
-    )
+    all_maps_filtered = _filter_all_maps(sdfg, blacklist=["diss_estd"])
+
+    if i_range or j_range or k_range:
+        array_range = [i_range, j_range, k_range]
+    else:
+        array_range = None
 
     for state, node, e in all_maps_filtered:
         _check_node(
@@ -262,6 +293,23 @@ def sdfg_nan_checker(sdfg: dace.SDFG):
             "_inp != _inp",
             "NaN found",
             assert_out=True,
+            array_range=array_range,
         )
 
     pace_log.info(f"Added {len(all_maps_filtered)} NaN checks")
+
+
+def sdfg_execution_progress(sdfg: dace.SDFG):
+    all_maps_filtered = _filter_all_maps(sdfg)
+
+    for state, node, e in all_maps_filtered:
+        _check_node(
+            state,
+            node,
+            e,
+            "execution_progress",
+            "_unused",
+            "",
+            "Progress",
+            array_range=[(0, 0, 1), (0, 0, 1), (0, 0, 1)],
+        )
