@@ -30,6 +30,7 @@ File structure
 --------------
 
 `pace.dsl.dace.*` carries the structure for orchestration.
+
 - `build.py`: tooling for distributed build & SDFG load.
 - `dace_config.py`: DaCeConfig & DaCeOrchestration enum.
 - `orchestration.py`: main code, takes care of orchestration .scaffolding, build pipeline (including parsing) and execution.
@@ -44,13 +45,15 @@ DaCe has many configuration options. When executing, it drops or reads a `dace.c
 
 `pace.dsl.dace.dace_config` carries a set of tested options for DaCe, with doc. It also takes care of removing the `dace.conf` that will be generated automatically when using DaCe.
 
-Orchestration can be debug by using the env var `PACE_DACE_DEBUG`.
+Orchestration can be debugged by using the env var `PACE_DACE_DEBUG`.
 When set to `True`, this will drop a few checks:
 
-- `sdfg_nan_checker`, which drops a NaN check after _every_ computation on field _written_.
-- `negative_qtracers_checker` drops a check for `tracer < -1e8` for every written field named one of the tracers
-- `negative_delp_checker` drops a check for `delp < -1e8` for every written field named `delp*`
-- insert a CUDA_ERROR_CHECK in C after each kernel
+- `sdfg_nan_checker`, which drops a NaN check after _every_ computation on field _written_,
+- `negative_qtracers_checker` drops a check for `tracer < -1e8` for every written field named one of the tracers,
+- `negative_delp_checker` drops a check for `delp < -1e8` for every written field named `delp*`,
+- `trace_all_outputs_at_index` drops a print on every variable at a given index to track numerical protection,
+- `sdfg_execution_progress`, drops a print after each kernel. Useful when encurring bad crash with no stacktrace,
+- insert a CUDA_ERROR_CHECK in C after each kernel.
 See `dsl/pace/dsl/dace/utils.py` for details.
 
 Build
@@ -59,6 +62,7 @@ Build
 Orchestrated code won't build the same way the gt backend builds. The build pipeline will lead to a single folder with code & `.so`. In the case of the driver main call, this would be in `.gt_cache_*/dacecache/pace_driver_driver_Driver__critical_path_step_all`.
 
 Code goes through phases before being ready to execute:
+
 - stencils are `parsed` into non-expanded SDFG (gt4py takes care of this),
 - all code is `parsed` into a single SDFG with stencils' SDFG included (dace takes care of this and the following steps),
 - a first `simplify` is applied to the SDFG to optimize the memory flow,

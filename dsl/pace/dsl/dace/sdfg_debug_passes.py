@@ -122,6 +122,9 @@ def _check_node(
     def evaluate(expr):
         return expr.subs({sp.Function("int_floor"): symbolic.int_floor})
 
+    # A bug in DaCe can lead to an edge labeled for storage on CPU
+    # wrongly, which can lead to access of device storage on the host
+    # (therefore crash)
     if (
         input_array.storage != dace.StorageType.GPU_Global
         and input_array.storage != dace.StorageType.GPU_Shared
