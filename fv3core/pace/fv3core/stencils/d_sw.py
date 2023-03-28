@@ -529,7 +529,7 @@ def heat_source_from_vorticity_damping(
         kinetic_energy_fraction_to_damp (in): the fraction of kinetic energy
             to explicitly damp and convert into heat.
     """
-    from __externals__ import (
+    from __externals__ import (  # noqa (see below)
         d_con,
         do_stochastic_ke_backscatter,
         local_ie,

@@ -5,9 +5,11 @@ from typing import Dict, List, Optional
 import dace
 import numpy as np
 from dace.transformation.helpers import get_parent_map
+from gt4py.cartesian.gtscript import PARALLEL, computation, interval
 
 from pace.dsl.dace.dace_config import DaceConfig
-from pace.dsl.typing import Float
+from pace.dsl.stencil import CompilationConfig, FrozenStencil, StencilConfig
+from pace.dsl.typing import Float, FloatField
 from pace.util._optional_imports import cupy as cp
 from pace.util.logging import pace_log
 
@@ -186,13 +188,6 @@ def memory_static_analysis_from_path(sdfg_path: str, detail_report=False) -> str
 # ----------------------------------------------------------
 # Theoritical bandwith from SDFG
 # ----------------------------------------------------------
-
-from gt4py.cartesian.gtscript import PARALLEL, computation, interval
-
-from pace.dsl.stencil import CompilationConfig, FrozenStencil, StencilConfig
-from pace.dsl.typing import FloatField
-
-
 def copy_defn(q_in: FloatField, q_out: FloatField):
     with computation(PARALLEL), interval(...):
         q_in = q_out
@@ -260,6 +255,7 @@ def kernel_theoretical_timing(
         )
     else:
         bandwidth_in_bytes_s = hardware_bw_in_GB_s * 1024 * 1024 * 1024
+        print(f"Given hardware bandwith: {bandwidth_in_bytes_s/(1024*1024*1024)} GB/s")
 
     allmaps = [
         (me, state)
@@ -311,7 +307,9 @@ def kernel_theoretical_timing(
                 pass
 
         # Bad expansion
-        if not isinstance(newresult_in_us, sympy.core.numbers.Float):
+        if not isinstance(newresult_in_us, sympy.core.numbers.Float) and not isinstance(
+            newresult_in_us, float
+        ):
             continue
 
         result[node.label] = float(newresult_in_us)
@@ -351,6 +349,7 @@ def kernel_theoretical_timing_from_path(
     output_format: Optional[str] = None,
 ) -> str:
     """Load an SDFG and report the theoretical kernel timings"""
+    print(f"Running kernel_theoretical_timing for {sdfg_path}")
     timings = kernel_theoretical_timing(
         dace.SDFG.from_file(sdfg_path),
         hardware_bw_in_GB_s=hardware_bw_in_GB_s,
