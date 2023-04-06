@@ -2,14 +2,14 @@ from gt4py.cartesian.gtscript import FORWARD, computation, horizontal, interval,
 
 import pace.util
 from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import FloatField, FloatFieldIJ
+from pace.dsl.typing import Float, FloatField, FloatFieldIJ
 from pace.util import X_DIM, Y_DIM
 
 
 # TODO merge with pe_halo? reuse partials?
 # NOTE: This is different from pace.fv3core.stencils.pe_halo.edge_pe
 def edge_pe_update(
-    pe: FloatFieldIJ, delp: FloatField, pk3: FloatField, ptop: float, akap: float
+    pe: FloatFieldIJ, delp: FloatField, pk3: FloatField, ptop: Float, akap: Float
 ):
     from __externals__ import local_ie, local_is, local_je, local_js
 
@@ -55,9 +55,13 @@ class PK3Halo:
             origin=origin,
             domain=domain,
         )
-        self._pe_tmp = quantity_factory.zeros([X_DIM, Y_DIM], units="unknown")
+        self._pe_tmp = quantity_factory.zeros(
+            [X_DIM, Y_DIM],
+            units="unknown",
+            dtype=Float,
+        )
 
-    def __call__(self, pk3: FloatField, delp: FloatField, ptop: float, akap: float):
+    def __call__(self, pk3: FloatField, delp: FloatField, ptop: Float, akap: Float):
         """Update pressure raised to the kappa (pk3) in halo region.
 
         Args:

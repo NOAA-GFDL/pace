@@ -17,7 +17,7 @@ import pace.fv3core.stencils.moist_cv as moist_cv
 import pace.util
 from pace.dsl.dace.orchestration import orchestrate
 from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import FloatField, FloatFieldIJ, FloatFieldK
+from pace.dsl.typing import Float, FloatField, FloatFieldIJ, FloatFieldK
 from pace.fv3core._config import RemappingConfig
 from pace.fv3core.stencils.basic_operations import adjust_divide_stencil
 from pace.fv3core.stencils.map_single import MapSingle
@@ -39,7 +39,7 @@ from pace.util import (
 CONSV_MIN = 0.001
 
 
-def init_pe(pe: FloatField, pe1: FloatField, pe2: FloatField, ptop: float):
+def init_pe(pe: FloatField, pe1: FloatField, pe2: FloatField, ptop: Float):
     """
     Args:
         pe (in):
@@ -102,7 +102,7 @@ def moist_cv_pt_pressure(
     ps: FloatFieldIJ,
     pn2: FloatField,
     peln: FloatField,
-    r_vir: float,
+    r_vir: Float,
 ):
     """
     Computes Eulerian reference pressures as targets for remapping.
@@ -177,7 +177,7 @@ def pn2_pk_delp(
     pe2: FloatField,
     pn2: FloatField,
     pk: FloatField,
-    akap: float,
+    akap: Float,
 ):
     """
     Args:
@@ -324,16 +324,52 @@ class LagrangianToEulerian:
             grid_indexing.domain[2] + 1,
         )
 
-        self._pe1 = quantity_factory.zeros([X_DIM, Y_DIM, Z_INTERFACE_DIM], units="Pa")
-        self._pe2 = quantity_factory.zeros([X_DIM, Y_DIM, Z_INTERFACE_DIM], units="Pa")
-        self._pe3 = quantity_factory.zeros([X_DIM, Y_DIM, Z_INTERFACE_DIM], units="Pa")
-        self._dp2 = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="Pa")
-        self._pn2 = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="Pa")
-        self._pe0 = quantity_factory.zeros([X_DIM, Y_DIM, Z_INTERFACE_DIM], units="Pa")
-        self._pe3 = quantity_factory.zeros([X_DIM, Y_DIM, Z_INTERFACE_DIM], units="Pa")
+        self._pe1 = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_INTERFACE_DIM],
+            units="Pa",
+            dtype=Float,
+        )
+        self._pe2 = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_INTERFACE_DIM],
+            units="Pa",
+            dtype=Float,
+        )
+        self._pe3 = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_INTERFACE_DIM],
+            units="Pa",
+            dtype=Float,
+        )
+        self._dp2 = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_DIM],
+            units="Pa",
+            dtype=Float,
+        )
+        self._pn2 = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_DIM],
+            units="Pa",
+            dtype=Float,
+        )
+        self._pe0 = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_INTERFACE_DIM],
+            units="Pa",
+            dtype=Float,
+        )
+        self._pe3 = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_INTERFACE_DIM],
+            units="Pa",
+            dtype=Float,
+        )
 
-        self._gz = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="m^2 s^-2")
-        self._cvm = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="unknown")
+        self._gz = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_DIM],
+            units="m^2 s^-2",
+            dtype=Float,
+        )
+        self._cvm = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_DIM],
+            units="unknown",
+            dtype=Float,
+        )
 
         self._kord_tm = abs(config.kord_tm)
         self._kord_wz = config.kord_wz
@@ -504,12 +540,12 @@ class LagrangianToEulerian:
         ak: FloatFieldK,
         bk: FloatFieldK,
         dp1: FloatField,
-        ptop: float,
-        akap: float,
-        zvir: float,
+        ptop: Float,
+        akap: Float,
+        zvir: Float,
         last_step: bool,
-        consv_te: float,
-        mdt: float,
+        consv_te: Float,
+        mdt: Float,
     ):
         """
         Remap the deformed Lagrangian surfaces onto the reference, or "Eulerian",

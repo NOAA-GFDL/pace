@@ -1004,40 +1004,32 @@ def fill_corners_dgrid_defn(
         # sw corner
         with horizontal(region[i_start - 1, j_start - 1]):
             x_out = mysign * y_in[0, 1, 0]
-        with horizontal(region[i_start - 1, j_start - 1]):
             y_out = mysign * x_in[1, 0, 0]
         with horizontal(region[i_start - 1, j_start - 2]):
             x_out = mysign * y_in[-1, 2, 0]
-        with horizontal(region[i_start - 1, j_start - 2]):
             y_out = mysign * x_in[2, 1, 0]
         with horizontal(region[i_start - 1, j_start - 3]):
             x_out = mysign * y_in[-2, 3, 0]
-        with horizontal(region[i_start - 1, j_start - 3]):
             y_out = mysign * x_in[3, 2, 0]
         with horizontal(region[i_start - 2, j_start - 1]):
             x_out = mysign * y_in[1, 2, 0]
-        with horizontal(region[i_start - 2, j_start - 1]):
             y_out = mysign * x_in[2, -1, 0]
         with horizontal(region[i_start - 2, j_start - 2]):
             x_out = mysign * y_in[0, 3, 0]
-        with horizontal(region[i_start - 2, j_start - 2]):
             y_out = mysign * x_in[3, 0, 0]
         with horizontal(region[i_start - 2, j_start - 3]):
             x_out = mysign * y_in[-1, 4, 0]
-        with horizontal(region[i_start - 2, j_start - 3]):
             y_out = mysign * x_in[4, 1, 0]
         with horizontal(region[i_start - 3, j_start - 1]):
             x_out = mysign * y_in[2, 3, 0]
-        with horizontal(region[i_start - 3, j_start - 1]):
             y_out = mysign * x_in[3, -2, 0]
         with horizontal(region[i_start - 3, j_start - 2]):
             x_out = mysign * y_in[1, 4, 0]
-        with horizontal(region[i_start - 3, j_start - 2]):
             y_out = mysign * x_in[4, -1, 0]
         with horizontal(region[i_start - 3, j_start - 3]):
             x_out = mysign * y_in[0, 5, 0]
-        with horizontal(region[i_start - 3, j_start - 3]):
             y_out = mysign * x_in[5, 0, 0]
+
         # ne corner
         with horizontal(region[i_end + 1, j_end + 2]):
             x_out = mysign * y_in[1, -2, 0]
@@ -1047,105 +1039,91 @@ def fill_corners_dgrid_defn(
             x_out = mysign * y_in[2, -3, 0]
         with horizontal(region[i_end + 2, j_end + 2]):
             y_out = mysign * x_in[-3, 0, 0]
+            x_out = mysign * y_in[0, -3, 0]
         with horizontal(region[i_end + 1, j_end + 4]):
             x_out = mysign * y_in[3, -4, 0]
         with horizontal(region[i_end + 2, j_end + 3]):
             y_out = mysign * x_in[-4, -1, 0]
-        with horizontal(region[i_end + 2, j_end + 2]):
-            x_out = mysign * y_in[0, -3, 0]
+            x_out = mysign * y_in[1, -4, 0]
         with horizontal(region[i_end + 3, j_end + 1]):
             y_out = mysign * x_in[-3, 2, 0]
-        with horizontal(region[i_end + 2, j_end + 3]):
-            x_out = mysign * y_in[1, -4, 0]
         with horizontal(region[i_end + 3, j_end + 2]):
             y_out = mysign * x_in[-4, 1, 0]
+            x_out = mysign * y_in[-1, -4, 0]
         with horizontal(region[i_end + 2, j_end + 4]):
             x_out = mysign * y_in[2, -5, 0]
         with horizontal(region[i_end + 3, j_end + 3]):
             y_out = mysign * x_in[-5, 0, 0]
-        with horizontal(region[i_end + 3, j_end + 2]):
-            x_out = mysign * y_in[-1, -4, 0]
+            x_out = mysign * y_in[0, -5, 0]
         with horizontal(region[i_end + 4, j_end + 1]):
             y_out = mysign * x_in[-4, 3, 0]
-        with horizontal(region[i_end + 3, j_end + 3]):
-            x_out = mysign * y_in[0, -5, 0]
         with horizontal(region[i_end + 4, j_end + 2]):
             y_out = mysign * x_in[-5, 2, 0]
         with horizontal(region[i_end + 3, j_end + 4]):
             x_out = mysign * y_in[1, -6, 0]
         with horizontal(region[i_end + 4, j_end + 3]):
             y_out = mysign * x_in[-6, 1, 0]
+
         # nw corner
         with horizontal(region[i_start - 1, j_end + 2]):
             x_out = y_in[0, -2, 0]
+            y_out = x_in[2, 0, 0]
         with horizontal(region[i_start - 1, j_end + 1]):
             y_out = x_in[1, 1, 0]
         with horizontal(region[i_start - 1, j_end + 3]):
             x_out = y_in[-1, -3, 0]
-        with horizontal(region[i_start - 1, j_end + 2]):
-            y_out = x_in[2, 0, 0]
+            y_out = x_in[3, -1, 0]
         with horizontal(region[i_start - 1, j_end + 4]):
             x_out = y_in[-2, -4, 0]
-        with horizontal(region[i_start - 1, j_end + 3]):
-            y_out = x_in[3, -1, 0]
         with horizontal(region[i_start - 2, j_end + 2]):
             x_out = y_in[1, -3, 0]
+            y_out = x_in[3, 1, 0]
         with horizontal(region[i_start - 2, j_end + 1]):
             y_out = x_in[2, 2, 0]
         with horizontal(region[i_start - 2, j_end + 3]):
             x_out = y_in[0, -4, 0]
-        with horizontal(region[i_start - 2, j_end + 2]):
-            y_out = x_in[3, 1, 0]
+            y_out = x_in[4, 0, 0]
         with horizontal(region[i_start - 2, j_end + 4]):
             x_out = y_in[-1, -5, 0]
-        with horizontal(region[i_start - 2, j_end + 3]):
-            y_out = x_in[4, 0, 0]
         with horizontal(region[i_start - 3, j_end + 2]):
             x_out = y_in[2, -4, 0]
+            y_out = x_in[4, 2, 0]
         with horizontal(region[i_start - 3, j_end + 1]):
             y_out = x_in[3, 3, 0]
         with horizontal(region[i_start - 3, j_end + 3]):
             x_out = y_in[1, -5, 0]
-        with horizontal(region[i_start - 3, j_end + 2]):
-            y_out = x_in[4, 2, 0]
+            y_out = x_in[5, 1, 0]
         with horizontal(region[i_start - 3, j_end + 4]):
             x_out = y_in[0, -6, 0]
-        with horizontal(region[i_start - 3, j_end + 3]):
-            y_out = x_in[5, 1, 0]
+
         # se corner
         with horizontal(region[i_end + 1, j_start - 1]):
             x_out = y_in[1, 1, 0]
         with horizontal(region[i_end + 2, j_start - 1]):
             y_out = x_in[-2, 0, 0]
+            x_out = y_in[0, 2, 0]
         with horizontal(region[i_end + 1, j_start - 2]):
             x_out = y_in[2, 2, 0]
         with horizontal(region[i_end + 2, j_start - 2]):
             y_out = x_in[-3, 1, 0]
+            x_out = y_in[1, 3, 0]
         with horizontal(region[i_end + 1, j_start - 3]):
             x_out = y_in[3, 3, 0]
         with horizontal(region[i_end + 2, j_start - 3]):
             y_out = x_in[-4, 2, 0]
-        with horizontal(region[i_end + 2, j_start - 1]):
-            x_out = y_in[0, 2, 0]
+            x_out = y_in[2, 4, 0]
         with horizontal(region[i_end + 3, j_start - 1]):
             y_out = x_in[-3, -1, 0]
-        with horizontal(region[i_end + 2, j_start - 2]):
-            x_out = y_in[1, 3, 0]
+            x_out = y_in[-1, 3, 0]
         with horizontal(region[i_end + 3, j_start - 2]):
             y_out = x_in[-4, 0, 0]
-        with horizontal(region[i_end + 2, j_start - 3]):
-            x_out = y_in[2, 4, 0]
+            x_out = y_in[0, 4, 0]
         with horizontal(region[i_end + 3, j_start - 3]):
             y_out = x_in[-5, 1, 0]
-        with horizontal(region[i_end + 3, j_start - 1]):
-            x_out = y_in[-1, 3, 0]
+            x_out = y_in[1, 5, 0]
         with horizontal(region[i_end + 4, j_start - 1]):
             y_out = x_in[-4, -2, 0]
-        with horizontal(region[i_end + 3, j_start - 2]):
-            x_out = y_in[0, 4, 0]
         with horizontal(region[i_end + 4, j_start - 2]):
             y_out = x_in[-5, -1, 0]
-        with horizontal(region[i_end + 3, j_start - 3]):
-            x_out = y_in[1, 5, 0]
         with horizontal(region[i_end + 4, j_start - 3]):
             y_out = x_in[-6, 0, 0]

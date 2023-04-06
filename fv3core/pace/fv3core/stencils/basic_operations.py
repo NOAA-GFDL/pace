@@ -1,7 +1,7 @@
 import gt4py.cartesian.gtscript as gtscript
 from gt4py.cartesian.gtscript import PARALLEL, computation, interval
 
-from pace.dsl.typing import FloatField, FloatFieldIJ
+from pace.dsl.typing import Float, FloatField, FloatFieldIJ
 
 
 def copy_defn(q_in: FloatField, q_out: FloatField):
@@ -20,7 +20,7 @@ def adjustmentfactor_stencil_defn(adjustment: FloatFieldIJ, q_out: FloatField):
         q_out = q_out * adjustment
 
 
-def set_value_defn(q_out: FloatField, value: float):
+def set_value_defn(q_out: FloatField, value: Float):
     with computation(PARALLEL), interval(...):
         q_out = value
 

@@ -8,6 +8,7 @@ import pace.physics
 import pace.util
 import pace.util.grid
 from pace import fv3core
+from pace.dsl.typing import Float
 
 
 @dataclasses.dataclass()
@@ -49,7 +50,7 @@ class TendencyState:
             initial_quantities[_field.name] = quantity_factory.zeros(
                 _field.metadata["dims"],
                 _field.metadata["units"],
-                dtype=float,
+                dtype=Float,
             )
         return cls(**initial_quantities)
 

@@ -5,6 +5,7 @@ import xarray as xr
 
 import pace.dsl.gt4py_utils as gt_utils
 import pace.util
+from pace.dsl.typing import Float
 from pace.physics.stencils.microphysics import MicrophysicsState
 
 
@@ -290,7 +291,7 @@ class PhysicsState:
             tendency = quantity_factory.zeros(
                 [pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM],
                 "unknown",
-                dtype=float,
+                dtype=Float,
             )
             self.microphysics: Optional[MicrophysicsState] = MicrophysicsState(
                 pt=self.pt,
@@ -321,7 +322,9 @@ class PhysicsState:
         for _field in fields(cls):
             if "dims" in _field.metadata.keys():
                 initial_arrays[_field.name] = quantity_factory.zeros(
-                    _field.metadata["dims"], _field.metadata["units"], dtype=float
+                    _field.metadata["dims"],
+                    _field.metadata["units"],
+                    dtype=Float,
                 ).data
         return cls(
             **initial_arrays,

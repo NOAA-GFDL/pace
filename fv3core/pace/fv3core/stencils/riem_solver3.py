@@ -16,7 +16,7 @@ import pace.util
 import pace.util.constants as constants
 from pace.dsl.dace import orchestrate
 from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import FloatField, FloatFieldIJ
+from pace.dsl.typing import Float, FloatField, FloatFieldIJ
 from pace.fv3core._config import RiemannConfig
 from pace.fv3core.stencils.sim1_solver import Sim1Solver
 from pace.util import X_DIM, Y_DIM, Z_DIM, Z_INTERFACE_DIM
@@ -37,9 +37,9 @@ def precompute(
     gamma: FloatField,
     dz: FloatField,
     p_gas: FloatField,
-    ptop: float,
-    peln1: float,
-    ptk: float,
+    ptop: Float,
+    peln1: Float,
+    ptk: Float,
 ):
     """
     Args:
@@ -175,20 +175,38 @@ class NonhydrostaticVerticalSolver:
         if config.a_imp <= 0.999:
             raise NotImplementedError("a_imp <= 0.999 is not implemented")
 
-        self._delta_mass = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="kg")
-        self._tmp_pe_init = quantity_factory.zeros(
-            [X_DIM, Y_DIM, Z_INTERFACE_DIM], units="Pa"
+        self._delta_mass = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_DIM],
+            units="kg",
+            dtype=Float,
         )
-        self._p_gas = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="Pa")
+        self._tmp_pe_init = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_INTERFACE_DIM],
+            units="Pa",
+            dtype=Float,
+        )
+        self._p_gas = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_DIM],
+            units="Pa",
+            dtype=Float,
+        )
         self._p_interface = quantity_factory.zeros(
-            [X_DIM, Y_DIM, Z_INTERFACE_DIM], units="Pa"
+            [X_DIM, Y_DIM, Z_INTERFACE_DIM],
+            units="Pa",
+            dtype=Float,
         )
         self._log_p_interface = quantity_factory.zeros(
-            [X_DIM, Y_DIM, Z_INTERFACE_DIM], units="log(Pa)"
+            [X_DIM, Y_DIM, Z_INTERFACE_DIM],
+            units="log(Pa)",
+            dtype=Float,
         )
 
         # gamma parameter is (cp/cv)
-        self._gamma = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="")
+        self._gamma = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_DIM],
+            units="",
+            dtype=Float,
+        )
 
         riemorigin = grid_indexing.origin_compute()
         domain = grid_indexing.domain_compute(add=(0, 0, 1))
@@ -207,9 +225,9 @@ class NonhydrostaticVerticalSolver:
     def __call__(
         self,
         last_call: bool,
-        dt: float,
+        dt: Float,
         cappa: FloatField,
-        ptop: float,
+        ptop: Float,
         zs: FloatFieldIJ,
         ws: FloatFieldIJ,
         delz: FloatField,

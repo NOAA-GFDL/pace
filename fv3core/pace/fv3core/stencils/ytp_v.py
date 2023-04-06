@@ -1,7 +1,7 @@
 from gt4py.cartesian import gtscript
 from gt4py.cartesian.gtscript import __INLINED, compile_assert, horizontal, region
 
-from pace.dsl.typing import FloatField, FloatFieldIJ
+from pace.dsl.typing import Float, FloatField, FloatFieldIJ
 from pace.fv3core.stencils import ppm, yppm
 
 
@@ -56,7 +56,7 @@ def advect_v_along_y(
     rdy: FloatFieldIJ,
     dy: FloatFieldIJ,
     dya: FloatFieldIJ,
-    dt: float,
+    dt: Float,
 ):
     """
     Advect covariant y-wind on D-grid using contravariant y-wind on cell corners.

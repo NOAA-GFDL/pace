@@ -14,7 +14,7 @@ from gt4py.cartesian.gtscript import (
 import pace.util
 from pace.dsl.dace.orchestration import orchestrate
 from pace.dsl.stencil import GridIndexing, StencilFactory
-from pace.dsl.typing import FloatField, FloatFieldI, FloatFieldIJ
+from pace.dsl.typing import Float, FloatField, FloatFieldI, FloatFieldIJ
 from pace.fv3core.stencils.basic_operations import copy_defn
 from pace.util import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_DIM
 from pace.util.grid import GridData
@@ -548,15 +548,21 @@ class AGrid2BGridFourthOrder:
         self.replace = replace
 
         self._tmp_qx = quantity_factory.zeros(
-            dims=[X_INTERFACE_DIM, Y_DIM, z_dim], units="unknown"
+            dims=[X_INTERFACE_DIM, Y_DIM, z_dim],
+            units="unknown",
+            dtype=Float,
         )
         self._tmp_qy = quantity_factory.zeros(
-            dims=[X_DIM, Y_INTERFACE_DIM, z_dim], units="unknown"
+            dims=[X_DIM, Y_INTERFACE_DIM, z_dim],
+            units="unknown",
+            dtype=Float,
         )
         # TODO: the dimensions of tmp_qout_edges may not be correct, verify
         # with Lucas and either update the code or remove this comment
         self._tmp_qout_edges = quantity_factory.zeros(
-            dims=[X_DIM, Y_DIM, z_dim], units="unknown"
+            dims=[X_DIM, Y_DIM, z_dim],
+            units="unknown",
+            dtype=Float,
         )
 
         _, (z_domain,) = self._idx.get_origin_domain([z_dim])

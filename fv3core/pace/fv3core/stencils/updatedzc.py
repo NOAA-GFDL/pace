@@ -4,7 +4,7 @@ from gt4py.cartesian.gtscript import BACKWARD, FORWARD, PARALLEL, computation, i
 import pace.util
 import pace.util.constants as constants
 from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import FloatField, FloatFieldIJ, FloatFieldK
+from pace.dsl.typing import Float, FloatField, FloatFieldIJ, FloatFieldK
 from pace.stencils import corners
 from pace.util import X_DIM, Y_DIM, Z_DIM
 
@@ -69,7 +69,7 @@ def update_dz_c(
     gz_y: FloatField,
     ws: FloatFieldIJ,
     *,
-    dt: float,
+    dt: Float,
 ):
     """
     Step dz forward on c-grid
@@ -133,10 +133,22 @@ class UpdateGeopotentialHeightOnCGrid:
         # e.g. by adding a quantity.factory
         # attribute, or by implementing basic math like slicing, addition, etc.
         # here it's needed to ensure we have a buffer point after the compute domain
-        self._dp_ref = quantity_factory.zeros(dp_ref.dims, units=dp_ref.units)
+        self._dp_ref = quantity_factory.zeros(
+            dp_ref.dims,
+            units=dp_ref.units,
+            dtype=Float,
+        )
         self._dp_ref.view[:] = dp_ref.view[:]
-        self._gz_x = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="m**2/s**2")
-        self._gz_y = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="m**2/s**2")
+        self._gz_x = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_DIM],
+            units="m**2/s**2",
+            dtype=Float,
+        )
+        self._gz_y = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_DIM],
+            units="m**2/s**2",
+            dtype=Float,
+        )
         full_origin = grid_indexing.origin_full()
         full_domain = grid_indexing.domain_full(add=(0, 0, 1))
         self._double_copy_stencil = stencil_factory.from_origin_domain(
@@ -171,7 +183,7 @@ class UpdateGeopotentialHeightOnCGrid:
         vt: FloatField,
         gz: FloatField,
         ws: FloatFieldIJ,
-        dt: float,
+        dt: Float,
     ):
         """
         Args:

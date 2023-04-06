@@ -2,8 +2,11 @@ import enum
 from typing import Any, Dict, Optional
 
 import dace.config
+from dace.codegen.compiled_sdfg import CompiledSDFG
+from dace.frontend.python.parser import DaceProgram
 
 from pace.dsl.gt4py_utils import is_gpu_backend
+from pace.util._optional_imports import cupy as cp
 from pace.util.communicator import CubedSphereCommunicator
 
 
@@ -29,6 +32,28 @@ class DaCeOrchestration(enum.Enum):
     Run = 3
 
 
+class FrozenCompiledSDFG:
+    """
+    Cache transform args to allow direct execution of the CSDFG
+
+    Args:
+        csdfg: compiled SDFG, e.g. loaded .so
+        sdfg_args: transformed args to align for CSDFG direct execution
+
+    WARNING: No checks are done on arguments, any memory swap (free/realloc)
+    will lead to difficult to debug misbehavior
+    """
+
+    def __init__(
+        self, daceprog: DaceProgram, csdfg: CompiledSDFG, args, kwargs
+    ) -> None:
+        self.csdfg = csdfg
+        self.sdfg_args = daceprog._create_sdfg_args(csdfg.sdfg, args, kwargs)
+
+    def __call__(self):
+        return self.csdfg(**self.sdfg_args)
+
+
 class DaceConfig:
     def __init__(
         self,
@@ -38,6 +63,11 @@ class DaceConfig:
         tile_nz: int = 0,
         orchestration: Optional[DaCeOrchestration] = None,
     ):
+        # Recording SDFG loaded for fast re-access
+        # ToDo: DaceConfig becomes a bit more than a read-only config
+        #       with this. Should be refactor into a DaceExecutor carrying a config
+        self.loaded_precompiled_SDFG: Dict[DaceProgram, FrozenCompiledSDFG] = {}
+
         # Temporary. This is a bit too out of the ordinary for the common user.
         # We should refactor the architecture to allow for a `gtc:orchestrated:dace:X`
         # backend that would signify both the `CPU|GPU` split and the orchestration mode
@@ -52,6 +82,10 @@ class DaceConfig:
             self._orchestrate = DaCeOrchestration[fv3_dacemode_env_var]
         else:
             self._orchestrate = orchestration
+
+        # Debugging Dace orchestration deeper can be done by turning on `syncdebug`
+        # We control this Dace configuration below with our own override
+        dace_debug_env_var = os.getenv("PACE_DACE_DEBUG", "False") == "True"
 
         # Set the configuration of DaCe to a rigid & tested set of divergence
         # from the defaults when orchestrating
@@ -83,7 +117,15 @@ class DaceConfig:
                 "args",
                 value="-std=c++14 -Xcompiler -fPIC -O3 -Xcompiler -march=native",
             )
-            dace.config.Config.set("compiler", "cuda", "cuda_arch", value="60")
+
+            cuda_sm = 60
+            if cp:
+                cuda_sm = cp.cuda.Device(0).compute_capability
+            dace.config.Config.set("compiler", "cuda", "cuda_arch", value=f"{cuda_sm}")
+            # Block size/thread count is defaulted to an average value for recent
+            # hardware (Pascal and upward). The problem of setting an optimized
+            # block/thread is both hardware and problem dependant. Fine tuners
+            # available in DaCe should be relied on for futher tuning of this value.
             dace.config.Config.set(
                 "compiler", "cuda", "default_block_size", value="64,8,1"
             )
@@ -126,7 +168,9 @@ class DaceConfig:
             )
 
             # Enable to debug GPU failures
-            dace.config.Config.set("compiler", "cuda", "syncdebug", value=False)
+            dace.config.Config.set(
+                "compiler", "cuda", "syncdebug", value=dace_debug_env_var
+            )
 
         # attempt to kill the dace.conf to avoid confusion
         if dace.config.Config._cfg_filename:

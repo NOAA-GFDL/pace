@@ -1,4 +1,3 @@
-import logging
 from functools import wraps
 from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union
 
@@ -6,6 +5,7 @@ import gt4py
 import numpy as np
 
 from pace.dsl.typing import DTypes, Field, Float
+from pace.util.logging import pace_log
 
 
 try:
@@ -32,9 +32,6 @@ tracer_variables = [
     "qsgs_tke",
     "qcld",
 ]
-
-# Logger instance
-logger = logging.getLogger("fv3core")
 
 
 def mark_untested(msg="This is not tested"):
@@ -83,7 +80,7 @@ def make_storage_data(
     origin: Tuple[int, ...] = origin,
     *,
     backend: str,
-    dtype: DTypes = np.float64,
+    dtype: DTypes = Float,
     mask: Optional[Tuple[bool, ...]] = None,
     start: Tuple[int, ...] = (0, 0, 0),
     dummy: Optional[Tuple[int, ...]] = None,
@@ -261,7 +258,7 @@ def make_storage_from_shape(
     origin: Tuple[int, ...] = origin,
     *,
     backend: str,
-    dtype: DTypes = np.float64,
+    dtype: DTypes = Float,
     mask: Optional[Tuple[bool, ...]] = None,
 ) -> Field:
     """Create a new gt4py storage of a given shape filled with zeros.
@@ -357,7 +354,7 @@ def k_split_run(func, data, k_indices, splitvars_values):
         data.update(splitvars)
         data["kstart"] = ki
         data["nk"] = nk
-        logger.debug(
+        pace_log.debug(
             "Running kstart: {}, num k:{}, variables:{}".format(ki, nk, splitvars)
         )
         func(**data)

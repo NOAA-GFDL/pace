@@ -4,7 +4,7 @@ import pace.dsl.gt4py_utils as utils
 import pace.util
 from pace.dsl.dace.orchestration import orchestrate
 from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import FloatField
+from pace.dsl.typing import Float, FloatField
 from pace.fv3core.stencils.fillz import FillNegativeTracerValues
 from pace.fv3core.stencils.map_single import MapSingle
 from pace.util import X_DIM, Y_DIM, Z_DIM
@@ -30,7 +30,11 @@ class MapNTracer:
             dace_compiletime_args=["tracers"],
         )
         self._nq = int(nq)
-        self._qs = quantity_factory.zeros([X_DIM, Y_DIM, Z_DIM], units="unknown")
+        self._qs = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_DIM],
+            units="unknown",
+            dtype=Float,
+        )
 
         kord_tracer = [kord] * self._nq
         kord_tracer[5] = 9  # qcld

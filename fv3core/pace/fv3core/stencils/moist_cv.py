@@ -9,7 +9,7 @@ from gt4py.cartesian.gtscript import (
 )
 
 import pace.util.constants as constants
-from pace.dsl.typing import FloatField
+from pace.dsl.typing import Float, FloatField
 
 
 @gtscript.function
@@ -58,7 +58,7 @@ def moist_pt_func(
     cappa: FloatField,
     delp: FloatField,
     delz: FloatField,
-    r_vir: float,
+    r_vir: Float,
 ):
     cvm, gz = moist_cv_nwat6_fn(
         qvapor, qliquid, qrain, qsnow, qice, qgraupel
@@ -72,11 +72,11 @@ def moist_pt_func(
 @gtscript.function
 def last_pt(
     pt: FloatField,
-    dtmp: float,
+    dtmp: Float,
     pkz: FloatField,
     gz: FloatField,
     qv: FloatField,
-    zvir: float,
+    zvir: Float,
 ):
     return (pt + dtmp * pkz) / ((1.0 + zvir * qv) * (1.0 - gz))
 
@@ -91,8 +91,8 @@ def moist_pt_last_step(
     gz: FloatField,
     pt: FloatField,
     pkz: FloatField,
-    dtmp: float,
-    r_vir: float,
+    dtmp: Float,
+    r_vir: Float,
 ):
     """
     Args:
@@ -142,7 +142,7 @@ def moist_pkz(
     cappa: FloatField,
     delp: FloatField,
     delz: FloatField,
-    r_vir: float,
+    r_vir: Float,
 ):
     """
     Args:

@@ -11,7 +11,7 @@ from pace.dsl.dace.dace_config import DaceConfig, DaCeOrchestration
 from pace.dsl.gt4py_utils import make_storage_from_shape
 from pace.dsl.stencil import FrozenStencil, _convert_quantities_to_storage
 from pace.dsl.stencil_config import CompilationConfig, StencilConfig
-from pace.dsl.typing import FloatField
+from pace.dsl.typing import Float, FloatField
 
 
 def get_stencil_config(
@@ -241,6 +241,7 @@ def test_frozen_stencil_kwargs_passed_to_init(
         externals={},
         **config.stencil_kwargs(func=copy_stencil),
         build_info={},
+        dtypes={float: Float},
     )
 
 

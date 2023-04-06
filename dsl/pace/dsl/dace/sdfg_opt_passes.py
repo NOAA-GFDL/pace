@@ -1,9 +1,6 @@
-import logging
-
 import dace
 
-
-logger = logging.getLogger(__name__)
+from pace.util.logging import pace_log
 
 
 def splittable_region_expansion(sdfg: dace.SDFG, verbose: bool = False):
@@ -24,4 +21,4 @@ def splittable_region_expansion(sdfg: dace.SDFG, verbose: bool = False):
                     "K",
                 ]
                 if verbose:
-                    logger.info(f"Reordered schedule for {node.label}")
+                    pace_log.info(f"Reordered schedule for {node.label}")
