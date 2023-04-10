@@ -2,6 +2,7 @@ from functools import wraps
 from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union
 
 import gt4py
+import gt4py.cartesian.config as gt_config
 import numpy as np
 
 from pace.dsl.typing import DTypes, Field, Float
@@ -483,3 +484,11 @@ def split_cartesian_into_storages(var: np.ndarray) -> Sequence[np.ndarray]:
             asarray(var, type(var))[:, :, cart],
         )
     return var_data
+
+
+def cache_path(rank: int) -> str:
+    rank_str = f"_{rank:06d}"
+    return (
+        f"{gt_config.cache_settings['root_path']}"
+        f"/{gt_config.cache_settings['dir_name']}{rank_str}"
+    )

@@ -5,6 +5,7 @@ from dace.sdfg import SDFG
 
 import pace.util
 from pace.dsl.dace.dace_config import DaceConfig, DaCeOrchestration
+from pace.dsl.gt4py_utils import cache_path
 
 
 ################################################
@@ -124,9 +125,6 @@ def get_sdfg_path(
             )
         return sdfg_file_path
 
-    # Case of loading a precompiled .so - lookup using GT_CACHE
-    from gt4py.cartesian import config as gt_config
-
     if config.rank_size > 1:
         rank = config.my_rank
         rank_str = f"_{config.target_rank:06d}"
@@ -134,10 +132,7 @@ def get_sdfg_path(
         rank = 0
         rank_str = f"_{rank:06d}"
 
-    sdfg_dir_path = (
-        f"{gt_config.cache_settings['root_path']}"
-        f"/.gt_cache{rank_str}/dacecache/{daceprog_name}"
-    )
+    sdfg_dir_path = f"{cache_path(rank)}/dacecache/{daceprog_name}"
     if not os.path.isdir(sdfg_dir_path):
         raise RuntimeError(f"Precompiled SDFG is missing at {sdfg_dir_path}")
 

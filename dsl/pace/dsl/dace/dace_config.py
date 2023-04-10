@@ -5,7 +5,7 @@ import dace.config
 from dace.codegen.compiled_sdfg import CompiledSDFG
 from dace.frontend.python.parser import DaceProgram
 
-from pace.dsl.gt4py_utils import is_gpu_backend
+from pace.dsl.gt4py_utils import cache_path, is_gpu_backend
 from pace.util._optional_imports import cupy as cp
 from pace.util.communicator import CubedSphereCommunicator
 
@@ -197,6 +197,8 @@ class DaceConfig:
             self.rank_size = 1
             self.target_rank = 0
             self.layout = (1, 1)
+
+        dace.config.Config.set("default_build_folder", value=cache_path(self.my_rank))
 
         set_distributed_caches(self)
 
