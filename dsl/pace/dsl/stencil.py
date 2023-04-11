@@ -16,7 +16,6 @@ from typing import (
     cast,
 )
 
-import dace
 import gt4py
 import numpy as np
 from gt4py.cartesian import gtscript
@@ -321,14 +320,6 @@ class FrozenStencil(SDFGConvertible):
         self.stencil_object = None
 
         self._argument_names = tuple(inspect.getfullargspec(func).args)
-
-        if "dace" in self.stencil_config.compilation_config.backend:
-            dace.Config.set(
-                "default_build_folder",
-                value="{gt_cache}/dacecache".format(
-                    gt_cache=gt4py.cartesian.config.cache_settings["dir_name"]
-                ),
-            )
 
         assert (
             len(self._argument_names) > 0
