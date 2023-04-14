@@ -64,7 +64,7 @@ N_HALO_DEFAULT = 3
 # The FV3GFS model ships with two sets of constants, one used in the GFS physics
 # package and the other used for the Dycore. Their difference are small but significant
 # Our Fortran executable on GCE has GFS_PHYS=True
-if CONST_VERSION == ConstantVersions.GEOS:
+if CONST_VERSION == "GEOS":
     RADIUS = 6.371e6
     PI = 3.14159265358979323846
     OMEGA = 2.0 * PI / 86164.0
@@ -78,7 +78,7 @@ if CONST_VERSION == ConstantVersions.GEOS:
     CP_AIR = RDGAS / KAPPA
     TFREEZE = 273.15
     SAT_ADJUST_THRESHOLD = 1.0e-6
-elif CONST_VERSION == ConstantVersions.GFS:
+elif CONST_VERSION == "GFS":
     RADIUS = 6.3712e6  # Radius of the Earth [m]
     PI = 3.1415926535897931
     OMEGA = 7.2921e-5  # Rotation of the earth
