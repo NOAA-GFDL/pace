@@ -1,31 +1,22 @@
 import os
-from enum import Enum, EnumMeta
+from enum import Enum
+from warnings import warn
 
 
-CONST_VERSION = os.environ.get("PACE_CONSTANTS", "GFS")
+# The FV3GFS model ships with two sets of constants, one used in the GFS physics
+# package and the other used for the Dycore. Their difference are small but significant
+# In addition the GSFC's GEOS model as its own variables
+class ConstantVersions(Enum):
+    FV3DYCORE = "FV3DYCORE"  # NOAA's FV3 dynamical core constants (original port)
+    GFS = "GFS"             # Constant as defined in NOAA GFS
+    GEOS = "GEOS"           # Constant as defined in GEOS v13
 
 
-class MetaEnum(EnumMeta):
-    def __contains__(cls, item):
-        try:
-            cls(item)
-        except ValueError:
-            return False
-        return True
-
-
-class BaseEnum(Enum, metaclass=MetaEnum):
-    pass
-
-
-class ConstantVersions(BaseEnum):
-    DEFAULT = ""
-    GEOS = "GEOS"
-    GFS = "GFS"
-
-
-if CONST_VERSION not in ConstantVersions:
-    raise NotImplementedError(f"Constant {CONST_VERSION} not implemented")
+CONST_VERSION_AS_STR = os.environ.get("PACE_CONSTANTS", "FV3DYCORE")
+try:
+    CONST_VERSION = ConstantVersions[CONST_VERSION_AS_STR]
+except KeyError as e:
+    raise RuntimeError(f"Constants {CONST_VERSION_AS_STR} is not implemented, abort.")
 
 ROOT_RANK = 0
 X_DIM = "x"
@@ -60,11 +51,7 @@ N_HALO_DEFAULT = 3
 #####################
 # Physical constants
 #####################
-
-# The FV3GFS model ships with two sets of constants, one used in the GFS physics
-# package and the other used for the Dycore. Their difference are small but significant
-# Our Fortran executable on GCE has GFS_PHYS=True
-if CONST_VERSION == "GEOS":
+if CONST_VERSION == ConstantVersions.GEOS:
     RADIUS = 6.371e6
     PI = 3.14159265358979323846
     OMEGA = 2.0 * PI / 86164.0
@@ -78,7 +65,7 @@ if CONST_VERSION == "GEOS":
     CP_AIR = RDGAS / KAPPA
     TFREEZE = 273.15
     SAT_ADJUST_THRESHOLD = 1.0e-6
-elif CONST_VERSION == "GFS":
+elif CONST_VERSION == ConstantVersions.GFS:
     RADIUS = 6.3712e6  # Radius of the Earth [m]
     PI = 3.1415926535897931
     OMEGA = 7.2921e-5  # Rotation of the earth
@@ -92,7 +79,7 @@ elif CONST_VERSION == "GFS":
     KAPPA = RDGAS / CP_AIR  # Specific heat capacity of dry air at
     TFREEZE = 273.15
     SAT_ADJUST_THRESHOLD = 1.0e-8
-else:
+elif CONST_VERSION == ConstantVersions.FV3DYCORE:
     RADIUS = 6371.0e3  # Radius of the Earth [m] #6371.0e3
     PI = 3.14159265358979323846  # 3.14159265358979323846
     OMEGA = 7.292e-5  # Rotation of the earth  # 7.292e-5
@@ -106,6 +93,8 @@ else:
     CP_AIR = RDGAS / KAPPA  # Specific heat capacity of dry air at
     TFREEZE = 273.16  # Freezing temperature of fresh water [K]
     SAT_ADJUST_THRESHOLD = 1.0e-8
+else:
+    raise RuntimeError("Constant selector failed, bad code.")
 
 DZ_MIN = 2.0
 CV_AIR = CP_AIR - RDGAS  # Heat capacity of dry air at constant volume
