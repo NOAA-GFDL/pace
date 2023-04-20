@@ -1,7 +1,7 @@
 import os
 from enum import Enum
 from warnings import warn
-
+from pace.util.logging import pace_log
 
 # The FV3GFS model ships with two sets of constants, one used in the GFS physics
 # package and the other used for the Dycore. Their difference are small but significant
@@ -11,10 +11,11 @@ class ConstantVersions(Enum):
     GFS = "GFS"             # Constant as defined in NOAA GFS
     GEOS = "GEOS"           # Constant as defined in GEOS v13
 
-
 CONST_VERSION_AS_STR = os.environ.get("PACE_CONSTANTS", "FV3DYCORE")
+
 try:
     CONST_VERSION = ConstantVersions[CONST_VERSION_AS_STR]
+    pace_log.info(f"Constant selected: {CONST_VERSION}")
 except KeyError as e:
     raise RuntimeError(f"Constants {CONST_VERSION_AS_STR} is not implemented, abort.")
 
