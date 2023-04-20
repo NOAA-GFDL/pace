@@ -19,6 +19,10 @@ try:
 except KeyError as e:
     raise RuntimeError(f"Constants {CONST_VERSION_AS_STR} is not implemented, abort.")
 
+#####################
+# Common constants
+#####################
+
 ROOT_RANK = 0
 X_DIM = "x"
 X_INTERFACE_DIM = "x_interface"
@@ -48,6 +52,22 @@ EDGE_BOUNDARY_TYPES = (NORTH, SOUTH, WEST, EAST)
 CORNER_BOUNDARY_TYPES = (NORTHWEST, NORTHEAST, SOUTHWEST, SOUTHEAST)
 BOUNDARY_TYPES = EDGE_BOUNDARY_TYPES + CORNER_BOUNDARY_TYPES
 N_HALO_DEFAULT = 3
+
+#######################
+# Tracers configuration
+#######################
+
+# nq is actually given by ncnst - pnats, where those are given in atmosphere.F90 by:
+# ncnst = Atm(mytile)%ncnst
+# pnats = Atm(mytile)%flagstruct%pnats
+# here we hard-coded it because 8 is the only supported value, refactor this later!
+if CONST_VERSION == ConstantVersions.GEOS:
+    # 'qlcd' is exchanged in GEOS
+    NQ = 9 
+elif ( CONST_VERSION == ConstantVersions.GFS or CONST_VERSION == ConstantVersions.FV3DYCORE ):
+    NQ = 8
+else:
+    raise RuntimeError("Constant selector failed, bad code.")
 
 #####################
 # Physical constants
