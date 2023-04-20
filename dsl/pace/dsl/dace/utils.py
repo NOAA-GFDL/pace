@@ -1,15 +1,22 @@
 import time
 from dataclasses import dataclass, field
-from typing import Dict, List
+from typing import Dict, List, Optional
 
 import dace
+import numpy as np
 from dace.transformation.helpers import get_parent_map
+from gt4py.cartesian.gtscript import PARALLEL, computation, interval
 
 from pace.dsl.dace.dace_config import DaceConfig
+from pace.dsl.stencil import CompilationConfig, FrozenStencil, StencilConfig
+from pace.dsl.typing import Float, FloatField
+from pace.util._optional_imports import cupy as cp
 from pace.util.logging import pace_log
 
 
+# ----------------------------------------------------------
 # Rough timer & log for major operations of DaCe build stack
+# ----------------------------------------------------------
 class DaCeProgress:
     """Timer and log to track build progress"""
 
@@ -48,6 +55,9 @@ def _is_ref(sd: dace.sdfg.SDFG, aname: str):
     return found
 
 
+# ----------------------------------------------------------
+# Memory analyser from SDFG
+# ----------------------------------------------------------
 @dataclass
 class ArrayReport:
     name: str = ""
@@ -175,19 +185,38 @@ def memory_static_analysis_from_path(sdfg_path: str, detail_report=False) -> str
     )
 
 
-# TODO (floriand): in order for the timing analysis to be realistic the reference
-# bandwidth of the hardware should be measured with GT4Py & simple in/out copy
-# stencils. This allows to both measure the _actual_ deployed hardware and
-# size it against the current GT4Py version.
-# Below we bypass this needed automation by writing the P100 bw on Piz Daint
-# measured with the above strategy.
-# A better tool would allow this measure with a simple command and allow
-# a one command that measure bw & report kernel analysis in one command
-_HARDWARE_BW_GB_S = {"P100": 492.0}
+# ----------------------------------------------------------
+# Theoritical bandwith from SDFG
+# ----------------------------------------------------------
+def copy_defn(q_in: FloatField, q_out: FloatField):
+    with computation(PARALLEL), interval(...):
+        q_in = q_out
+
+
+class MaxBandwithBenchmarkProgram:
+    def __init__(self, size, backend) -> None:
+        from pace.dsl.dace.orchestration import DaCeOrchestration, orchestrate
+
+        dconfig = DaceConfig(None, backend, orchestration=DaCeOrchestration.BuildAndRun)
+        c = CompilationConfig(backend=backend)
+        s = StencilConfig(dace_config=dconfig, compilation_config=c)
+        self.copy_stencil = FrozenStencil(
+            func=copy_defn,
+            origin=(0, 0, 0),
+            domain=size,
+            stencil_config=s,
+        )
+        orchestrate(obj=self, config=dconfig)
+
+    def __call__(self, A, B, n: int):
+        for i in dace.nounroll(range(n)):
+            self.copy_stencil(A, B)
 
 
 def kernel_theoretical_timing(
-    sdfg: dace.sdfg.SDFG, hardware="P100", hardware_bw_in_Gb_s=None
+    sdfg: dace.sdfg.SDFG,
+    hardware_bw_in_GB_s=None,
+    backend=None,
 ) -> Dict[str, float]:
     """Compute a lower timing bound for kernels with the following hypothesis:
 
@@ -197,6 +226,37 @@ def kernel_theoretical_timing(
     - Memory pressure is mostly in read/write from global memory, inner scalar & shared
       memory is not counted towards memory movement.
     """
+    if not hardware_bw_in_GB_s:
+        size = np.array(sdfg.arrays["__g_self__w"].shape)
+        print(
+            f"Calculating experimental hardware bandwith on {size}"
+            f" arrays at {Float} precision..."
+        )
+        bench = MaxBandwithBenchmarkProgram(size, backend)
+        if backend == "dace:gpu":
+            A = cp.ones(size, dtype=Float)
+            B = cp.ones(size, dtype=Float)
+        else:
+            A = np.ones(size, dtype=Float)
+            B = np.ones(size, dtype=Float)
+        n = 1000
+        m = 4
+        dt = []
+        bench(A, B, n)
+        # Time
+        for _ in range(m):
+            s = time.time()
+            bench(A, B, n)
+            dt.append((time.time() - s) / n)
+        memory_size_in_b = np.prod(size) * np.dtype(Float).itemsize * 8
+        bandwidth_in_bytes_s = memory_size_in_b / np.median(dt)
+        print(
+            f"Hardware bandwith computed: {bandwidth_in_bytes_s/(1024*1024*1024)} GB/s"
+        )
+    else:
+        bandwidth_in_bytes_s = hardware_bw_in_GB_s * 1024 * 1024 * 1024
+        print(f"Given hardware bandwith: {bandwidth_in_bytes_s/(1024*1024*1024)} GB/s")
+
     allmaps = [
         (me, state)
         for me, state in sdfg.all_nodes_recursive()
@@ -228,19 +288,6 @@ def kernel_theoretical_timing(
             ]
         )
 
-        # Compute hardware memory bandwidth in bytes/us
-        if hardware_bw_in_Gb_s and hardware in _HARDWARE_BW_GB_S.keys():
-            raise NotImplementedError("can't specify hardware bandwidth and hardware")
-        if hardware_bw_in_Gb_s:
-            bandwidth_in_bytes_s = hardware_bw_in_Gb_s * 1024 * 1024 * 1024
-        elif hardware in _HARDWARE_BW_GB_S.keys():
-            # Time it has to take (at least): bytes / bandwidth_in_bytes_s
-            bandwidth_in_bytes_s = _HARDWARE_BW_GB_S[hardware] * 1024 * 1024 * 1024
-        else:
-            print(
-                f"Timing analysis: hardware {hardware} unknown and no bandwidth given"
-            )
-
         in_us = 1000 * 1000
 
         # Theoretical fastest timing
@@ -249,8 +296,9 @@ def kernel_theoretical_timing(
         except TypeError:
             newresult_in_us = (alldata_in_bytes / bandwidth_in_bytes_s) * in_us
 
+        import sympy
+
         if node.label in result:
-            import sympy
 
             newresult_in_us = sympy.Max(result[node.label], newresult_in_us).expand()
             try:
@@ -259,29 +307,56 @@ def kernel_theoretical_timing(
                 pass
 
         # Bad expansion
-        if not isinstance(newresult_in_us, float):
+        if not isinstance(newresult_in_us, sympy.core.numbers.Float) and not isinstance(
+            newresult_in_us, float
+        ):
             continue
 
-        result[node.label] = newresult_in_us
+        result[node.label] = float(newresult_in_us)
 
     return result
 
 
 def report_kernel_theoretical_timing(
-    timings: Dict[str, float], human_readable: bool = True, csv: bool = False
+    timings: Dict[str, float],
+    human_readable: bool = True,
+    out_format: Optional[str] = None,
 ) -> str:
     """Produce a human readable or CSV of the kernel timings"""
     result_string = f"Maps processed: {len(timings)}.\n"
     if human_readable:
         result_string += "Timing in microseconds  Map name:\n"
         result_string += "\n".join(f"{v:.2f}\t{k}," for k, v in sorted(timings.items()))
-    if csv:
-        result_string += "#Map name,timing in microseconds\n"
-        result_string += "\n".join(f"{k},{v}," for k, v in sorted(timings.items()))
+    if out_format == "csv":
+        csv_string = ""
+        csv_string += "#Map name,timing in microseconds\n"
+        csv_string += "\n".join(f"{k},{v}," for k, v in sorted(timings.items()))
+        with open("kernel_theoretical_timing.csv", "w") as f:
+            f.write(csv_string)
+    elif out_format == "json":
+        import json
+
+        with open("kernel_theoretical_timing.json", "w") as f:
+            json.dump(timings, f, indent=2)
+
     return result_string
 
 
-def kernel_theoretical_timing_from_path(sdfg_path: str) -> str:
+def kernel_theoretical_timing_from_path(
+    sdfg_path: str,
+    hardware_bw_in_GB_s: Optional[float] = None,
+    backend: Optional[str] = None,
+    output_format: Optional[str] = None,
+) -> str:
     """Load an SDFG and report the theoretical kernel timings"""
-    timings = kernel_theoretical_timing(dace.SDFG.from_file(sdfg_path))
-    return report_kernel_theoretical_timing(timings, human_readable=True, csv=False)
+    print(f"Running kernel_theoretical_timing for {sdfg_path}")
+    timings = kernel_theoretical_timing(
+        dace.SDFG.from_file(sdfg_path),
+        hardware_bw_in_GB_s=hardware_bw_in_GB_s,
+        backend=backend,
+    )
+    return report_kernel_theoretical_timing(
+        timings,
+        human_readable=True,
+        out_format=output_format,
+    )

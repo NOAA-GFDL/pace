@@ -21,17 +21,10 @@ from pace.fv3core.stencils.dyn_core import AcousticDynamics
 from pace.fv3core.stencils.neg_adj3 import AdjustNegativeTracerMixingRatio
 from pace.fv3core.stencils.remapping import LagrangianToEulerian
 from pace.stencils.c2l_ord import CubedToLatLon
-from pace.util import X_DIM, Y_DIM, Z_INTERFACE_DIM, Timer
+from pace.util import X_DIM, Y_DIM, Z_INTERFACE_DIM, Timer, constants
 from pace.util.grid import DampingCoefficients, GridData
 from pace.util.logging import pace_log
 from pace.util.mpi import MPI
-
-
-# nq is actually given by ncnst - pnats, where those are given in atmosphere.F90 by:
-# ncnst = Atm(mytile)%ncnst
-# pnats = Atm(mytile)%flagstruct%pnats
-# here we hard-coded it because 8 is the only supported value, refactor this later!
-NQ = 8  # state.nq_tot - spec.namelist.dnats
 
 
 def pt_to_potential_density_pt(
@@ -179,6 +172,8 @@ class DynamicalCore:
             method_to_orchestrate="_checkpoint_tracer_advection_out",
             dace_compiletime_args=["state"],
         )
+        if timestep == timedelta(seconds=0):
+            raise RuntimeError("Bad dynamical core configuration: bdt is 0")
         # nested and stretched_grid are options in the Fortran code which we
         # have not implemented, so they are hard-coded here.
         self.call_checkpointer = checkpointer is not None
@@ -207,7 +202,7 @@ class DynamicalCore:
         )
 
         self.tracers = {}
-        for name in utils.tracer_variables[0:NQ]:
+        for name in utils.tracer_variables[0:constants.NQ]:
             self.tracers[name] = state.__dict__[name]
 
         temporaries = fvdyn_temporaries(quantity_factory)
@@ -282,7 +277,7 @@ class DynamicalCore:
         )
         self._cappa = self.acoustic_dynamics.cappa
 
-        if not (not self.config.inline_q and NQ != 0):
+        if not (not self.config.inline_q and constants.NQ != 0):
             raise NotImplementedError("tracer_2d not implemented, turn on z_tracer")
         self._adjust_tracer_mixing_ratio = AdjustNegativeTracerMixingRatio(
             stencil_factory,
@@ -296,7 +291,7 @@ class DynamicalCore:
             quantity_factory=quantity_factory,
             config=config.remapping,
             area_64=grid_data.area_64,
-            nq=NQ,
+            nq=constants.NQ,
             pfull=self._pfull,
             tracers=self.tracers,
             checkpointer=checkpointer,
@@ -546,6 +541,11 @@ class DynamicalCore:
                     log_on_rank_0("Remapping")
                 with timer.clock("Remapping"):
                     self._checkpoint_remapping_in(state)
+                    
+                    # TODO: When NQ=9, we shouldn't need to pass qcld explicitly
+                    #       since it's in self.tracers. It should not be an issue since
+                    #       we don't have self.tracers & qcld computation at the same time
+                    #       When NQ=8, we do need qcld passed explicitely
                     self._lagrangian_to_eulerian_obj(
                         self.tracers,
                         state.pt,

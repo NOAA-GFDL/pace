@@ -184,7 +184,7 @@ class TranslateInitCase(ParallelTranslateBaseSlicing):
 
     def compute_parallel(self, inputs, communicator):
         state = {}
-        full_shape = (*self.grid.domain_shape_full(add=(1, 1, 1)), fv_dynamics.NQ)
+        full_shape = (*self.grid.domain_shape_full(add=(1, 1, 1)), pace.util.constants.NQ)
         for variable, properties in self.outputs.items():
             dims = properties["dims"]
             state[variable] = fv3util.Quantity(

@@ -1,7 +1,6 @@
 DaCe Orchestration in Pace: a primer
 ====================================
 
-
 Fundamentals
 ------------
 
@@ -10,12 +9,14 @@ Full program optimziation with DaCe is the process of turning all Python and GT4
 _Orchestration_ is our own wording for full program optimization. We only _orchestrate_ the runtime code of the model, e.g. everything in the `__call__` method of the module. All code in `__init__` is executed like a normal gt backend.
 
 At the highest level in Pace, to turn on orchestration you need to flip the `FV3_DACEMODE` to an orchestrated options _and_ run a `dace:*` backend (it will error out if run anything else). Option for `FV3_DACEMODE` are:
+
 - _Python_: default, turns orchestration off.
 - _Build_: build the SDFG then exit without running. See Build for limitation of build strategy.
 - _BuildAndRun_: as above, but distribute the build and run.
 - _Run_: tries to execute, errors out if the cache don't exists.
 
 Code is orchestrated two ways:
+
 - functions are orchestrated via `orchestrate_function` decorator,
 - methods are orchestrate via the `orchestrate` function (e.g. `pace.driver.Driver._critical_path_step_all`)
 
@@ -29,28 +30,30 @@ File structure
 --------------
 
 `pace.dsl.dace.*` carries the structure for orchestration.
-* `build.py`: tooling for distributed build & SDFG load.
-* `dace_config.py`: DaCeConfig & DaCeOrchestration enum.
-* `orchestration.py`: main code, takes care of orchestration .scaffolding, build pipeline (including parsing) and execution.
-* `sdfg_opt_passes.py`: custom optimization pass for Pace, used in the build pipeline.
-* `utils.py`: as every "utils" or "misc" or "common" file, this should not exists and collect tools & functions I lazily didn't put in a proper place.
-* `wrapped_halo_exchange.py`: a callback-ready halo exchanger, which is our current solution for keeping the Halo Exchange in python (because of prior optimization) in orchestration.
+
+- `build.py`: tooling for distributed build & SDFG load.
+- `dace_config.py`: DaCeConfig & DaCeOrchestration enum.
+- `orchestration.py`: main code, takes care of orchestration .scaffolding, build pipeline (including parsing) and execution.
+- `sdfg_opt_passes.py`: custom optimization pass for Pace, used in the build pipeline.
+- `utils.py`: as every "utils" or "misc" or "common" file, this should not exists and collect tools & functions I lazily didn't put in a proper place.
+- `wrapped_halo_exchange.py`: a callback-ready halo exchanger, which is our current solution for keeping the Halo Exchange in python (because of prior optimization) in orchestration.
 
 DaCe Config
 -----------
 
 DaCe has many configuration options. When executing, it drops or reads a `dace.conf` to get/set options for execution. Because this is a performance-portable model and not a DaCe model, decision has been taken to freeze the options.
 
-`pace.dsl.dace.dace_config` carries a set of tested options for DaCe, with doc. It also takes care of removing the `dace.conf` that will be generated automatically when using DaCe. Documentation should be self-explanatory but a good one to remember is:
+`pace.dsl.dace.dace_config` carries a set of tested options for DaCe, with doc. It also takes care of removing the `dace.conf` that will be generated automatically when using DaCe.
 
-```python
-# Enable to debug GPU failures
-dace.config.Config.set("compiler", "cuda", "syncdebug", value=False)
-```
+Orchestration can be debugged by using the env var `PACE_DACE_DEBUG`.
 When set to `True`, this will drop a few checks:
-- `sdfg_nan_checker`, which drops a NaN check after _every_ computation on field _written_.
-- `negative_qtracers_checker` drops a check for `tracer < -1e8` for every written field named one of the tracers
-- `negative_delp_checker` drops a check for `delp < -1e8` for every written field named `delp*`
+
+- `sdfg_nan_checker`, which drops a NaN check after _every_ computation on field _written_,
+- `negative_qtracers_checker` drops a check for `tracer < -1e8` for every written field named one of the tracers,
+- `negative_delp_checker` drops a check for `delp < -1e8` for every written field named `delp*`,
+- `trace_all_outputs_at_index` drops a print on every variable at a given index to track numerical protection,
+- `sdfg_execution_progress`, drops a print after each kernel. Useful when encurring bad crash with no stacktrace,
+- insert a CUDA_ERROR_CHECK in C after each kernel.
 See `dsl/pace/dsl/dace/utils.py` for details.
 
 Build
@@ -59,19 +62,20 @@ Build
 Orchestrated code won't build the same way the gt backend builds. The build pipeline will lead to a single folder with code & `.so`. In the case of the driver main call, this would be in `.gt_cache_*/dacecache/pace_driver_driver_Driver__critical_path_step_all`.
 
 Code goes through phases before being ready to execute:
-* stencils are `parsed` into non-expanded SDFG (gt4py takes care of this),
-* all code is `parsed` into a single SDFG with stencils' SDFG included (dace takes care of this and the following steps),
-* a first `simplify` is applied to the SDFG to optimize the memory flow,
-* we apply the custom `splittable_region_expansion` which optimize small regions (_major_ speed up),
-* `expand` will expand all the stencils to a fully workable SDFG (with tasklet filled)
-* another `simplify` is applied,
-* the memory that can is flagged to be `pooled`,
-* [OPTIONAL] Insert debugging passes
-* `code generation` into a single file for CPU or two for GPU (a `.cpp` and a `.cu`),
-* the SDFG is analysed for memory consumption.
 
+- stencils are `parsed` into non-expanded SDFG (gt4py takes care of this),
+- all code is `parsed` into a single SDFG with stencils' SDFG included (dace takes care of this and the following steps),
+- a first `simplify` is applied to the SDFG to optimize the memory flow,
+- we apply the custom `splittable_region_expansion` which optimize small regions (_major_ speed up),
+- `expand` will expand all the stencils to a fully workable SDFG (with tasklet filled)
+- another `simplify` is applied,
+- the memory that can is flagged to be `pooled`,
+- [OPTIONAL] Insert debugging passes
+- `code generation` into a single file for CPU or two for GPU (a `.cpp` and a `.cu`),
+- the SDFG is analysed for memory consumption.
 
 Orchestration comes with it's own distributed compilation (could be merged with gt). It compiles the top tile and distriubutes the results to other ranks. This uses a couple of hypothesis that limits how to build/execute. The major one is that any decomposition from `(3,3)` upward will require the following workflow:
+
 - compile on `(3,3)`,
 - copy caches 0 to 8 (top tile) to target decomposition run dir,
 - execute (`FV3_DACEMODE=Run`) target decompoposition.
@@ -99,6 +103,10 @@ DaCe will optimize aas much as it can. This means any scalar with be turned into
 _Parsing errors_
 
 DaCe cannot parse _any_ dynamic Python and any code that allocates memory on the fly (think list creation). It will also complain about any arguments it can't memory describe (remember `dace_compiletime_args` ).
+
+_GT_CACHE_DIR_NAME_
+
+We do not honor the `GT_CACHE_DIR_NAME` with orchestration. `GT_CACHE_ROOT` is respected.
 
 Conclusion
 ----------
