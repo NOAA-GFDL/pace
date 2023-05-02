@@ -1,15 +1,17 @@
 import os
 from enum import Enum
-from warnings import warn
+
 from pace.util.logging import pace_log
+
 
 # The FV3GFS model ships with two sets of constants, one used in the GFS physics
 # package and the other used for the Dycore. Their difference are small but significant
 # In addition the GSFC's GEOS model as its own variables
 class ConstantVersions(Enum):
     FV3DYCORE = "FV3DYCORE"  # NOAA's FV3 dynamical core constants (original port)
-    GFS = "GFS"             # Constant as defined in NOAA GFS
-    GEOS = "GEOS"           # Constant as defined in GEOS v13
+    GFS = "GFS"  # Constant as defined in NOAA GFS
+    GEOS = "GEOS"  # Constant as defined in GEOS v13
+
 
 CONST_VERSION_AS_STR = os.environ.get("PACE_CONSTANTS", "FV3DYCORE")
 
@@ -63,8 +65,10 @@ N_HALO_DEFAULT = 3
 # here we hard-coded it because 8 is the only supported value, refactor this later!
 if CONST_VERSION == ConstantVersions.GEOS:
     # 'qlcd' is exchanged in GEOS
-    NQ = 9 
-elif ( CONST_VERSION == ConstantVersions.GFS or CONST_VERSION == ConstantVersions.FV3DYCORE ):
+    NQ = 9
+elif (
+    CONST_VERSION == ConstantVersions.GFS or CONST_VERSION == ConstantVersions.FV3DYCORE
+):
     NQ = 8
 else:
     raise RuntimeError("Constant selector failed, bad code.")

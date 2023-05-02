@@ -1,5 +1,4 @@
 import abc
-import logging
 from typing import List, Mapping, Optional, Sequence, Tuple, Union, cast
 
 import numpy as np
@@ -14,8 +13,6 @@ from .quantity import Quantity, QuantityHaloSpec, QuantityMetadata
 from .types import NumpyModule
 from .utils import device_synchronize
 
-
-logger = logging.getLogger("pace.util")
 
 try:
     import cupy

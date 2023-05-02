@@ -27,7 +27,7 @@ class DaCeProgress:
 
     @classmethod
     def log(cls, prefix: str, message: str):
-        pace_log.info(f"{prefix} {message}")
+        pace_log.debug(f"{prefix} {message}")
 
     @classmethod
     def default_prefix(cls, config: DaceConfig) -> str:
@@ -299,7 +299,6 @@ def kernel_theoretical_timing(
         import sympy
 
         if node.label in result:
-
             newresult_in_us = sympy.Max(result[node.label], newresult_in_us).expand()
             try:
                 newresult_in_us = float(newresult_in_us)
