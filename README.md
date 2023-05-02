@@ -61,6 +61,12 @@ mpirun -n 6 --oversubscribe python3 -m pace.driver.run driver/examples/configs/b
 
 After the run completes, you will see an output direcotry `output.zarr`. An example to visualize the output is provided in `driver/examples/plot_output.py`. See the [driver example](driver/examples/README.md) section for more details.
 
+### Environment variable configuration
+
+- `PACE_CONSTANTS`: Pace is bundled with various constants (see _util/pace/util/constants.py_).
+- `PACE_FLOAT_PRECISION`: default precision of the field & scalars in the numerics. Default to 64.
+- `PACE_LOGLEVEL`: logging level to display (DEBUG, INFO, WARNING, ERROR, CRITICAL). Default to INFO.
+
 ## Quickstart - Docker
 ### Build
 

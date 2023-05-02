@@ -1,15 +1,19 @@
 import logging
+import os
 import sys
 
 from mpi4py import MPI
 
 
+LOGLEVEL = os.environ.get("PACE_LOGLEVEL", "INFO").upper()
+
+
 def _pace_logger():
     name_log = logging.getLogger(__name__)
-    name_log.setLevel(logging.DEBUG)
+    name_log.setLevel(LOGLEVEL)
 
     handler = logging.StreamHandler(sys.stdout)
-    handler.setLevel(logging.DEBUG)
+    handler.setLevel(LOGLEVEL)
     formatter = logging.Formatter(
         fmt=(
             f"%(asctime)s|%(levelname)s|rank {MPI.COMM_WORLD.Get_rank()}|"

@@ -10,11 +10,9 @@ from pace.util.communicator import Communicator
 
 from .. import _xarray as xr
 from ..filesystem import get_fs
+from ..logging import pace_log
 from ..quantity import Quantity
 from .convert import to_numpy
-
-
-logger = logging.getLogger(__name__)
 
 
 class _TimeChunkedVariable:
@@ -46,7 +44,6 @@ class _TimeChunkedVariable:
 
 
 class _ChunkedNetCDFWriter:
-
     FILENAME_FORMAT = "state_{chunk:04d}_tile{tile}.nc"
 
     def __init__(
@@ -62,7 +59,7 @@ class _ChunkedNetCDFWriter:
         self._time_units: Optional[str] = None
 
     def append(self, state):
-        logger.debug("appending at time %d", self._i_time)
+        pace_log.debug("appending at time %d", self._i_time)
         state = {**state}  # copy so we don't mutate the input
         time = state.pop("time", None)
         if self._chunked is None:
@@ -75,7 +72,7 @@ class _ChunkedNetCDFWriter:
                 self._chunked[name].append(quantity)
         self._times.append(time)
         if (self._i_time + 1) % self._time_chunk_size == 0:
-            logger.debug("flushing on append at time %d", self._i_time)
+            pace_log.debug("flushing on append at time %d", self._i_time)
             self.flush()
         self._i_time += 1
 
