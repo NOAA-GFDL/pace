@@ -7,7 +7,6 @@ from gt4py.cartesian.gtscript import PARALLEL, computation, interval
 import pace.dsl.gt4py_utils as utils
 import pace.fv3core.stencils.moist_cv as moist_cv
 import pace.util
-import pace.util.constants as constants
 from pace.dsl.dace.orchestration import dace_inhibitor, orchestrate
 from pace.dsl.dace.wrapped_halo_exchange import WrappedHaloUpdater
 from pace.dsl.stencil import StencilFactory
@@ -202,7 +201,7 @@ class DynamicalCore:
         )
 
         self.tracers = {}
-        for name in utils.tracer_variables[0:constants.NQ]:
+        for name in utils.tracer_variables[0 : constants.NQ]:
             self.tracers[name] = state.__dict__[name]
 
         temporaries = fvdyn_temporaries(quantity_factory)
@@ -541,10 +540,11 @@ class DynamicalCore:
                     log_on_rank_0("Remapping")
                 with timer.clock("Remapping"):
                     self._checkpoint_remapping_in(state)
-                    
+
                     # TODO: When NQ=9, we shouldn't need to pass qcld explicitly
                     #       since it's in self.tracers. It should not be an issue since
-                    #       we don't have self.tracers & qcld computation at the same time
+                    #       we don't have self.tracers & qcld computation at
+                    #       the same time.
                     #       When NQ=8, we do need qcld passed explicitely
                     self._lagrangian_to_eulerian_obj(
                         self.tracers,
