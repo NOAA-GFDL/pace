@@ -21,7 +21,7 @@ from pace.fv3core.stencils.dyn_core import AcousticDynamics
 from pace.fv3core.stencils.neg_adj3 import AdjustNegativeTracerMixingRatio
 from pace.fv3core.stencils.remapping import LagrangianToEulerian
 from pace.stencils.c2l_ord import CubedToLatLon
-from pace.util import X_DIM, Y_DIM, Z_INTERFACE_DIM, Timer, constants
+from pace.util import X_DIM, Y_DIM, Z_INTERFACE_DIM, Timer
 from pace.util.grid import DampingCoefficients, GridData
 from pace.util.logging import pace_log
 from pace.util.mpi import MPI
@@ -202,7 +202,7 @@ class DynamicalCore:
         )
 
         self.tracers = {}
-        for name in utils.tracer_variables[0:constants.NQ]:
+        for name in utils.tracer_variables[0 : constants.NQ]:
             self.tracers[name] = state.__dict__[name]
 
         temporaries = fvdyn_temporaries(quantity_factory)
@@ -541,10 +541,11 @@ class DynamicalCore:
                     log_on_rank_0("Remapping")
                 with timer.clock("Remapping"):
                     self._checkpoint_remapping_in(state)
-                    
+
                     # TODO: When NQ=9, we shouldn't need to pass qcld explicitly
                     #       since it's in self.tracers. It should not be an issue since
-                    #       we don't have self.tracers & qcld computation at the same time
+                    #       we don't have self.tracers & qcld computation at the same
+                    #       time
                     #       When NQ=8, we do need qcld passed explicitely
                     self._lagrangian_to_eulerian_obj(
                         self.tracers,
