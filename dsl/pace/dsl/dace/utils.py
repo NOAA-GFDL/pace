@@ -1,3 +1,4 @@
+import json
 import time
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional
@@ -296,10 +297,12 @@ def kernel_theoretical_timing(
         except TypeError:
             newresult_in_us = (alldata_in_bytes / bandwidth_in_bytes_s) * in_us
 
+        # We keep sympy import here because sympy is known to be a problematic
+        # import and an heavy module which should be avoided if possible.
+        # TODO: refactor it out by shadow-coding the sympy.Max/Eval functions
         import sympy
 
         if node.label in result:
-
             newresult_in_us = sympy.Max(result[node.label], newresult_in_us).expand()
             try:
                 newresult_in_us = float(newresult_in_us)
@@ -334,8 +337,6 @@ def report_kernel_theoretical_timing(
         with open("kernel_theoretical_timing.csv", "w") as f:
             f.write(csv_string)
     elif out_format == "json":
-        import json
-
         with open("kernel_theoretical_timing.json", "w") as f:
             json.dump(timings, f, indent=2)
 
