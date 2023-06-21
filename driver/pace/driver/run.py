@@ -6,8 +6,8 @@ from typing import Optional
 import click
 import yaml
 
-from pace.util.mpi import MPI
 from pace.util import pace_log
+from pace.util.mpi import MPI
 
 from .driver import Driver, DriverConfig
 
