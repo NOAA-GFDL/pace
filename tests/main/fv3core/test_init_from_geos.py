@@ -7,7 +7,6 @@ from pace.util.null_comm import NullComm
 
 
 def test_geos_wrapper():
-
     namelist_dict = {
         "stencil_config": {
             "compilation_config": {
@@ -82,7 +81,12 @@ def test_geos_wrapper():
     comm = NullComm(rank=0, total_ranks=6, fill_value=0.0)
     backend = "numpy"
 
-    wrapper = fv3core.GeosDycoreWrapper(namelist, comm, backend)
+    wrapper = fv3core.GeosDycoreWrapper(
+        namelist=namelist,
+        comm=comm,
+        backend=backend,
+        bdt=namelist_dict["dt_atmos"],
+    )
     nhalo = 3
     shape_centered = (
         namelist["nx_tile"] + 2 * nhalo,
@@ -191,31 +195,33 @@ def test_geos_wrapper():
     )
     diss_estd = np.ones(shape_centered)
 
-    output_dict = wrapper(
-        u,
-        v,
-        w,
-        delz,
-        pt,
-        delp,
-        q,
-        ps,
-        pe,
-        pk,
-        peln,
-        pkz,
-        phis,
-        q_con,
-        omga,
-        ua,
-        va,
-        uc,
-        vc,
-        mfxd,
-        mfyd,
-        cxd,
-        cyd,
-        diss_estd,
+    timings = {}
+    output_dict, timings = wrapper(
+        timings=timings,
+        u=u,
+        v=v,
+        w=w,
+        delz=delz,
+        pt=pt,
+        delp=delp,
+        q=q,
+        ps=ps,
+        pe=pe,
+        pk=pk,
+        peln=peln,
+        pkz=pkz,
+        phis=phis,
+        q_con=q_con,
+        omga=omga,
+        ua=ua,
+        va=va,
+        uc=uc,
+        vc=vc,
+        mfxd=mfxd,
+        mfyd=mfyd,
+        cxd=cxd,
+        cyd=cyd,
+        diss_estd=diss_estd,
     )
 
     assert isinstance(output_dict["u"], np.ndarray)

@@ -1,4 +1,3 @@
-import logging
 from datetime import datetime, timedelta
 from typing import List, Tuple, Union
 
@@ -7,11 +6,10 @@ import cftime
 from .. import _xarray as xr
 from .. import constants, utils
 from .._optional_imports import cupy, zarr
+from ..logging import pace_log
 from ..partitioner import Partitioner, subtile_slice
 from .convert import to_numpy
 
-
-logger = logging.getLogger("pace.util")
 
 __all__ = ["ZarrMonitor"]
 
@@ -238,7 +236,7 @@ class _ZarrVariableWriter:
         )
 
         from_slice = _get_from_slice(target_slice)
-        logger.debug(
+        pace_log.debug(
             f"assigning data from subtile slice {from_slice} to "
             f"target slice {target_slice}"
         )
@@ -310,7 +308,7 @@ class _ZarrConstantWriter(_ZarrVariableWriter):
         )
 
         from_slice = _get_from_slice(target_slice)
-        logger.debug(
+        pace_log.debug(
             f"assigning data from subtile slice {from_slice} to "
             f"target slice {target_slice}"
         )
@@ -332,7 +330,6 @@ class _ZarrConstantWriter(_ZarrVariableWriter):
 
 
 class _ZarrTimeWriter(_ZarrVariableWriter):
-
     _TIME_CHUNK_SIZE = 1024
 
     def __init__(self, *args, **kwargs):

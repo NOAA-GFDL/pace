@@ -6,6 +6,7 @@ from typing import Optional
 import click
 import yaml
 
+from pace.util import pace_log
 from pace.util.mpi import MPI
 
 from .driver import Driver, DriverConfig
@@ -76,11 +77,13 @@ def command_line(config_path: str, log_rank: Optional[int], log_level: str):
     CONFIG_PATH is the path to a DriverConfig yaml file.
     """
     configure_logging(log_rank=log_rank, log_level=log_level)
-    logger.info("loading DriverConfig from yaml")
+    pace_log.info("loading DriverConfig from yaml")
     with open(config_path, "r") as f:
         config = yaml.safe_load(f)
         driver_config = DriverConfig.from_dict(config)
-    logging.info(f"DriverConfig loaded: {yaml.dump(dataclasses.asdict(driver_config))}")
+    pace_log.info(
+        f"DriverConfig loaded: {yaml.dump(dataclasses.asdict(driver_config))}"
+    )
     main(driver_config=driver_config)
 
 
