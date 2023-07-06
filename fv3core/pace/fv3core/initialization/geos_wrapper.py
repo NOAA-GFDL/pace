@@ -10,8 +10,8 @@ import pace.util
 from pace import fv3core
 from pace.driver.performance.collector import PerformanceCollector
 from pace.dsl.dace import DaceConfig, orchestrate
-from pace.dsl.typing import floating_point_precision
 from pace.dsl.gt4py_utils import is_gpu_backend
+from pace.dsl.typing import floating_point_precision
 from pace.util.logging import pace_log
 
 
