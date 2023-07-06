@@ -10,6 +10,7 @@ import pace.util
 from pace import fv3core
 from pace.driver.performance.collector import PerformanceCollector
 from pace.dsl.dace import DaceConfig, orchestrate
+from pace.dsl.typing import floating_point_precision
 from pace.dsl.gt4py_utils import is_gpu_backend
 from pace.util.logging import pace_log
 
@@ -136,6 +137,7 @@ class GeosDycoreWrapper:
             f"  dt     : {self.dycore_state.bdt}\n"
             f"  bridge : {self._fortran_mem_space} > {self._pace_mem_space}\n"
             f"  backend: {backend}\n"
+            f"  float  : {floating_point_precision()}bit"
             f"  orchestration: {self._is_orchestrated}\n"
             f"  sizer  : {sizer.nx}x{sizer.ny}x{sizer.nz} (halo: {sizer.n_halo})"
         )
