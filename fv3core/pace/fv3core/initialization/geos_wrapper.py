@@ -5,6 +5,7 @@ from typing import Dict, List, Tuple
 
 import f90nml
 import numpy as np
+from pace.util._optional_imports import cupy as cp
 
 import pace.util
 from pace import fv3core
@@ -132,6 +133,11 @@ class GeosDycoreWrapper:
         self.output_dict: Dict[str, np.ndarray] = {}
         self._allocate_output_dir()
 
+        device_ordinal_info = ""
+        if is_gpu_backend():
+            device_ordinal_info = (
+                f"  Device PCI bus id: {cp.cuda.Device(0).pci_bus_id}\n"
+            )
         pace_log.info(
             "Pace GEOS wrapper initialized: \n"
             f"  dt     : {self.dycore_state.bdt}\n"
@@ -139,7 +145,8 @@ class GeosDycoreWrapper:
             f"  backend: {backend}\n"
             f"  float  : {floating_point_precision()}bit"
             f"  orchestration: {self._is_orchestrated}\n"
-            f"  sizer  : {sizer.nx}x{sizer.ny}x{sizer.nz} (halo: {sizer.n_halo})"
+            f"  sizer  : {sizer.nx}x{sizer.ny}x{sizer.nz} (halo: {sizer.n_halo})\n"
+            f"  {device_ordinal_info}"
         )
 
     def _critical_path(self):
