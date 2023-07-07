@@ -5,7 +5,6 @@ from typing import Dict, List, Tuple
 
 import f90nml
 import numpy as np
-from pace.util._optional_imports import cupy as cp
 
 import pace.util
 from pace import fv3core
@@ -13,6 +12,7 @@ from pace.driver.performance.collector import PerformanceCollector
 from pace.dsl.dace import DaceConfig, orchestrate
 from pace.dsl.gt4py_utils import is_gpu_backend
 from pace.dsl.typing import floating_point_precision
+from pace.util._optional_imports import cupy as cp
 from pace.util.logging import pace_log
 
 
@@ -134,7 +134,7 @@ class GeosDycoreWrapper:
         self._allocate_output_dir()
 
         device_ordinal_info = ""
-        if is_gpu_backend():
+        if is_gpu_backend(backend):
             device_ordinal_info = (
                 f"  Device PCI bus id: {cp.cuda.Device(0).pci_bus_id}\n"
             )
