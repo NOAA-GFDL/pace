@@ -243,6 +243,8 @@ def kernel_theoretical_timing(
         n = 1000
         m = 4
         dt = []
+        # Warm up run (build, allocation)
+        # to remove from timing the common runtime
         bench(A, B, n)
         # Time
         for _ in range(m):
