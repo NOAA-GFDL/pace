@@ -560,6 +560,7 @@ class AcousticDynamics:
                 quantity_factory=quantity_factory,
                 area=grid_data.area,
                 dp_ref=grid_data.dp_ref,
+                grid_type=config.grid_type,
             )
         )
 
