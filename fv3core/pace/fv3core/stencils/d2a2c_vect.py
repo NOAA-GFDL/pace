@@ -391,9 +391,9 @@ class DGrid2AGrid2CGridVectors:
         grid_type: int,
         dord4: bool,
     ):
-        if grid_type not in [0,4]:
+        if grid_type not in [0, 4]:
             raise NotImplementedError(f"unimplemented grid_type {grid_type}")
-        
+
         orchestrate(obj=self, config=stencil_factory.config.dace_config)
 
         grid_indexing = stencil_factory.grid_indexing
@@ -447,17 +447,25 @@ class DGrid2AGrid2CGridVectors:
 
         if (grid_type < 3) and (not nested):
             ifirst = (
-                grid_indexing.isc + 2 if grid_indexing.west_edge else grid_indexing.isc - 1
+                grid_indexing.isc + 2
+                if grid_indexing.west_edge
+                else grid_indexing.isc - 1
             )
             ilast = (
-                grid_indexing.iec - 1 if grid_indexing.east_edge else grid_indexing.iec + 2
+                grid_indexing.iec - 1
+                if grid_indexing.east_edge
+                else grid_indexing.iec + 2
             )
 
             jfirst = (
-                grid_indexing.jsc + 2 if grid_indexing.south_edge else grid_indexing.jsc - 1
+                grid_indexing.jsc + 2
+                if grid_indexing.south_edge
+                else grid_indexing.jsc - 1
             )
             jlast = (
-                grid_indexing.jec - 1 if grid_indexing.north_edge else grid_indexing.jec + 2
+                grid_indexing.jec - 1
+                if grid_indexing.north_edge
+                else grid_indexing.jec + 2
             )
         else:
             ifirst = grid_indexing.isc - 1
@@ -465,10 +473,8 @@ class DGrid2AGrid2CGridVectors:
             jfirst = grid_indexing.jsc - 1
             jlast = grid_indexing.jec + 2
 
-
         idiff = ilast - ifirst + 1
         jdiff = jlast - jfirst + 1
-        
 
         self._set_tmps = stencil_factory.from_dims_halo(
             func=set_tmps,
