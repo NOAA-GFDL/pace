@@ -877,6 +877,7 @@ class DGridShallowWaterLagrangianDynamics:
                 "mord": config.hord_mt,
                 "xt_minmax": False,
                 "yt_minmax": False,
+                "grid_type": config.grid_type,
             },
         )
         self._apply_fluxes = stencil_factory.from_dims_halo(

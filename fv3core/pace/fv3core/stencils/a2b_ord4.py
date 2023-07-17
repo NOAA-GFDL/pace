@@ -508,20 +508,17 @@ def a2b_interpolation(
 
 
 def doubly_periodic_a2b_ord4(qout: FloatField, qin: FloatField):
-    from __externals__ import i_end, i_start, j_end, j_start, replace
+    from __externals__ import replace
 
     with computation(PARALLEL), interval(...):
-        with horizontal(region[i_start : i_end + 1, j_start - 2 : j_end + 2]):
-            qx = b1 * (qin[-1, 0, 0] + qin) + b2 * (qin[-2, 0, 0] + qin[1, 0, 0])
-        with horizontal(region[i_start - 2 : i_start + 2, j_start : j_end + 1]):
-            qy = b1 * (qin[0, -1, 0] + qin) + b2 * (qin[0, -2, 0] + qin[0, 1, 0])
-        with horizontal(region[i_start : i_end + 1, j_start : j_end + 1]):
-            qout = 0.5 * (
-                a1 * (qx[0, -1, 0] + qx + qy[-1, 0, 0] + qy)
-                + a2 * (qx[0, -2, 0] + qx[0, 1, 0] + qy[-2, 0, 0] + qy[1, 0, 0])
-            )
-            if __INLINED(replace):
-                qin = qout
+        qx = b1 * (qin[-1, 0, 0] + qin) + b2 * (qin[-2, 0, 0] + qin[1, 0, 0])
+        qy = b1 * (qin[0, -1, 0] + qin) + b2 * (qin[0, -2, 0] + qin[0, 1, 0])
+        qout = 0.5 * (
+            a1 * (qx[0, -1, 0] + qx + qy[-1, 0, 0] + qy)
+            + a2 * (qx[0, -2, 0] + qx[0, 1, 0] + qy[-2, 0, 0] + qy[1, 0, 0])
+        )
+        if __INLINED(replace):
+            qin = qout
 
 
 class AGrid2BGridFourthOrder:
@@ -680,13 +677,9 @@ class AGrid2BGridFourthOrder:
                 doubly_periodic_a2b_ord4,
                 externals={
                     "replace": replace,
-                    "i_start": self._idx.isc,
-                    "i_end": self._idx.iec,
-                    "j_start": self._idx.jsc,
-                    "j_end": self._idx.jec,
                 },
-                origin=self._idx.origin_full(),
-                domain=self._idx.domain_full(),
+                origin=self._idx.origin_compute(),
+                domain=self._idx.domain_compute(),
             )
 
     def _exclude_tile_edges(self, origin, domain, dims=("x", "y")):
