@@ -1,4 +1,11 @@
-from gt4py.cartesian.gtscript import PARALLEL, computation, horizontal, interval, region
+from gt4py.cartesian.gtscript import (
+    __INLINED,
+    PARALLEL,
+    computation,
+    horizontal,
+    interval,
+    region,
+)
 
 from pace.dsl.dace import orchestrate
 from pace.dsl.stencil import StencilFactory
@@ -28,24 +35,36 @@ def main_uc_vc_contra(
         uc_contra (out): contravariant c-grid x-wind
         vc_contra (out): contravariant c-grid y-wind
     """
-    from __externals__ import j_end, j_start, local_ie, local_is, local_je, local_js
+    from __externals__ import (
+        grid_type,
+        j_end,
+        j_start,
+        local_ie,
+        local_is,
+        local_je,
+        local_js,
+    )
 
     with computation(PARALLEL), interval(...):
-        utmp = uc_contra
-        with horizontal(region[local_is - 1 : local_ie + 3, :]):
-            # for C-grid, v must be regridded to lie at the same point as u
-            v = 0.25 * (vc[-1, 0, 0] + vc + vc[-1, 1, 0] + vc[0, 1, 0])
-            uc_contra = contravariant(uc, v, cosa_u, rsin_u)
-        # TODO: investigate whether this region operation is necessary
-        with horizontal(
-            region[:, j_start - 1 : j_start + 1], region[:, j_end : j_end + 2]
-        ):
-            uc_contra = utmp
+        if __INLINED(grid_type < 3):
+            utmp = uc_contra
+            with horizontal(region[local_is - 1 : local_ie + 3, :]):
+                # for C-grid, v must be regridded to lie at the same point as u
+                v = 0.25 * (vc[-1, 0, 0] + vc + vc[-1, 1, 0] + vc[0, 1, 0])
+                uc_contra = contravariant(uc, v, cosa_u, rsin_u)
+            # TODO: investigate whether this region operation is necessary
+            with horizontal(
+                region[:, j_start - 1 : j_start + 1], region[:, j_end : j_end + 2]
+            ):
+                uc_contra = utmp
 
-        with horizontal(region[:, local_js - 1 : local_je + 3]):
-            # for C-grid, u must be regridded to lie at same point as v
-            u = 0.25 * (uc[0, -1, 0] + uc[1, -1, 0] + uc + uc[1, 0, 0])
-            vc_contra = contravariant(vc, u, cosa_v, rsin_v)
+            with horizontal(region[:, local_js - 1 : local_je + 3]):
+                # for C-grid, u must be regridded to lie at same point as v
+                u = 0.25 * (uc[0, -1, 0] + uc[1, -1, 0] + uc + uc[1, 0, 0])
+                vc_contra = contravariant(vc, u, cosa_v, rsin_v)
+        else:
+            uc_contra = uc
+            vc_contra = vc
 
 
 def uc_contra_y_edge(
@@ -496,12 +515,14 @@ class FiniteVolumeFluxPrep:
         self,
         stencil_factory: StencilFactory,
         grid_data: GridData,
+        grid_type: int,
     ):
         orchestrate(
             obj=self,
             config=stencil_factory.config.dace_config,
         )
         grid_indexing = stencil_factory.grid_indexing
+        self._grid_type = grid_type
         self._tile_interior = not (
             grid_indexing.west_edge
             or grid_indexing.east_edge
@@ -533,26 +554,30 @@ class FiniteVolumeFluxPrep:
             "domain": domain_corners,
         }
         self._main_uc_vc_contra_stencil = stencil_factory.from_origin_domain(
-            main_uc_vc_contra, **kwargs
+            main_uc_vc_contra,
+            externals={"grid_type": grid_type, **ax_offsets},
+            origin=origin,
+            domain=domain,
         )
-        self._uc_contra_y_edge_stencil = stencil_factory.from_origin_domain(
-            uc_contra_y_edge, **kwargs
-        )
-        self._vc_contra_y_edge_stencil = stencil_factory.from_origin_domain(
-            vc_contra_y_edge, **kwargs
-        )
-        self._vc_contra_x_edge_stencil = stencil_factory.from_origin_domain(
-            vc_contra_x_edge, **kwargs
-        )
-        self._uc_contra_x_edge_stencil = stencil_factory.from_origin_domain(
-            uc_contra_x_edge, **kwargs
-        )
-        self._uc_contra_corners_stencil = stencil_factory.from_origin_domain(
-            uc_contra_corners, **kwargs_corners
-        )
-        self._vc_contra_corners_stencil = stencil_factory.from_origin_domain(
-            vc_contra_corners, **kwargs_corners
-        )
+        if self._grid_type < 3:
+            self._uc_contra_y_edge_stencil = stencil_factory.from_origin_domain(
+                uc_contra_y_edge, **kwargs
+            )
+            self._vc_contra_y_edge_stencil = stencil_factory.from_origin_domain(
+                vc_contra_y_edge, **kwargs
+            )
+            self._vc_contra_x_edge_stencil = stencil_factory.from_origin_domain(
+                vc_contra_x_edge, **kwargs
+            )
+            self._uc_contra_x_edge_stencil = stencil_factory.from_origin_domain(
+                uc_contra_x_edge, **kwargs
+            )
+            self._uc_contra_corners_stencil = stencil_factory.from_origin_domain(
+                uc_contra_corners, **kwargs_corners
+            )
+            self._vc_contra_corners_stencil = stencil_factory.from_origin_domain(
+                vc_contra_corners, **kwargs_corners
+            )
         self._fxadv_fluxes_stencil = stencil_factory.from_origin_domain(
             fxadv_fluxes_stencil, **kwargs
         )
@@ -607,41 +632,46 @@ class FiniteVolumeFluxPrep:
             uc_contra,
             vc_contra,
         )
-        if not self._tile_interior:
-            self._uc_contra_y_edge_stencil(uc, self._sin_sg1, self._sin_sg3, uc_contra)
-            self._vc_contra_y_edge_stencil(
-                vc,
-                self._cosa_v,
-                uc_contra,
-                vc_contra,
-            )
-            self._vc_contra_x_edge_stencil(vc, self._sin_sg2, self._sin_sg4, vc_contra)
-            self._uc_contra_x_edge_stencil(
-                uc,
-                self._cosa_u,
-                vc_contra,
-                uc_contra,
-            )
-            # NOTE: this is aliasing memory
-            self._uc_contra_corners_stencil(
-                self._cosa_u,
-                self._cosa_v,
-                uc,
-                vc,
-                uc_contra,
-                uc_contra,
-                vc_contra,
-            )
-            # NOTE: this is aliasing memory
-            self._vc_contra_corners_stencil(
-                self._cosa_u,
-                self._cosa_v,
-                uc,
-                vc,
-                uc_contra,
-                vc_contra,
-                vc_contra,
-            )
+        if self._grid_type < 3:
+            if not self._tile_interior:
+                self._uc_contra_y_edge_stencil(
+                    uc, self._sin_sg1, self._sin_sg3, uc_contra
+                )
+                self._vc_contra_y_edge_stencil(
+                    vc,
+                    self._cosa_v,
+                    uc_contra,
+                    vc_contra,
+                )
+                self._vc_contra_x_edge_stencil(
+                    vc, self._sin_sg2, self._sin_sg4, vc_contra
+                )
+                self._uc_contra_x_edge_stencil(
+                    uc,
+                    self._cosa_u,
+                    vc_contra,
+                    uc_contra,
+                )
+                # NOTE: this is aliasing memory
+                self._uc_contra_corners_stencil(
+                    self._cosa_u,
+                    self._cosa_v,
+                    uc,
+                    vc,
+                    uc_contra,
+                    uc_contra,
+                    vc_contra,
+                )
+                # NOTE: this is aliasing memory
+                self._vc_contra_corners_stencil(
+                    self._cosa_u,
+                    self._cosa_v,
+                    uc,
+                    vc,
+                    uc_contra,
+                    vc_contra,
+                    vc_contra,
+                )
         self._fxadv_fluxes_stencil(
             self._sin_sg1,
             self._sin_sg2,

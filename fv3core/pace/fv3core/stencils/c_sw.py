@@ -1,4 +1,4 @@
-from gt4py.cartesian.gtscript import (
+from gt4py.cartesian.gtscript import (  # noqa
     __INLINED,
     PARALLEL,
     compile_assert,
@@ -351,7 +351,7 @@ def transportdelp_update_vorticity_and_kineticenergy(
     from __externals__ import grid_type, i_end, i_start, j_end, j_start
 
     with computation(PARALLEL), interval(...):
-        compile_assert(grid_type < 3)
+        # compile_assert(grid_type < 3)
         # additional assumption (not grid.nested)
         # corresponds to x fluxes function, but for y-direction
         fy1 = delp[0, -1, 0] if vtc > 0.0 else delp

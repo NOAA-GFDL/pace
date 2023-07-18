@@ -507,18 +507,23 @@ def a2b_interpolation(
         qout = 0.5 * (qxx + qyy)
 
 
-def doubly_periodic_a2b_ord4(qout: FloatField, qin: FloatField):
+@gtscript.function
+def doubly_periodic_a2b_ord4(qout, qin, replace):
     from __externals__ import replace
 
+    qx = b1 * (qin[-1, 0, 0] + qin) + b2 * (qin[-2, 0, 0] + qin[1, 0, 0])
+    qy = b1 * (qin[0, -1, 0] + qin) + b2 * (qin[0, -2, 0] + qin[0, 1, 0])
+    qout = 0.5 * (
+        a1 * (qx[0, -1, 0] + qx + qy[-1, 0, 0] + qy)
+        + a2 * (qx[0, -2, 0] + qx[0, 1, 0] + qy[-2, 0, 0] + qy[1, 0, 0])
+    )
+    if __INLINED(replace):
+        qin = qout
+
+
+def doubly_periodic_a2b_ord4_stencil(qout: FloatField, qin: FloatField):
     with computation(PARALLEL), interval(...):
-        qx = b1 * (qin[-1, 0, 0] + qin) + b2 * (qin[-2, 0, 0] + qin[1, 0, 0])
-        qy = b1 * (qin[0, -1, 0] + qin) + b2 * (qin[0, -2, 0] + qin[0, 1, 0])
-        qout = 0.5 * (
-            a1 * (qx[0, -1, 0] + qx + qy[-1, 0, 0] + qy)
-            + a2 * (qx[0, -2, 0] + qx[0, 1, 0] + qy[-2, 0, 0] + qy[1, 0, 0])
-        )
-        if __INLINED(replace):
-            qin = qout
+        doubly_periodic_a2b_ord4(qout, qin)
 
 
 class AGrid2BGridFourthOrder:
@@ -674,7 +679,7 @@ class AGrid2BGridFourthOrder:
 
         else:  # grid type >= 3:
             self._doubly_periodic_a2b_ord4 = stencil_factory.from_origin_domain(
-                doubly_periodic_a2b_ord4,
+                doubly_periodic_a2b_ord4_stencil,
                 externals={
                     "replace": replace,
                 },
