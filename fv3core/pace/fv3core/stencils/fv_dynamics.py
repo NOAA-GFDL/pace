@@ -278,7 +278,13 @@ class DynamicalCore:
             self.config.nf_omega,
         )
         self._cubed_to_latlon = CubedToLatLon(
-            state, stencil_factory, quantity_factory, grid_data, config.c2l_ord, comm
+            state,
+            stencil_factory,
+            quantity_factory,
+            grid_data,
+            self.config.grid_type,
+            config.c2l_ord,
+            comm,
         )
         self._cappa = self.acoustic_dynamics.cappa
 
