@@ -385,9 +385,9 @@ class AcousticDynamics:
             quantity_factory: creates quantities
             grid_data: metric terms defining the grid
             damping_coefficients: damping configuration
-            grid_type: ???
-            nested: ???
-            stretched_grid: ???
+            grid_type: grid geometry used
+            nested: if the grid contains a nested, high-res region
+            stretched_grid: if the grid is stretched so tile faces cover different areas
             config: configuration settings
             pfull: atmospheric Eulerian grid reference pressure (Pa)
             phis: surface geopotential height
