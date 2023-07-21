@@ -577,7 +577,7 @@ def accumulate_heat_source_and_dissipation_estimate(
     heat_source: FloatField,
     heat_source_total: FloatField,
     diss_est: FloatField,
-    diss_est_total: FloatField,giu
+    diss_est_total: FloatField,
 ):
     with computation(PARALLEL), interval(...):
         heat_source_total += heat_source
