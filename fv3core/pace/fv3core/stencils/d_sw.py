@@ -94,6 +94,8 @@ def heat_diss(
         ke_bg (in):
     """
     with computation(PARALLEL), interval(...):
+        heat_source = 0.0
+        diss_est = 0.0
         if damp_w > 1e-5:
             dd8 = ke_bg * abs(dt)
             dw = (fx2 - fx2[1, 0, 0] + fy2 - fy2[0, 1, 0]) * rarea
@@ -575,7 +577,7 @@ def accumulate_heat_source_and_dissipation_estimate(
     heat_source: FloatField,
     heat_source_total: FloatField,
     diss_est: FloatField,
-    diss_est_total: FloatField,
+    diss_est_total: FloatField,giu
 ):
     with computation(PARALLEL), interval(...):
         heat_source_total += heat_source
@@ -751,6 +753,8 @@ class DGridShallowWaterLagrangianDynamics:
         orchestrate(obj=self, config=stencil_factory.config.dace_config)
         self.grid_data = grid_data
         self._f0 = self.grid_data.fC_agrid
+        self._d_con = config.d_con
+        self._do_stochastic_ke_backscatter = config.do_skeb
 
         self.grid_indexing = stencil_factory.grid_indexing
         assert config.grid_type < 3, "ubke and vbke only implemented for grid_type < 3"
@@ -927,12 +931,15 @@ class DGridShallowWaterLagrangianDynamics:
                 },
             )
         )
-        self._accumulate_heat_source_and_dissipation_estimate_stencil = (
-            stencil_factory.from_dims_halo(
-                func=accumulate_heat_source_and_dissipation_estimate,
-                compute_dims=[X_DIM, Y_DIM, Z_DIM],
+
+        if (self._d_con > 1.e-5) or (self._do_stochastic_ke_backscatter):
+            self._accumulate_heat_source_and_dissipation_estimate_stencil = (
+                stencil_factory.from_dims_halo(
+                    func=accumulate_heat_source_and_dissipation_estimate,
+                    compute_dims=[X_DIM, Y_DIM, Z_DIM],
+                )
             )
-        )
+
         self._compute_vorticity_stencil = stencil_factory.from_dims_halo(
             compute_vorticity,
             compute_dims=[X_DIM, Y_DIM, Z_DIM],
@@ -1246,9 +1253,12 @@ class DGridShallowWaterLagrangianDynamics:
             self._tmp_diss_e,
             self._column_namelist["d_con"],
         )
-        self._accumulate_heat_source_and_dissipation_estimate_stencil(
-            self._tmp_heat_s, heat_source, self._tmp_diss_e, diss_est
-        )
+
+        if (self._d_con > 1.e-5) or (self._do_stochastic_ke_backscatter):
+            self._accumulate_heat_source_and_dissipation_estimate_stencil(
+                self._tmp_heat_s, heat_source, self._tmp_diss_e, diss_est
+            )
+        
         self._update_u_and_v_stencil(
             self._tmp_ut,
             self._tmp_vt,
