@@ -7,7 +7,6 @@ import pace.dsl
 import pace.dsl.gt4py_utils as utils
 import pace.fv3core.initialization.baroclinic as baroclinic_init
 import pace.fv3core.initialization.baroclinic_jablonowski_williamson as jablo_init
-import pace.fv3core.stencils.fv_dynamics as fv_dynamics
 import pace.util
 import pace.util as fv3util
 from pace.fv3core.testing import TranslateDycoreFortranData2Py
@@ -17,7 +16,6 @@ from pace.util.grid import MetricTerms
 
 
 class TranslateInitCase(ParallelTranslateBaseSlicing):
-
     outputs: Dict[str, Any] = {
         "u": {
             "name": "x_wind",
@@ -175,7 +173,6 @@ class TranslateInitCase(ParallelTranslateBaseSlicing):
                     state[name][tracer] = state[name][tracer].data
                 arrays[name] = state[name]
             elif len(self.outputs[name]["dims"]) > 0:
-
                 arrays[name] = state[name].data
             else:
                 outputs[name] = state[name]  # scalar
@@ -184,7 +181,10 @@ class TranslateInitCase(ParallelTranslateBaseSlicing):
 
     def compute_parallel(self, inputs, communicator):
         state = {}
-        full_shape = (*self.grid.domain_shape_full(add=(1, 1, 1)), fv_dynamics.NQ)
+        full_shape = (
+            *self.grid.domain_shape_full(add=(1, 1, 1)),
+            pace.util.constants.NQ,
+        )
         for variable, properties in self.outputs.items():
             dims = properties["dims"]
             state[variable] = fv3util.Quantity(

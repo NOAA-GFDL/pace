@@ -909,14 +909,14 @@ def satadjust(
             # icloud_f = 0: bug - fixed
             # icloud_f = 1: old fvgfs gfdl) mp implementation
             # icloud_f = 2: binary cloud scheme (0 / 1)
-            if rh > 0.75 and qpz > 1.0e-8:
+            if rh > 0.75 and qpz > constants.SAT_ADJUST_THRESHOLD:
                 dq = hvar * qpz
                 q_plus = qpz + dq
                 q_minus = qpz - dq
                 if icloud_f == 2:  # TODO untested
                     if qpz > qstar:
                         qa = 1.0
-                    elif (qstar < q_plus) and (q_cond > 1.0e-8):
+                    elif (qstar < q_plus) and (q_cond > constants.SAT_ADJUST_THRESHOLD):
                         qa = min(1.0, ((q_plus - qstar) / dq) ** 2)
                     else:
                         qa = 0.0
@@ -932,7 +932,7 @@ def satadjust(
                         else:
                             qa = 0.0
                         # impose minimum cloudiness if substantial q_cond exist
-                        if q_cond > 1.0e-8:
+                        if q_cond > constants.SAT_ADJUST_THRESHOLD:
                             qa = max(cld_min, qa)
                         qa = min(1, qa)
             else:

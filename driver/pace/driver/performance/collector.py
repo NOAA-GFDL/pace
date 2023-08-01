@@ -66,6 +66,10 @@ class PerformanceCollector(AbstractPerformanceCollector):
         self.experiment_name = experiment_name
         self.comm = comm
 
+    def clear(self):
+        self.times_per_step = []
+        self.hits_per_step = []
+
     def collect_performance(self):
         """
         Take the accumulated timings and flush them into a new entry
