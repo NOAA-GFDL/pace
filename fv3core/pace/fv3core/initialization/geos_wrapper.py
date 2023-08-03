@@ -133,20 +133,30 @@ class GeosDycoreWrapper:
         self.output_dict: Dict[str, np.ndarray] = {}
         self._allocate_output_dir()
 
-        device_ordinal_info = ""
-        if is_gpu_backend(backend):
-            device_ordinal_info = (
-                f"  Device PCI bus id: {cp.cuda.Device(0).pci_bus_id}\n"
-            )
+        # Feedback information
+        device_ordinal_info = (
+            f"  Device PCI bus id: {cp.cuda.Device(0).pci_bus_id}\n"
+            if is_gpu_backend(backend)
+            else "N/A"
+        )
+        MPS_pipe_directory = os.getenv("CUDA_MPS_PIPE_DIRECTORY", None)
+        MPS_is_on = (
+            True
+            if MPS_pipe_directory
+            and is_gpu_backend(backend)
+            and os.path.exists(f"{MPS_pipe_directory}/log")
+            else False
+        )
         pace_log.info(
             "Pace GEOS wrapper initialized: \n"
-            f"  dt     : {self.dycore_state.bdt}\n"
-            f"  bridge : {self._fortran_mem_space} > {self._pace_mem_space}\n"
-            f"  backend: {backend}\n"
-            f"  float  : {floating_point_precision()}bit"
-            f"  orchestration: {self._is_orchestrated}\n"
-            f"  sizer  : {sizer.nx}x{sizer.ny}x{sizer.nz} (halo: {sizer.n_halo})\n"
+            f"             dt : {self.dycore_state.bdt}\n"
+            f"         bridge : {self._fortran_mem_space} > {self._pace_mem_space}\n"
+            f"        backend : {backend}\n"
+            f"          float : {floating_point_precision()}bit"
+            f"  orchestration : {self._is_orchestrated}\n"
+            f"          sizer : {sizer.nx}x{sizer.ny}x{sizer.nz} (halo: {sizer.n_halo})\n"
             f"  {device_ordinal_info}"
+            f"     Nvidia MPS : {MPS_is_on}"
         )
 
     def _critical_path(self):
