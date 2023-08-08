@@ -154,7 +154,8 @@ class GeosDycoreWrapper:
             f"        backend : {backend}\n"
             f"          float : {floating_point_precision()}bit"
             f"  orchestration : {self._is_orchestrated}\n"
-            f"          sizer : {sizer.nx}x{sizer.ny}x{sizer.nz} (halo: {sizer.n_halo})\n"
+            f"          sizer : {sizer.nx}x{sizer.ny}x{sizer.nz}"
+            f"(halo: {sizer.n_halo})\n"
             f"  {device_ordinal_info}"
             f"     Nvidia MPS : {MPS_is_on}"
         )
