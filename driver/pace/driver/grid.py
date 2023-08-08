@@ -89,6 +89,7 @@ class GeneratedGridConfig(GridInitializer):
         dx_const: constant x-width of grid cells on a dp-grid
         dy_const: constant y-width of grid cells on a dp-grid
         deglat: latitude to use for coriolis calculations on a dp-grid
+        umax: maximum wind speed for grid_type > 3
     """
 
     stretch_factor: Optional[float] = 1.0
@@ -99,6 +100,7 @@ class GeneratedGridConfig(GridInitializer):
     dx_const: Optional[float] = 1000.0
     dy_const: Optional[float] = 1000.0
     deglat: Optional[float] = 15.0
+    umax: Optional[float] = 350.0
 
     def get_grid(
         self,
