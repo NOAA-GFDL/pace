@@ -206,7 +206,6 @@ def set_hybrid_pressure_coefficients(km: int) -> HybridPressureCoefficients:
         )
 
     elif km == 91:
-
         ak = np.array(
             [
                 1.00000000,
@@ -402,7 +401,6 @@ def set_hybrid_pressure_coefficients(km: int) -> HybridPressureCoefficients:
         )
 
     elif km == 72:
-
         ak = np.array(
             [
                 1.00000000,
@@ -560,7 +558,6 @@ def set_hybrid_pressure_coefficients(km: int) -> HybridPressureCoefficients:
         )
 
     elif km == 137:
-
         ak = np.array(
             [
                 1.00000000,
@@ -761,35 +758,35 @@ def set_hybrid_pressure_coefficients(km: int) -> HybridPressureCoefficients:
                 0.00000000,
                 0.00000000,
                 0.00000000,
-                7.00000010E-06,
-                2.40000008E-05,
-                5.90000018E-05,
-                1.12000002E-04,
-                1.99000002E-04,
-                3.39999999E-04,
-                5.61999972E-04,
-                8.90000025E-04,
-                1.35300006E-03,
-                1.99200003E-03,
-                2.85700010E-03,
-                3.97100020E-03,
-                5.37799997E-03,
-                7.13300006E-03,
-                9.26099997E-03,
-                1.18060000E-02,
-                1.48160001E-02,
-                1.83179993E-02,
-                2.23549996E-02,
-                2.69639995E-02,
-                3.21759991E-02,
-                3.80260013E-02,
-                4.45480011E-02,
-                5.17730005E-02,
-                5.97280003E-02,
-                6.84479997E-02,
-                7.79580027E-02,
-                8.82859975E-02,
-                9.94620025E-02,
+                7.00000010e-06,
+                2.40000008e-05,
+                5.90000018e-05,
+                1.12000002e-04,
+                1.99000002e-04,
+                3.39999999e-04,
+                5.61999972e-04,
+                8.90000025e-04,
+                1.35300006e-03,
+                1.99200003e-03,
+                2.85700010e-03,
+                3.97100020e-03,
+                5.37799997e-03,
+                7.13300006e-03,
+                9.26099997e-03,
+                1.18060000e-02,
+                1.48160001e-02,
+                1.83179993e-02,
+                2.23549996e-02,
+                2.69639995e-02,
+                3.21759991e-02,
+                3.80260013e-02,
+                4.45480011e-02,
+                5.17730005e-02,
+                5.97280003e-02,
+                6.84479997e-02,
+                7.79580027e-02,
+                8.82859975e-02,
+                9.94620025e-02,
                 0.111505002,
                 0.124448001,
                 0.138312995,
@@ -849,7 +846,8 @@ def set_hybrid_pressure_coefficients(km: int) -> HybridPressureCoefficients:
 
     else:
         raise NotImplementedError(
-            "Only grids with 72, 79, 91 or 137 vertical levels have been implemented so far"
+            "Only grids with 72, 79, 91 or 137 vertical levels"
+            "have been implemented so far"
         )
 
     if 0.0 in bk:
