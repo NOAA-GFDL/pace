@@ -141,11 +141,9 @@ class GeosDycoreWrapper:
         )
         MPS_pipe_directory = os.getenv("CUDA_MPS_PIPE_DIRECTORY", None)
         MPS_is_on = (
-            True
-            if MPS_pipe_directory
+            MPS_pipe_directory
             and is_gpu_backend(backend)
             and os.path.exists(f"{MPS_pipe_directory}/log")
-            else False
         )
         pace_log.info(
             "Pace GEOS wrapper initialized: \n"
