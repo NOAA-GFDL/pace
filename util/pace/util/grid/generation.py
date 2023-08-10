@@ -226,7 +226,7 @@ class MetricTerms:
         dy_const: float = 1000.0,
         deglat: float = 15.0,
     ):
-        assert grid_type < 3
+        # assert grid_type < 3
         self._grid_type = grid_type
         self._halo = N_HALO_DEFAULT
         self._comm = communicator
