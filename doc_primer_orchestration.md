@@ -104,6 +104,10 @@ _Parsing errors_
 
 DaCe cannot parse _any_ dynamic Python and any code that allocates memory on the fly (think list creation). It will also complain about any arguments it can't memory describe (remember `dace_compiletime_args` ).
 
+_GT_CACHE_DIR_NAME_
+
+We do not honor the `GT_CACHE_DIR_NAME` with orchestration. `GT_CACHE_ROOT` is respected.
+
 Conclusion
 ----------
 

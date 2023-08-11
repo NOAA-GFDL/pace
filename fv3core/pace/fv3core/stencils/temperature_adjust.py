@@ -29,7 +29,6 @@ def apply_diffusive_heating(
     """
     with computation(PARALLEL), interval(...):
         pkz = exp(cappa / (1.0 - cappa) * log(constants.RDG * delp / delz * pt))
-        pkz = (constants.RDG * delp / delz * pt) ** (cappa / (1.0 - cappa))
         dtmp = heat_source / (constants.CV_AIR * delp)
     with computation(PARALLEL):
         with interval(0, 1):

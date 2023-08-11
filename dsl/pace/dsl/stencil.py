@@ -325,8 +325,9 @@ class FrozenStencil(SDFGConvertible):
         if "dace" in self.stencil_config.compilation_config.backend:
             dace.Config.set(
                 "default_build_folder",
-                value="{gt_cache}/dacecache".format(
-                    gt_cache=gt4py.cartesian.config.cache_settings["dir_name"]
+                value="{gt_root}/{gt_cache}/dacecache".format(
+                    gt_root=gt4py.cartesian.config.cache_settings["root_path"],
+                    gt_cache=gt4py.cartesian.config.cache_settings["dir_name"],
                 ),
             )
 

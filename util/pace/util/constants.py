@@ -1,3 +1,30 @@
+import os
+from enum import Enum
+
+from pace.util.logging import pace_log
+
+
+# The FV3GFS model ships with two sets of constants, one used in the GFS physics
+# package and the other used for the Dycore. Their difference are small but significant
+# In addition the GSFC's GEOS model as its own variables
+class ConstantVersions(Enum):
+    FV3DYCORE = "FV3DYCORE"  # NOAA's FV3 dynamical core constants (original port)
+    GFS = "GFS"  # Constant as defined in NOAA GFS
+    GEOS = "GEOS"  # Constant as defined in GEOS v13
+
+
+CONST_VERSION_AS_STR = os.environ.get("PACE_CONSTANTS", "FV3DYCORE")
+
+try:
+    CONST_VERSION = ConstantVersions[CONST_VERSION_AS_STR]
+    pace_log.info(f"Constant selected: {CONST_VERSION}")
+except KeyError as e:
+    raise RuntimeError(f"Constants {CONST_VERSION_AS_STR} is not implemented, abort.")
+
+#####################
+# Common constants
+#####################
+
 ROOT_RANK = 0
 X_DIM = "x"
 X_INTERFACE_DIM = "x_interface"
@@ -28,15 +55,42 @@ CORNER_BOUNDARY_TYPES = (NORTHWEST, NORTHEAST, SOUTHWEST, SOUTHEAST)
 BOUNDARY_TYPES = EDGE_BOUNDARY_TYPES + CORNER_BOUNDARY_TYPES
 N_HALO_DEFAULT = 3
 
+#######################
+# Tracers configuration
+#######################
+
+# nq is actually given by ncnst - pnats, where those are given in atmosphere.F90 by:
+# ncnst = Atm(mytile)%ncnst
+# pnats = Atm(mytile)%flagstruct%pnats
+# here we hard-coded it because 8 is the only supported value, refactor this later!
+if CONST_VERSION == ConstantVersions.GEOS:
+    # 'qlcd' is exchanged in GEOS
+    NQ = 9
+elif (
+    CONST_VERSION == ConstantVersions.GFS or CONST_VERSION == ConstantVersions.FV3DYCORE
+):
+    NQ = 8
+else:
+    raise RuntimeError("Constant selector failed, bad code.")
+
 #####################
 # Physical constants
 #####################
-
-# The FV3GFS model ships with two sets of constants, one used in the GFS physics
-# package and the other used for the Dycore. Their difference are small but significant
-# Our Fortran executable on GCE has GFS_PHYS=True
-GFS_PHYS = True
-if GFS_PHYS:
+if CONST_VERSION == ConstantVersions.GEOS:
+    RADIUS = 6.371e6
+    PI = 3.14159265358979323846
+    OMEGA = 2.0 * PI / 86164.0
+    GRAV = 9.80665
+    RGRAV = 1.0 / GRAV
+    RDGAS = 8314.47 / 28.965
+    RVGAS = 8314.47 / 18.015
+    HLV = 2.4665e6
+    HLF = 3.3370e5
+    KAPPA = RDGAS / (3.5 * RDGAS)
+    CP_AIR = RDGAS / KAPPA
+    TFREEZE = 273.15
+    SAT_ADJUST_THRESHOLD = 1.0e-6
+elif CONST_VERSION == ConstantVersions.GFS:
     RADIUS = 6.3712e6  # Radius of the Earth [m]
     PI = 3.1415926535897931
     OMEGA = 7.2921e-5  # Rotation of the earth
@@ -49,7 +103,8 @@ if GFS_PHYS:
     CP_AIR = 1004.6
     KAPPA = RDGAS / CP_AIR  # Specific heat capacity of dry air at
     TFREEZE = 273.15
-else:
+    SAT_ADJUST_THRESHOLD = 1.0e-8
+elif CONST_VERSION == ConstantVersions.FV3DYCORE:
     RADIUS = 6371.0e3  # Radius of the Earth [m] #6371.0e3
     PI = 3.14159265358979323846  # 3.14159265358979323846
     OMEGA = 7.292e-5  # Rotation of the earth  # 7.292e-5
@@ -62,6 +117,9 @@ else:
     KAPPA = 2.0 / 7.0
     CP_AIR = RDGAS / KAPPA  # Specific heat capacity of dry air at
     TFREEZE = 273.16  # Freezing temperature of fresh water [K]
+    SAT_ADJUST_THRESHOLD = 1.0e-8
+else:
+    raise RuntimeError("Constant selector failed, bad code.")
 
 DZ_MIN = 2.0
 CV_AIR = CP_AIR - RDGAS  # Heat capacity of dry air at constant volume
