@@ -7,6 +7,7 @@ stencil_config:
     device_sync: false
 grid_type: 4
 grid_config:
+  type: generated
   config:
     dx_const: 3000.0
     dy_const: 3000.0
