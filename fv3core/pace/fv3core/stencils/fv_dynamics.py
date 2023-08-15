@@ -172,7 +172,10 @@ class DynamicalCore:
             dace_compiletime_args=["state"],
         )
         if timestep == timedelta(seconds=0):
-            raise RuntimeError("Bad dynamical core configuration: bdt is 0")
+            raise RuntimeError(
+                "Bad dynamical core configuration:"
+                " the atmospheric timestep is 0 seconds!"
+            )
         # nested and stretched_grid are options in the Fortran code which we
         # have not implemented, so they are hard-coded here.
         self.call_checkpointer = checkpointer is not None
@@ -543,8 +546,8 @@ class DynamicalCore:
 
                     # TODO: When NQ=9, we shouldn't need to pass qcld explicitly
                     #       since it's in self.tracers. It should not be an issue since
-                    #       we don't have self.tracers & qcld computation at
-                    #       the same time.
+                    #       we don't have self.tracers & qcld computation at the same
+                    #       time
                     #       When NQ=8, we do need qcld passed explicitely
                     self._lagrangian_to_eulerian_obj(
                         self.tracers,
