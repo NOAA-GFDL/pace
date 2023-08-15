@@ -176,10 +176,6 @@ class GeosDycoreWrapper:
         cyd: np.ndarray,
         diss_estd: np.ndarray,
     ) -> Tuple[Dict[str, np.ndarray], Dict[str, List[float]]]:
-<<<<<<< HEAD
-=======
-
->>>>>>> main
         with self.perf_collector.timestep_timer.clock("numpy-to-dycore"):
             self.dycore_state = self._put_fortran_data_in_dycore(
                 u,
