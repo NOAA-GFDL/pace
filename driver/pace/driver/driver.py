@@ -274,7 +274,7 @@ class DriverConfig:
         )
         if "grid_config" in kwargs:
             if "grid_type" in kwargs:
-                kwargs["grid_config"].config.grid_type = kwargs["grid_type"]
+                kwargs["grid_config"]['config']['grid_type'] = kwargs["grid_type"]
             kwargs["grid_config"] = GridInitializerSelector.from_dict(
                 kwargs["grid_config"]
             )

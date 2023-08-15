@@ -100,7 +100,7 @@ class GeneratedGridConfig(GridInitializer):
     dx_const: Optional[float] = 1000.0
     dy_const: Optional[float] = 1000.0
     deglat: Optional[float] = 15.0
-    umax: Optional[float] = 350.0
+    u_max: Optional[float] = 350.0
 
     def get_grid(
         self,
