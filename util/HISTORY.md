@@ -5,6 +5,7 @@ latest
 ------
 
 - Added f32 support to halo exchange data transformation
+- Use one single logger, from logging.py
 
 v0.10.0
 -------
