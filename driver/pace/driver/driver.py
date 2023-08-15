@@ -259,8 +259,6 @@ class DriverConfig:
         kwargs["dycore_config"].npy = kwargs["nx_tile"] + 1
         kwargs["dycore_config"].npz = kwargs["nz"]
         kwargs["dycore_config"].ntiles = 6
-        if "grid_type" in kwargs:
-            kwargs["dycore_config"].grid_type = kwargs["grid_type"]
         kwargs["physics_config"].layout = kwargs["layout"]
         kwargs["physics_config"].dt_atmos = kwargs["dt_atmos"]
         kwargs["physics_config"].npx = kwargs["nx_tile"] + 1
@@ -273,14 +271,12 @@ class DriverConfig:
             kwargs["initialization"]
         )
         if "grid_config" in kwargs:
-            if "grid_type" in kwargs:
-                kwargs["grid_config"]['config']['grid_type'] = kwargs["grid_type"]
             kwargs["grid_config"] = GridInitializerSelector.from_dict(
                 kwargs["grid_config"]
             )
-        elif ("grid_type" in kwargs) and kwargs["grid_type"] != 0:
-            gt = kwargs["grid_type"]
-            raise KeyError(f"Must specify a grid config if grid_type is nonzero ({gt})")
+            grid_type = kwargs["grid_config"]['config']['grid_type']
+            if grid_type != 0:
+                kwargs["dycore_config"].grid_type = grid_type
 
         if (
             isinstance(kwargs["stencil_config"], dict)

@@ -5,10 +5,10 @@ stencil_config:
     validate_args: true
     format_source: false
     device_sync: false
-grid_type: 4
 grid_config:
   type: generated
   config:
+    grid_type: 4
     dx_const: 3000.0
     dy_const: 3000.0
     deglat: 10.0
