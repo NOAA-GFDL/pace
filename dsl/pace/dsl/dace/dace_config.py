@@ -213,6 +213,10 @@ class DaceConfig:
             if cp:
                 cuda_sm = cp.cuda.Device(0).compute_capability
             dace.config.Config.set("compiler", "cuda", "cuda_arch", value=f"{cuda_sm}")
+            # Block size/thread count is defaulted to an average value for recent
+            # hardware (Pascal and upward). The problem of setting an optimized
+            # block/thread is both hardware and problem dependant. Fine tuners
+            # available in DaCe should be relied on for futher tuning of this value.
             dace.config.Config.set(
                 "compiler", "cuda", "default_block_size", value="64,8,1"
             )
