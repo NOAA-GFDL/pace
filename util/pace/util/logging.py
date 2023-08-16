@@ -7,6 +7,14 @@ from mpi4py import MPI
 
 LOGLEVEL = os.environ.get("PACE_LOGLEVEL", "INFO").upper()
 
+AVAILABLE_LOG_LEVELS = {
+    "info": logging.INFO,
+    "debug": logging.DEBUG,
+    "warning": logging.WARNING,
+    "error": logging.ERROR,
+    "critical": logging.CRITICAL,
+}
+
 
 def _pace_logger():
     name_log = logging.getLogger(__name__)
