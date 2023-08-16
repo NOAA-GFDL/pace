@@ -7,6 +7,8 @@ from mpi4py import MPI
 
 LOGLEVEL = os.environ.get("PACE_LOGLEVEL", "INFO").upper()
 
+# Python log levels are hierarchical, therefore setting INFO
+# means DEBUG and everything lower will be logged.
 AVAILABLE_LOG_LEVELS = {
     "info": logging.INFO,
     "debug": logging.DEBUG,
