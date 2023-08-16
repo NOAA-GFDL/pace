@@ -49,6 +49,7 @@ class XTP_U:
                 "iord": iord,
                 "mord": iord,
                 "xt_minmax": False,
+                "grid_type": grid_type,
                 **ax_offsets,
             },
             origin=origin,

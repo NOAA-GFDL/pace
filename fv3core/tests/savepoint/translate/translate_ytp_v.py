@@ -50,6 +50,7 @@ class YTP_V:
                 "jord": jord,
                 "mord": jord,
                 "yt_minmax": False,
+                "grid_type": grid_type,
                 **ax_offsets,
             },
             origin=origin,

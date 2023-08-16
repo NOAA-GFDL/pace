@@ -508,7 +508,7 @@ def a2b_interpolation(
 
 
 @gtscript.function
-def doubly_periodic_a2b_ord4(qout, qin, replace):
+def doubly_periodic_a2b_ord4(qout, qin):
     from __externals__ import replace
 
     qx = b1 * (qin[-1, 0, 0] + qin) + b2 * (qin[-2, 0, 0] + qin[1, 0, 0])

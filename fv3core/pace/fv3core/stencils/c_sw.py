@@ -493,7 +493,7 @@ def update_y_velocity(
 
         # first-order upwind voriticity flux
         tmp_flux = dt2 * (velocity - velocity_c * cosa) / sina
-        if __INLINED(grid_type) < 3:
+        if __INLINED(grid_type < 3):
             with horizontal(region[:, j_start], region[:, j_end + 1]):
                 tmp_flux = dt2 * velocity
 
