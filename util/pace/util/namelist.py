@@ -12,6 +12,10 @@ DEFAULT_BOOL = False
 class NamelistDefaults:
     layout = (1, 1)
     grid_type = 0
+    dx_const = 1000.0
+    dy_const = 1000.0
+    deglat = 15.0
+    u_max = 350.0
     do_f3d = False
     inline_q = False
     do_skeb = False  # save dissipation estimate
@@ -372,6 +376,10 @@ class Namelist:
     # fvmxl: Any
     # ldebug: Any
     grid_type: int = NamelistDefaults.grid_type
+    dx_const: float = NamelistDefaults.dx_const
+    dy_const: float = NamelistDefaults.dy_const
+    deglat: float = NamelistDefaults.deglat
+    u_max: float = NamelistDefaults.u_max
     do_f3d: bool = NamelistDefaults.do_f3d
     inline_q: bool = NamelistDefaults.inline_q
     do_skeb: bool = NamelistDefaults.do_skeb  # save dissipation estimate

@@ -273,6 +273,10 @@ class DriverConfig:
             kwargs["grid_config"] = GridInitializerSelector.from_dict(
                 kwargs["grid_config"]
             )
+            grid_type = kwargs["grid_config"].config.grid_type
+            # Copy grid_type to the DycoreConfig if it's not the default value
+            if grid_type != 0: 
+                kwargs["dycore_config"].grid_type = grid_type
 
         if (
             isinstance(kwargs["stencil_config"], dict)
