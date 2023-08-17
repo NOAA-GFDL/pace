@@ -258,12 +258,12 @@ def smagorinsky_diffusion_approx(delpc: FloatField, vort: FloatField, absdt: Flo
 def smag_corner(
     u: FloatField,
     v: FloatField,
-    dx: FloatField,
-    dxc: FloatField,
-    dy: FloatField,
-    dyc: FloatField,
-    rarea: FloatField,
-    rarea_c: FloatField,
+    dx: FloatFieldIJ,
+    dxc: FloatFieldIJ,
+    dy: FloatFieldIJ,
+    dyc: FloatFieldIJ,
+    rarea: FloatFieldIJ,
+    rarea_c: FloatFieldIJ,
     smag_c: FloatField,
     dt: Float,
 ):
