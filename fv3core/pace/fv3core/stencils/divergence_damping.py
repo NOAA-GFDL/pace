@@ -335,6 +335,7 @@ class DivergenceDamping:
         self._grid_type = grid_type
         self._nord_column = nord_col
         self._d2_bg_column = d2_bg
+        self._rarea = grid_data.rarea
         self._rarea_c = grid_data.rarea_c
         self._sin_sg1 = grid_data.sin_sg1
         self._sin_sg2 = grid_data.sin_sg2
@@ -344,6 +345,8 @@ class DivergenceDamping:
         self._cosa_v = grid_data.cosa_v
         self._sina_u = grid_data.sina_u
         self._sina_v = grid_data.sina_v
+        self._dx = grid_data.dx
+        self._dy = grid_data.dy
         self._dxc = grid_data.dxc
         self._dyc = grid_data.dyc
         # TODO: maybe compute locally divg_* grid variables
