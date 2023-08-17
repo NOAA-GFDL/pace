@@ -461,16 +461,27 @@ class DGrid2AGrid2CGridVectors:
             dtype=Float,
         )
 
-        # if (grid_type < 3):
-        js1 = npt + OFFSET if grid_indexing.south_edge else grid_indexing.jsc - 1
-        je1 = ny - npt if grid_indexing.north_edge else grid_indexing.jec + 1
-        is1 = npt + OFFSET if grid_indexing.west_edge else grid_indexing.isd
-        ie1 = nx - npt if grid_indexing.east_edge else grid_indexing.ied
+        if (grid_type < 3) and (not nested):
+            js1 = npt + OFFSET if grid_indexing.south_edge else grid_indexing.jsc - 1
+            je1 = ny - npt if grid_indexing.north_edge else grid_indexing.jec + 1
+            is1 = npt + OFFSET if grid_indexing.west_edge else grid_indexing.isd
+            ie1 = nx - npt if grid_indexing.east_edge else grid_indexing.ied
 
-        is2 = npt + OFFSET if grid_indexing.west_edge else grid_indexing.isc - 1
-        ie2 = nx - npt if grid_indexing.east_edge else grid_indexing.iec + 1
-        js2 = npt + OFFSET if grid_indexing.south_edge else grid_indexing.jsd
-        je2 = ny - npt if grid_indexing.north_edge else grid_indexing.jed
+            is2 = npt + OFFSET if grid_indexing.west_edge else grid_indexing.isc - 1
+            ie2 = nx - npt if grid_indexing.east_edge else grid_indexing.iec + 1
+            js2 = npt + OFFSET if grid_indexing.south_edge else grid_indexing.jsd
+            je2 = ny - npt if grid_indexing.north_edge else grid_indexing.jed
+
+        else:
+            js1 = grid_indexing.jsc - 1
+            je1 = grid_indexing.jec + 1
+            is1 = grid_indexing.isd
+            ie1 = grid_indexing.ied
+
+            is2 = grid_indexing.isc - 1
+            ie2 = grid_indexing.iec + 1
+            js2 = grid_indexing.jsd
+            je2 = grid_indexing.jed
 
         idiff = ilast - ifirst + 1
         jdiff = jlast - jfirst + 1
