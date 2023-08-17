@@ -422,30 +422,6 @@ class DGrid2AGrid2CGridVectors:
             npt = 4
             if npt > grid_indexing.domain[0] - 1 or npt > grid_indexing.domain[1] - 1:
                 npt = 0
-        else:
-            npt = -2
-        self._utmp = quantity_factory.zeros(
-            [X_DIM, Y_DIM, Z_DIM],
-            units="m/s",
-            dtype=Float,
-        )
-        self._vtmp = quantity_factory.zeros(
-            [X_DIM, Y_DIM, Z_DIM],
-            units="m/s",
-            dtype=Float,
-        )
-
-        js1 = npt + OFFSET if grid_indexing.south_edge else grid_indexing.jsc - 1
-        je1 = ny - npt if grid_indexing.north_edge else grid_indexing.jec + 1
-        is1 = npt + OFFSET if grid_indexing.west_edge else grid_indexing.isd
-        ie1 = nx - npt if grid_indexing.east_edge else grid_indexing.ied
-
-        is2 = npt + OFFSET if grid_indexing.west_edge else grid_indexing.isc - 1
-        ie2 = nx - npt if grid_indexing.east_edge else grid_indexing.iec + 1
-        js2 = npt + OFFSET if grid_indexing.south_edge else grid_indexing.jsd
-        je2 = ny - npt if grid_indexing.north_edge else grid_indexing.jed
-
-        if (grid_type < 3) and (not nested):
             ifirst = (
                 grid_indexing.isc + 2
                 if grid_indexing.west_edge
@@ -468,13 +444,38 @@ class DGrid2AGrid2CGridVectors:
                 else grid_indexing.jec + 2
             )
         else:
+            npt = -2
             ifirst = grid_indexing.isc - 1
             ilast = grid_indexing.iec + 2
             jfirst = grid_indexing.jsc - 1
             jlast = grid_indexing.jec + 2
 
+        self._utmp = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_DIM],
+            units="m/s",
+            dtype=Float,
+        )
+        self._vtmp = quantity_factory.zeros(
+            [X_DIM, Y_DIM, Z_DIM],
+            units="m/s",
+            dtype=Float,
+        )
+
+        # if (grid_type < 3):
+        js1 = npt + OFFSET if grid_indexing.south_edge else grid_indexing.jsc - 1
+        je1 = ny - npt if grid_indexing.north_edge else grid_indexing.jec + 1
+        is1 = npt + OFFSET if grid_indexing.west_edge else grid_indexing.isd
+        ie1 = nx - npt if grid_indexing.east_edge else grid_indexing.ied
+
+        is2 = npt + OFFSET if grid_indexing.west_edge else grid_indexing.isc - 1
+        ie2 = nx - npt if grid_indexing.east_edge else grid_indexing.iec + 1
+        js2 = npt + OFFSET if grid_indexing.south_edge else grid_indexing.jsd
+        je2 = ny - npt if grid_indexing.north_edge else grid_indexing.jed
+
         idiff = ilast - ifirst + 1
         jdiff = jlast - jfirst + 1
+
+        breakpoint()
 
         self._set_tmps = stencil_factory.from_dims_halo(
             func=set_tmps,
