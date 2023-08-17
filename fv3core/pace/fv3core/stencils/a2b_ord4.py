@@ -508,8 +508,7 @@ def a2b_interpolation(
 
 
 @gtscript.function
-def doubly_periodic_a2b_ord4(qout, qin):
-    from __externals__ import replace
+def doubly_periodic_a2b_ord4(qin):
 
     qx = b1 * (qin[-1, 0, 0] + qin) + b2 * (qin[-2, 0, 0] + qin[1, 0, 0])
     qy = b1 * (qin[0, -1, 0] + qin) + b2 * (qin[0, -2, 0] + qin[0, 1, 0])
@@ -517,13 +516,16 @@ def doubly_periodic_a2b_ord4(qout, qin):
         a1 * (qx[0, -1, 0] + qx + qy[-1, 0, 0] + qy)
         + a2 * (qx[0, -2, 0] + qx[0, 1, 0] + qy[-2, 0, 0] + qy[1, 0, 0])
     )
-    if __INLINED(replace):
-        qin = qout
+    return qout
 
 
 def doubly_periodic_a2b_ord4_stencil(qout: FloatField, qin: FloatField):
+    from __externals__ import replace
+
     with computation(PARALLEL), interval(...):
-        doubly_periodic_a2b_ord4(qout, qin)
+        qout = doubly_periodic_a2b_ord4(qin)
+        if __INLINED(replace):
+            qin = qout
 
 
 class AGrid2BGridFourthOrder:

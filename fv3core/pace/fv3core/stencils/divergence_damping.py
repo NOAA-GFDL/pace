@@ -295,7 +295,7 @@ def smag_corner(
         ut2 = v * dy
         wk = rarea * (vt2 - vt2[0, 1, 0] + ut2 - ut2[1, 0, 0])
 
-        doubly_periodic_a2b_ord4(shear, wk)
+        shear = doubly_periodic_a2b_ord4(wk)
         smag_c = dt * sqrt(shear ** 2 + smag_c_t ** 2)
 
 
