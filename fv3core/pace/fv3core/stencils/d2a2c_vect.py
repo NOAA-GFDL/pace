@@ -486,8 +486,6 @@ class DGrid2AGrid2CGridVectors:
         idiff = ilast - ifirst + 1
         jdiff = jlast - jfirst + 1
 
-        breakpoint()
-
         self._set_tmps = stencil_factory.from_dims_halo(
             func=set_tmps,
             compute_dims=[X_DIM, Y_DIM, Z_DIM],
