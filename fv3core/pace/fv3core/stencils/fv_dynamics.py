@@ -7,7 +7,6 @@ from gt4py.cartesian.gtscript import PARALLEL, computation, interval
 import pace.dsl.gt4py_utils as utils
 import pace.fv3core.stencils.moist_cv as moist_cv
 import pace.util
-import pace.util.constants as constants
 from pace.dsl.dace.orchestration import dace_inhibitor, orchestrate
 from pace.dsl.dace.wrapped_halo_exchange import WrappedHaloUpdater
 from pace.dsl.stencil import StencilFactory
@@ -21,7 +20,7 @@ from pace.fv3core.stencils.dyn_core import AcousticDynamics
 from pace.fv3core.stencils.neg_adj3 import AdjustNegativeTracerMixingRatio
 from pace.fv3core.stencils.remapping import LagrangianToEulerian
 from pace.stencils.c2l_ord import CubedToLatLon
-from pace.util import X_DIM, Y_DIM, Z_INTERFACE_DIM, Timer
+from pace.util import X_DIM, Y_DIM, Z_INTERFACE_DIM, Timer, constants
 from pace.util.grid import DampingCoefficients, GridData
 from pace.util.logging import pace_log
 from pace.util.mpi import MPI

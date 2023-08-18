@@ -932,7 +932,7 @@ class DGridShallowWaterLagrangianDynamics:
             )
         )
 
-        if (self._d_con > 1.e-5) or (self._do_stochastic_ke_backscatter):
+        if (self._d_con > 1.0e-5) or (self._do_stochastic_ke_backscatter):
             self._accumulate_heat_source_and_dissipation_estimate_stencil = (
                 stencil_factory.from_dims_halo(
                     func=accumulate_heat_source_and_dissipation_estimate,
@@ -1254,11 +1254,11 @@ class DGridShallowWaterLagrangianDynamics:
             self._column_namelist["d_con"],
         )
 
-        if (self._d_con > 1.e-5) or (self._do_stochastic_ke_backscatter):
+        if (self._d_con > 1.0e-5) or (self._do_stochastic_ke_backscatter):
             self._accumulate_heat_source_and_dissipation_estimate_stencil(
                 self._tmp_heat_s, heat_source, self._tmp_diss_e, diss_est
             )
-        
+
         self._update_u_and_v_stencil(
             self._tmp_ut,
             self._tmp_vt,

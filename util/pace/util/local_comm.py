@@ -1,12 +1,9 @@
 import copy
-import logging
 from typing import Any
 
 from .comm import Comm
+from .logging import pace_log
 from .utils import ensure_contiguous, safe_assign_array
-
-
-logger = logging.getLogger("pace.util")
 
 
 class ConcurrencyError(Exception):
@@ -104,7 +101,7 @@ class LocalComm(Comm):
                 "the bcast source"
             )
         value = self._get_buffer("bcast", value)
-        logger.debug(f"bcast {value} to rank {self.rank}")
+        pace_log.debug(f"bcast {value} to rank {self.rank}")
         return value
 
     def Barrier(self):

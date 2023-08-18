@@ -132,9 +132,12 @@ class GeosDycoreWrapper:
         self._allocate_output_dir()
 
         pace_log.info(
-            "GEOS-Wrapper with: \n"
+            "Pace GEOS wrapper initialized: \n"
             f"  dt     : {self.dycore_state.bdt}\n"
             f"  bridge : {self._fortran_mem_space} > {self._pace_mem_space}\n"
+            f"  backend: {backend}\n"
+            f"  orchestration: {self._is_orchestrated}\n"
+            f"  sizer  : {sizer.nx}x{sizer.ny}x{sizer.nz} (halo: {sizer.n_halo})"
         )
 
     def _critical_path(self):
@@ -173,7 +176,6 @@ class GeosDycoreWrapper:
         cyd: np.ndarray,
         diss_estd: np.ndarray,
     ) -> Tuple[Dict[str, np.ndarray], Dict[str, List[float]]]:
-
         with self.perf_collector.timestep_timer.clock("numpy-to-dycore"):
             self.dycore_state = self._put_fortran_data_in_dycore(
                 u,
@@ -246,7 +248,6 @@ class GeosDycoreWrapper:
         cyd: np.ndarray,
         diss_estd: np.ndarray,
     ) -> fv3core.DycoreState:
-
         isc = self._grid_indexing.isc
         jsc = self._grid_indexing.jsc
         iec = self._grid_indexing.iec + 1
@@ -315,7 +316,6 @@ class GeosDycoreWrapper:
         return state
 
     def _prep_outputs_for_geos(self) -> Dict[str, np.ndarray]:
-
         output_dict = self.output_dict
         isc = self._grid_indexing.isc
         jsc = self._grid_indexing.jsc

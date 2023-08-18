@@ -28,7 +28,7 @@ class DaCeProgress:
 
     @classmethod
     def log(cls, prefix: str, message: str):
-        pace_log.info(f"{prefix} {message}")
+        pace_log.debug(f"{prefix} {message}")
 
     @classmethod
     def default_prefix(cls, config: DaceConfig) -> str:
