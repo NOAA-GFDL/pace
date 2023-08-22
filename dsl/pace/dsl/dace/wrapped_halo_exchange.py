@@ -2,7 +2,7 @@ import dataclasses
 from typing import List, Optional
 
 from pace.dsl.dace.orchestration import dace_inhibitor
-from pace.util.communicator import CubedSphereCommunicator
+from pace.util.communicator import Communicator
 from pace.util.halo_updater import HaloUpdater
 
 
@@ -21,7 +21,7 @@ class WrappedHaloUpdater:
         state,
         qty_x_names: List[str],
         qty_y_names: List[str] = None,
-        comm: Optional[CubedSphereCommunicator] = None,
+        comm: Optional[Communicator] = None,
     ) -> None:
         self._updater = updater
         self._state = state

@@ -23,6 +23,39 @@ C1 = 1.125
 C2 = -0.125
 
 
+def mock_exchange(
+    quantity,
+    domain_2d,
+):
+    isc = domain_2d[0][0]
+    iec = domain_2d[0][1]
+    isd = domain_2d[1][0]
+    ied = domain_2d[1][1]
+    jsc = domain_2d[2][0]
+    jec = domain_2d[2][1]
+    jsd = domain_2d[3][0]
+    jed = domain_2d[3][1]
+    nhalo = isd - isc
+
+    quantity[isd:isc, :, :] = quantity[iec - nhalo + 1 : iec + 1, :, :]
+    quantity[iec + 1 : ied + 1, :, :] = quantity[isc : isc + nhalo, :, :]
+    quantity[:, jsd:jsc, :] = quantity[:, jec - nhalo + 1 : jec + 1, :]
+    quantity[:, jec + 1 : jed + 1, :] = quantity[:, jsc : jsc + nhalo, :]
+
+    quantity[isd:isc, jsd:jsc, :] = quantity[
+        iec - nhalo + 1 : iec + 1, jec - nhalo + 1 : jec + 1, :
+    ]
+    quantity[isd:isc, jec + 1 : jed + 1, :] = quantity[
+        iec - nhalo + 1 : iec + 1, jsc : jsc + nhalo, :
+    ]
+    quantity[iec + 1 : ied + 1, jsd:jsc, :] = quantity[
+        isc : isc + nhalo, jec - nhalo + 1 : jec + 1, :
+    ]
+    quantity[iec + 1 : ied + 1, jec + 1 : jed + 1, :] = quantity[
+        isc : isc + nhalo, jsc : jsc + nhalo, :
+    ]
+
+
 @utils.mark_untested("This namelist option is not tested")
 def c2l_ord2(
     u: FloatField,
@@ -129,7 +162,7 @@ class CubedToLatLon:
         grid_data: GridData,
         grid_type: int,
         order: int,
-        comm: pace.util.CubedSphereCommunicator,
+        comm: pace.util.Communicator,
     ):
         """
         Initializes stencils to use either 2nd or 4th order of interpolation
@@ -140,9 +173,23 @@ class CubedToLatLon:
             order: Order of interpolation, must be 2 or 4
         """
         grid_indexing = stencil_factory.grid_indexing
+        isc = grid_indexing.isc
+        jsc = grid_indexing.jsc
+        iec = grid_indexing.iec
+        jec = grid_indexing.jec
+        isd = grid_indexing.isd
+        jsd = grid_indexing.jsd
+        ied = grid_indexing.ied
+        jed = grid_indexing.jed
+        self._domain = [[isc, iec], [isd, ied], [jsc, jec], [jsd, jed]]
+
         self._n_halo = grid_indexing.n_halo
         self._dx = grid_data.dx
         self._dy = grid_data.dy
+        if comm.size == 1:
+            self.one_rank = True
+        else:
+            self.one_rank = False
 
         # TODO: maybe compute locally a* variables
         # They depend on z* and sin_sg5, which
@@ -169,25 +216,26 @@ class CubedToLatLon:
 
         origin = grid_indexing.origin_compute()
         shape = grid_indexing.max_shape
-        full_size_xyiz_halo_spec = quantity_factory.get_quantity_halo_spec(
-            dims=[X_DIM, Y_INTERFACE_DIM, Z_DIM],
-            n_halo=grid_indexing.n_halo,
-            dtype=Float,
-        )
-        full_size_xiyz_halo_spec = quantity_factory.get_quantity_halo_spec(
-            dims=[X_INTERFACE_DIM, Y_DIM, Z_DIM],
-            n_halo=grid_indexing.n_halo,
-            dtype=Float,
-        )
-        self.u__v = WrappedHaloUpdater(
-            comm.get_vector_halo_updater(
-                [full_size_xyiz_halo_spec], [full_size_xiyz_halo_spec]
-            ),
-            state,
-            ["u"],
-            ["v"],
-            comm=comm,
-        )
+        if not self.one_rank:
+            full_size_xyiz_halo_spec = quantity_factory.get_quantity_halo_spec(
+                dims=[X_DIM, Y_INTERFACE_DIM, Z_DIM],
+                n_halo=grid_indexing.n_halo,
+                dtype=Float,
+            )
+            full_size_xiyz_halo_spec = quantity_factory.get_quantity_halo_spec(
+                dims=[X_INTERFACE_DIM, Y_DIM, Z_DIM],
+                n_halo=grid_indexing.n_halo,
+                dtype=Float,
+            )
+            self.u__v = WrappedHaloUpdater(
+                comm.get_vector_halo_updater(
+                    [full_size_xyiz_halo_spec], [full_size_xiyz_halo_spec]
+                ),
+                state,
+                ["u"],
+                ["v"],
+                comm=comm,
+            )
 
     def __call__(
         self,
@@ -203,10 +251,14 @@ class CubedToLatLon:
             v: y-wind on D-grid (in)
             ua: x-wind on A-grid (out)
             va: y-wind on A-grid (out)
-            comm: Cubed-sphere communicator
+            comm: Cubed-sphere or Tile communicator
         """
         if self._do_ord4:
-            self.u__v.update()
+            if self.one_rank:
+                mock_exchange(u.data[:-1, :, :], self._domain)
+                mock_exchange(v.data[:, :-1, :], self._domain)
+            else:
+                self.u__v.update()
         self._compute_cubed_to_latlon(
             u,
             v,

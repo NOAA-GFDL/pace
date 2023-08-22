@@ -7,7 +7,7 @@ from dace.frontend.python.parser import DaceProgram
 
 from pace.dsl.gt4py_utils import is_gpu_backend
 from pace.util._optional_imports import cupy as cp
-from pace.util.communicator import CubedSphereCommunicator
+from pace.util.communicator import Communicator
 
 
 # This can be turned on to revert compilation for orchestration
@@ -57,7 +57,7 @@ class FrozenCompiledSDFG:
 class DaceConfig:
     def __init__(
         self,
-        communicator: Optional[CubedSphereCommunicator],
+        communicator: Optional[Communicator],
         backend: str,
         tile_nx: int = 0,
         tile_nz: int = 0,

@@ -87,7 +87,7 @@ class ApplyPhysicsToDycore:
         quantity_factory: pace.util.QuantityFactory,
         grid_data: GridData,
         namelist,
-        comm: pace.util.CubedSphereCommunicator,
+        comm: pace.util.Communicator,
         grid_info: DriverGridData,
         state: fv3core.DycoreState,
         u_dt: pace.util.Quantity,

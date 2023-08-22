@@ -62,6 +62,7 @@ from .nudging import apply_nudging, get_nudging_tendencies
 from .null_comm import NullComm
 from .partitioner import (
     CubedSpherePartitioner,
+    Partitioner,
     TilePartitioner,
     get_tile_index,
     get_tile_number,

@@ -55,6 +55,11 @@ def get_tile_number(tile_rank: int, total_ranks: int) -> int:
 
 class Partitioner(abc.ABC):
     @abc.abstractmethod
+    def __init__(self):
+        self.tile = None
+        self.layout = None
+
+    @abc.abstractmethod
     def boundary(self, boundary_type: int, rank: int) -> Optional[bd.SimpleBoundary]:
         ...
 
@@ -119,7 +124,8 @@ class Partitioner(abc.ABC):
         """
         pass
 
-    @abc.abstractproperty
+    @property
+    @abc.abstractmethod
     def total_ranks(self) -> int:
         pass
 
@@ -133,6 +139,7 @@ class TilePartitioner(Partitioner):
         """Create an object for fv3gfs tile decomposition."""
         self.layout = layout
         self.edge_interior_ratio = edge_interior_ratio
+        self.tile = self
 
     def tile_index(self, rank: int):
         return 0
