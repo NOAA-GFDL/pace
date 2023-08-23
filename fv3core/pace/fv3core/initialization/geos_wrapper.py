@@ -141,7 +141,7 @@ class GeosDycoreWrapper:
         )
         MPS_pipe_directory = os.getenv("CUDA_MPS_PIPE_DIRECTORY", None)
         MPS_is_on = (
-            MPS_pipe_directory
+            MPS_pipe_directory is not None
             and is_gpu_backend(backend)
             and os.path.exists(f"{MPS_pipe_directory}/log")
         )
