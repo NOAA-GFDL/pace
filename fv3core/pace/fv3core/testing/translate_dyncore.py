@@ -140,7 +140,7 @@ class TranslateDynCore(ParallelTranslate2PyState):
             grid_data.ptop = inputs["ptop"]
         self._base.make_storage_data_input_vars(inputs)
         state = DycoreState.init_zeros(quantity_factory=self.grid.quantity_factory)
-        wsd: pace.util.Quantity = self.grid.quantity_factory.empty(
+        wsd: pace.util.Quantity = self.grid.quantity_factory.zeros(
             dims=[pace.util.X_DIM, pace.util.Y_DIM],
             units="unknown",
         )
@@ -152,7 +152,7 @@ class TranslateDynCore(ParallelTranslate2PyState):
                 state[name].data[selection] = value
             else:
                 setattr(state, name, value)
-        phis: pace.util.Quantity = self.grid.quantity_factory.empty(
+        phis: pace.util.Quantity = self.grid.quantity_factory.zeros(
             dims=[pace.util.X_DIM, pace.util.Y_DIM],
             units="m",
         )

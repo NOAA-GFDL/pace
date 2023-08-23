@@ -102,7 +102,7 @@ class QuantityFactory:
         That numpy array must correspond to the correct shape and extent
         for the given dims.
         """
-        base = self.empty(
+        base = self.zeros(
             dims=dims,
             units=units,
             dtype=data.dtype,
