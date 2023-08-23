@@ -12,7 +12,7 @@ import pace.util
 from pace.dsl.dace.dace_config import DaceConfig
 from pace.stencils.testing import ParallelTranslate, TranslateGrid
 from pace.stencils.testing.savepoint import SavepointCase, dataset_to_dict
-from pace.util.communicator import CubedSphereCommunicator
+from pace.util.communicator import CubedSphereCommunicator, TileCommunicator
 from pace.util.mpi import MPI
 
 
@@ -222,7 +222,7 @@ def parallel_savepoint_cases(
 
 def pytest_generate_tests(metafunc):
     backend = metafunc.config.getoption("backend")
-    if MPI is not None and MPI.COMM_WORLD.Get_size() > 1:
+    if MPI is not None: # and MPI.COMM_WORLD.Get_size() > 1:
         if metafunc.function.__name__ == "test_parallel_savepoint":
             generate_parallel_stencil_tests(metafunc, backend=backend)
     elif metafunc.function.__name__ == "test_sequential_savepoint":
@@ -262,8 +262,12 @@ def generate_parallel_stencil_tests(metafunc, *, backend: str):
 
 
 def get_communicator(comm, layout):
-    partitioner = pace.util.CubedSpherePartitioner(pace.util.TilePartitioner(layout))
-    communicator = pace.util.CubedSphereCommunicator(comm, partitioner)
+    if MPI.COMM_WORLD.Get_size() > 1:
+        partitioner = pace.util.CubedSpherePartitioner(pace.util.TilePartitioner(layout))
+        communicator = pace.util.CubedSphereCommunicator(comm, partitioner)
+    else:
+        partitioner = pace.util.TilePartitioner(layout)
+        communicator = pace.util.TileCommunicator(comm, partitioner)
     return communicator
 
 
