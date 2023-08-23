@@ -222,6 +222,9 @@ class MetricTerms:
         quantity_factory: util.QuantityFactory,
         communicator: util.CubedSphereCommunicator,
         grid_type: int = 0,
+        dx_const: float = 1000.0,
+        dy_const: float = 1000.0,
+        deglat: float = 15.0,
     ):
         assert grid_type < 3
         self._grid_type = grid_type
@@ -375,6 +378,9 @@ class MetricTerms:
         communicator: util.CubedSphereCommunicator,
         backend: str,
         grid_type: int = 0,
+        dx_const: float = 1000.0,
+        dy_const: float = 1000.0,
+        deglat: float = 15.0,
     ) -> "MetricTerms":
         sizer = util.SubtileGridSizer.from_tile_params(
             nx_tile=npx - 1,
@@ -393,6 +399,9 @@ class MetricTerms:
             quantity_factory=quantity_factory,
             communicator=communicator,
             grid_type=grid_type,
+            dx_const=dx_const,
+            dy_const=dy_const,
+            deglat=deglat,
         )
 
     @property

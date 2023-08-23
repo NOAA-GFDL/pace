@@ -85,12 +85,20 @@ class GeneratedGridConfig(GridInitializer):
         lon_target: desired center longitude for refined tile (deg)
         lat_target: desired center latitude for refined tile (deg)
         restart_path: if given, load vertical grid from restart file
+        grid_type: type of grid, 0 is a gnomonic cubed-sphere, 4 is doubly-periodic
+        dx_const: constant x-width of grid cells on a dp-grid
+        dy_const: constant y-width of grid cells on a dp-grid
+        deglat: latitude to use for coriolis calculations on a dp-grid
     """
 
     stretch_factor: Optional[float] = 1.0
     lon_target: Optional[float] = 350.0
     lat_target: Optional[float] = -90.0
     restart_path: Optional[str] = None
+    grid_type: Optional[int] = 0
+    dx_const: Optional[float] = 1000.0
+    dy_const: Optional[float] = 1000.0
+    deglat: Optional[float] = 15.0
 
     def get_grid(
         self,
@@ -99,7 +107,12 @@ class GeneratedGridConfig(GridInitializer):
     ) -> Tuple[DampingCoefficients, DriverGridData, GridData]:
 
         metric_terms = MetricTerms(
-            quantity_factory=quantity_factory, communicator=communicator
+            quantity_factory=quantity_factory,
+            communicator=communicator,
+            grid_type=self.grid_type,
+            dx_const=self.dx_const,
+            dy_const=self.dy_const,
+            deglat=self.deglat,
         )
         if self.stretch_factor != 1:  # do horizontal grid transformation
             _transform_horizontal_grid(
