@@ -10,7 +10,7 @@ import pace.physics
 import pace.stencils
 import pace.util.grid
 from pace.stencils.testing import TranslateGrid
-from pace.util import CubedSphereCommunicator, QuantityFactory
+from pace.util import Communicator, QuantityFactory
 from pace.util.grid import (
     DampingCoefficients,
     DriverGridData,
@@ -35,7 +35,7 @@ class GridInitializer(abc.ABC):
     def get_grid(
         self,
         quantity_factory: pace.util.QuantityFactory,
-        communicator: pace.util.CubedSphereCommunicator,
+        communicator: pace.util.Communicator,
     ) -> Tuple[DampingCoefficients, DriverGridData, GridData]:
         ...
 
@@ -62,7 +62,7 @@ class GridInitializerSelector(GridInitializer):
     def get_grid(
         self,
         quantity_factory: QuantityFactory,
-        communicator: CubedSphereCommunicator,
+        communicator: Communicator,
     ) -> Tuple[DampingCoefficients, DriverGridData, GridData]:
         return self.config.get_grid(
             quantity_factory=quantity_factory, communicator=communicator
@@ -89,7 +89,6 @@ class GeneratedGridConfig(GridInitializer):
         dx_const: constant x-width of grid cells on a dp-grid
         dy_const: constant y-width of grid cells on a dp-grid
         deglat: latitude to use for coriolis calculations on a dp-grid
-        u_max: maximum wind speed for grid_type > 3
     """
 
     stretch_factor: Optional[float] = 1.0
@@ -100,12 +99,11 @@ class GeneratedGridConfig(GridInitializer):
     dx_const: Optional[float] = 1000.0
     dy_const: Optional[float] = 1000.0
     deglat: Optional[float] = 15.0
-    u_max: Optional[float] = 350.0
 
     def get_grid(
         self,
         quantity_factory: QuantityFactory,
-        communicator: CubedSphereCommunicator,
+        communicator: Communicator,
     ) -> Tuple[DampingCoefficients, DriverGridData, GridData]:
 
         metric_terms = MetricTerms(
@@ -160,7 +158,7 @@ class SerialboxGridConfig(GridInitializer):
     def _namelist(self) -> Namelist:
         return Namelist.from_f90nml(self._f90_namelist)
 
-    def _serializer(self, communicator: pace.util.CubedSphereCommunicator):
+    def _serializer(self, communicator: pace.util.Communicator):
         import serialbox
 
         serializer = serialbox.Serializer(
@@ -172,7 +170,7 @@ class SerialboxGridConfig(GridInitializer):
 
     def _get_serialized_grid(
         self,
-        communicator: pace.util.CubedSphereCommunicator,
+        communicator: pace.util.Communicator,
         backend: str,
     ) -> pace.stencils.testing.grid.Grid:  # type: ignore
         ser = self._serializer(communicator)
@@ -184,7 +182,7 @@ class SerialboxGridConfig(GridInitializer):
     def get_grid(
         self,
         quantity_factory: QuantityFactory,
-        communicator: CubedSphereCommunicator,
+        communicator: Communicator,
     ) -> Tuple[DampingCoefficients, DriverGridData, GridData]:
 
         backend = quantity_factory.empty(

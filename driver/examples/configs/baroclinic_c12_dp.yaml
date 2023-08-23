@@ -12,7 +12,6 @@ grid_config:
     dx_const: 3000.0
     dy_const: 3000.0
     deglat: 10.0
-    u_max: 355.0
 initialization:
   type: baroclinic
 performance_config:
@@ -95,6 +94,7 @@ dycore_config:
   tau_v2l: 90.
   fv_sg_adj: 0
   n_sponge: 48
+  u_max: 355.0
 
 physics_config:
   hydrostatic: false

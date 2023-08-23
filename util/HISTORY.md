@@ -4,6 +4,8 @@ History
 latest
 ------
 
+- Added `dx_const`, `dy_const`, `deglat`, and `u_max` namelist settings for doubly-periodic grids
+- Added `dx_const`, `dy_const`, and `deglat` to grid generation code for doubly-periodic grids
 - Added f32 support to halo exchange data transformation
 
 v0.10.0

@@ -24,7 +24,11 @@ from pace.dsl.typing import Float
 
 # TODO: move update_atmos_state into pace.driver
 from pace.stencils import update_atmos_state
-from pace.util.communicator import CubedSphereCommunicator
+from pace.util.communicator import (
+    Communicator,
+    CubedSphereCommunicator,
+    TileCommunicator,
+)
 from pace.util.logging import pace_log
 
 from . import diagnostics
@@ -159,7 +163,7 @@ class DriverConfig:
 
     def get_grid(
         self,
-        communicator: pace.util.CubedSphereCommunicator,
+        communicator: pace.util.Communicator,
         quantity_factory: Optional[pace.util.QuantityFactory] = None,
     ) -> Tuple[
         pace.util.grid.DampingCoefficients,
@@ -188,7 +192,7 @@ class DriverConfig:
 
     def get_driver_state(
         self,
-        communicator: pace.util.CubedSphereCommunicator,
+        communicator: pace.util.Communicator,
         damping_coefficients: pace.util.grid.DampingCoefficients,
         driver_grid_data: pace.util.grid.DriverGridData,
         grid_data: pace.util.grid.GridData,
@@ -214,7 +218,7 @@ class DriverConfig:
             if stencil_factory is None:
                 grid_indexing = (
                     pace.dsl.stencil.GridIndexing.from_sizer_and_communicator(
-                        sizer=sizer, cube=communicator
+                        sizer=sizer, comm=communicator
                     )
                 )
                 stencil_factory = pace.dsl.StencilFactory(
@@ -274,7 +278,8 @@ class DriverConfig:
             kwargs["grid_config"] = GridInitializerSelector.from_dict(
                 kwargs["grid_config"]
             )
-            grid_type = kwargs["grid_config"]['config']['grid_type']
+            grid_type = kwargs["grid_config"].config.grid_type
+            # Copy grid_type to the DycoreConfig if it's not the default value
             if grid_type != 0:
                 kwargs["dycore_config"].grid_type = grid_type
 
@@ -404,11 +409,19 @@ class Driver:
                 if self.config.performance_config.collect_communication
                 else None
             )
-            communicator = CubedSphereCommunicator.from_layout(
-                comm=self.comm,
-                layout=self.config.layout,
-                timer=comm_timer,
-            )
+            communicator: Communicator
+            if self.config.grid_type <= 3:
+                communicator = CubedSphereCommunicator.from_layout(
+                    comm=self.comm,
+                    layout=self.config.layout,
+                    timer=comm_timer,
+                )
+            else:
+                communicator = TileCommunicator.from_layout(
+                    comm=self.comm,
+                    layout=self.config.layout,
+                    timer=comm_timer,
+                )
             self._update_driver_config_with_communicator(communicator)
 
             if self.config.stencil_config.compilation_config.run_mode == RunMode.Build:
@@ -544,7 +557,7 @@ class Driver:
         pace_log.info("initialization of the object done")
 
     def _update_driver_config_with_communicator(
-        self, communicator: CubedSphereCommunicator
+        self, communicator: Communicator
     ) -> None:
         dace_config = DaceConfig(
             communicator=communicator,
@@ -707,7 +720,7 @@ def log_subtile_location(partitioner: pace.util.TilePartitioner, rank: int):
 
 def _setup_factories(
     config: DriverConfig,
-    communicator: pace.util.CubedSphereCommunicator,
+    communicator: pace.util.Communicator,
     stencil_compare_comm,
 ) -> Tuple[pace.util.QuantityFactory, pace.dsl.StencilFactory]:
     """
@@ -735,7 +748,7 @@ def _setup_factories(
     )
 
     grid_indexing = pace.dsl.stencil.GridIndexing.from_sizer_and_communicator(
-        sizer=sizer, cube=communicator
+        sizer=sizer, comm=communicator
     )
     quantity_factory = pace.util.QuantityFactory.from_backend(
         sizer, backend=config.stencil_config.compilation_config.backend

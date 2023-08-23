@@ -243,7 +243,7 @@ class AcousticDynamics:
 
         def __init__(
             self,
-            comm: pace.util.CubedSphereCommunicator,
+            comm: pace.util.Communicator,
             grid_indexing: GridIndexing,
             quantity_factory: pace.util.QuantityFactory,
             state: DycoreState,
@@ -364,7 +364,7 @@ class AcousticDynamics:
 
     def __init__(
         self,
-        comm: pace.util.CubedSphereCommunicator,
+        comm: pace.util.Communicator,
         stencil_factory: StencilFactory,
         quantity_factory: pace.util.QuantityFactory,
         grid_data: GridData,
@@ -380,7 +380,7 @@ class AcousticDynamics:
     ):
         """
         Args:
-            comm: object for cubed sphere inter-process communication
+            comm: object for tile or cubed-sphere inter-process communication
             stencil_factory: creates stencils
             quantity_factory: creates quantities
             grid_data: metric terms defining the grid

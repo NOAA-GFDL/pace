@@ -90,7 +90,7 @@ class DynamicalCore:
 
     def __init__(
         self,
-        comm: pace.util.CubedSphereCommunicator,
+        comm: pace.util.Communicator,
         grid_data: GridData,
         stencil_factory: StencilFactory,
         quantity_factory: pace.util.QuantityFactory,
@@ -103,7 +103,7 @@ class DynamicalCore:
     ):
         """
         Args:
-            comm: object for cubed sphere inter-process communication
+            comm: object for cubed sphere or tile inter-process communication
             grid_data: metric terms defining the model grid
             stencil_factory: creates stencils
             damping_coefficients: damping configuration/constants

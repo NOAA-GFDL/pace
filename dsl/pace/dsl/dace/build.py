@@ -31,7 +31,7 @@ def unblock_waiting_tiles(comm, sdfg_path: str) -> None:
             comm.send(sdfg_path, dest=tile * tilesize + comm.Get_rank())
 
 
-def get_target_rank(rank: int, partitioner: pace.util.CubedSpherePartitioner):
+def get_target_rank(rank: int, partitioner: pace.util.Partitioner):
     """From my rank & the current partitioner we determine which
     rank we should read from.
     For all layout >= 3,3 this presumes build has been done on a

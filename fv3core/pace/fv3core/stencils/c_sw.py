@@ -1,7 +1,6 @@
 from gt4py.cartesian.gtscript import (  # noqa
     __INLINED,
     PARALLEL,
-    compile_assert,
     computation,
     horizontal,
     interval,
@@ -351,8 +350,7 @@ def transportdelp_update_vorticity_and_kineticenergy(
     from __externals__ import grid_type, i_end, i_start, j_end, j_start
 
     with computation(PARALLEL), interval(...):
-        # compile_assert(grid_type < 3)
-        # additional assumption (not grid.nested)
+        # assume (not grid.nested)
         # corresponds to x fluxes function, but for y-direction
         fy1 = delp[0, -1, 0] if vtc > 0.0 else delp
         fy = pt[0, -1, 0] if vtc > 0.0 else pt
@@ -367,7 +365,6 @@ def transportdelp_update_vorticity_and_kineticenergy(
 
     with computation(PARALLEL), interval(...):
         # update vorticity and kinetic energy
-        # compile_assert(grid_type < 3)
 
         ke = uc if ua > 0.0 else uc[1, 0, 0]
         vort = vc if va > 0.0 else vc[0, 1, 0]
@@ -453,8 +450,7 @@ def update_x_velocity(
     from __externals__ import grid_type, i_end, i_start
 
     with computation(PARALLEL), interval(...):
-        # compile_assert(grid_type < 3)
-        # additional assumption: not __INLINED(spec.grid.nested)
+        # assume: not __INLINED(spec.grid.nested)
 
         tmp_flux = dt2 * (velocity - velocity_c * cosa) / sina
         if __INLINED(grid_type < 3):
@@ -488,8 +484,7 @@ def update_y_velocity(
     from __externals__ import grid_type, j_end, j_start
 
     with computation(PARALLEL), interval(...):
-        # compile_assert(grid_type < 3)
-        # additional assumption: not __INLINED(spec.grid.nested)
+        # assume: not __INLINED(spec.grid.nested)
 
         # first-order upwind voriticity flux
         tmp_flux = dt2 * (velocity - velocity_c * cosa) / sina
