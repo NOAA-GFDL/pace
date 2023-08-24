@@ -3,4 +3,4 @@
 	url = https://github.com/gridtools/gt4py.git
 [submodule "external/dace"]
 	path = external/dace
-	url = git@github.com:spcl/dace.git
+	url = https://github.com/spcl/dace.git
