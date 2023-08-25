@@ -2,12 +2,11 @@ import enum
 
 
 class FV3CodePath(enum.Enum):
-    """Enum listing all possible code path on a cube sphere.
-    For any layout the cube sphere has up to 9 different code path, 10
-    when counting the 1,1 layout which aggregates all 9. Those are related to
-    the positioning of the rank on the tile and which of the edge/corner case
-    it has to handle.
-    Since the framework inline code to optimize, we _cannot_ pre-suppose of the code
+    """Enum listing all possible code paths on a cube sphere.
+    For any layout the cube sphere has up to 9 different code paths depending on
+    the positioning of the rank on the tile and which of the edge/corner cases
+    it has to handle, as well as the possibility for all boundary computations in the 1x1 layout case. 
+    Since the framework inlines code to optimize, we _cannot_ pre-suppose which code
     being kept and/or ejected. This enum serves as the ground truth to map rank to
     the proper generated code.
     """
