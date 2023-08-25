@@ -154,7 +154,7 @@ class GeosDycoreWrapper:
             f"  orchestration : {self._is_orchestrated}\n"
             f"          sizer : {sizer.nx}x{sizer.ny}x{sizer.nz}"
             f"(halo: {sizer.n_halo})\n"
-            f"  {device_ordinal_info}"
+            f"      Device ord: {device_ordinal_info}\n"
             f"     Nvidia MPS : {MPS_is_on}"
         )
 
