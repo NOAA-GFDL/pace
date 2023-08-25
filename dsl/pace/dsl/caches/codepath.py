@@ -5,7 +5,8 @@ class FV3CodePath(enum.Enum):
     """Enum listing all possible code paths on a cube sphere.
     For any layout the cube sphere has up to 9 different code paths depending on
     the positioning of the rank on the tile and which of the edge/corner cases
-    it has to handle, as well as the possibility for all boundary computations in the 1x1 layout case. 
+    it has to handle, as well as the possibility for all boundary computations in
+    the 1x1 layout case.
     Since the framework inlines code to optimize, we _cannot_ pre-suppose which code
     being kept and/or ejected. This enum serves as the ground truth to map rank to
     the proper generated code.
