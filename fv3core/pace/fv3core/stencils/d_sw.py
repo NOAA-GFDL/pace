@@ -94,6 +94,8 @@ def heat_diss(
         ke_bg (in):
     """
     with computation(PARALLEL), interval(...):
+        heat_source = 0.0
+        diss_est = 0.0
         if damp_w > 1e-5:
             dd8 = ke_bg * abs(dt)
             dw = (fx2 - fx2[1, 0, 0] + fy2 - fy2[0, 1, 0]) * rarea
