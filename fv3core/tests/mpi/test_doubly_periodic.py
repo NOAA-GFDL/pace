@@ -87,7 +87,7 @@ def setup_dycore() -> Tuple[pace.fv3core.DynamicalCore, List[Any]]:
         tile_rank=communicator.rank,
     )
     grid_indexing = pace.dsl.stencil.GridIndexing.from_sizer_and_communicator(
-        sizer=sizer, cube=communicator
+        sizer=sizer, comm=communicator
     )
     quantity_factory = pace.util.QuantityFactory.from_backend(
         sizer=sizer, backend=backend

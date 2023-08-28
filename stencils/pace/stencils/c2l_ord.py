@@ -35,8 +35,8 @@ def mock_exchange(
     jec = domain_2d[2][1]
     jsd = domain_2d[3][0]
     jed = domain_2d[3][1]
-    nhalo = isd - isc
-
+    nhalo = isc - isd
+    
     quantity[isd:isc, :, :] = quantity[iec - nhalo + 1 : iec + 1, :, :]
     quantity[iec + 1 : ied + 1, :, :] = quantity[isc : isc + nhalo, :, :]
     quantity[:, jsd:jsc, :] = quantity[:, jec - nhalo + 1 : jec + 1, :]
@@ -255,8 +255,8 @@ class CubedToLatLon:
         """
         if self._do_ord4:
             if self.one_rank:
-                mock_exchange(u.data[:-1, :, :], self._domain)
-                mock_exchange(v.data[:, :-1, :], self._domain)
+                mock_exchange(u[:, :-1, :], self._domain)
+                mock_exchange(v[:-1, :, :], self._domain)
             else:
                 self.u__v.update()
         self._compute_cubed_to_latlon(
