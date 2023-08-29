@@ -126,54 +126,55 @@ def test_relocatability_orchestration(backend):
 @pytest.mark.parametrize(
     "backend",
     [
-        pytest.param("gt:cpu_ifirst"),
         pytest.param("dace:cpu"),
     ],
 )
-def test_relocatability(backend):
-    # TODO: test work - but crashes when chained with other
-    #       see https://github.com/GEOS-ESM/pace/issues/16
-    pass
-    # import os
-    # import shutil
+def test_relocatability(backend: str):
+    import os
+    import shutil
 
-    # working_dir = os.getcwd()
+    import gt4py
+    from gt4py.cartesian import config as gt_config
 
-    # # Compile on default
-    # p0 = OrchestratedProgam(backend, DaCeOrchestration.Python)
-    # p0()
-    # assert os.path.exists(
-    #     f"{working_dir}/.gt_cache_000000/py38_1013/gtcpu_ifirst/__main__/_stencil/"
-    # )
+    from pace.util.mpi import MPI
 
-    # # Compile in another directory
-    # from gt4py.cartesian import config as gt_config
+    # Restore original dir name
+    gt4py.cartesian.config.cache_settings["dir_name"] = os.environ.get(
+        "GT_CACHE_DIR_NAME", f".gt_cache_{MPI.COMM_WORLD.Get_rank():06}"
+    )
 
-    # custom_path = f"{working_dir}/.my_cache_path"
-    # gt_config.cache_settings["root_path"] = custom_path
-    # p1 = OrchestratedProgam(backend, DaCeOrchestration.Python)
-    # p1()
-    # assert os.path.exists(
-    #     f"{custom_path}/.gt_cache_000000/py38_1013/gtcpu_ifirst/__main__/_stencil/"
-    # )
+    backend_sanitized = backend.replace(":", "")
+    working_dir = os.getcwd()
 
-    # # Check relocability by copying the second cache directory,
-    # # changing the path of gt_config.cache_settings and trying to Run on it
-    # relocated_path = f"{working_dir}/.my_relocated_cache_path"
-    # shutil.copytree(custom_path, relocated_path, dirs_exist_ok=True)
-    # gt_config.cache_settings["root_path"] = relocated_path
-    # p2 = OrchestratedProgam(backend, DaCeOrchestration.Python)
-    # p2()
-    # assert os.path.exists(
-    #     f"{relocated_path}/.gt_cache_000000/py38_1013/gtcpu_ifirst/__main__/_stencil/"
-    # )
+    # Compile on default
+    p0 = OrchestratedProgam(backend, DaCeOrchestration.Python)
+    p0()
+    assert os.path.exists(
+        f"{working_dir}/.gt_cache_000000/py38_1013/{backend_sanitized}"
+        "/__main__/_stencil/"
+    )
 
+    # Compile in another directory
 
-if __name__ == "__main__":
-    # TODO: test can be merged once gt4py also generates in the _FV3_X format
-    print("\n|>    test_relocatability_orchestration('dace:cpu')\n")
-    test_relocatability_orchestration("dace:cpu")
-    print("\n|>    test_relocatability('gt:cpu_ifirst')\n")
-    test_relocatability("gt:cpu_ifirst")
-    print("\n|>    test_relocatability('dace:cpu')\n")
-    test_relocatability("dace:cpu")
+    custom_path = f"{working_dir}/.my_cache_path"
+    gt_config.cache_settings["root_path"] = custom_path
+    p1 = OrchestratedProgam(backend, DaCeOrchestration.Python)
+    p1()
+    assert os.path.exists(
+        f"{custom_path}/.gt_cache_000000/py38_1013/{backend_sanitized}"
+        "/__main__/_stencil/"
+    )
+
+    # Check relocability by copying the second cache directory,
+    # changing the path of gt_config.cache_settings and trying to Run on it
+    relocated_path = f"{working_dir}/.my_relocated_cache_path"
+    shutil.copytree(
+        f"{working_dir}/.gt_cache_000000", relocated_path, dirs_exist_ok=True
+    )
+    gt_config.cache_settings["root_path"] = relocated_path
+    p2 = OrchestratedProgam(backend, DaCeOrchestration.Python)
+    p2()
+    assert os.path.exists(
+        f"{relocated_path}/.gt_cache_000000/py38_1013/{backend_sanitized}"
+        "/__main__/_stencil/"
+    )
