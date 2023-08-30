@@ -144,37 +144,33 @@ def test_relocatability(backend: str):
     )
 
     backend_sanitized = backend.replace(":", "")
-    working_dir = os.getcwd()
 
     # Compile on default
     p0 = OrchestratedProgam(backend, DaCeOrchestration.Python)
     p0()
     assert os.path.exists(
-        f"{working_dir}/.gt_cache_000000/py38_1013/{backend_sanitized}"
-        "/__main__/_stencil/"
+        f"./.gt_cache_000000/py38_1013/{backend_sanitized}/test_caches/_stencil/"
     )
 
     # Compile in another directory
 
-    custom_path = f"{working_dir}/.my_cache_path"
+    custom_path = "./.my_cache_path"
     gt_config.cache_settings["root_path"] = custom_path
     p1 = OrchestratedProgam(backend, DaCeOrchestration.Python)
     p1()
     assert os.path.exists(
         f"{custom_path}/.gt_cache_000000/py38_1013/{backend_sanitized}"
-        "/__main__/_stencil/"
+        "/test_caches/_stencil/"
     )
 
     # Check relocability by copying the second cache directory,
     # changing the path of gt_config.cache_settings and trying to Run on it
-    relocated_path = f"{working_dir}/.my_relocated_cache_path"
-    shutil.copytree(
-        f"{working_dir}/.gt_cache_000000", relocated_path, dirs_exist_ok=True
-    )
+    relocated_path = "./.my_relocated_cache_path"
+    shutil.copytree("./.gt_cache_000000", relocated_path, dirs_exist_ok=True)
     gt_config.cache_settings["root_path"] = relocated_path
     p2 = OrchestratedProgam(backend, DaCeOrchestration.Python)
     p2()
     assert os.path.exists(
         f"{relocated_path}/.gt_cache_000000/py38_1013/{backend_sanitized}"
-        "/__main__/_stencil/"
+        "/test_caches/_stencil/"
     )
