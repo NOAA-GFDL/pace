@@ -31,6 +31,11 @@ def calibrate_thresholds(pytestconfig):
     calibrate_thresholds = pytestconfig.getoption("calibrate_thresholds")
     return calibrate_thresholds
 
+@pytest.fixture()
+def dperiodic(pytestconfig):
+    dperiodic = pytestconfig.getoption("dperiodic")
+    return dperiodic
+
 
 def pytest_addoption(parser):
     parser.addoption(
@@ -50,4 +55,10 @@ def pytest_addoption(parser):
         action="store_true",
         default=False,
         help="re-calibrate error thresholds for comparison to reference",
+    )
+    parser.addoption(
+        "--dperiodic",
+        action="store_true",
+        default=False,
+        help="configure tests for doubly-periodic domain",
     )
