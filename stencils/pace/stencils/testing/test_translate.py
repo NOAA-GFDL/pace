@@ -335,7 +335,7 @@ def get_tile_communicator(comm, layout):
 
 @pytest.mark.parallel
 @pytest.mark.skipif(
-    MPI is None, #or MPI.COMM_WORLD.Get_size() == 1,
+    MPI is None or MPI.COMM_WORLD.Get_size() == 1,
     reason="Not running in parallel with mpi",
 )
 def test_parallel_savepoint(
