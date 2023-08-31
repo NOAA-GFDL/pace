@@ -186,13 +186,13 @@ class TropicalCycloneConfig(Initializer):
             driver_grid_data=driver_grid_data,
         )
 
-@InitializerSelector.register(analytic_init_str)
+@InitializerSelector.register("analytic")
 @dataclasses.dataclass
 class AnalyticInit(Initializer):
     """
     Configuration for analytic initialization.
     """
-
+    case: str="baroclinic"
     start_time: datetime = datetime(2000, 1, 1)
 
     def get_driver_state(
@@ -204,7 +204,7 @@ class AnalyticInit(Initializer):
         grid_data: pace.util.grid.GridData,
     ) -> DriverState:
         dycore_state = analytic_init.init_analytic_choice(
-            analytic_init_str=analytic_init_str,
+            analytic_init_str=case,
             grid_data=grid_data,
             quantity_factory=quantity_factory,
             adiabatic=False,

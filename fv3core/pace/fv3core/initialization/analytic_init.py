@@ -14,6 +14,11 @@ from pace.util.grid.gnomonic import (
     lon_lat_midpoint,
 )
 import pace.fv3core.initialization.init_utils as init_utils
+from enum import Enum
+
+class cases(Enum):
+    baroclinic = "baroclinic"
+    tropicalcylclone = "tropicalcyclone"
 
 def init_baroclinic_state(
     grid_data: GridData,
@@ -241,24 +246,25 @@ def init_analytic_choice(
     moist_phys: bool,
     comm: fv3util.CubedSphereCommunicator,
 ) -> DycoreState:
-    if analytic_init_str == "baroclinic":
-        return init_baroclinic_state(
-            grid_data=grid_data,
-            quantity_factory=quantity_factory,
-            adiabatic=False,
-            hydrostatic=False,
-            moist_phys=True,
-            comm=comm,
+    if analytic_init_str in cases:
+        if analytic_init_str == "baroclinic":
+            return init_baroclinic_state(
+                grid_data=grid_data,
+                quantity_factory=quantity_factory,
+                adiabatic=False,
+                hydrostatic=False,
+                moist_phys=True,
+                comm=comm,
+                )
+        
+        elif analytic_init_str == "tropicalcyclone":
+            return init_tc_state(
+                grid_data=grid_data,
+                quantity_factory=quantity_factory,
+                hydrostatic=False,
+                comm=comm,
             )
-    
-    elif analytic_init_str == "tropicalcyclone":
-        return init_tc_state(
-            grid_data=grid_data,
-            quantity_factory=quantity_factory,
-            hydrostatic=False,
-            comm=comm,
-        )
-    
     else:
-        print("UNKNOWN ANALYTIC INITIALIZATION")
+        raise ValueError(f"Case {analytic_init_str} not implemented")
+    
     
