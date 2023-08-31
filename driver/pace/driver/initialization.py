@@ -26,6 +26,8 @@ from pace.util.namelist import Namelist
 from .registry import Registry
 from .state import DriverState, TendencyState, _restart_driver_state
 
+import pace.fv3core.initialization.analytic_init as analytic_init
+
 
 class Initializer(abc.ABC):
     @property
@@ -175,6 +177,47 @@ class TropicalCycloneConfig(Initializer):
             dycore_state.pt.data[:, :, -2].max(),
         )
 
+        return DriverState(
+            dycore_state=dycore_state,
+            physics_state=physics_state,
+            tendency_state=tendency_state,
+            grid_data=grid_data,
+            damping_coefficients=damping_coefficients,
+            driver_grid_data=driver_grid_data,
+        )
+
+@InitializerSelector.register(analytic_init_str)
+@dataclasses.dataclass
+class AnalyticInit(Initializer):
+    """
+    Configuration for analytic initialization.
+    """
+
+    start_time: datetime = datetime(2000, 1, 1)
+
+    def get_driver_state(
+        self,
+        quantity_factory: pace.util.QuantityFactory,
+        communicator: pace.util.CubedSphereCommunicator,
+        damping_coefficients: pace.util.grid.DampingCoefficients,
+        driver_grid_data: pace.util.grid.DriverGridData,
+        grid_data: pace.util.grid.GridData,
+    ) -> DriverState:
+        dycore_state = analytic_init.init_analytic_choice(
+            analytic_init_str=analytic_init_str,
+            grid_data=grid_data,
+            quantity_factory=quantity_factory,
+            adiabatic=False,
+            hydrostatic=False,
+            moist_phys=True,
+            comm=communicator,
+        )
+        physics_state = pace.physics.PhysicsState.init_zeros(
+            quantity_factory=quantity_factory, active_packages=["microphysics"]
+        )
+        tendency_state = TendencyState.init_zeros(
+            quantity_factory=quantity_factory,
+        )
         return DriverState(
             dycore_state=dycore_state,
             physics_state=physics_state,
