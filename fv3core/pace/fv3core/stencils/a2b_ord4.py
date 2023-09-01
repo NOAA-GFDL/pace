@@ -1,6 +1,5 @@
 import gt4py.cartesian.gtscript as gtscript
 from gt4py.cartesian.gtscript import (
-    __INLINED,
     PARALLEL,
     asin,
     computation,
@@ -520,12 +519,8 @@ def doubly_periodic_a2b_ord4(qin):
 
 
 def doubly_periodic_a2b_ord4_stencil(qout: FloatField, qin: FloatField):
-    from __externals__ import replace
-
     with computation(PARALLEL), interval(...):
         qout = doubly_periodic_a2b_ord4(qin)
-        if __INLINED(replace):
-            qin = qout
 
 
 class AGrid2BGridFourthOrder:
@@ -553,6 +548,7 @@ class AGrid2BGridFourthOrder:
         assert grid_type in [0, 4]
         self._idx: GridIndexing = stencil_factory.grid_indexing
         self._stencil_config = stencil_factory.config
+        self.replace = replace
 
         if grid_type < 3:
             self._dxa = grid_data.dxa
@@ -569,7 +565,6 @@ class AGrid2BGridFourthOrder:
             self._edge_s = grid_data.edge_s
             self._edge_n = grid_data.edge_n
 
-            self.replace = replace
             self.grid_type = grid_type
 
             self._tmp_qx = quantity_factory.zeros(
@@ -682,12 +677,13 @@ class AGrid2BGridFourthOrder:
         else:  # grid type >= 3:
             self._doubly_periodic_a2b_ord4 = stencil_factory.from_origin_domain(
                 doubly_periodic_a2b_ord4_stencil,
-                externals={
-                    "replace": replace,
-                },
                 origin=self._idx.origin_compute(),
                 domain=self._idx.domain_compute(),
             )
+            if self.replace:
+                self._copy_stencil = stencil_factory.from_dims_halo(
+                    copy_defn, compute_dims=[X_INTERFACE_DIM, Y_INTERFACE_DIM, z_dim]
+                )
 
     def _exclude_tile_edges(self, origin, domain, dims=("x", "y")):
         """
@@ -804,3 +800,5 @@ class AGrid2BGridFourthOrder:
                 )
         else:  # grid type >= 3:
             self._doubly_periodic_a2b_ord4(qout, qin)
+            if self.replace:
+                self._copy_stencil(qout, qin)
