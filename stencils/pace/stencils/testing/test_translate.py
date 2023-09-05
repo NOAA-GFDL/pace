@@ -329,7 +329,7 @@ def get_communicator(comm, layout):
 
 def get_tile_communicator(comm, layout):
     partitioner = pace.util.TilePartitioner(layout)
-    communicator =  pace.util.TileCommunicator(comm, partitioner)
+    communicator = pace.util.TileCommunicator(comm, partitioner)
     return communicator
 
 
@@ -349,7 +349,7 @@ def test_parallel_savepoint(
     compute_grid,
     xy_indices=True,
 ):
-    if MPI.COMM_WORLD.Get_size()%6 != 0:
+    if MPI.COMM_WORLD.Get_size() % 6 != 0:
         layout = (
             int(MPI.COMM_WORLD.Get_size() ** 0.5),
             int(MPI.COMM_WORLD.Get_size() ** 0.5),

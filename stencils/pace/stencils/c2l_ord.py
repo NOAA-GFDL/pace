@@ -36,7 +36,7 @@ def mock_exchange(
     jsd = domain_2d[3][0]
     jed = domain_2d[3][1]
     nhalo = isc - isd
-    
+
     quantity[isd:isc, :, :] = quantity[iec - nhalo + 1 : iec + 1, :, :]
     quantity[iec + 1 : ied + 1, :, :] = quantity[isc : isc + nhalo, :, :]
     quantity[:, jsd:jsc, :] = quantity[:, jec - nhalo + 1 : jec + 1, :]
