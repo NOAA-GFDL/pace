@@ -13,7 +13,7 @@ TESTED_CONFIGS: List[str] = [
 
 
 @pytest.mark.parametrize(
-    "tested_configs"[
+    "tested_configs", [
         pytest.param(TESTED_CONFIGS, id="example configs"),
     ],
 )
