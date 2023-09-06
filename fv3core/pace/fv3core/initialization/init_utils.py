@@ -1,24 +1,23 @@
 import math
-import numpy as np
-import pace.util.constants as constants
 from dataclasses import fields
 from types import SimpleNamespace
-import pace.dsl.gt4py_utils as utils
+
+import numpy as np
+
 import pace.util as fv3util
+import pace.util.constants as constants
 from pace.dsl.typing import Float
 from pace.fv3core.initialization.dycore_state import DycoreState
-from pace.util.grid import GridData, lon_lat_midpoint, great_circle_distance_lon_lat
-from pace.util.grid.gnomonic import (
-    get_lonlat_vect,
-    get_unit_vector_direction,
-    lon_lat_midpoint,
-)
+from pace.util.grid import great_circle_distance_lon_lat, lon_lat_midpoint
+from pace.util.grid.gnomonic import get_lonlat_vect, get_unit_vector_direction
+
 
 # maximum windspeed amplitude - close to windspeed of zonal-mean time-mean
 # jet stream in troposphere
 u0 = 35.0  # From Table VI of DCMIP2016
 # [lon, lat] of zonal wind perturbation centerpoint at 20E, 40N
 pcen = [math.pi / 9.0, 2.0 * math.pi / 9.0]  # From Table VI of DCMIP2016
+ptop_min = 1e-8
 u1 = 1.0
 pt0 = 0.0
 eta_0 = 0.252
@@ -31,6 +30,7 @@ surface_pressure = 1.0e5  # units of (Pa), from Table VI of DCMIP2016
 # NOTE RADIUS = 6.3712e6 in FV3 vs Jabowski paper 6.371229e6
 R = constants.RADIUS / 10.0  # Perturbation radiusfor test case 13
 nhalo = fv3util.N_HALO_DEFAULT
+
 
 def apply_perturbation(u_component, up, lon, lat):
     """
@@ -50,6 +50,7 @@ def apply_perturbation(u_component, up, lon, lat):
     u_component[near_perturbation] = u_component[near_perturbation] + up * np.exp(
         -((r3d[near_perturbation] / R) ** 2.0)
     )
+
 
 def baroclinic_initialization(
     eta,
@@ -156,10 +157,12 @@ def baroclinic_initialization(
         )
         pt[slice_3d] = moisture_adjusted_temperature(pt[slice_3d], qvapor[slice_3d])
 
+
 def baroclinic_perturbed_zonal_wind(eta_v, lon, lat):
     u = zonal_wind(eta_v, lat)
     apply_perturbation(u, u1, lon, lat)
     return u
+
 
 def _calculate_distance_from_tc_center(pe_v, ps_v, muv, calc, tc_properties):
 
@@ -189,6 +192,7 @@ def _calculate_distance_from_tc_center(pe_v, ps_v, muv, calc, tc_properties):
 
     return distance_dict
 
+
 def _calculate_pt_height(height, qvapor, r, tc_properties, calc):
 
     aa = height / tc_properties["zp"]
@@ -204,6 +208,7 @@ def _calculate_pt_height(height, qvapor, r, tc_properties, calc):
     pt = gg / ii / hh
 
     return pt
+
 
 def _calculate_utmp(height, dist, calc, tc_properties):
 
@@ -237,6 +242,7 @@ def _calculate_utmp(height, dist, calc, tc_properties):
 
     return utmp
 
+
 def _calculate_vortex_surface_pressure_with_radius(p0, p_grid, tc_properties):
     """
     p0 is the tc center point
@@ -252,6 +258,7 @@ def _calculate_vortex_surface_pressure_with_radius(p0, p_grid, tc_properties):
     )
 
     return ps
+
 
 def cell_average_nine_components(
     component_function,
@@ -288,6 +295,7 @@ def cell_average_nine_components(
     pt9 = component_function(*component_args, lat=lat[:-1, 1:])
     return cell_average_nine_point(pt1, pt2, pt3, pt4, pt5, pt6, pt7, pt8, pt9)
 
+
 def cell_average_nine_point(pt1, pt2, pt3, pt4, pt5, pt6, pt7, pt8, pt9):
     """
     9-point average: should be 2nd order accurate for a rectangular cell
@@ -299,6 +307,7 @@ def cell_average_nine_point(pt1, pt2, pt3, pt4, pt5, pt6, pt7, pt8, pt9):
         0.25 * pt1 + 0.125 * (pt2 + pt3 + pt4 + pt5) + 0.0625 * (pt6 + pt7 + pt8 + pt9)
     )
 
+
 def compute_eta(ak, bk):
     """
     Equation (1) JRMS2006
@@ -307,6 +316,7 @@ def compute_eta(ak, bk):
     eta = 0.5 * ((ak[:-1] + ak[1:]) / surface_pressure + bk[:-1] + bk[1:])
     eta_v = vertical_coordinate(eta)
     return eta, eta_v
+
 
 def compute_grid_edge_midpoint_latitude_components(lon, lat):
     _, lat_avg_x_south = lon_lat_midpoint(
@@ -323,12 +333,14 @@ def compute_grid_edge_midpoint_latitude_components(lon, lat):
     )
     return lat_avg_x_south, lat_avg_y_east, lat_avg_x_north, lat_avg_y_west
 
+
 def compute_slices(nx, ny):
     islice = slice(nhalo, nhalo + nx)
     jslice = slice(nhalo, nhalo + ny)
     slice_3d = (islice, jslice, slice(None))
     slice_2d = (islice, jslice)
     return islice, jslice, slice_3d, slice_2d
+
 
 def _define_ak():
     ak = np.array(
@@ -418,6 +430,7 @@ def _define_ak():
 
     return ak
 
+
 def _define_bk():
     bk = np.array(
         [
@@ -506,6 +519,7 @@ def _define_bk():
 
     return bk
 
+
 def empty_numpy_dycore_state(shape):
     numpy_dict = {}
     for _field in fields(DycoreState):
@@ -516,6 +530,7 @@ def empty_numpy_dycore_state(shape):
             )
     numpy_state = SimpleNamespace(**numpy_dict)
     return numpy_state
+
 
 def _find_midpoint_unit_vectors(p1, p2):
 
@@ -529,12 +544,14 @@ def _find_midpoint_unit_vectors(p1, p2):
 
     return muv
 
+
 def fix_top_log_edge_pressure(peln, ptop):
     if ptop < ptop_min:
         ak1 = (constants.KAPPA + 1.0) / constants.KAPPA
         peln[:, :, 0] = peln[:, :, 1] - ak1
     else:
         peln[:, :, 0] = np.log(ptop)
+
 
 def geopotential_perturbation(lat, eta_value):
     """
@@ -552,6 +569,7 @@ def geopotential_perturbation(lat, eta_value):
         * constants.OMEGA
     )
 
+
 def horizontally_averaged_temperature(eta):
     """
     Equations (4) and (5) JRMS2006 for characteristic temperature profile
@@ -565,6 +583,7 @@ def horizontally_averaged_temperature(eta):
     )
     return t_mean
 
+
 def _initialize_delp(ak, bk, ps, shape):
     delp = np.zeros(shape)
     delp[:, :, :-1] = (
@@ -575,6 +594,7 @@ def _initialize_delp(ak, bk, ps, shape):
 
     return delp
 
+
 def initialize_delp(ps, ak, bk):
     return (
         ak[None, None, 1:]
@@ -582,8 +602,10 @@ def initialize_delp(ps, ak, bk):
         + ps[:, :, None] * (bk[None, None, 1:] - bk[None, None, :-1])
     )
 
+
 def initialize_delz(pt, peln):
     return constants.RDG * pt[:, :, :-1] * (peln[:, :, 1:] - peln[:, :, :-1])
+
 
 def _initialize_delz_w(pe, ps, pt, qvapor, tc_properties, calc, shape):
 
@@ -599,6 +621,7 @@ def _initialize_delz_w(pe, ps, pt, qvapor, tc_properties, calc, shape):
 
     return delz, w
 
+
 def _initialize_edge_pressure(delp, ptop, shape):
     pe = np.zeros(shape)
     pe[:, :, 0] = ptop
@@ -606,12 +629,14 @@ def _initialize_edge_pressure(delp, ptop, shape):
         pe[:, :, k] = ptop + np.sum(delp[:, :, :k], axis=2)
     return pe
 
+
 def initialize_edge_pressure(delp, ptop):
     pe = np.zeros(delp.shape)
     pe[:, :, 0] = ptop
     for k in range(1, pe.shape[2]):
         pe[:, :, k] = pe[:, :, k - 1] + delp[:, :, k - 1]
     return pe
+
 
 def _initialize_edge_pressure_cgrid(ak, bk, ps, shape, ptop):
     """
@@ -624,6 +649,7 @@ def _initialize_edge_pressure_cgrid(ak, bk, ps, shape, ptop):
     pe_cgrid[:, :, :] = ak[None, None, :] + ps[:, :, None] * bk[None, None, :]
 
     return pe_cgrid
+
 
 def initialize_kappa_pressures(pe, peln, ptop):
     """
@@ -638,17 +664,20 @@ def initialize_kappa_pressures(pe, peln, ptop):
     )
     return pk, pkz
 
+
 def initialize_log_pressure_interfaces(pe, ptop):
     peln = np.zeros(pe.shape)
     peln[:, :, 0] = math.log(ptop)
     peln[:, :, 1:] = np.log(pe[:, :, 1:])
     return peln
 
+
 def initialize_pkz_dry(delp, pt, delz):
     return np.exp(
         constants.KAPPA
         * np.log(constants.RDG * delp[:, :, :-1] * pt[:, :, :-1] / delz[:, :, :-1])
     )
+
 
 def initialize_pkz_moist(delp, pt, qvapor, delz):
     return np.exp(
@@ -661,6 +690,7 @@ def initialize_pkz_moist(delp, pt, qvapor, delz):
             / delz[:, :, :-1]
         )
     )
+
 
 def _initialize_qvapor_temperature(grid_data, pe, ps, tc_properties, calc, shape):
 
@@ -697,6 +727,7 @@ def _initialize_qvapor_temperature(grid_data, pe, ps, tc_properties, calc, shape
     pt[height > tc_properties["ztrop"]] = calc["ttrop"]
 
     return qvapor, pt
+
 
 def _initialize_vortex_ps_phis(grid_data, shape, tc_properties, calc):
     p0 = [np.deg2rad(tc_properties["lon_tc"]), np.deg2rad(tc_properties["lat_tc"])]
@@ -736,6 +767,7 @@ def _initialize_vortex_ps_phis(grid_data, shape, tc_properties, calc):
     output_dict = {"ps": ps, "ps_uc": ps_uc, "ps_vc": ps_vc, "phis": phis}
 
     return output_dict
+
 
 def _initialize_wind_dgrid(
     grid_data, tc_properties, calc, pe_u, pe_v, ps_u, ps_v, shape
@@ -783,6 +815,7 @@ def _initialize_wind_dgrid(
     vd[:, :, :-1][dist["height"] > tc_properties["ztrop"]] = 0
 
     return ud, vd
+
 
 def initialize_zonal_wind(
     u,
@@ -837,6 +870,7 @@ def initialize_zonal_wind(
     )
     u[islice, jslice, :] = 0.25 * (uu1 + 2.0 * uu2 + uu3)[islice, jslice, :]
 
+
 def _interpolate_winds_dgrid_agrid(grid_data, ud, vd, tc_properties, shape):
 
     ua = np.zeros(shape)
@@ -879,11 +913,13 @@ def _interpolate_winds_dgrid_agrid(grid_data, ud, vd, tc_properties, shape):
 
     return ua, va
 
+
 def local_compute_size(data_array_shape):
     nx = data_array_shape[0] - 2 * nhalo - 1
     ny = data_array_shape[1] - 2 * nhalo - 1
     nz = data_array_shape[2]
     return nx, ny, nz
+
 
 def local_coordinate_transformation(u_component, lon, grid_vector_component):
     """
@@ -897,11 +933,13 @@ def local_coordinate_transformation(u_component, lon, grid_vector_component):
         )[:, :, None]
     )
 
+
 def moisture_adjusted_temperature(pt, qvapor):
     """
     Update initial temperature to include water vapor contribution
     """
     return pt / (1.0 + constants.ZVIR * qvapor)
+
 
 def p_var(
     delp,
@@ -934,6 +972,7 @@ def p_var(
     else:
         pkz[:, :, :-1] = initialize_pkz_dry(delp, pt, delz)
 
+
 def setup_pressure_fields(
     eta,
     eta_v,
@@ -954,6 +993,7 @@ def setup_pressure_fields(
     pk[:], pkz[:] = initialize_kappa_pressures(pe, peln, ptop)
     eta[:-1], eta_v[:-1] = compute_eta(ak, bk)
 
+
 def _some_inital_calculations(tc_properties):
     t00 = tc_properties["Ts0"] * (1.0 + constants.ZVIR * tc_properties["q00"])  # num
     p0 = [np.deg2rad(tc_properties["lon_tc"]), np.deg2rad(tc_properties["lat_tc"])]
@@ -970,6 +1010,7 @@ def _some_inital_calculations(tc_properties):
     }
 
     return calc
+
 
 def specific_humidity(delp, peln, lat_agrid):
     """
@@ -990,6 +1031,7 @@ def specific_humidity(delp, peln, lat_agrid):
         * np.exp(-((ptmp / pw) ** 2.0))
     )
 
+
 def surface_geopotential_perturbation(lat):
     """
     From JRMS2006:
@@ -999,6 +1041,7 @@ def surface_geopotential_perturbation(lat):
     """
     surface_level = vertical_coordinate(eta_surface)
     return geopotential_perturbation(lat, surface_level)
+
 
 def temperature(eta, eta_v, t_mean, lat):
     """
@@ -1022,12 +1065,14 @@ def temperature(eta, eta_v, t_mean, lat):
         * constants.OMEGA
     )
 
+
 def vertical_coordinate(eta_value):
     """
     Equation (1) JRMS2006
     computes eta_v, the auxiliary variable vertical coordinate
     """
     return (eta_value - eta_0) * math.pi * 0.5
+
 
 def wind_component_calc(
     shape,
@@ -1052,6 +1097,7 @@ def wind_component_calc(
         grid_vector_component[islice_grid, jslice_grid, :],
     )
     return u_component
+
 
 def zonal_wind(eta_v, lat):
     """

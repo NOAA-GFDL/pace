@@ -9,6 +9,7 @@ import f90nml
 
 import pace.driver
 import pace.dsl
+import pace.fv3core.initialization.analytic_init as analytic_init
 import pace.fv3core.initialization.baroclinic as baroclinic_init
 import pace.fv3core.initialization.tropical_cyclone as tc_init
 import pace.physics
@@ -25,8 +26,6 @@ from pace.util.namelist import Namelist
 
 from .registry import Registry
 from .state import DriverState, TendencyState, _restart_driver_state
-
-import pace.fv3core.initialization.analytic_init as analytic_init
 
 
 class Initializer(abc.ABC):
@@ -186,13 +185,15 @@ class TropicalCycloneConfig(Initializer):
             driver_grid_data=driver_grid_data,
         )
 
+
 @InitializerSelector.register("analytic")
 @dataclasses.dataclass
 class AnalyticInit(Initializer):
     """
     Configuration for analytic initialization.
     """
-    case: str="baroclinic"
+
+    case: str = "baroclinic"
     start_time: datetime = datetime(2000, 1, 1)
 
     def get_driver_state(
@@ -204,7 +205,7 @@ class AnalyticInit(Initializer):
         grid_data: pace.util.grid.GridData,
     ) -> DriverState:
         dycore_state = analytic_init.init_analytic_choice(
-            analytic_init_str=case,
+            analytic_init_str=self.case,
             grid_data=grid_data,
             quantity_factory=quantity_factory,
             adiabatic=False,

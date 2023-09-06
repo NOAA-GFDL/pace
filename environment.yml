@@ -1,0 +1,11 @@
+name: pace_commit_env
+
+dependencies:
+  - python>=3.6 # oldest python officially supported security-wise
+  - cdo=<1.9.10 # python-cdo currently doesn't support >= cdo 2.0
+  - python-cdo
+  - cmor
+  - xarray
+  - metomi-isodatetime
+  - pytest
+  - pip
