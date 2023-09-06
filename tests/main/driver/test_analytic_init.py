@@ -22,5 +22,5 @@ def test_analytic_init_config(tested_configs: List[str]):
         with open(os.path.abspath(config_file), "r") as f:
             config = yaml.safe_load(f)
         driver_config = pace.driver.DriverConfig.from_dict(config)
-        assert(driver_config.initialization.case == "baroclinic")
+        assert(driver_config.initialization == "baroclinic")
         driver = pace.driver.Driver(config=driver_config)
