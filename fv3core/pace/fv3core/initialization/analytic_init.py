@@ -9,6 +9,7 @@ class cases(Enum):
     baroclinic = "baroclinic"
     tropicalcylclone = "tropicalcyclone"
 
+valid_cases = [item.value for item in cases]
 
 def init_analytic_choice(
     analytic_init_str: str,
@@ -19,7 +20,7 @@ def init_analytic_choice(
     moist_phys: bool,
     comm: fv3util.CubedSphereCommunicator,
 ) -> DycoreState:
-    if analytic_init_str in cases:
+    if analytic_init_str in valid_cases:
         if analytic_init_str == "baroclinic":
             import pace.fv3core.initialization.test_cases.initialize_baroclinic as bc
 
