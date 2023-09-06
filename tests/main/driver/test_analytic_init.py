@@ -18,6 +18,7 @@ TESTED_CONFIGS: List[str] = [
 )
 def test_analytic_init_config(tested_configs: List[str]):
     for config_file in tested_configs:
-        config = yaml.safe_load(config_file)
-        driver_config = pace.driver.DriverConfig.from_dict(config)
-        driver = pace.driver.Driver(config=driver_config)
+        with open(config_file,"r"):
+            config = yaml.safe_load(config_file)
+            driver_config = pace.driver.DriverConfig.from_dict(config)
+            driver = pace.driver.Driver(config=driver_config)
