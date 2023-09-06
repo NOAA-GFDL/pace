@@ -1,9 +1,10 @@
 from typing import List
-
+import os
 import pytest
 import yaml
 
 import pace.driver
+
 
 
 TESTED_CONFIGS: List[str] = [
@@ -18,7 +19,7 @@ TESTED_CONFIGS: List[str] = [
 )
 def test_analytic_init_config(tested_configs: List[str]):
     for config_file in tested_configs:
-        with open(config_file,"r"):
-            config = yaml.safe_load(config_file)
+        with open(os.path.abspath(config_file), "r") as f:
+            config = yaml.safe_load(f)
             driver_config = pace.driver.DriverConfig.from_dict(config)
             driver = pace.driver.Driver(config=driver_config)
