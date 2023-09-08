@@ -549,6 +549,7 @@ class AGrid2BGridFourthOrder:
         self._idx: GridIndexing = stencil_factory.grid_indexing
         self._stencil_config = stencil_factory.config
         self.replace = replace
+        self.grid_type = grid_type
 
         if grid_type < 3:
             self._dxa = grid_data.dxa
@@ -564,8 +565,6 @@ class AGrid2BGridFourthOrder:
             self._edge_e = grid_data.edge_e
             self._edge_s = grid_data.edge_s
             self._edge_n = grid_data.edge_n
-
-            self.grid_type = grid_type
 
             self._tmp_qx = quantity_factory.zeros(
                 dims=[X_INTERFACE_DIM, Y_DIM, z_dim],
