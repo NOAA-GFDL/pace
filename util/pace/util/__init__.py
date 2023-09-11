@@ -54,7 +54,7 @@ from .halo_updater import HaloUpdater, HaloUpdateRequest
 from .initialization import GridSizer, QuantityFactory, SubtileGridSizer
 from .io import read_state, write_state
 from .local_comm import LocalComm
-from .logging import pace_log, AVAILABLE_LOG_LEVELS
+from .logging import AVAILABLE_LOG_LEVELS, pace_log
 from .monitor import Monitor, NetCDFMonitor, ZarrMonitor
 from .mpi import MPIComm
 from .namelist import Namelist, NamelistDefaults

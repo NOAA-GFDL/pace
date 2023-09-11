@@ -105,7 +105,6 @@ class GeneratedGridConfig(GridInitializer):
         quantity_factory: QuantityFactory,
         communicator: CubedSphereCommunicator,
     ) -> Tuple[DampingCoefficients, DriverGridData, GridData]:
-
         metric_terms = MetricTerms(
             quantity_factory=quantity_factory,
             communicator=communicator,
@@ -184,8 +183,7 @@ class SerialboxGridConfig(GridInitializer):
         quantity_factory: QuantityFactory,
         communicator: CubedSphereCommunicator,
     ) -> Tuple[DampingCoefficients, DriverGridData, GridData]:
-
-        backend = quantity_factory.empty(
+        backend = quantity_factory.zeros(
             dims=[pace.util.X_DIM, pace.util.Y_DIM], units="unknown"
         ).gt4py_backend
 
