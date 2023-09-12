@@ -10,6 +10,7 @@ from dace.frontend.python.common import SDFGConvertible
 from dace.frontend.python.parser import DaceProgram
 from dace.transformation.auto.auto_optimize import make_transients_persistent
 from dace.transformation.helpers import get_parent_map
+from dace.transformation.passes.simplify import SimplifyPass
 
 from pace.dsl.dace.build import get_sdfg_path, write_build_info
 from pace.dsl.dace.dace_config import (
@@ -65,17 +66,13 @@ def _download_results_from_dace(
             gt4py_results = [
                 gt4py.storage.from_array(
                     r,
-                    default_origin=(0, 0, 0),
                     backend=config.get_backend(),
-                    managed_memory=True,
                 )
                 for r in dace_result
             ]
         else:
             gt4py_results = [
-                gt4py.storage.from_array(
-                    r, default_origin=(0, 0, 0), backend=config.get_backend()
-                )
+                gt4py.storage.from_array(r, backend=config.get_backend())
                 for r in dace_result
             ]
     return gt4py_results
@@ -111,6 +108,17 @@ def _to_gpu(sdfg: dace.SDFG):
         sd.openmp_sections = False
 
 
+def _simplify(sdfg: dace.SDFG, validate=True, verbose=False):
+    """Override of sdfg.simplify to skip failing transformation
+    per https://github.com/spcl/dace/issues/1328
+    """
+    return SimplifyPass(
+        validate=validate,
+        verbose=verbose,
+        skip=["ConstantPropagation"],
+    ).apply_pass(sdfg, {})
+
+
 def _build_sdfg(
     daceprog: DaceProgram, sdfg: dace.SDFG, config: DaceConfig, args, kwargs
 ):
@@ -144,7 +152,7 @@ def _build_sdfg(
                 del sdfg_kwargs[k]
 
         with DaCeProgress(config, "Simplify (1/2)"):
-            sdfg.simplify(validate=False, verbose=True)
+            _simplify(sdfg, validate=False, verbose=True)
 
         # Perform pre-expansion fine tuning
         with DaCeProgress(config, "Split regions"):
@@ -155,7 +163,7 @@ def _build_sdfg(
             sdfg.expand_library_nodes()
 
         with DaCeProgress(config, "Simplify (2/2)"):
-            sdfg.simplify(validate=False, verbose=True)
+            _simplify(sdfg, validate=False, verbose=True)
 
         # Move all memory that can be into a pool to lower memory pressure.
         # Change Persistent memory (sub-SDFG) into Scope and flag it.

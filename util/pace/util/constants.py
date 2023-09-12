@@ -13,7 +13,7 @@ class ConstantVersions(Enum):
     GEOS = "GEOS"  # Constant as defined in GEOS v13
 
 
-CONST_VERSION_AS_STR = os.environ.get("PACE_CONSTANTS", "FV3DYCORE")
+CONST_VERSION_AS_STR = os.environ.get("PACE_CONSTANTS", "GFS")
 
 try:
     CONST_VERSION = ConstantVersions[CONST_VERSION_AS_STR]
