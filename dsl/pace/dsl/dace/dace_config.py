@@ -1,4 +1,5 @@
 import enum
+import os
 from typing import Any, Dict, Optional, Tuple
 
 import dace.config
@@ -162,8 +163,6 @@ class DaceConfig:
         # Temporary. This is a bit too out of the ordinary for the common user.
         # We should refactor the architecture to allow for a `gtc:orchestrated:dace:X`
         # backend that would signify both the `CPU|GPU` split and the orchestration mode
-        import os
-
         if orchestration is None:
             fv3_dacemode_env_var = os.getenv("FV3_DACEMODE", "Python")
             # The below condition guard against defining empty FV3_DACEMODE and
@@ -266,8 +265,6 @@ class DaceConfig:
         # attempt to kill the dace.conf to avoid confusion
         if dace.config.Config._cfg_filename:
             try:
-                import os
-
                 os.remove(dace.config.Config._cfg_filename)
             except OSError:
                 pass
@@ -317,7 +314,7 @@ class DaceConfig:
         return self._orchestrate
 
     def get_sync_debug(self) -> bool:
-        return dace.config.Config.get("compiler", "cuda", "syncdebug")
+        return dace.config.Config.get_bool("compiler", "cuda", "syncdebug")
 
     def as_dict(self) -> Dict[str, Any]:
         return {

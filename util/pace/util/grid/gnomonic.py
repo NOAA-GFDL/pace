@@ -303,9 +303,9 @@ def _mirror_latlon(lon1, lat1, lon2, lat2, lon0, lat0, np):
     pdot = p0[0] * nb[0] + p0[1] * nb[1] + p0[2] * nb[2]
     pp = p0 - np.multiply(2.0, pdot) * nb
 
-    lon3 = np.empty((1, 1))
-    lat3 = np.empty((1, 1))
-    pp3 = np.empty((3, 1, 1))
+    lon3 = np.zeros((1, 1))
+    lat3 = np.zeros((1, 1))
+    pp3 = np.zeros((3, 1, 1))
     pp3[:, 0, 0] = pp
     _cart_to_latlon(1, pp3, lon3, lat3, np)
 

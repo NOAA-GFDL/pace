@@ -70,7 +70,7 @@ def _build_flatten_indices(
     """
 
     # Have to go down to numpy to leverage indices calculation
-    arr_indices = np.empty(shape, dtype=np.int32, order="C")[slices]
+    arr_indices = np.zeros(shape, dtype=np.int32, order="C")[slices]
 
     # Get offset from first index
     offset_dims = []
@@ -875,7 +875,6 @@ class HaloDataTransformerGPU(HaloDataTransformer):
 
             # Use private stream
             with self._get_stream(cu_kernel_args.stream):
-
                 # Launch kernel
                 blocks = 128
                 grid_x = (info_x._unpack_buffer_size // blocks) + 1
@@ -942,7 +941,6 @@ class HaloDataTransformerGPU(HaloDataTransformer):
 
             # Use private stream
             with self._get_stream(cu_kernel_args.stream):
-
                 # Buffer sizes
                 edge_size = info_x._unpack_buffer_size + info_y._unpack_buffer_size
 
