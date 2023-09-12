@@ -154,7 +154,6 @@ class TropicalCycloneConfig(Initializer):
         driver_grid_data: pace.util.grid.DriverGridData,
         grid_data: pace.util.grid.GridData,
     ) -> DriverState:
-
         dycore_state = tc_init.init_tc_state(
             grid_data=grid_data,
             quantity_factory=quantity_factory,
@@ -323,7 +322,7 @@ class SerialboxInit(Initializer):
         driver_grid_data: pace.util.grid.DriverGridData,
         grid_data: pace.util.grid.GridData,
     ) -> DriverState:
-        backend = quantity_factory.empty(
+        backend = quantity_factory.zeros(
             dims=[pace.util.X_DIM, pace.util.Y_DIM], units="unknown"
         ).gt4py_backend
 
@@ -348,7 +347,6 @@ class SerialboxInit(Initializer):
         communicator: pace.util.CubedSphereCommunicator,
         backend: str,
     ) -> fv3core.DycoreState:
-
         grid = self._get_serialized_grid(communicator=communicator, backend=backend)
 
         ser = self._serializer(communicator)
@@ -401,7 +399,6 @@ class PredefinedStateInit(Initializer):
         driver_grid_data: pace.util.grid.DriverGridData,
         grid_data: pace.util.grid.GridData,
     ) -> DriverState:
-
         return DriverState(
             dycore_state=self.dycore_state,
             physics_state=self.physics_state,

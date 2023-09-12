@@ -504,7 +504,7 @@ class Grid:
             data = getattr(self, name)
             assert data is not None
 
-            quantity = self.quantity_factory.empty(dims=dims, units=units)
+            quantity = self.quantity_factory.zeros(dims=dims, units=units)
             if len(quantity.shape) == 3:
                 quantity.data[:] = data[:, :, : quantity.shape[2]]
             elif len(quantity.shape) == 2:

@@ -75,7 +75,7 @@ def quantity_cast_to_model_float(
     quantity_factory: util.QuantityFactory, qty_64: util.Quantity
 ) -> util.Quantity:
     """Copy & cast from 64-bit float to model precision if need be"""
-    qty = quantity_factory.empty(qty_64.dims, qty_64.units, dtype=Float)
+    qty = quantity_factory.zeros(qty_64.dims, qty_64.units, dtype=Float)
     qty.data[:] = qty_64.data[:]
     return qty
 
@@ -1530,7 +1530,6 @@ class MetricTerms:
         )
 
     def _init_dgrid(self):
-
         grid_mirror_ew = self.quantity_factory.zeros(
             self._grid_dims,
             "radians",
@@ -1751,7 +1750,6 @@ class MetricTerms:
         return dx, dy
 
     def _compute_dxdy_agrid(self):
-
         dx_agrid_64 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_DIM],
             "m",
@@ -2149,7 +2147,6 @@ class MetricTerms:
         )
 
     def _init_cell_trigonometry(self):
-
         cosa_u_64 = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_DIM],
             "",
