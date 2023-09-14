@@ -533,7 +533,7 @@ class AGrid2BGridFourthOrder:
         stencil_factory: StencilFactory,
         quantity_factory: pace.util.QuantityFactory,
         grid_data: GridData,
-        grid_type,
+        grid_type: int,
         z_dim=Z_DIM,
         replace: bool = False,
     ):

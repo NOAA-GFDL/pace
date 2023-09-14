@@ -3,8 +3,9 @@ from gt4py.cartesian.gtscript import PARALLEL, computation, interval
 import pace.util
 from pace.dsl.stencil import StencilFactory
 from pace.dsl.typing import Float, FloatField, FloatFieldIJ
-from pace.fv3core.stencils.a2b_ord4 import AGrid2BGridFourthOrder
-from pace.util import X_DIM, Y_DIM, Z_INTERFACE_DIM
+from pace.fv3core.stencils.a2b_ord4 import AGrid2BGridFourthOrder, doubly_periodic_a2b_ord4_stencil
+from pace.fv3core.stencils.basic_operations import copy_defn
+from pace.util import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_DIM, Z_INTERFACE_DIM
 from pace.util.grid import GridData
 
 
@@ -138,6 +139,7 @@ class NonHydrostaticPressureGradient:
         self.nk = grid_indexing.domain[2]
         self._rdx = grid_data.rdx
         self._rdy = grid_data.rdy
+        self._grid_type = grid_type
 
         self._tmp_wk = quantity_factory.zeros(
             [X_DIM, Y_DIM, Z_INTERFACE_DIM],
@@ -150,29 +152,52 @@ class NonHydrostaticPressureGradient:
             dtype=Float,
         )
 
-        self.a2b_k1 = AGrid2BGridFourthOrder(
-            stencil_factory.restrict_vertical(k_start=1),
-            quantity_factory=quantity_factory,
-            grid_data=grid_data,
-            grid_type=grid_type,
-            z_dim=Z_INTERFACE_DIM,
-            replace=True,
-        )
-        self.a2b_kbuffer = AGrid2BGridFourthOrder(
-            stencil_factory,
-            quantity_factory=quantity_factory,
-            grid_data=grid_data,
-            grid_type=grid_type,
-            z_dim=Z_INTERFACE_DIM,
-            replace=True,
-        )
-        self.a2b_kstandard = AGrid2BGridFourthOrder(
-            stencil_factory,
-            quantity_factory=quantity_factory,
-            grid_data=grid_data,
-            grid_type=grid_type,
-            replace=False,
-        )
+        if grid_type < 3:
+            self.a2b_k1 = AGrid2BGridFourthOrder(
+                stencil_factory.restrict_vertical(k_start=1),
+                quantity_factory=quantity_factory,
+                grid_data=grid_data,
+                grid_type=grid_type,
+                z_dim=Z_INTERFACE_DIM,
+                replace=True,
+            )
+            self.a2b_kbuffer = AGrid2BGridFourthOrder(
+                stencil_factory,
+                quantity_factory=quantity_factory,
+                grid_data=grid_data,
+                grid_type=grid_type,
+                z_dim=Z_INTERFACE_DIM,
+                replace=True,
+            )
+            self.a2b_kstandard = AGrid2BGridFourthOrder(
+                stencil_factory,
+                quantity_factory=quantity_factory,
+                grid_data=grid_data,
+                grid_type=grid_type,
+                replace=False,
+            )
+        else:
+            self.a2b_k1 = stencil_factory.restrict_vertical(k_start=1).from_dims_halo(
+                doubly_periodic_a2b_ord4_stencil,
+                compute_dims=[X_INTERFACE_DIM, Y_INTERFACE_DIM, Z_INTERFACE_DIM],
+            )
+            self.copy_k1 = stencil_factory.restrict_vertical(k_start=1).from_dims_halo(
+                copy_defn,
+                compute_dims=[X_INTERFACE_DIM, Y_INTERFACE_DIM, Z_INTERFACE_DIM],
+            )
+            self.a2b_kbuffer = stencil_factory.from_dims_halo(
+                doubly_periodic_a2b_ord4_stencil,
+                compute_dims=[X_INTERFACE_DIM, Y_INTERFACE_DIM, Z_INTERFACE_DIM],
+            )
+            self.copy_kbuffer = stencil_factory.from_dims_halo(
+                copy_defn,
+                compute_dims=[X_INTERFACE_DIM, Y_INTERFACE_DIM, Z_INTERFACE_DIM],
+            )
+            self.a2b_kstandard = stencil_factory.from_dims_halo(
+                doubly_periodic_a2b_ord4_stencil,
+                compute_dims=[X_INTERFACE_DIM, Y_INTERFACE_DIM, Z_DIM],
+            )
+
         self._set_k0_and_calc_wk_stencil = stencil_factory.from_origin_domain(
             set_k0_and_calc_wk,
             origin=self.orig,
@@ -229,9 +254,15 @@ class NonHydrostaticPressureGradient:
         # the second argument and using a temporary instead?
 
         self.a2b_k1(pp, self._tmp_wk1)
+        if self._grid_type >= 3:
+            self.copy_k1(self._tmp_wk1, pp)
         self.a2b_k1(pk3, self._tmp_wk1)
+        if self._grid_type >= 3:
+            self.copy_k1(self._tmp_wk1, pk3)
 
         self.a2b_kbuffer(gz, self._tmp_wk1)
+        if self._grid_type >= 3:
+            self.copy_kbuffer(self._tmp_wk1, gz)
         self.a2b_kstandard(delp, self._tmp_wk1)
 
         self._set_k0_and_calc_wk_stencil(pp, pk3, self._tmp_wk, top_value)
