@@ -25,7 +25,7 @@ class StencilBackendCompilerOverride:
     """Override the Pace global stencil JIT to allow for 9-rank build
     on any setup.
 
-    This is a workaround that requires to now _exactly_ when build is happening.
+    This is a workaround that requires to know _exactly_ when build is happening.
     Using this as a context manager, we leverage the DaCe build system to override
     the name and build the 9 codepaths required- while every other rank wait.
 

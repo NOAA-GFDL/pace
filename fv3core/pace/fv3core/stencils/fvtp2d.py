@@ -236,6 +236,18 @@ class FiniteVolumeTransport:
             domain=idx.domain_compute(add=(1, 1, 1)),
         )
 
+    def _transport_flux(self, x_unit_flux, y_unit_flux, q_x_flux, q_y_flux):
+        self.stencil_transport_flux(
+            self._q_advected_y_x_advected_mean,
+            self._q_x_advected_mean,
+            self._q_advected_x_y_advected_mean,
+            self._q_y_advected_mean,
+            x_unit_flux,
+            y_unit_flux,
+            q_x_flux,
+            q_y_flux,
+        )
+
     def __call__(
         self,
         q,
@@ -342,58 +354,15 @@ class FiniteVolumeTransport:
         # TODO [DACE]: due to an aliiasing issue (see above for original code)
         # we duplicate the code here
         if x_mass_flux is None:
-            # x_unit_flux = x_area_flux
             if y_mass_flux is None:
-                # y_unit_flux = y_area_flux
-                self.stencil_transport_flux(
-                    self._q_advected_y_x_advected_mean,
-                    self._q_x_advected_mean,
-                    self._q_advected_x_y_advected_mean,
-                    self._q_y_advected_mean,
-                    x_area_flux,
-                    y_area_flux,
-                    q_x_flux,
-                    q_y_flux,
-                )
+                self._transport_flux(x_area_flux, y_area_flux, q_x_flux, q_y_flux)
             else:
-                # y_unit_flux = y_mass_flux
-                self.stencil_transport_flux(
-                    self._q_advected_y_x_advected_mean,
-                    self._q_x_advected_mean,
-                    self._q_advected_x_y_advected_mean,
-                    self._q_y_advected_mean,
-                    x_area_flux,
-                    y_mass_flux,
-                    q_x_flux,
-                    q_y_flux,
-                )
-
+                self._transport_flux(x_area_flux, y_mass_flux, q_x_flux, q_y_flux)
         else:
-            # x_unit_flux = x_mass_flux
             if y_mass_flux is None:
-                # y_unit_flux = y_area_flux
-                self.stencil_transport_flux(
-                    self._q_advected_y_x_advected_mean,
-                    self._q_x_advected_mean,
-                    self._q_advected_x_y_advected_mean,
-                    self._q_y_advected_mean,
-                    x_mass_flux,
-                    y_area_flux,
-                    q_x_flux,
-                    q_y_flux,
-                )
+                self._transport_flux(x_mass_flux, y_area_flux, q_x_flux, q_y_flux)
             else:
-                # y_unit_flux = y_mass_flux
-                self.stencil_transport_flux(
-                    self._q_advected_y_x_advected_mean,
-                    self._q_x_advected_mean,
-                    self._q_advected_x_y_advected_mean,
-                    self._q_y_advected_mean,
-                    x_mass_flux,
-                    y_mass_flux,
-                    q_x_flux,
-                    q_y_flux,
-                )
+                self._transport_flux(x_mass_flux, y_mass_flux, q_x_flux, q_y_flux)
 
         if self._do_delnflux:
             self.delnflux(q, q_x_flux, q_y_flux, mass=mass)
