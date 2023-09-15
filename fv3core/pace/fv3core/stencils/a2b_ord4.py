@@ -674,9 +674,10 @@ class AGrid2BGridFourthOrder:
             )
 
         else:  # grid type >= 3:
-            self._doubly_periodic_a2b_ord4 = stencil_factory.from_dims_halo(
+            self._doubly_periodic_a2b_ord4 = stencil_factory.from_origin_domain(
                 doubly_periodic_a2b_ord4_stencil,
-                compute_dims=[X_INTERFACE_DIM, Y_INTERFACE_DIM, z_dim],
+                origin=self._idx.origin_compute(),
+                domain=self._idx.domain_compute(),
             )
             if self.replace:
                 self._copy_stencil = stencil_factory.from_dims_halo(
