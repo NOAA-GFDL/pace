@@ -236,6 +236,18 @@ class FiniteVolumeTransport:
             domain=idx.domain_compute(add=(1, 1, 1)),
         )
 
+    def _transport_flux(self, x_unit_flux, y_unit_flux, q_x_flux, q_y_flux):
+        self.stencil_transport_flux(
+            self._q_advected_y_x_advected_mean,
+            self._q_x_advected_mean,
+            self._q_advected_x_y_advected_mean,
+            self._q_y_advected_mean,
+            x_unit_flux,
+            y_unit_flux,
+            q_x_flux,
+            q_y_flux,
+        )
+
     def __call__(
         self,
         q,
@@ -283,7 +295,8 @@ class FiniteVolumeTransport:
                 (as opposed to per-area) then this must be provided for
                 damping to be correct
         """
-        # [DaCe] dace.frontend.python.common.DaceSyntaxError: Keyword "Raise" disallowed
+        # TODO [DaCe] dace.frontend.python.common.DaceSyntaxError:
+        # Keyword "Raise" disallowed
         # if (
         #     self.delnflux is not None
         #     and mass is None
@@ -292,14 +305,16 @@ class FiniteVolumeTransport:
         #     raise ValueError(
         #         "when damping is enabled, mass must be given if mass flux is given"
         #     )
-        if x_mass_flux is None:
-            x_unit_flux = x_area_flux
-        else:
-            x_unit_flux = x_mass_flux
-        if y_mass_flux is None:
-            y_unit_flux = y_area_flux
-        else:
-            y_unit_flux = y_mass_flux
+
+        # TODO [DaCe] Original aliasing failing code
+        # if x_mass_flux is None:
+        #     x_unit_flux = x_area_flux
+        # else:
+        #     x_unit_flux = x_mass_flux
+        # if y_mass_flux is None:
+        #     y_unit_flux = y_area_flux
+        # else:
+        #     y_unit_flux = y_mass_flux
 
         # TODO: consider whether to refactor xppm/yppm to output fluxes by also taking
         # y_area_flux as an input (flux = area_flux * advected_mean), since a flux is
@@ -336,15 +351,18 @@ class FiniteVolumeTransport:
             self._q_advected_x, cry, self._q_advected_x_y_advected_mean
         )
 
-        self.stencil_transport_flux(
-            self._q_advected_y_x_advected_mean,
-            self._q_x_advected_mean,
-            self._q_advected_x_y_advected_mean,
-            self._q_y_advected_mean,
-            x_unit_flux,
-            y_unit_flux,
-            q_x_flux,
-            q_y_flux,
-        )
+        # TODO [DACE]: due to an aliiasing issue (see above for original code)
+        # we duplicate the code here
+        if x_mass_flux is None:
+            if y_mass_flux is None:
+                self._transport_flux(x_area_flux, y_area_flux, q_x_flux, q_y_flux)
+            else:
+                self._transport_flux(x_area_flux, y_mass_flux, q_x_flux, q_y_flux)
+        else:
+            if y_mass_flux is None:
+                self._transport_flux(x_mass_flux, y_area_flux, q_x_flux, q_y_flux)
+            else:
+                self._transport_flux(x_mass_flux, y_mass_flux, q_x_flux, q_y_flux)
+
         if self._do_delnflux:
             self.delnflux(q, q_x_flux, q_y_flux, mass=mass)

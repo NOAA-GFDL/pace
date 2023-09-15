@@ -1,6 +1,5 @@
 # type: ignore
 import copy
-import logging
 import os
 from typing import Any, Dict, List
 
@@ -227,7 +226,6 @@ def test_sequential_savepoint(
     threshold_overrides,
     xy_indices=True,
 ):
-    caplog.set_level(logging.DEBUG, logger="fv3core")
     if case.testobj is None:
         pytest.xfail(
             f"no translate object available for savepoint {case.savepoint_name}"
@@ -348,7 +346,6 @@ def test_parallel_savepoint(
         int((MPI.COMM_WORLD.Get_size() // 6) ** 0.5),
     )
     communicator = get_communicator(MPI.COMM_WORLD, layout)
-    caplog.set_level(logging.DEBUG, logger="fv3core")
     if case.testobj is None:
         pytest.xfail(
             f"no translate object available for savepoint {case.savepoint_name}"

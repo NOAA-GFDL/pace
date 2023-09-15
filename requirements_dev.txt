@@ -3,6 +3,7 @@ pytest-subtests
 pytest-regressions
 pytest-profiling
 pytest-cov
+scipy
 nbmake
 mpi4py
 xarray
@@ -10,14 +11,14 @@ zarr
 dask>=2021.10.0
 netCDF4
 cftime
-dace==0.14.0
 fv3config>=0.9.0
 f90nml>=1.1.0
 numpy>=1.15
 -e external/gt4py
--e util[dace]
+-e external/dace
 -e stencils
 -e dsl
 -e physics
 -e fv3core
 -e driver
+-e util

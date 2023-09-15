@@ -135,7 +135,7 @@ def set_distributed_caches(config: "DaceConfig"):
         verb = "reading"
 
     gt_config.cache_settings["dir_name"] = get_cache_directory(config.code_path)
-    pace.util.pace_log.critical(
+    pace.util.pace_log.info(
         f"[{orchestration_mode}] Rank {config.my_rank} "
         f"{verb} cache {gt_config.cache_settings['dir_name']}"
     )
