@@ -17,6 +17,7 @@ def pytest_addoption(parser):
     parser.addoption("--data_path", action="store", default="./")
     parser.addoption("--threshold_overrides_file", action="store", default=None)
     parser.addoption("--compute_grid", action="store_true")
+    parser.addoption("--dperiodic", action="store_true")
 
 
 def pytest_configure(config):
