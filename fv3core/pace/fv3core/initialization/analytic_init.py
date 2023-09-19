@@ -1,7 +1,9 @@
 from enum import Enum
 
 import pace.util as fv3util
-from pace.fv3core.initialization.dycore_state import DycoreState
+
+# from pace.fv3core.initialization.dycore_state import DycoreState
+from pace.fv3core.dycore_state import DycoreState
 from pace.util.grid import GridData
 
 
@@ -9,7 +11,9 @@ class cases(Enum):
     baroclinic = "baroclinic"
     tropicalcylclone = "tropicalcyclone"
 
+
 valid_cases = [item.value for item in cases]
+
 
 def init_analytic_choice(
     analytic_init_str: str,

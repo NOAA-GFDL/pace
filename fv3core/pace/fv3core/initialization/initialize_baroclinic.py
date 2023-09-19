@@ -3,7 +3,9 @@ import numpy as np
 import pace.dsl.gt4py_utils as utils
 import pace.fv3core.initialization.init_utils as init_utils
 import pace.util as fv3util
-from pace.fv3core.initialization.dycore_state import DycoreState
+
+# from pace.fv3core.initialization.dycore_state import DycoreState
+from pace.fv3core.dycore_state import DycoreState
 from pace.util.grid import GridData
 
 

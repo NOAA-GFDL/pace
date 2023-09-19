@@ -2,7 +2,9 @@ import numpy as np
 
 import pace.util as fv3util
 import pace.util.constants as constants
-from pace.fv3core.initialization.dycore_state import DycoreState
+
+# from pace.fv3core.initialization.dycore_state import DycoreState
+from pace.fv3core.dycore_state import DycoreState
 from pace.util.grid import GridData, great_circle_distance_lon_lat
 from pace.util.grid.gnomonic import (
     get_lonlat_vect,
