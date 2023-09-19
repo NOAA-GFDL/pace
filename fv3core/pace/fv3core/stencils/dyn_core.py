@@ -29,7 +29,6 @@ from pace.dsl.stencil import GridIndexing, StencilFactory
 from pace.dsl.typing import Float, FloatField, FloatFieldIJ
 from pace.fv3core._config import AcousticDynamicsConfig
 
-# from pace.fv3core.initialization.dycore_state import DycoreState
 from pace.fv3core.dycore_state import DycoreState
 from pace.fv3core.stencils.c_sw import CGridShallowWaterDynamics
 from pace.fv3core.stencils.del2cubed import HyperdiffusionDamping

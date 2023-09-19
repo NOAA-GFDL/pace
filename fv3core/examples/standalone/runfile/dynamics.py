@@ -23,7 +23,6 @@ from pace.dsl import StencilFactory
 from pace.dsl.dace.orchestration import DaceConfig
 from pace.fv3core import DynamicalCore, DynamicalCoreConfig
 
-# from pace.fv3core.initialization.dycore_state import DycoreState
 from pace.fv3core.dycore_state import DycoreState
 from pace.fv3core.initialization.baroclinic import init_baroclinic_state
 from pace.fv3core.testing import TranslateFVDynamics
