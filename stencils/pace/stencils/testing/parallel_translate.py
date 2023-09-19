@@ -12,7 +12,6 @@ from .translate import TranslateFortranData2Py, read_serialized_data
 
 
 class ParallelTranslate:
-
     max_error = TranslateFortranData2Py.max_error
     near_zero = TranslateFortranData2Py.near_zero
     compute_grid_option = False
@@ -192,7 +191,7 @@ class ParallelTranslateGrid(ParallelTranslate):
         for name, properties in self.inputs.items():
             standard_name = properties.get("name", name)
             if len(properties["dims"]) > 0:
-                state[standard_name] = grid.quantity_factory.empty(
+                state[standard_name] = grid.quantity_factory.zeros(
                     properties["dims"], properties["units"], dtype=inputs[name].dtype
                 )
                 input_slice = _serialize_slice(

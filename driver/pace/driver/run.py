@@ -5,7 +5,7 @@ from typing import Optional
 import click
 import yaml
 
-from pace.util import pace_log, AVAILABLE_LOG_LEVELS
+from pace.util import AVAILABLE_LOG_LEVELS, pace_log
 
 from .driver import Driver, DriverConfig
 

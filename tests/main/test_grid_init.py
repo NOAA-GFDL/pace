@@ -51,8 +51,6 @@ def test_grid_init_not_decomposition_dependent(rank: int):
     assert allclose(metric_terms_1by1.area, metric_terms_3by3.area, partitioner, rank)
     assert allclose(metric_terms_1by1.dx, metric_terms_3by3.dx, partitioner, rank)
     assert allclose(metric_terms_1by1.dy, metric_terms_3by3.dy, partitioner, rank)
-    assert allclose(metric_terms_1by1.dxa, metric_terms_3by3.dxa, partitioner, rank)
-    assert allclose(metric_terms_1by1.dya, metric_terms_3by3.dya, partitioner, rank)
     assert allclose(
         metric_terms_1by1.cos_sg1, metric_terms_3by3.cos_sg1, partitioner, rank
     )

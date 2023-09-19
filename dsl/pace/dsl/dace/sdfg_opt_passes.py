@@ -21,4 +21,4 @@ def splittable_region_expansion(sdfg: dace.SDFG, verbose: bool = False):
                     "K",
                 ]
                 if verbose:
-                    pace_log.info(f"Reordered schedule for {node.label}")
+                    pace_log.debug(f"Reordered schedule for {node.label}")

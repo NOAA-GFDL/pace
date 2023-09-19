@@ -107,7 +107,7 @@ class TranslateRemapping(TranslateDycoreFortranData2Py):
         inputs["wsd"] = wsd_2d
         inputs["q_cld"] = inputs["tracers"]["qcld"]
         inputs["last_step"] = bool(inputs["last_step"])
-        pfull = self.grid.quantity_factory.empty([Z_DIM], units="Pa")
+        pfull = self.grid.quantity_factory.zeros([Z_DIM], units="Pa")
         pfull.data[:] = pfull.np.asarray(inputs.pop("pfull"))
         l_to_e_obj = LagrangianToEulerian(
             self.stencil_factory,

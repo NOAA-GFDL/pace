@@ -22,11 +22,15 @@ K = gtscript.K  # noqa: E741
 DTypes = Union[bool, np.bool_, int, np.int32, np.int64, float, np.float32, np.float64]
 
 
+def floating_point_precision() -> int:
+    return int(os.getenv("PACE_FLOAT_PRECISION", "64"))
+
+
 def global_set_floating_point_precision():
     """Set the global floating point precision for all reference
     to Float in the codebase. Defaults to 64 bit."""
     global Float
-    precision_in_bit = int(os.getenv("PACE_FLOAT_PRECISION", "64"))
+    precision_in_bit = floating_point_precision()
     if precision_in_bit == 64:
         return np.float64
     elif precision_in_bit == 32:
