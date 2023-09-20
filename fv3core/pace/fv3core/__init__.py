@@ -4,7 +4,6 @@ from .dycore_state import DycoreState
 from .stencils.fv_dynamics import DynamicalCore
 from .stencils.fv_subgridz import DryConvectiveAdjustment
 
-# from .initialization.geos_wrapper import GeosDycoreWrapper
 from .wrappers.geos_wrapper import GeosDycoreWrapper
 
 

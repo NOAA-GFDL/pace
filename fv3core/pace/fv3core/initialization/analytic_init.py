@@ -23,6 +23,20 @@ def init_analytic_choice(
     moist_phys: bool,
     comm: fv3util.CubedSphereCommunicator,
 ) -> DycoreState:
+    """
+    This method initializes the choosen analytic test case type
+    Args:
+        analytic_init_str:      test case specifier
+        grid_data:              current selected grid data values
+        quantity_factory:       inclusion of QuantityFactory class
+        adiabatic:              flag for adiabatic methods
+        hydrostatic:            flag for hydrostatic methods
+        moist_phys:             flag for including moisture physics methods
+        comm:                   inclusion of CubedSphereCommunicator class
+
+    Returns:
+        an instance of DycoreState class
+    """
     if analytic_init_str in valid_cases:
         if analytic_init_str == "baroclinic":
             import pace.fv3core.initialization.test_cases.initialize_baroclinic as bc
