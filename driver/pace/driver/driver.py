@@ -275,7 +275,7 @@ class DriverConfig:
             )
             grid_type = kwargs["grid_config"].config.grid_type
             # Copy grid_type to the DycoreConfig if it's not the default value
-            if grid_type != 0: 
+            if grid_type != 0:
                 kwargs["dycore_config"].grid_type = grid_type
 
         if (

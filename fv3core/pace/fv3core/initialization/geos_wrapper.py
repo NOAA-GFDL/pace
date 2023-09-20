@@ -1,17 +1,74 @@
 import enum
+import logging
 import os
 from datetime import timedelta
 from typing import Dict, List, Tuple
 
 import f90nml
 import numpy as np
+from gt4py.cartesian.config import build_settings as gt_build_settings
+from mpi4py import MPI
 
 import pace.util
 from pace import fv3core
 from pace.driver.performance.collector import PerformanceCollector
-from pace.dsl.dace import DaceConfig, orchestrate
+from pace.dsl.dace import orchestrate
+from pace.dsl.dace.build import set_distributed_caches
+from pace.dsl.dace.dace_config import DaceConfig, DaCeOrchestration
 from pace.dsl.gt4py_utils import is_gpu_backend
+from pace.dsl.typing import floating_point_precision
+from pace.util._optional_imports import cupy as cp
 from pace.util.logging import pace_log
+
+
+class StencilBackendCompilerOverride:
+    """Override the Pace global stencil JIT to allow for 9-rank build
+    on any setup.
+
+    This is a workaround that requires to know _exactly_ when build is happening.
+    Using this as a context manager, we leverage the DaCe build system to override
+    the name and build the 9 codepaths required- while every other rank wait.
+
+    This should be removed when we refactor the GT JIT to distribute building
+    much more efficiently
+    """
+
+    def __init__(self, comm: MPI.Intracomm, config: DaceConfig):
+        self.comm = comm
+        self.config = config
+
+        # Orchestration or mono-node is not concerned
+        self.no_op = self.config.is_dace_orchestrated() or self.comm.Get_size() == 1
+
+        # We abuse the DaCe build system
+        if not self.no_op:
+            config._orchestrate = DaCeOrchestration.Build
+            set_distributed_caches(config)
+            config._orchestrate = DaCeOrchestration.Python
+
+        # We remove warnings from the stencils compiling when in critical and/or
+        # error
+        if pace_log.level > logging.WARNING:
+            gt_build_settings["extra_compile_args"]["cxx"].append("-w")
+            gt_build_settings["extra_compile_args"]["cuda"].append("-w")
+
+    def __enter__(self):
+        if self.no_op:
+            return
+        if self.config.do_compile:
+            pace_log.info(f"Stencil backend compiles on {self.comm.Get_rank()}")
+        else:
+            pace_log.info(f"Stencil backend waits on {self.comm.Get_rank()}")
+            self.comm.Barrier()
+
+    def __exit__(self, type, value, traceback):
+        if self.no_op:
+            return
+        if not self.config.do_compile:
+            pace_log.info(f"Stencil backend read cache on {self.comm.Get_rank()}")
+        else:
+            pace_log.info(f"Stencil backend compiled on {self.comm.Get_rank()}")
+            self.comm.Barrier()
 
 
 @enum.unique
@@ -111,17 +168,18 @@ class GeosDycoreWrapper:
             metric_terms
         )
 
-        self.dynamical_core = fv3core.DynamicalCore(
-            comm=self.communicator,
-            grid_data=grid_data,
-            stencil_factory=stencil_factory,
-            quantity_factory=quantity_factory,
-            damping_coefficients=damping_coefficients,
-            config=self.dycore_config,
-            timestep=timedelta(seconds=self.dycore_state.bdt),
-            phis=self.dycore_state.phis,
-            state=self.dycore_state,
-        )
+        with StencilBackendCompilerOverride(MPI.COMM_WORLD, stencil_config.dace_config):
+            self.dynamical_core = fv3core.DynamicalCore(
+                comm=self.communicator,
+                grid_data=grid_data,
+                stencil_factory=stencil_factory,
+                quantity_factory=quantity_factory,
+                damping_coefficients=damping_coefficients,
+                config=self.dycore_config,
+                timestep=timedelta(seconds=self.dycore_state.bdt),
+                phis=self.dycore_state.phis,
+                state=self.dycore_state,
+            )
 
         self._fortran_mem_space = fortran_mem_space
         self._pace_mem_space = (
@@ -131,13 +189,29 @@ class GeosDycoreWrapper:
         self.output_dict: Dict[str, np.ndarray] = {}
         self._allocate_output_dir()
 
+        # Feedback information
+        device_ordinal_info = (
+            f"  Device PCI bus id: {cp.cuda.Device(0).pci_bus_id}\n"
+            if is_gpu_backend(backend)
+            else "N/A"
+        )
+        MPS_pipe_directory = os.getenv("CUDA_MPS_PIPE_DIRECTORY", None)
+        MPS_is_on = (
+            MPS_pipe_directory is not None
+            and is_gpu_backend(backend)
+            and os.path.exists(f"{MPS_pipe_directory}/log")
+        )
         pace_log.info(
             "Pace GEOS wrapper initialized: \n"
-            f"  dt     : {self.dycore_state.bdt}\n"
-            f"  bridge : {self._fortran_mem_space} > {self._pace_mem_space}\n"
-            f"  backend: {backend}\n"
-            f"  orchestration: {self._is_orchestrated}\n"
-            f"  sizer  : {sizer.nx}x{sizer.ny}x{sizer.nz} (halo: {sizer.n_halo})"
+            f"             dt : {self.dycore_state.bdt}\n"
+            f"         bridge : {self._fortran_mem_space} > {self._pace_mem_space}\n"
+            f"        backend : {backend}\n"
+            f"          float : {floating_point_precision()}bit"
+            f"  orchestration : {self._is_orchestrated}\n"
+            f"          sizer : {sizer.nx}x{sizer.ny}x{sizer.nz}"
+            f"(halo: {sizer.n_halo})\n"
+            f"     Device ord : {device_ordinal_info}\n"
+            f"     Nvidia MPS : {MPS_is_on}"
         )
 
     def _critical_path(self):

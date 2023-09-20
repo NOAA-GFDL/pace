@@ -15,9 +15,9 @@ jobs:
           uses: actions/setup-python@v4.6.0
           with:
             python-version: '3.8.12'
-        - name: Install OpenMPI for gt4py
+        - name: Install OpenMPI & Boost for gt4py
           run: |
-            sudo apt-get install libopenmpi-dev
+            sudo apt-get install libopenmpi-dev libboost1.74-dev
         - name: Install Python packages
           run: |
             python -m pip install --upgrade pip
