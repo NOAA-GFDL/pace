@@ -8,7 +8,7 @@ import pace.driver
 
 
 TESTED_CONFIGS: List[str] = [
-    "../../../driver/examples/configs/analytic_test.yaml",
+    "driver/examples/configs/analytic_test.yaml",
 ]
 
 
