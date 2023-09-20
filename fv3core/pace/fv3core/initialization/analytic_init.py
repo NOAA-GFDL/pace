@@ -59,5 +59,7 @@ def init_analytic_choice(
                 hydrostatic=False,
                 comm=comm,
             )
+        else:
+            return None
     else:
         raise ValueError(f"Case {analytic_init_str} not implemented")
