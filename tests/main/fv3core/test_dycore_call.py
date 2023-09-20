@@ -5,7 +5,7 @@ from datetime import timedelta
 from typing import Tuple
 
 import pace.dsl.stencil
-import pace.fv3core.initialization.baroclinic as baroclinic_init
+import pace.fv3core.initialization.test_cases.initialize_baroclinic as bc
 import pace.stencils.testing
 import pace.util
 from pace import fv3core
@@ -105,7 +105,7 @@ def setup_dycore() -> Tuple[
 
     # create an initial state from the Jablonowski & Williamson Baroclinic
     # test case perturbation. JRMS2006
-    state = baroclinic_init.init_baroclinic_state(
+    state = bc.init_baroclinic_state(
         grid_data,
         quantity_factory=quantity_factory,
         adiabatic=config.adiabatic,
