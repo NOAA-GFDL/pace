@@ -1,9 +1,9 @@
 from typing import List, Optional, Tuple
-from warnings import warn
 
 from dace.sdfg import SDFG
 
 import pace.util
+from pace.dsl.caches.cache_location import get_cache_directory, get_cache_fullpath
 from pace.dsl.dace.dace_config import DaceConfig, DaCeOrchestration
 
 
@@ -11,66 +11,11 @@ from pace.dsl.dace.dace_config import DaceConfig, DaCeOrchestration
 # Distributed compilation
 
 
-def determine_compiling_ranks(config: DaceConfig) -> bool:
-    is_compiling = False
-    rank = config.my_rank
-    size = config.rank_size
-
-    if int(size / 6) == 0:
-        is_compiling = True
-    elif rank % int(size / 6) == rank:
-        is_compiling = True
-
-    return is_compiling
-
-
 def unblock_waiting_tiles(comm, sdfg_path: str) -> None:
     if comm and comm.Get_size() > 1:
         for tile in range(1, 6):
             tilesize = comm.Get_size() / 6
             comm.send(sdfg_path, dest=tile * tilesize + comm.Get_rank())
-
-
-def get_target_rank(rank: int, partitioner: pace.util.CubedSpherePartitioner):
-    """From my rank & the current partitioner we determine which
-    rank we should read from.
-    For all layout >= 3,3 this presumes build has been done on a
-    3,3 layout."""
-    if partitioner.layout == (1, 1):
-        return 0
-    if partitioner.layout == (2, 2):
-        if partitioner.tile.on_tile_bottom(rank):
-            if partitioner.tile.on_tile_left(rank):
-                return 0  # "00"
-            if partitioner.tile.on_tile_right(rank):
-                return 1  # "10"
-        if partitioner.tile.on_tile_top(rank):
-            if partitioner.tile.on_tile_left(rank):
-                return 2  # "01"
-            if partitioner.tile.on_tile_right(rank):
-                return 3  # "11"
-    else:
-        if partitioner.tile.on_tile_bottom(rank):
-            if partitioner.tile.on_tile_left(rank):
-                return 0  # "00"
-            if partitioner.tile.on_tile_right(rank):
-                return 2  # "20"
-            else:
-                return 1  # "10"
-        if partitioner.tile.on_tile_top(rank):
-            if partitioner.tile.on_tile_left(rank):
-                return 6  # "02"
-            if partitioner.tile.on_tile_right(rank):
-                return 8  # "22"
-            else:
-                return 7  # "12"
-        else:
-            if partitioner.tile.on_tile_left(rank):
-                return 3  # "01"
-            if partitioner.tile.on_tile_right(rank):
-                return 5  # "21"
-            else:
-                return 4  # "11"
 
 
 def build_info_filepath() -> str:
@@ -101,7 +46,10 @@ def write_build_info(
 
 
 def get_sdfg_path(
-    daceprog_name: str, config: DaceConfig, sdfg_file_path: Optional[str] = None
+    daceprog_name: str,
+    config: DaceConfig,
+    sdfg_file_path: Optional[str] = None,
+    override_run_only=False,
 ) -> Optional[str]:
     """Build an SDFG path from the qualified program name or it's direct path to .sdfg
 
@@ -113,7 +61,7 @@ def get_sdfg_path(
 
     # TODO: check DaceConfig for cache.strategy == name
     # Guarding against bad usage of this function
-    if config.get_orchestrate() != DaCeOrchestration.Run:
+    if not override_run_only and config.get_orchestrate() != DaCeOrchestration.Run:
         return None
 
     # Case of a .sdfg file given by the user to be compiled
@@ -125,19 +73,8 @@ def get_sdfg_path(
         return sdfg_file_path
 
     # Case of loading a precompiled .so - lookup using GT_CACHE
-    from gt4py.cartesian import config as gt_config
-
-    if config.rank_size > 1:
-        rank = config.my_rank
-        rank_str = f"_{config.target_rank:06d}"
-    else:
-        rank = 0
-        rank_str = f"_{rank:06d}"
-
-    sdfg_dir_path = (
-        f"{gt_config.cache_settings['root_path']}"
-        f"/.gt_cache{rank_str}/dacecache/{daceprog_name}"
-    )
+    cache_fullpath = get_cache_fullpath(config.code_path)
+    sdfg_dir_path = f"{cache_fullpath}/dacecache/{daceprog_name}"
     if not os.path.isdir(sdfg_dir_path):
         raise RuntimeError(f"Precompiled SDFG is missing at {sdfg_dir_path}")
 
@@ -153,23 +90,8 @@ def get_sdfg_path(
             raise RuntimeError(
                 f"SDFG build for {build_backend}, {config._backend} has been asked"
             )
-        # Check layout
-        build_layout = ast.literal_eval(build_info_file.readline())
-        can_read = True
-        if config.layout == (1, 1) and config.layout != build_layout:
-            can_read = False
-        elif config.layout == (2, 2) and config.layout != build_layout:
-            can_read = False
-        elif (
-            build_layout != (1, 1) and build_layout != (2, 2) and build_layout != (3, 3)
-        ):
-            can_read = False
-        if not can_read:
-            warn(
-                f"SDFG build for layout {build_layout}, "
-                f"cannot be run with current layout {config.layout}, bad layout?"
-            )
         # Check resolution per tile
+        build_layout = ast.literal_eval(build_info_file.readline())
         build_resolution = ast.literal_eval(build_info_file.readline())
         if (config.tile_resolution[0] / config.layout[0]) != (
             build_resolution[0] / build_layout[0]
@@ -179,7 +101,7 @@ def get_sdfg_path(
                 f"cannot be run with current resolution {config.tile_resolution}"
             )
 
-    print(f"[DaCe Config] Rank {rank} loading SDFG {sdfg_dir_path}")
+    print(f"[DaCe Config] Rank {config.my_rank} loading SDFG {sdfg_dir_path}")
 
     return sdfg_dir_path
 
@@ -189,33 +111,31 @@ def set_distributed_caches(config: "DaceConfig"):
 
     # Execute specific initialization per orchestration state
     orchestration_mode = config.get_orchestrate()
+    if orchestration_mode == DaCeOrchestration.Python:
+        return
 
     # Check that we have all the file we need to early out in case
     # of issues.
     if orchestration_mode == DaCeOrchestration.Run:
         import os
 
-        from gt4py.cartesian import config as gt_config
-
-        # Check our cache exist
-        if config.rank_size > 1:
-            rank = config.my_rank
-            target_rank_str = f"_{config.target_rank:06d}"
-        else:
-            rank = 0
-            target_rank_str = f"_{rank:06d}"
-        cache_filepath = (
-            f"{gt_config.cache_settings['root_path']}/.gt_cache{target_rank_str}"
-        )
-        if not os.path.exists(cache_filepath):
+        cache_directory = get_cache_fullpath(config.code_path)
+        if not os.path.exists(cache_directory):
             raise RuntimeError(
                 f"{orchestration_mode} error: Could not find caches for rank "
-                f"{rank} at {cache_filepath}"
+                f"{config.my_rank} at {cache_directory}"
             )
 
-        # All, good set this rank cache to the source cache
-        gt_config.cache_settings["dir_name"] = f".gt_cache{target_rank_str}"
-        print(
-            f"[{orchestration_mode}] Rank {rank} "
-            f"reading cache {gt_config.cache_settings['dir_name']}"
-        )
+    # Set read/write caches to the target rank
+    from gt4py.cartesian import config as gt_config
+
+    if config.do_compile:
+        verb = "reading/writing"
+    else:
+        verb = "reading"
+
+    gt_config.cache_settings["dir_name"] = get_cache_directory(config.code_path)
+    pace.util.pace_log.info(
+        f"[{orchestration_mode}] Rank {config.my_rank} "
+        f"{verb} cache {gt_config.cache_settings['dir_name']}"
+    )

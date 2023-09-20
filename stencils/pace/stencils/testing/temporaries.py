@@ -40,10 +40,9 @@ def _assert_same_temporaries(dict1: dict, dict2: dict) -> List[str]:
         attr2 = dict2[attr]
         if isinstance(attr1, np.ndarray):
             try:
-                np.testing.assert_almost_equal(
-                    attr1, attr2, err_msg=f"{attr} not equal"
-                )
-            except AssertionError:
+                assert np.allclose(attr1, attr2, equal_nan=True)
+            except AssertionError as e:
+                print(e)
                 differences.append(attr)
         else:
             sub_differences = _assert_same_temporaries(attr1, attr2)

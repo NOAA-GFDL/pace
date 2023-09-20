@@ -2,6 +2,7 @@ import collections
 
 import numpy as np
 
+from pace.util._optional_imports import cupy as cp
 from pace.util._optional_imports import xarray as xr
 
 from .base import Checkpointer
@@ -16,6 +17,8 @@ def make_dims(savepoint_dim, label, data_list):
     """
     data = np.concatenate([array[None, :] for array in data_list], axis=0)
     dims = [savepoint_dim] + [f"{label}_dim{i}" for i in range(len(data.shape[1:]))]
+    if cp and isinstance(data, cp.ndarray):
+        data = data.get()
     return dims, data
 
 
