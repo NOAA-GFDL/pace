@@ -1,0 +1,19 @@
+MetricTerms: changes needed in initial calculations of grid lat/lon and cached properties 
+	Best approach: modify functions called in ... is None branches?
+	Side effects: important? how?
+
+	Precompute at end of __init__
+	side effects only used in metric terms class--for computing derived metric terms with better precision
+
+Translation tests: how to run (want to use them as I go)
+
+	pytest --data_path=... --which_modules=...(translate_grid.py) -vs fv3core/tests
+
+Indexing: equivalent of i=isd,ied (how to get indexes from rank)
+
+	Quantity: numpy arrays with properties that make them play nicely with gt4py
+	.view: into compute domain of underlying data (no halos)
+	.data: into full array (including halos)
+	geometry.py -> edge_factors (get global indices using tile partitioner)
+
+
