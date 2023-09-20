@@ -10,7 +10,7 @@ import pace.stencils
 import pace.util
 import pace.util.grid
 from pace.dsl.dace.orchestration import dace_inhibitor
-from pace.fv3core.initialization.dycore_state import DycoreState
+from pace.fv3core.dycore_state import DycoreState
 from pace.util.constants import RGRAV
 
 from .state import DriverState
