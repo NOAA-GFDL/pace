@@ -10,8 +10,6 @@ import f90nml
 import pace.driver
 import pace.dsl
 import pace.fv3core.initialization.analytic_init as analytic_init
-import pace.fv3core.initialization.baroclinic as baroclinic_init
-import pace.fv3core.initialization.tropical_cyclone as tc_init
 import pace.physics
 import pace.stencils
 import pace.util
