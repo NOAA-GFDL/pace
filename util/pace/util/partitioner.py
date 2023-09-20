@@ -133,6 +133,7 @@ class TilePartitioner(Partitioner):
         """Create an object for fv3gfs tile decomposition."""
         self.layout = layout
         self.edge_interior_ratio = edge_interior_ratio
+        self.tile = self
 
     def tile_index(self, rank: int):
         return 0
