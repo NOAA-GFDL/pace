@@ -571,32 +571,3 @@ def set_hybrid_pressure_coefficients(km: int) -> HybridPressureCoefficients:
 
     pressure_data = HybridPressureCoefficients(ks, ptop, ak, bk)
     return pressure_data
-
-"""
-def set_hybrid_pressure_coefficients(pressure_file: str)-> HybridPressureCoefficients:
-"""
-    """
-    Sets the coefficients describing the hybrid pressure coordinates.
-
-    The pressure of each k-level is calculated as Pk = ak + (bk * Ps)
-    where Ps is the surface pressure. Values are currently stored in
-    lookup tables.
-
-    Args:
-        pressure_file: file containing ak and bk values
-
-    Returns:
-        a HybridPressureCoefficients dataclass
-    """
-   """ ak = np.loadtxt(pressure_file, usecols=(1,))
-    bk = np.loadtxt(pressure_file, usecols=(2,))
-
-    if 0.0 in bk:
-        ks = 0
-        ptop = ak[0]
-    else:
-        raise ValueError("bk must contain at least one 0.")
-    
-    pressure_data = HybridPressureCoefficients(ks, ptop, ak, bk)
-    return pressure_data
-    """
