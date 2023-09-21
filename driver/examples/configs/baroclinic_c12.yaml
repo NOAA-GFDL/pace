@@ -25,7 +25,6 @@ diagnostics_config:
   names:
     - u
     - v
-    - ua
     - va
     - pt
     - delp
