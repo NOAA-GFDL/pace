@@ -6,9 +6,7 @@ stencil_config:
     format_source: false
     device_sync: false
 initialization:
-  type: analytic
-  config:
-    case: baroclinic
+  type: baroclinic
 performance_config:
   collect_performance: true
   experiment_name: c12_baroclinic
