@@ -19,7 +19,7 @@ def test_diagnostics_can_be_opened(tmpdir):
     diagnostics_path = os.path.join(tmpdir, "output.zarr")
     driver_config.diagnostics_config = pace.driver.DiagnosticsConfig(
         path=diagnostics_path,
-        names=["u", "v", "va", "w", "delp", "pt", "qvapor"],
+        names=["u", "v", "ua", "va", "w", "delp", "pt", "qvapor"],
     )
     driver_config.comm_config = pace.driver.NullCommConfig(rank=0, total_ranks=6)
     driver_config.dt_atmos = 60
