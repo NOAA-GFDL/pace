@@ -1,3 +1,0 @@
-srun -n 4 python -m mpi4py -m pytest -vs -rfEsx -m parallel --dperiodic --data_path=/lustre/f2/dev/Tristan.Abbott/pace_test_data/c14_4ranks/init  --which_modules=SetEta fv3core/tests/savepoint
-
-srun -n 4 python -m mpi4py -m pytest -vs -rfEsx -m parallel --dperiodic --data_path=/lustre/f2/dev/Tristan.Abbott/pace_test_data/c14_4ranks/init  --which_modules=GridAreas fv3core/tests/savepoint

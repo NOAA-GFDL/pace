@@ -226,8 +226,10 @@ class MetricTerms:
         dy_const: float = 1000.0,
         deglat: float = 15.0,
     ):
-        assert grid_type < 3
         self._grid_type = grid_type
+        self._dx_const = dx_const
+        self._dy_const = dy_const 
+        self._deglat = deglat
         self._halo = N_HALO_DEFAULT
         self._comm = communicator
         self._partitioner = self._comm.partitioner
@@ -278,6 +280,9 @@ class MetricTerms:
         self._dy_agrid = None
         self._dx_center = None
         self._dy_center = None
+        self._area = None
+        self._area_c = None
+        self._ks = None
         self._ak = None
         self._bk = None
         self._ptop = None
@@ -366,8 +371,13 @@ class MetricTerms:
         self._vlon_64 = None
         self._vlat_64 = None
 
-        self._init_dgrid()
-        self._init_agrid()
+        if grid_type == 4:
+            self._init_cartesian()
+        elif grid_type < 3:
+            self._init_dgrid()
+            self._init_agrid()
+        else:
+            raise NotImplementedError(f"Unsupported grid_type = {grid_type}")
 
     @classmethod
     def from_tile_sizing(
@@ -537,6 +547,20 @@ class MetricTerms:
         return self._dy_center
 
     @property
+    def ks(self) -> util.Quantity:
+        """
+        number of levels where the vertical coordinate is purely pressure-based
+        """
+        if self._ks is None:
+            (
+                self._ks,
+                self._ptop,
+                self._ak,
+                self._bk,
+            ) = self._set_hybrid_pressure_coefficients()
+        return self._ks
+
+    @property
     def ak(self) -> util.Quantity:
         """
         the ak coefficient used to calculate the pressure at a given k-level:
@@ -544,6 +568,7 @@ class MetricTerms:
         """
         if self._ak is None:
             (
+                self._ks,
                 self._ptop,
                 self._ak,
                 self._bk,
@@ -558,6 +583,7 @@ class MetricTerms:
         """
         if self._bk is None:
             (
+                self._ks,
                 self._ptop,
                 self._ak,
                 self._bk,
@@ -571,6 +597,7 @@ class MetricTerms:
         """
         if self._ptop is None:
             (
+                self._ks,
                 self._ptop,
                 self._ak,
                 self._bk,
@@ -1377,19 +1404,23 @@ class MetricTerms:
             self._reduce_global_area_minmaxes()
         return self._da_max_c
 
-    @cached_property
+    @property
     def area(self) -> util.Quantity:
         """
         the area of each a-grid cell
         """
-        return self._compute_area()
+        if self._area is None:
+            self._area = self._compute_area()
+        return self._area
 
-    @cached_property
+    @property
     def area_c(self) -> util.Quantity:
         """
         the area of each c-grid cell
         """
-        return self._compute_area_c()
+        if self._area_c is None:
+            self._area_c = self._compute_area_c()
+        return self._area_c
 
     @cached_property
     def _dgrid_xyz_64(self) -> util.Quantity:
@@ -1528,6 +1559,63 @@ class MetricTerms:
             units="m^-1",
             gt4py_backend=self.dyc.gt4py_backend,
         )
+
+    def _init_cartesian(self):
+
+        domain_rad = PI/16.0
+        lat_rad = self._deglat*PI/180.0
+        lon_rad = 0.0
+
+        self._dx, self._dy = self._compute_dxdy_cartesian()
+        self._dx_agrid, self._dy_agrid = self._compute_dxdy_agrid_cartesian()
+        self._dx_center, self._dy_center = self._compute_dxdy_center_cartesian()
+        self._area = self._compute_area_cartesian()
+        self._area_c = self._compute_area_c_cartesian()
+
+        self._grid_64.data[:,:,:] = self._np.nan
+        slice_x, slice_y = self._tile_partitioner.subtile_slice(
+            self._rank, self._grid_64.dims, (self._npx, self._npy)
+        )
+
+        isd = slice_x.start - self._halo 
+        ied = slice_x.stop + self._halo 
+        isg = max(isd, 0)
+        ieg = min(ied, self._npx)
+        isl = isg - isd 
+        iel = isl + ieg - isg
+
+        jsd = slice_y.start - self._halo 
+        jed = slice_y.stop + self._halo 
+        jsg = max(jsd, 0)
+        jeg = min(jed, self._npy)
+        jsl = jsg - jsd
+        jel = jsl + jeg - jsg
+
+        lon_frac = np.array(range(isg, ieg))/(self._npx - 1) - 0.5
+        lon_frac = lon_frac[:,np.newaxis]
+        lat_frac = np.array(range(jsg, jeg))/(self._npy - 1) - 0.5
+        lat_frac = lat_frac[np.newaxis,:]
+
+        self._grid_64.data[isl:iel,jsl:jel,0] = lon_rad + lon_frac*domain_rad 
+        self._grid_64.data[isl:iel,jsl:jel,1] = lat_rad + lat_frac*domain_rad 
+
+        self._agrid_64.data[:,:,0] = lon_rad 
+        self._agrid_64.data[:,:,1] = lat_rad
+
+        self._init_cell_trigonometry_cartesian()
+
+        self._ec1, self._ec2 = self._calculate_center_vectors_cartesian()
+        self._ew1, self._ew2 = self._calculate_vectors_west_cartesian()
+        self._es1, self._es2 = self._calculate_vectors_south_cartesian()
+        
+        # TODO: ollowing lines just fill fields with nan
+        # presumably these aren't needed other than for testing
+        # so best to get rid of them to reduce memory pressure?
+        self._ee1, self._ee2 = self._calculate_xy_unit_vectors_cartesian()
+        self._vlon, self._vlat = self._calculate_unit_vectors_lonlat_cartesian()
+        self._l2c_v, self._l2c_u = self._calculate_latlon_momentum_correction_cartesian()
+
+        set_hybrid_pressure_coefficients
 
     def _init_dgrid(self):
         grid_mirror_ew = self.quantity_factory.zeros(
@@ -1749,6 +1837,30 @@ class MetricTerms:
 
         return dx, dy
 
+    def _compute_dxdy_cartesian(self):
+        dx_64 = self.quantity_factory.zeros(
+            [util.X_DIM, util.Y_INTERFACE_DIM],
+            "m",
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
+        )
+        dx_64.data[:, :] = self._dx_const
+
+        dy_64 = self.quantity_factory.zeros(
+            [util.X_INTERFACE_DIM, util.Y_DIM],
+            "m",
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
+        )
+        dy_64.data[:, :] = self._dy_const
+
+        dx = quantity_cast_to_model_float(self.quantity_factory, dx_64)
+        self._dx_64 = dx_64
+        dy = quantity_cast_to_model_float(self.quantity_factory, dy_64)
+        self._dy_64 = dy_64
+
+        return dx, dy
+
     def _compute_dxdy_agrid(self):
         dx_agrid_64 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_DIM],
@@ -1792,6 +1904,28 @@ class MetricTerms:
         # Not doing it here at the moment.
         dx_agrid_64.data[dx_agrid_64.data < 0] *= -1
         dy_agrid_64.data[dy_agrid_64.data < 0] *= -1
+
+        dx_agrid = quantity_cast_to_model_float(self.quantity_factory, dx_agrid_64)
+        dy_agrid = quantity_cast_to_model_float(self.quantity_factory, dy_agrid_64)
+
+        return dx_agrid, dy_agrid
+
+    def _compute_dxdy_agrid_cartesian(self):
+        dx_agrid_64 = self.quantity_factory.zeros(
+            [util.X_DIM, util.Y_DIM],
+            "m",
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
+        )
+        dx_agrid_64.data[:,:] = self._dx_const
+
+        dy_agrid_64 = self.quantity_factory.zeros(
+            [util.X_DIM, util.Y_DIM],
+            "m",
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
+        )
+        dy_agrid_64.data[:,:] = self._dy_const
 
         dx_agrid = quantity_cast_to_model_float(self.quantity_factory, dx_agrid_64)
         dy_agrid = quantity_cast_to_model_float(self.quantity_factory, dy_agrid_64)
@@ -1873,6 +2007,30 @@ class MetricTerms:
 
         return dx_center, dy_center
 
+    def _compute_dxdy_center_cartesian(self):
+        dx_center_64 = self.quantity_factory.zeros(
+            [util.X_INTERFACE_DIM, util.Y_DIM],
+            "m",
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
+        )
+        dx_center_64.data[:,:] = self._dx_const
+
+        dy_center_64 = self.quantity_factory.zeros(
+            [util.X_DIM, util.Y_INTERFACE_DIM],
+            "m",
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
+        )
+        dy_center_64.data[:,:] = self._dy_const
+
+        dx_center = quantity_cast_to_model_float(self.quantity_factory, dx_center_64)
+        self._dxc_64 = dx_center_64
+        dy_center = quantity_cast_to_model_float(self.quantity_factory, dy_center_64)
+        self._dyc_64 = dy_center_64
+
+        return dx_center, dy_center
+
     def _compute_area(self):
         area_64 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_DIM],
@@ -1890,6 +2048,16 @@ class MetricTerms:
         )
         self._comm.halo_update(area_64, n_points=self._halo)
 
+        return quantity_cast_to_model_float(self.quantity_factory, area_64)
+
+    def _compute_area_cartesian(self):
+        area_64 = self.quantity_factory.zeros(
+            [util.X_DIM, util.Y_DIM],
+            "m^2",
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
+        )
+        area_64.data[:, :] = self._dx_const*self._dy_const
         return quantity_cast_to_model_float(self.quantity_factory, area_64)
 
     def _compute_area_c(self):
@@ -1936,7 +2104,22 @@ class MetricTerms:
         )
         return quantity_cast_to_model_float(self.quantity_factory, area_cgrid_64)
 
+    def _compute_area_c_cartesian(self):
+        area_cgrid_64 = self.quantity_factory.zeros(
+            [util.X_INTERFACE_DIM, util.Y_INTERFACE_DIM],
+            "m^2",
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
+        )
+        area_cgrid_64.data[:,:] = self._dx_const*self._dy_const
+        return quantity_cast_to_model_float(self.quantity_factory, area_cgrid_64)
+
     def _set_hybrid_pressure_coefficients(self):
+        ks = self.quantity_factory.zeros(
+            [],
+            "",
+            dtype=Float,
+        )
         ptop = self.quantity_factory.zeros(
             [],
             "Pa",
@@ -1953,10 +2136,11 @@ class MetricTerms:
             dtype=Float,
         )
         pressure_coefficients = set_hybrid_pressure_coefficients(self._npz)
+        ks = pressure_coefficients.ks
         ptop = pressure_coefficients.ptop
         ak.data[:] = asarray(pressure_coefficients.ak, type(ak.data))
         bk.data[:] = asarray(pressure_coefficients.bk, type(bk.data))
-        return ptop, ak, bk
+        return ks, ptop, ak, bk
 
     def _calculate_center_vectors(self):
         ec1_64 = self.quantity_factory.zeros(
@@ -1981,6 +2165,31 @@ class MetricTerms:
             self._rank,
             self._np,
         )
+
+        ec1 = quantity_cast_to_model_float(self.quantity_factory, ec1_64)
+        self._ec1_64 = ec1_64
+        ec2 = quantity_cast_to_model_float(self.quantity_factory, ec2_64)
+        self._ec2_64 = ec2_64
+        return ec1, ec2
+
+    def _calculate_center_vectors_cartesian(self):
+        ec1_64 = self.quantity_factory.zeros(
+            [util.X_DIM, util.Y_DIM, self.CARTESIAN_DIM],
+            "",
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
+        )
+        ec2_64 = self.quantity_factory.zeros(
+            [util.X_DIM, util.Y_DIM, self.CARTESIAN_DIM],
+            "",
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
+        )
+        ec1_64.data[:, :, 0] = 1.0
+        ec1_64.data[:, :, 1:3] = 0.0
+        ec2_64.data[:, :, 0] = 0.0
+        ec2_64.data[:, :, 1] = 1.0
+        ec2_64.data[:, :, 2] = 0.0
 
         ec1 = quantity_cast_to_model_float(self.quantity_factory, ec1_64)
         self._ec1_64 = ec1_64
@@ -2017,6 +2226,29 @@ class MetricTerms:
         ew2 = quantity_cast_to_model_float(self.quantity_factory, ew2_64)
         return ew1, ew2
 
+    def _calculate_vectors_west_cartesian(self):
+        ew1_64 = self.quantity_factory.zeros(
+            [util.X_INTERFACE_DIM, util.Y_DIM, self.CARTESIAN_DIM],
+            "",
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
+        )
+        ew2_64 = self.quantity_factory.zeros(
+            [util.X_INTERFACE_DIM, util.Y_DIM, self.CARTESIAN_DIM],
+            "",
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
+        )
+        ew1_64.data[:, :, 0] = 1.0
+        ew1_64.data[:, :, 1:3] = 0.0
+        ew2_64.data[:, :, 0] = 0.0
+        ew2_64.data[:, :, 1] = 1.0
+        ew2_64.data[:, :, 2] = 0.0
+
+        ew1 = quantity_cast_to_model_float(self.quantity_factory, ew1_64)
+        ew2 = quantity_cast_to_model_float(self.quantity_factory, ew2_64)
+        return ew1, ew2
+
     def _calculate_vectors_south(self):
         es1_64 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_INTERFACE_DIM, self.CARTESIAN_DIM],
@@ -2039,6 +2271,27 @@ class MetricTerms:
             self._rank,
             self._np,
         )
+
+        es1 = quantity_cast_to_model_float(self.quantity_factory, es1_64)
+        es2 = quantity_cast_to_model_float(self.quantity_factory, es2_64)
+        return es1, es2
+
+    def _calculate_vectors_south_cartesian(self):
+        es1_64 = self.quantity_factory.zeros(
+            [util.X_DIM, util.Y_INTERFACE_DIM, self.CARTESIAN_DIM],
+            "",
+            allow_mismatch_float_precision=True,
+        )
+        es2_64 = self.quantity_factory.zeros(
+            [util.X_DIM, util.Y_INTERFACE_DIM, self.CARTESIAN_DIM],
+            "",
+            allow_mismatch_float_precision=True,
+        )
+        es1_64.data[:, :, 0] = 1.0
+        es1_64.data[:, :, 1:2] = 0.0
+        es2_64.data[:, :, 0] = 0.0
+        es2_64.data[:, :, 1] = 1.0
+        es2_64.data[:, :, 2] = 0.0
 
         es1 = quantity_cast_to_model_float(self.quantity_factory, es1_64)
         es2 = quantity_cast_to_model_float(self.quantity_factory, es2_64)
@@ -2351,6 +2604,123 @@ class MetricTerms:
         self._cosa = quantity_cast_to_model_float(self.quantity_factory, cosa_64)
         self._sina = quantity_cast_to_model_float(self.quantity_factory, sina_64)
 
+    def _init_cell_trigonometry_cartesian(self):
+
+        cosa_u_64 = self.quantity_factory.zeros(
+            [util.X_INTERFACE_DIM, util.Y_DIM],
+            "",
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
+        )
+        cosa_v_64 = self.quantity_factory.zeros(
+            [util.X_DIM, util.Y_INTERFACE_DIM],
+            "",
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
+        )
+        cosa_s_64 = self.quantity_factory.zeros(
+            [util.X_DIM, util.Y_DIM],
+            "",
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
+        )
+        sina_u_64 = self.quantity_factory.zeros(
+            [util.X_INTERFACE_DIM, util.Y_DIM],
+            "",
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
+        )
+        sina_v_64 = self.quantity_factory.zeros(
+            [util.X_DIM, util.Y_INTERFACE_DIM],
+            "",
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
+        )
+        rsin_u_64 = self.quantity_factory.zeros(
+            [util.X_INTERFACE_DIM, util.Y_DIM],
+            "",
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
+        )
+        rsin_v_64 = self.quantity_factory.zeros(
+            [util.X_DIM, util.Y_INTERFACE_DIM],
+            "",
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
+        )
+        rsina_64 = self.quantity_factory.zeros(
+            [util.X_INTERFACE_DIM, util.Y_INTERFACE_DIM],
+            "",
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
+        )
+        rsin2_64 = self.quantity_factory.zeros(
+            [util.X_DIM, util.Y_DIM],
+            "",
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
+        )
+        cosa_64 = self.quantity_factory.zeros(
+            [util.X_INTERFACE_DIM, util.Y_INTERFACE_DIM],
+            "",
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
+        )
+        sina_64 = self.quantity_factory.zeros(
+            [util.X_INTERFACE_DIM, util.Y_INTERFACE_DIM],
+            "",
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
+        )
+
+        cosa_u_64.data[:,:] = 0.0
+        cosa_v_64.data[:,:] = 0.0
+        cosa_s_64.data[:,:] = 0.0
+        sina_u_64.data[:,:] = 1.0
+        sina_v_64.data[:,:] = 1.0
+        rsin_u_64.data[:,:] = 1.0
+        rsin_v_64.data[:,:] = 1.0
+        rsina_64.data[:,:] = 1.0
+        rsin2_64.data[:,:] = 1.0
+        cosa_64.data[:,:] = 0.0
+        sina_64.data[:,:] = 1.0
+
+        for i in range(1,10):
+            sin_sg = self.quantity_factory.zeros(
+                [util.X_DIM, util.Y_DIM],
+                "",
+                dtype=np.float64,
+                allow_mismatch_float_precision=True
+            )
+            sin_sg.data[:,:] = 1.0
+            setattr(self, f"_sin_sg{i}", 
+                quantity_cast_to_model_float(self.quantity_factory, sin_sg))
+            if i == 5:
+                self._sin_sg5_64 = sin_sg
+            cos_sg = self.quantity_factory.zeros(
+                [util.X_DIM, util.Y_DIM],
+                "",
+                dtype=np.float64,
+                allow_mismatch_float_precision=True
+            )
+            cos_sg.data[:,:] = 0.0
+            setattr(self, f"_cos_sg{i}", 
+                quantity_cast_to_model_float(self.quantity_factory, cos_sg))
+
+        self._cosa_u = quantity_cast_to_model_float(self.quantity_factory, cosa_u_64)
+        self._cosa_v = quantity_cast_to_model_float(self.quantity_factory, cosa_v_64)
+        self._cosa_s = quantity_cast_to_model_float(self.quantity_factory, cosa_s_64)
+        self._sina_u = quantity_cast_to_model_float(self.quantity_factory, sina_u_64)
+        self._sina_u_64 = sina_u_64
+        self._sina_v = quantity_cast_to_model_float(self.quantity_factory, sina_v_64)
+        self._sina_v_64 = sina_v_64
+        self._rsin_u = quantity_cast_to_model_float(self.quantity_factory, rsin_u_64)
+        self._rsin_v = quantity_cast_to_model_float(self.quantity_factory, rsin_v_64)
+        self._rsina = quantity_cast_to_model_float(self.quantity_factory, rsina_64)
+        self._rsin2 = quantity_cast_to_model_float(self.quantity_factory, rsin2_64)
+        self._cosa = quantity_cast_to_model_float(self.quantity_factory, cosa_64)
+        self._sina = quantity_cast_to_model_float(self.quantity_factory, sina_64)
+
     def _calculate_derived_trig_terms_for_testing(self):
         """
         As _calculate_derived_trig_terms_for_testing but updates trig attributes
@@ -2507,6 +2877,27 @@ class MetricTerms:
 
         return l2c_v, l2c_u
 
+    def _calculate_latlon_momentum_correction_cartesian(self):
+        l2c_v_64 = self.quantity_factory.zeros(
+            [util.X_INTERFACE_DIM, util.Y_DIM],
+            "",
+            dtype=Float,
+            allow_mismatch_float_precision=True,
+        )
+        l2c_u_64 = self.quantity_factory.zeros(
+            [util.X_DIM, util.Y_INTERFACE_DIM],
+            "",
+            dtype=Float,
+            allow_mismatch_float_precision=True,
+        )
+        l2c_v_64.data[:] = self._np.nan 
+        l2c_u_64.data[:] = self._np.nan
+ 
+        l2c_v = quantity_cast_to_model_float(self.quantity_factory, l2c_v_64)
+        l2c_u = quantity_cast_to_model_float(self.quantity_factory, l2c_u_64)
+
+        return l2c_v, l2c_u
+
     def _calculate_xy_unit_vectors(self):
         ee1_64 = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_INTERFACE_DIM, self.CARTESIAN_DIM],
@@ -2528,6 +2919,27 @@ class MetricTerms:
         ) = calculate_xy_unit_vectors(
             self._dgrid_xyz_64, self._halo, self._tile_partitioner, self._rank, self._np
         )
+
+        ee1 = quantity_cast_to_model_float(self.quantity_factory, ee1_64)
+        ee2 = quantity_cast_to_model_float(self.quantity_factory, ee2_64)
+
+        return ee1, ee2
+
+    def _calculate_xy_unit_vectors_cartesian(self):
+        ee1_64 = self.quantity_factory.zeros(
+            [util.X_INTERFACE_DIM, util.Y_INTERFACE_DIM, self.CARTESIAN_DIM],
+            "",
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
+        )
+        ee2_64 = self.quantity_factory.zeros(
+            [util.X_INTERFACE_DIM, util.Y_INTERFACE_DIM, self.CARTESIAN_DIM],
+            "",
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
+        )
+        ee1_64.data[:] = self._np.nan
+        ee2_64.data[:] = self._np.nan
 
         ee1 = quantity_cast_to_model_float(self.quantity_factory, ee1_64)
         ee2 = quantity_cast_to_model_float(self.quantity_factory, ee2_64)
@@ -2690,6 +3102,29 @@ class MetricTerms:
         vlon_64.data[:-1, :-1], vlat_64.data[:-1, :-1] = unit_vector_lonlat(
             self._agrid_64.data[:-1, :-1], self._np
         )
+
+        vlon = quantity_cast_to_model_float(self.quantity_factory, vlon_64)
+        self._vlon_64 = vlon_64
+        vlat = quantity_cast_to_model_float(self.quantity_factory, vlat_64)
+        self._vlat_64 = vlat_64
+
+        return vlon, vlat
+
+    def _calculate_unit_vectors_lonlat_cartesian(self):
+        vlon_64 = self.quantity_factory.zeros(
+            [util.X_DIM, util.Y_DIM, self.CARTESIAN_DIM],
+            "",
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
+        )
+        vlat_64 = self.quantity_factory.zeros(
+            [util.X_DIM, util.Y_DIM, self.CARTESIAN_DIM],
+            "",
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
+        )
+        vlon_64.data[:] = self._np.nan 
+        vlat_64.data[:] = self._np.nan 
 
         vlon = quantity_cast_to_model_float(self.quantity_factory, vlon_64)
         self._vlon_64 = vlon_64

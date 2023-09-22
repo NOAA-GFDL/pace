@@ -5,6 +5,7 @@ from typing import Any, Dict, List
 
 import numpy as np
 import pytest
+import logging
 
 import pace.dsl
 import pace.dsl.gt4py_utils as gt_utils
