@@ -187,7 +187,7 @@ class AGrid2DGridPhysics:
         self._jm2 = int((npy - 1) / 2) + 2
         self._subtile_index = partitioner.subtile_index(rank)
         layout = self.namelist.layout
-        self._grid_type = namelist.grid_type
+        self._grid_type = grid_info.grid_type
 
         self._subtile_width_x = int((npx - 1) / layout[0])
         self._subtile_width_y = int((npy - 1) / layout[1])

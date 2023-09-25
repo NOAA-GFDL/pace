@@ -93,7 +93,7 @@ class ApplyPhysicsToDycore:
         u_dt: pace.util.Quantity,
         v_dt: pace.util.Quantity,
     ):
-        self._grid_type = namelist.grid_type
+        self._grid_type = grid_info.grid_type
         orchestrate(
             obj=self,
             config=stencil_factory.config.dace_config,
