@@ -166,8 +166,8 @@ class VerticalGridData:
                 but no fv_core.res.nc in restart data file."""
             )
 
-        ak = quantity_factory.empty([Z_INTERFACE_DIM], units="Pa")
-        bk = quantity_factory.empty([Z_INTERFACE_DIM], units="")
+        ak = quantity_factory.zeros([Z_INTERFACE_DIM], units="Pa")
+        bk = quantity_factory.zeros([Z_INTERFACE_DIM], units="")
         with fs.open(ak_bk_data_file, "rb") as f:
             ds = xr.open_dataset(f).isel(Time=0).drop_vars("Time")
             ak.view[:] = ds["ak"].values
@@ -322,7 +322,6 @@ class GridData:
 
     @classmethod
     def new_from_metric_terms(cls, metric_terms: MetricTerms):
-
         horizontal_data = HorizontalGridData.new_from_metric_terms(metric_terms)
         vertical_data = VerticalGridData.new_from_metric_terms(metric_terms)
         contravariant_data = ContravariantGridData.new_from_metric_terms(metric_terms)
@@ -701,7 +700,6 @@ class DriverGridData:
         es1: pace.util.Quantity,
         ew2: pace.util.Quantity,
     ) -> "DriverGridData":
-
         try:
             vlon1, vlon2, vlon3 = split_quantity_along_last_dim(vlon)
             vlat1, vlat2, vlat3 = split_quantity_along_last_dim(vlat)

@@ -1,0 +1,27 @@
+name: "Main unit tests"
+on:
+  pull_request:
+      types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
+
+jobs:
+  main_unit_tests:
+    runs-on: ubuntu-latest
+    steps:
+        - name: Checkout Pace repository
+          uses: actions/checkout@v3.5.2
+          with:
+            submodules: 'recursive'
+        - name: Step Python 3.8.12
+          uses: actions/setup-python@v4.6.0
+          with:
+            python-version: '3.8.12'
+        - name: Install OpenMPI & Boost for gt4py
+          run: |
+            sudo apt-get install libopenmpi-dev libboost1.74-dev
+        - name: Install Python packages
+          run: |
+            python -m pip install --upgrade pip
+            pip install -r requirements_dev.txt
+        - name: Run all main tests
+          run: |
+            pytest -x tests/main

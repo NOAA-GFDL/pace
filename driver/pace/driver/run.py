@@ -1,56 +1,13 @@
 import dataclasses
 import gc
-import logging
 from typing import Optional
 
 import click
 import yaml
 
-from pace.util.mpi import MPI
+from pace.util import AVAILABLE_LOG_LEVELS, pace_log
 
 from .driver import Driver, DriverConfig
-
-
-logger = logging.getLogger(__name__)
-
-
-log_levels = {
-    "info": logging.INFO,
-    "debug": logging.DEBUG,
-    "warning": logging.WARNING,
-    "error": logging.ERROR,
-    "critical": logging.CRITICAL,
-}
-
-
-def configure_logging(log_rank: Optional[int], log_level: str):
-    """
-    Configure logging for the driver.
-
-    Args:
-        log_rank: rank to log from, or 'all' to log to all ranks,
-            forced to 'all' if running without MPI
-        log_level: log level to use
-    """
-    level = log_levels[log_level.lower()]
-    if MPI is None:
-        logging.basicConfig(
-            level=level,
-            format="%(asctime)s [%(levelname)s] %(name)s:%(message)s",
-            handlers=[logging.StreamHandler()],
-            datefmt="%Y-%m-%d %H:%M:%S",
-        )
-    else:
-        if log_rank is None or int(log_rank) == MPI.COMM_WORLD.Get_rank():
-            logging.basicConfig(
-                level=level,
-                format=(
-                    f"%(asctime)s [%(levelname)s] (rank {MPI.COMM_WORLD.Get_rank()}) "
-                    "%(name)s:%(message)s"
-                ),
-                handlers=[logging.StreamHandler()],
-                datefmt="%Y-%m-%d %H:%M:%S",
-            )
 
 
 @click.command()
@@ -75,12 +32,15 @@ def command_line(config_path: str, log_rank: Optional[int], log_level: str):
 
     CONFIG_PATH is the path to a DriverConfig yaml file.
     """
-    configure_logging(log_rank=log_rank, log_level=log_level)
-    logger.info("loading DriverConfig from yaml")
+    level = AVAILABLE_LOG_LEVELS[log_level.lower()]
+    pace_log.setLevel(level)
+    pace_log.info("loading DriverConfig from yaml")
     with open(config_path, "r") as f:
         config = yaml.safe_load(f)
         driver_config = DriverConfig.from_dict(config)
-    logging.info(f"DriverConfig loaded: {yaml.dump(dataclasses.asdict(driver_config))}")
+    pace_log.info(
+        f"DriverConfig loaded: {yaml.dump(dataclasses.asdict(driver_config))}"
+    )
     main(driver_config=driver_config)
 
 

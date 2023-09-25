@@ -24,6 +24,14 @@ try:
 except ImportError:
     cupy = None
 
+if cupy is not None:
+    # Cupy might be available - but not the device
+    try:
+        cupy.cuda.runtime.deviceSynchronize()
+    except cupy.cuda.runtime.CUDARuntimeError:
+        cupy = None
+
+
 try:
     import gt4py
 except ImportError:

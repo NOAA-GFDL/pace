@@ -1,6 +1,7 @@
 from gt4py.cartesian.gtscript import PARALLEL, computation, interval
 
 import pace.util
+from pace.dsl.dace import orchestrate
 from pace.dsl.stencil import StencilFactory
 from pace.dsl.typing import Float, FloatField, FloatFieldIJ
 from pace.fv3core.stencils.a2b_ord4 import AGrid2BGridFourthOrder
@@ -130,6 +131,11 @@ class NonHydrostaticPressureGradient:
         grid_data: GridData,
         grid_type,
     ):
+        orchestrate(
+            obj=self,
+            config=stencil_factory.config.dace_config,
+        )
+
         grid_indexing = stencil_factory.grid_indexing
         self.orig = grid_indexing.origin_compute()
         domain_full_k = grid_indexing.domain_compute(add=(1, 1, 0))
