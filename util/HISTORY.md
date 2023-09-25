@@ -4,6 +4,7 @@ History
 latest
 ------
 
+- Added methods to TileCommunicator and TilePartitioner to ensure they can replace CubedSphere equivalents for doublt-periodic single-tile runs
 - Added `dx_const`, `dy_const`, `deglat`, and `u_max` namelist settings for doubly-periodic grids
 - Added `dx_const`, `dy_const`, and `deglat` to grid generation code for doubly-periodic grids
 - Added f32 support to halo exchange data transformation
