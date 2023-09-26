@@ -158,4 +158,5 @@ def test_restart_save_to_disk():
                     )
 
     finally:
+        os.sync()
         shutil.rmtree("RESTART")
