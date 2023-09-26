@@ -90,7 +90,7 @@ class InitializerSelector(Initializer):
     def from_dict(cls, config: dict):
         instance = cls.registry.from_dict(config)
         return cls(config=instance, type=config["type"])
-    
+
 
 @InitializerSelector.register("analytic")
 @dataclasses.dataclass
