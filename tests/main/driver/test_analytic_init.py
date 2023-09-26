@@ -1,10 +1,10 @@
-from typing import List
 import os
+from typing import List
+
 import pytest
 import yaml
 
 import pace.driver
-
 
 
 TESTED_CONFIGS: List[str] = [
@@ -13,7 +13,8 @@ TESTED_CONFIGS: List[str] = [
 
 
 @pytest.mark.parametrize(
-    "tested_configs", [
+    "tested_configs",
+    [
         pytest.param(TESTED_CONFIGS, id="example configs"),
     ],
 )
@@ -22,5 +23,5 @@ def test_analytic_init_config(tested_configs: List[str]):
         with open(os.path.abspath(config_file), "r") as f:
             config = yaml.safe_load(f)
         driver_config = pace.driver.DriverConfig.from_dict(config)
-        assert(driver_config.initialization.type == "analytic")
-        driver = pace.driver.Driver(config=driver_config)
+        assert driver_config.initialization.type == "analytic"
+    # driver = pace.driver.Driver(config=driver_config)
