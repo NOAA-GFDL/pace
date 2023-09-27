@@ -2,9 +2,9 @@ import numpy as np
 
 import pace.fv3core.initialization.init_utils as init_utils
 import pace.util as fv3util
+import pace.util.constants as constants
 from pace.fv3core.dycore_state import DycoreState
-from pace.util.grid import great_circle_distance_lon_lat, lon_lat_midpoint
-from pace.util.grid import GridData
+from pace.util.grid import GridData, great_circle_distance_lon_lat
 
 
 def _calculate_distance_from_tc_center(pe_v, ps_v, muv, calc, tc_properties):
@@ -35,6 +35,7 @@ def _calculate_distance_from_tc_center(pe_v, ps_v, muv, calc, tc_properties):
 
     return distance_dict
 
+
 def _calculate_pt_height(height, qvapor, r, tc_properties, calc):
 
     aa = height / tc_properties["zp"]
@@ -50,6 +51,7 @@ def _calculate_pt_height(height, qvapor, r, tc_properties, calc):
     pt = gg / ii / hh
 
     return pt
+
 
 def _calculate_utmp(height, dist, calc, tc_properties):
 
@@ -83,6 +85,7 @@ def _calculate_utmp(height, dist, calc, tc_properties):
 
     return utmp
 
+
 def _calculate_vortex_surface_pressure_with_radius(p0, p_grid, tc_properties):
     """
     p0 is the tc center point
@@ -98,6 +101,7 @@ def _calculate_vortex_surface_pressure_with_radius(p0, p_grid, tc_properties):
     )
 
     return ps
+
 
 def _define_ak():
     ak = np.array(
@@ -276,6 +280,7 @@ def _define_bk():
 
     return bk
 
+
 def _initialize_vortex_ps_phis(grid_data, shape, tc_properties, calc):
     p0 = [np.deg2rad(tc_properties["lon_tc"]), np.deg2rad(tc_properties["lat_tc"])]
 
@@ -315,6 +320,7 @@ def _initialize_vortex_ps_phis(grid_data, shape, tc_properties, calc):
 
     return output_dict
 
+
 def _initialize_qvapor_temperature(grid_data, pe, ps, tc_properties, calc, shape):
 
     qvapor = np.zeros(shape)
@@ -351,6 +357,7 @@ def _initialize_qvapor_temperature(grid_data, pe, ps, tc_properties, calc, shape
 
     return qvapor, pt
 
+
 def _initialize_wind_dgrid(
     grid_data, tc_properties, calc, pe_u, pe_v, ps_u, ps_v, shape
 ):
@@ -383,7 +390,7 @@ def _initialize_wind_dgrid(
     vd = np.zeros(shape)
     p1 = grid[:, :-1, :]
     p2 = grid[:, 1:, :]
-    muv = _find_midpoint_unit_vectors(p1, p2)
+    muv = init_utils._find_midpoint_unit_vectors(p1, p2)
     dist = _calculate_distance_from_tc_center(pe_v, ps_v, muv, calc, tc_properties)
 
     utmp = _calculate_utmp(dist["height"][:, :-1, :], dist, calc, tc_properties)
@@ -397,6 +404,7 @@ def _initialize_wind_dgrid(
     vd[:, :, :-1][dist["height"] > tc_properties["ztrop"]] = 0
 
     return ud, vd
+
 
 def _interpolate_winds_dgrid_agrid(grid_data, ud, vd, tc_properties, shape):
 
@@ -440,6 +448,7 @@ def _interpolate_winds_dgrid_agrid(grid_data, ud, vd, tc_properties, shape):
 
     return ua, va
 
+
 def _some_inital_calculations(tc_properties):
     t00 = tc_properties["Ts0"] * (1.0 + constants.ZVIR * tc_properties["q00"])  # num
     p0 = [np.deg2rad(tc_properties["lon_tc"]), np.deg2rad(tc_properties["lat_tc"])]
@@ -457,6 +466,7 @@ def _some_inital_calculations(tc_properties):
 
     return calc
 
+
 def _initialize_delz_w(pe, ps, pt, qvapor, tc_properties, calc, shape):
 
     delz = np.zeros(shape)
@@ -470,6 +480,7 @@ def _initialize_delz_w(pe, ps, pt, qvapor, tc_properties, calc, shape):
     )
 
     return delz, w
+
 
 def init_tc_state(
     grid_data: GridData,
@@ -517,9 +528,7 @@ def init_tc_state(
 
     calc = _some_inital_calculations(tc_properties)
 
-    ps_output = _initialize_vortex_ps_phis(
-        grid_data, shape, tc_properties, calc
-    )
+    ps_output = _initialize_vortex_ps_phis(grid_data, shape, tc_properties, calc)
     ps, ps_u, ps_v = ps_output["ps"], ps_output["ps_uc"], ps_output["ps_vc"]
 
     # TODO restart file had different ak, bk. Figure out where they came from;
@@ -541,16 +550,12 @@ def init_tc_state(
     ud, vd = _initialize_wind_dgrid(
         grid_data, tc_properties, calc, pe_u, pe_v, ps_u, ps_v, shape
     )
-    ua, va = _interpolate_winds_dgrid_agrid(
-        grid_data, ud, vd, tc_properties, shape
-    )
+    ua, va = _interpolate_winds_dgrid_agrid(grid_data, ud, vd, tc_properties, shape)
 
     qvapor, pt = _initialize_qvapor_temperature(
         grid_data, pe, ps, tc_properties, calc, shape
     )
-    delz, w = _initialize_delz_w(
-        pe, ps, pt, qvapor, tc_properties, calc, shape
-    )
+    delz, w = _initialize_delz_w(pe, ps, pt, qvapor, tc_properties, calc, shape)
 
     numpy_state.delp[:] = delp
     numpy_state.delz[:] = delz

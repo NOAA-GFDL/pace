@@ -1,1 +1,1 @@
-from .analytic_init.py import init_analytic_state
+from .analytic_init import init_analytic_state

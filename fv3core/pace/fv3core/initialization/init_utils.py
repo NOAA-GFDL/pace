@@ -31,6 +31,7 @@ surface_pressure = 1.0e5  # units of (Pa), from Table VI of DCMIP2016
 R = constants.RADIUS / 10.0  # Perturbation radiusfor test case 13
 nhalo = fv3util.N_HALO_DEFAULT
 
+
 def cell_average_nine_components(
     component_function,
     component_args,
@@ -270,63 +271,6 @@ def initialize_pkz_moist(delp, pt, qvapor, delz):
     )
 
 
-
-
-def initialize_zonal_wind(
-    u,
-    eta,
-    eta_v,
-    lon,
-    lat,
-    east_grid_vector_component,
-    center_grid_vector_component,
-    islice,
-    islice_grid,
-    jslice,
-    jslice_grid,
-    axis,
-):
-    shape = u.shape
-    uu1 = wind_component_calc(
-        shape,
-        eta_v,
-        lon,
-        lat,
-        east_grid_vector_component,
-        islice,
-        islice,
-        jslice,
-        jslice_grid,
-    )
-    uu3 = wind_component_calc(
-        shape,
-        eta_v,
-        lon,
-        lat,
-        east_grid_vector_component,
-        islice,
-        islice_grid,
-        jslice,
-        jslice,
-    )
-    upper = (slice(None),) * axis + (slice(0, -1),)
-    lower = (slice(None),) * axis + (slice(1, None),)
-    pa1, pa2 = lon_lat_midpoint(lon[upper], lon[lower], lat[upper], lat[lower], np)
-    uu2 = wind_component_calc(
-        shape,
-        eta_v,
-        pa1,
-        pa2,
-        center_grid_vector_component,
-        islice,
-        islice,
-        jslice,
-        jslice,
-    )
-    u[islice, jslice, :] = 0.25 * (uu1 + 2.0 * uu2 + uu3)[islice, jslice, :]
-
-
-
 def local_compute_size(data_array_shape):
     nx = data_array_shape[0] - 2 * nhalo - 1
     ny = data_array_shape[1] - 2 * nhalo - 1
@@ -407,9 +351,6 @@ def setup_pressure_fields(
     eta[:-1], eta_v[:-1] = compute_eta(ak, bk)
 
 
-
-
-
 def specific_humidity(delp, peln, lat_agrid):
     """
     Compute specific humidity using the DCMPI2016 equation 18 and relevant constants
@@ -470,36 +411,3 @@ def vertical_coordinate(eta_value):
     computes eta_v, the auxiliary variable vertical coordinate
     """
     return (eta_value - eta_0) * math.pi * 0.5
-
-
-def wind_component_calc(
-    shape,
-    eta_v,
-    lon,
-    lat,
-    grid_vector_component,
-    islice,
-    islice_grid,
-    jslice,
-    jslice_grid,
-):
-    slice_grid = (islice_grid, jslice_grid)
-    slice_3d = (islice, jslice, slice(None))
-    u_component = np.zeros(shape)
-    u_component[slice_3d] = baroclinic_perturbed_zonal_wind(
-        eta_v, lon[slice_grid], lat[slice_grid]
-    )
-    u_component[slice_3d] = local_coordinate_transformation(
-        u_component[slice_3d],
-        lon[slice_grid],
-        grid_vector_component[islice_grid, jslice_grid, :],
-    )
-    return u_component
-
-
-def zonal_wind(eta_v, lat):
-    """
-    Equation (2) JRMS2006
-    Returns the zonal wind u
-    """
-    return u0 * np.cos(eta_v[:]) ** (3.0 / 2.0) * np.sin(2.0 * lat[:, :, None]) ** 2.0

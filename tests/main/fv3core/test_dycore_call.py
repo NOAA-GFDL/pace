@@ -106,8 +106,8 @@ def setup_dycore() -> Tuple[
     # create an initial state from the Jablonowski & Williamson Baroclinic
     # test case perturbation. JRMS2006
     state = ai.init_analytic_state(
-        analytic_init_str="baroclinic"
-        grid_data,
+        analytic_init_str="baroclinic",
+        grid_data=grid_data,
         quantity_factory=quantity_factory,
         adiabatic=config.adiabatic,
         hydrostatic=config.hydrostatic,

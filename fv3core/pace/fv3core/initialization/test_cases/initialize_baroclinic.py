@@ -1,13 +1,34 @@
+import math
+
 import numpy as np
 
 import pace.dsl.gt4py_utils as utils
 import pace.fv3core.initialization.init_utils as init_utils
 import pace.util as fv3util
+import pace.util.constants as constants
 from pace.fv3core.dycore_state import DycoreState
-from pace.util.grid import GridData
+from pace.util.grid import GridData, great_circle_distance_lon_lat, lon_lat_midpoint
 
 
+# maximum windspeed amplitude - close to windspeed of zonal-mean time-mean
+# jet stream in troposphere
+u0 = 35.0  # From Table VI of DCMIP2016
+# [lon, lat] of zonal wind perturbation centerpoint at 20E, 40N
+pcen = [math.pi / 9.0, 2.0 * math.pi / 9.0]  # From Table VI of DCMIP2016
+ptop_min = 1e-8
+u1 = 1.0
+pt0 = 0.0
+eta_0 = 0.252
+eta_surface = 1.0
+eta_tropopause = 0.2
+t_0 = 288.0
+delta_t = 480000.0
+lapse_rate = 0.005  # From Table VI of DCMIP2016
+surface_pressure = 1.0e5  # units of (Pa), from Table VI of DCMIP2016
+# NOTE RADIUS = 6.3712e6 in FV3 vs Jabowski paper 6.371229e6
+R = constants.RADIUS / 10.0  # Perturbation radiusfor test case 13
 nhalo = fv3util.N_HALO_DEFAULT
+
 
 def apply_perturbation(u_component, up, lon, lat):
     """
@@ -28,10 +49,99 @@ def apply_perturbation(u_component, up, lon, lat):
         -((r3d[near_perturbation] / R) ** 2.0)
     )
 
+
 def baroclinic_perturbed_zonal_wind(eta_v, lon, lat):
     u = zonal_wind(eta_v, lat)
     apply_perturbation(u, u1, lon, lat)
     return u
+
+
+def wind_component_calc(
+    shape,
+    eta_v,
+    lon,
+    lat,
+    grid_vector_component,
+    islice,
+    islice_grid,
+    jslice,
+    jslice_grid,
+):
+    slice_grid = (islice_grid, jslice_grid)
+    slice_3d = (islice, jslice, slice(None))
+    u_component = np.zeros(shape)
+    u_component[slice_3d] = baroclinic_perturbed_zonal_wind(
+        eta_v, lon[slice_grid], lat[slice_grid]
+    )
+    u_component[slice_3d] = init_utils.local_coordinate_transformation(
+        u_component[slice_3d],
+        lon[slice_grid],
+        grid_vector_component[islice_grid, jslice_grid, :],
+    )
+    return u_component
+
+
+def zonal_wind(eta_v, lat):
+    """
+    Equation (2) JRMS2006
+    Returns the zonal wind u
+    """
+    return u0 * np.cos(eta_v[:]) ** (3.0 / 2.0) * np.sin(2.0 * lat[:, :, None]) ** 2.0
+
+
+def initialize_zonal_wind(
+    u,
+    eta,
+    eta_v,
+    lon,
+    lat,
+    east_grid_vector_component,
+    center_grid_vector_component,
+    islice,
+    islice_grid,
+    jslice,
+    jslice_grid,
+    axis,
+):
+    shape = u.shape
+    uu1 = wind_component_calc(
+        shape,
+        eta_v,
+        lon,
+        lat,
+        east_grid_vector_component,
+        islice,
+        islice,
+        jslice,
+        jslice_grid,
+    )
+    uu3 = wind_component_calc(
+        shape,
+        eta_v,
+        lon,
+        lat,
+        east_grid_vector_component,
+        islice,
+        islice_grid,
+        jslice,
+        jslice,
+    )
+    upper = (slice(None),) * axis + (slice(0, -1),)
+    lower = (slice(None),) * axis + (slice(1, None),)
+    pa1, pa2 = lon_lat_midpoint(lon[upper], lon[lower], lat[upper], lat[lower], np)
+    uu2 = wind_component_calc(
+        shape,
+        eta_v,
+        pa1,
+        pa2,
+        center_grid_vector_component,
+        islice,
+        islice,
+        jslice,
+        jslice,
+    )
+    u[islice, jslice, :] = 0.25 * (uu1 + 2.0 * uu2 + uu3)[islice, jslice, :]
+
 
 def baroclinic_initialization(
     eta,
@@ -109,9 +219,9 @@ def baroclinic_initialization(
     slice_2d = (slice(0, nx), slice(0, ny))
     slice_2d_buffer = (slice(0, nx + 1), slice(0, ny + 1))
     # initialize temperature
-    t_mean = horizontally_averaged_temperature(eta)
-    pt[slice_3d] = cell_average_nine_components(
-        temperature,
+    t_mean = init_utils.horizontally_averaged_temperature(eta)
+    pt[slice_3d] = init_utils.cell_average_nine_components(
+        init_utils.temperature,
         [eta, eta_v, t_mean],
         lon[slice_2d_buffer],
         lat[slice_2d_buffer],
@@ -119,8 +229,8 @@ def baroclinic_initialization(
     )
 
     # initialize surface geopotential
-    phis[slice_2d] = cell_average_nine_components(
-        surface_geopotential_perturbation,
+    phis[slice_2d] = init_utils.cell_average_nine_components(
+        init_utils.surface_geopotential_perturbation,
         [],
         lon[slice_2d_buffer],
         lat[slice_2d_buffer],
@@ -130,13 +240,15 @@ def baroclinic_initialization(
     if not hydrostatic:
         # vertical velocity is set to 0 for nonhydrostatic setups
         w[slice_3d] = 0.0
-        delz[:nx, :ny, :-1] = initialize_delz(pt[slice_3d], peln[slice_3d])
+        delz[:nx, :ny, :-1] = init_utils.initialize_delz(pt[slice_3d], peln[slice_3d])
 
     if not adiabatic:
-        qvapor[:nx, :ny, :-1] = specific_humidity(
+        qvapor[:nx, :ny, :-1] = init_utils.specific_humidity(
             delp[slice_3d], peln[slice_3d], lat_agrid[slice_2d]
         )
-        pt[slice_3d] = moisture_adjusted_temperature(pt[slice_3d], qvapor[slice_3d])
+        pt[slice_3d] = init_utils.moisture_adjusted_temperature(
+            pt[slice_3d], qvapor[slice_3d]
+        )
 
 
 def init_baroclinic_state(
@@ -192,7 +304,7 @@ def init_baroclinic_state(
         ptop=grid_data.ptop,
     )
 
-    init_utils.baroclinic_initialization(
+    baroclinic_initialization(
         eta=eta,
         eta_v=eta_v,
         peln=numpy_state.peln[slice_3d_buffer],
