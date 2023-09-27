@@ -323,7 +323,7 @@ class DriverConfig:
         config_dict["initialization"]["config"]["start_time"] = time
         config_dict["initialization"]["config"]["path"] = restart_path
         if "case" in config_dict["initialization"]["config"].keys():
-            _ = config_dict["initialization"]["config"].pop("case")
+            del config_dict["initialization"]["config"]["case"]
         with open(f"{restart_path}/restart.yaml", "w") as file:
             yaml.safe_dump(config_dict, file)
 
