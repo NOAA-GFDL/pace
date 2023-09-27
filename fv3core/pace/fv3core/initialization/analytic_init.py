@@ -59,6 +59,6 @@ def init_analytic_choice(
                 comm=comm,
             )
         else:
-            return None
+            raise ValueError(f"Case {analytic_init_str} not implemented")
     else:
-        raise ValueError(f"Case {analytic_init_str} not implemented")
+        raise ValueError(f"Case {analytic_init_str} not recognized")
