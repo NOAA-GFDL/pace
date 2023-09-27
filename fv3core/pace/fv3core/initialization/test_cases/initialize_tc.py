@@ -119,7 +119,6 @@ def init_tc_state(
     numpy_state.va[:] = va
     # numpy_state.vc[:] =
     numpy_state.w[:] = w
-    breakpoint()
     state = DycoreState.init_from_numpy_arrays(
         numpy_state.__dict__,
         sizer=quantity_factory.sizer,
