@@ -13,7 +13,7 @@ class cases(Enum):
 valid_cases = [item.value for item in cases]
 
 
-def init_analytic_choice(
+def init_analytic_state(
     analytic_init_str: str,
     grid_data: GridData,
     quantity_factory: fv3util.QuantityFactory,
@@ -43,9 +43,9 @@ def init_analytic_choice(
             return bc.init_baroclinic_state(
                 grid_data=grid_data,
                 quantity_factory=quantity_factory,
-                adiabatic=False,
-                hydrostatic=False,
-                moist_phys=True,
+                adiabatic=adiabatic,
+                hydrostatic=hydrostatic,
+                moist_phys=moist_phys,
                 comm=comm,
             )
 
@@ -55,7 +55,7 @@ def init_analytic_choice(
             return tc.init_tc_state(
                 grid_data=grid_data,
                 quantity_factory=quantity_factory,
-                hydrostatic=False,
+                hydrostatic=hydrostatic,
                 comm=comm,
             )
         else:

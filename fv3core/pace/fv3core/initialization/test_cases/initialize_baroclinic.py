@@ -9,6 +9,135 @@ from pace.util.grid import GridData
 
 nhalo = fv3util.N_HALO_DEFAULT
 
+def apply_perturbation(u_component, up, lon, lat):
+    """
+    Apply a Gaussian perturbation to intiate a baroclinic wave in JRMS2006
+    up is the maximum amplitude of the perturbation
+    modifies u_component to include the perturbation of radius R
+    """
+    r = np.zeros((u_component.shape[0], u_component.shape[1], 1))
+    # Equation (11), distance from perturbation at 20E, 40N in JRMS2006
+    r = great_circle_distance_lon_lat(pcen[0], lon, pcen[1], lat, constants.RADIUS, np)[
+        :, :, None
+    ]
+    r3d = np.repeat(r, u_component.shape[2], axis=2)
+    near_perturbation = (r3d / R) ** 2.0 < 40.0
+    # Equation(10) in JRMS2006 perturbation applied to u_component
+    # Equivalent to Equation (14) in DCMIP 2016, where Zp = 1.0
+    u_component[near_perturbation] = u_component[near_perturbation] + up * np.exp(
+        -((r3d[near_perturbation] / R) ** 2.0)
+    )
+
+def baroclinic_perturbed_zonal_wind(eta_v, lon, lat):
+    u = zonal_wind(eta_v, lat)
+    apply_perturbation(u, u1, lon, lat)
+    return u
+
+def baroclinic_initialization(
+    eta,
+    eta_v,
+    peln,
+    qvapor,
+    delp,
+    u,
+    v,
+    pt,
+    phis,
+    delz,
+    w,
+    lon,
+    lat,
+    lon_agrid,
+    lat_agrid,
+    ee1,
+    ee2,
+    es1,
+    ew2,
+    ptop,
+    adiabatic,
+    hydrostatic,
+    nx,
+    ny,
+):
+    """
+    Calls methods that compute initial state via the Jablonowski perturbation test case
+    Transforms results to the cubed sphere grid
+    Creates an initial baroclinic state for u(x-wind), v(y-wind), pt(temperature),
+    phis(surface geopotential)w (vertical windspeed) and delz (vertical coordinate layer
+    width)
+
+    Inputs lon, lat, lon_agrid, lat_agrid, ee1, ee2, es1, ew2, ptop are defined by the
+           grid and can be computed using an instance of the MetricTerms class.
+    Inputs eta and eta_v are vertical coordinate columns derived from the ak and bk
+           variables, also found in the Metric Terms class.
+    """
+
+    # Equation (2) for v
+    # Although meridional wind is 0 in this scheme
+    # on the cubed sphere grid, v is not 0 on every tile
+    initialize_zonal_wind(
+        v,
+        eta,
+        eta_v,
+        lon,
+        lat,
+        east_grid_vector_component=ee2,
+        center_grid_vector_component=ew2,
+        islice=slice(0, nx + 1),
+        islice_grid=slice(0, nx + 1),
+        jslice=slice(0, ny),
+        jslice_grid=slice(1, ny + 1),
+        axis=1,
+    )
+
+    initialize_zonal_wind(
+        u,
+        eta,
+        eta_v,
+        lon,
+        lat,
+        east_grid_vector_component=ee1,
+        center_grid_vector_component=es1,
+        islice=slice(0, nx),
+        islice_grid=slice(1, nx + 1),
+        jslice=slice(0, ny + 1),
+        jslice_grid=slice(0, ny + 1),
+        axis=0,
+    )
+
+    slice_3d = (slice(0, nx), slice(0, ny), slice(None))
+    slice_2d = (slice(0, nx), slice(0, ny))
+    slice_2d_buffer = (slice(0, nx + 1), slice(0, ny + 1))
+    # initialize temperature
+    t_mean = horizontally_averaged_temperature(eta)
+    pt[slice_3d] = cell_average_nine_components(
+        temperature,
+        [eta, eta_v, t_mean],
+        lon[slice_2d_buffer],
+        lat[slice_2d_buffer],
+        lat_agrid[slice_2d],
+    )
+
+    # initialize surface geopotential
+    phis[slice_2d] = cell_average_nine_components(
+        surface_geopotential_perturbation,
+        [],
+        lon[slice_2d_buffer],
+        lat[slice_2d_buffer],
+        lat_agrid[slice_2d],
+    )
+
+    if not hydrostatic:
+        # vertical velocity is set to 0 for nonhydrostatic setups
+        w[slice_3d] = 0.0
+        delz[:nx, :ny, :-1] = initialize_delz(pt[slice_3d], peln[slice_3d])
+
+    if not adiabatic:
+        qvapor[:nx, :ny, :-1] = specific_humidity(
+            delp[slice_3d], peln[slice_3d], lat_agrid[slice_2d]
+        )
+        pt[slice_3d] = moisture_adjusted_temperature(pt[slice_3d], qvapor[slice_3d])
+
 
 def init_baroclinic_state(
     grid_data: GridData,
