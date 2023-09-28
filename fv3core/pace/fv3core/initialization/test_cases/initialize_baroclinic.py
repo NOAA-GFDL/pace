@@ -9,25 +9,16 @@ import pace.util.constants as constants
 from pace.fv3core.dycore_state import DycoreState
 from pace.util.grid import GridData, great_circle_distance_lon_lat, lon_lat_midpoint
 
-
 # maximum windspeed amplitude - close to windspeed of zonal-mean time-mean
 # jet stream in troposphere
-u0 = 35.0  # From Table VI of DCMIP2016
+U0 = 35.0  # From Table VI of DCMIP2016
 # [lon, lat] of zonal wind perturbation centerpoint at 20E, 40N
-pcen = [math.pi / 9.0, 2.0 * math.pi / 9.0]  # From Table VI of DCMIP2016
-ptop_min = 1e-8
-u1 = 1.0
-pt0 = 0.0
-eta_0 = 0.252
-eta_surface = 1.0
-eta_tropopause = 0.2
-t_0 = 288.0
-delta_t = 480000.0
-lapse_rate = 0.005  # From Table VI of DCMIP2016
-surface_pressure = 1.0e5  # units of (Pa), from Table VI of DCMIP2016
+PCEN = [math.pi / 9.0, 2.0 * math.pi / 9.0]  # From Table VI of DCMIP2016
+U1 = 1.0
+SURFACE_PRESSURE = 1.0e5  # units of (Pa), from Table VI of DCMIP2016
 # NOTE RADIUS = 6.3712e6 in FV3 vs Jabowski paper 6.371229e6
 R = constants.RADIUS / 10.0  # Perturbation radiusfor test case 13
-nhalo = fv3util.N_HALO_DEFAULT
+NHALO = fv3util.N_HALO_DEFAULT
 
 
 def apply_perturbation(u_component, up, lon, lat):
@@ -38,7 +29,7 @@ def apply_perturbation(u_component, up, lon, lat):
     """
     r = np.zeros((u_component.shape[0], u_component.shape[1], 1))
     # Equation (11), distance from perturbation at 20E, 40N in JRMS2006
-    r = great_circle_distance_lon_lat(pcen[0], lon, pcen[1], lat, constants.RADIUS, np)[
+    r = great_circle_distance_lon_lat(PCEN[0], lon, PCEN[1], lat, constants.RADIUS, np)[
         :, :, None
     ]
     r3d = np.repeat(r, u_component.shape[2], axis=2)
@@ -52,7 +43,7 @@ def apply_perturbation(u_component, up, lon, lat):
 
 def baroclinic_perturbed_zonal_wind(eta_v, lon, lat):
     u = zonal_wind(eta_v, lat)
-    apply_perturbation(u, u1, lon, lat)
+    apply_perturbation(u, U1, lon, lat)
     return u
 
 
@@ -86,7 +77,7 @@ def zonal_wind(eta_v, lat):
     Equation (2) JRMS2006
     Returns the zonal wind u
     """
-    return u0 * np.cos(eta_v[:]) ** (3.0 / 2.0) * np.sin(2.0 * lat[:, :, None]) ** 2.0
+    return U0 * np.cos(eta_v[:]) ** (3.0 / 2.0) * np.sin(2.0 * lat[:, :, None]) ** 2.0
 
 
 def initialize_zonal_wind(
@@ -269,10 +260,10 @@ def init_baroclinic_state(
     numpy_state = init_utils.empty_numpy_dycore_state(shape)
     # Initializing to values the Fortran does for easy comparison
     numpy_state.delp[:] = 1e30
-    numpy_state.delp[:nhalo, :nhalo] = 0.0
-    numpy_state.delp[:nhalo, nhalo + ny :] = 0.0
-    numpy_state.delp[nhalo + nx :, :nhalo] = 0.0
-    numpy_state.delp[nhalo + nx :, nhalo + ny :] = 0.0
+    numpy_state.delp[:NHALO, :NHALO] = 0.0
+    numpy_state.delp[:NHALO, NHALO + ny :] = 0.0
+    numpy_state.delp[NHALO + nx :, :NHALO] = 0.0
+    numpy_state.delp[NHALO + nx :, NHALO + ny :] = 0.0
     numpy_state.pe[:] = 0.0
     numpy_state.pt[:] = 1.0
     numpy_state.ua[:] = 1e35
@@ -282,7 +273,7 @@ def init_baroclinic_state(
     numpy_state.w[:] = 1.0e30
     numpy_state.delz[:] = 1.0e25
     numpy_state.phis[:] = 1.0e25
-    numpy_state.ps[:] = init_utils.surface_pressure
+    numpy_state.ps[:] = SURFACE_PRESSURE
     eta = np.zeros(nz)
     eta_v = np.zeros(nz)
     islice, jslice, slice_3d, slice_2d = init_utils.compute_slices(nx, ny)
@@ -350,8 +341,8 @@ def init_baroclinic_state(
         backend=sample_quantity.metadata.gt4py_backend,
     )
 
-    comm.halo_update(state.phis, n_points=nhalo)
+    comm.halo_update(state.phis, n_points=NHALO)
 
-    comm.vector_halo_update(state.u, state.v, n_points=nhalo)
+    comm.vector_halo_update(state.u, state.v, n_points=NHALO)
 
     return state
