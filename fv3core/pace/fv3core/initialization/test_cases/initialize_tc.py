@@ -62,7 +62,7 @@ def _calculate_utmp(height, dist, calc, tc_properties):
     ee = 1.0 - tc_properties["p_ref"] / tc_properties["dp"] * np.exp(
         dd[:, :, None]
     ) * np.exp(
-        ccNHALO
+        cc
     )  # (134, 135, 79)
     ff = constants.GRAV * tc_properties["zp"] ** tc_properties["exppz"]  # number
     gg = calc["t00"] - tc_properties["gamma"] * height  # (134, 135, 79)

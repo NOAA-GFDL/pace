@@ -80,7 +80,7 @@ def cell_average_nine_point(pt1, pt2, pt3, pt4, pt5, pt6, pt7, pt8, pt9):
     )
 
 
-# TODO: we have a bunch of functions floating around in Pace that do this exact calculation, at some point we should consolidate them
+# TODO: functions that do this exact calculation, we should consolidate them
 def compute_eta(ak, bk):
     """
     Equation (1) JRMS2006
@@ -173,8 +173,8 @@ def horizontally_averaged_temperature(eta):
     t_mean = T_0 * eta[:] ** (constants.RDGAS * LAPSE_RATE / constants.GRAV)
     # above troposphere
     t_mean[ETA_TROPOPAUSE > eta] = (
-        t_mean[ETA_TROPOPAUSE> eta]
-        + DELTA_T * (ETA_TROPOPAUSE- eta[ETA_TROPOPAUSE> eta]) ** 5.0
+        t_mean[ETA_TROPOPAUSE > eta]
+        + DELTA_T * (ETA_TROPOPAUSE - eta[ETA_TROPOPAUSE > eta]) ** 5.0
     )
     return t_mean
 
