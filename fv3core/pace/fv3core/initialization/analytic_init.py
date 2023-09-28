@@ -1,16 +1,18 @@
-from enum import Enum
+from enum import Enum, EnumMeta
+from typing import Any
 
 import pace.util as fv3util
 from pace.fv3core.dycore_state import DycoreState
 from pace.util.grid import GridData
 
 
-class cases(Enum):
+class MetaEnumStr(EnumMeta):
+    def __contains__(cls, item):
+        return item in cls.__members__.keys()
+
+class Cases(Enum, metaclass=MetaEnumStr):
     baroclinic = "baroclinic"
-    tropicalcylclone = "tropicalcyclone"
-
-
-valid_cases = [item.value for item in cases]
+    tropicalcyclone = "tropicalcyclone"
 
 
 def init_analytic_state(
@@ -36,7 +38,7 @@ def init_analytic_state(
     Returns:
         an instance of DycoreState class
     """
-    if analytic_init_str in valid_cases:
+    if analytic_init_str in Cases:
         if analytic_init_str == "baroclinic":
             import pace.fv3core.initialization.test_cases.initialize_baroclinic as bc
 
