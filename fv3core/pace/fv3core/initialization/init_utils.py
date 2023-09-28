@@ -80,6 +80,7 @@ def cell_average_nine_point(pt1, pt2, pt3, pt4, pt5, pt6, pt7, pt8, pt9):
     )
 
 
+# TODO: we have a bunch of functions floating around in Pace that do this exact calculation, at some point we should consolidate them
 def compute_eta(ak, bk):
     """
     Equation (1) JRMS2006
