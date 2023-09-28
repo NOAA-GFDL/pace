@@ -14,22 +14,22 @@ from pace.util.grid.gnomonic import get_lonlat_vect, get_unit_vector_direction
 
 # maximum windspeed amplitude - close to windspeed of zonal-mean time-mean
 # jet stream in troposphere
-u0 = 35.0  # From Table VI of DCMIP2016
+U0 = 35.0  # From Table VI of DCMIP2016
 # [lon, lat] of zonal wind perturbation centerpoint at 20E, 40N
-pcen = [math.pi / 9.0, 2.0 * math.pi / 9.0]  # From Table VI of DCMIP2016
-ptop_min = 1e-8
-u1 = 1.0
-pt0 = 0.0
-eta_0 = 0.252
-eta_surface = 1.0
-eta_tropopause = 0.2
-t_0 = 288.0
-delta_t = 480000.0
-lapse_rate = 0.005  # From Table VI of DCMIP2016
-surface_pressure = 1.0e5  # units of (Pa), from Table VI of DCMIP2016
+PCEN = [math.pi / 9.0, 2.0 * math.pi / 9.0]  # From Table VI of DCMIP2016
+PTOP_MIN = 1e-8
+U1 = 1.0
+PT0 = 0.0
+ETA_0 = 0.252
+ETA_SURFACE = 1.0
+ETA_TROPOPAUSE = 0.2
+T_0 = 288.0
+DELTA_T = 480000.0
+LAPSE_RATE = 0.005  # From Table VI of DCMIP2016
+SURFACE_PRESSURE = 1.0e5  # units of (Pa), from Table VI of DCMIP2016
 # NOTE RADIUS = 6.3712e6 in FV3 vs Jabowski paper 6.371229e6
 R = constants.RADIUS / 10.0  # Perturbation radiusfor test case 13
-nhalo = fv3util.N_HALO_DEFAULT
+NHALO = fv3util.N_HALO_DEFAULT
 
 
 def cell_average_nine_components(
@@ -86,7 +86,7 @@ def compute_eta(ak, bk):
     Equation (1) JRMS2006
     eta is the vertical coordinate and eta_v is an auxiliary vertical coordinate
     """
-    eta = 0.5 * ((ak[:-1] + ak[1:]) / surface_pressure + bk[:-1] + bk[1:])
+    eta = 0.5 * ((ak[:-1] + ak[1:]) / SURFACE_PRESSURE + bk[:-1] + bk[1:])
     eta_v = vertical_coordinate(eta)
     return eta, eta_v
 
@@ -108,8 +108,8 @@ def compute_grid_edge_midpoint_latitude_components(lon, lat):
 
 
 def compute_slices(nx, ny):
-    islice = slice(nhalo, nhalo + nx)
-    jslice = slice(nhalo, nhalo + ny)
+    islice = slice(NHALO, NHALO + nx)
+    jslice = slice(NHALO, NHALO + ny)
     slice_3d = (islice, jslice, slice(None))
     slice_2d = (islice, jslice)
     return islice, jslice, slice_3d, slice_2d
@@ -141,7 +141,7 @@ def _find_midpoint_unit_vectors(p1, p2):
 
 
 def fix_top_log_edge_pressure(peln, ptop):
-    if ptop < ptop_min:
+    if ptop < PTOP_MIN:
         ak1 = (constants.KAPPA + 1.0) / constants.KAPPA
         peln[:, :, 0] = peln[:, :, 1] - ak1
     else:
@@ -152,7 +152,7 @@ def geopotential_perturbation(lat, eta_value):
     """
     Equation (7) JRMS2006, just the perturbation component
     """
-    u_comp = u0 * (np.cos(eta_value) ** (3.0 / 2.0))
+    u_comp = U0 * (np.cos(eta_value) ** (3.0 / 2.0))
     return u_comp * (
         (-2.0 * (np.sin(lat) ** 6.0) * (np.cos(lat) ** 2.0 + 1.0 / 3.0) + 10.0 / 63.0)
         * u_comp
@@ -170,11 +170,11 @@ def horizontally_averaged_temperature(eta):
     Equations (4) and (5) JRMS2006 for characteristic temperature profile
     """
     # for troposphere:
-    t_mean = t_0 * eta[:] ** (constants.RDGAS * lapse_rate / constants.GRAV)
+    t_mean = T_0 * eta[:] ** (constants.RDGAS * LAPSE_RATE / constants.GRAV)
     # above troposphere
-    t_mean[eta_tropopause > eta] = (
-        t_mean[eta_tropopause > eta]
-        + delta_t * (eta_tropopause - eta[eta_tropopause > eta]) ** 5.0
+    t_mean[ETA_TROPOPAUSE > eta] = (
+        t_mean[ETA_TROPOPAUSE> eta]
+        + DELTA_T * (ETA_TROPOPAUSE- eta[ETA_TROPOPAUSE> eta]) ** 5.0
     )
     return t_mean
 
@@ -273,8 +273,8 @@ def initialize_pkz_moist(delp, pt, qvapor, delz):
 
 
 def local_compute_size(data_array_shape):
-    nx = data_array_shape[0] - 2 * nhalo - 1
-    ny = data_array_shape[1] - 2 * nhalo - 1
+    nx = data_array_shape[0] - 2 * NHALO - 1
+    ny = data_array_shape[1] - 2 * NHALO - 1
     nz = data_array_shape[2]
     return nx, ny, nz
 
@@ -344,7 +344,7 @@ def setup_pressure_fields(
     bk,
     ptop,
 ):
-    ps[:] = surface_pressure
+    ps[:] = SURFACE_PRESSURE
     delp[:, :, :-1] = initialize_delp(ps, ak, bk)
     pe[:] = initialize_edge_pressure(delp, ptop)
     peln[:] = initialize_log_pressure_interfaces(pe, ptop)
@@ -363,11 +363,11 @@ def specific_humidity(delp, peln, lat_agrid):
     q0 = 0.021
     # In equation 18 of DCMPI2016, ptmp is pressure - surface pressure
     # TODO why do we use dp/(d(log(p))) for 'pressure'?
-    ptmp = delp[:, :, :-1] / (peln[:, :, 1:] - peln[:, :, :-1]) - surface_pressure
+    ptmp = delp[:, :, :-1] / (peln[:, :, 1:] - peln[:, :, :-1]) - SURFACE_PRESSURE
     # Similar to equation 18 of DCMIP2016 without a cutoff at tropopause
     return (
         q0
-        * np.exp(-((lat_agrid[:, :, None] / pcen[1]) ** 4.0))
+        * np.exp(-((lat_agrid[:, :, None] / PCEN[1]) ** 4.0))
         * np.exp(-((ptmp / pw) ** 2.0))
     )
 
@@ -379,7 +379,7 @@ def surface_geopotential_perturbation(lat):
        only necessary to initialize surface geopotential.'
     * 'balances the non-zero zonal wind at the surface with surface elevation zs'
     """
-    surface_level = vertical_coordinate(eta_surface)
+    surface_level = vertical_coordinate(ETA_SURFACE)
     return geopotential_perturbation(lat, surface_level)
 
 
@@ -390,12 +390,12 @@ def temperature(eta, eta_v, t_mean, lat):
      and a horizontal variation at each level
     """
     lat = lat[:, :, None]
-    return t_mean + 0.75 * (eta[:] * math.pi * u0 / constants.RDGAS) * np.sin(
+    return t_mean + 0.75 * (eta[:] * math.pi * U0 / constants.RDGAS) * np.sin(
         eta_v[:]
     ) * np.sqrt(np.cos(eta_v[:])) * (
         (-2.0 * (np.sin(lat) ** 6.0) * (np.cos(lat) ** 2.0 + 1.0 / 3.0) + 10.0 / 63.0)
         * 2.0
-        * u0
+        * U0
         * np.cos(eta_v[:]) ** (3.0 / 2.0)
         + (
             (8.0 / 5.0) * (np.cos(lat) ** 3.0) * (np.sin(lat) ** 2.0 + 2.0 / 3.0)
@@ -411,4 +411,4 @@ def vertical_coordinate(eta_value):
     Equation (1) JRMS2006
     computes eta_v, the auxiliary variable vertical coordinate
     """
-    return (eta_value - eta_0) * math.pi * 0.5
+    return (eta_value - ETA_0) * math.pi * 0.5
