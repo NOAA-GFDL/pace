@@ -39,7 +39,7 @@ def init_analytic_state(
         an instance of DycoreState class
     """
     if analytic_init_str in Cases:
-        if analytic_init_str == "baroclinic":
+        if analytic_init_str == Cases.baroclinic.value:
             import pace.fv3core.initialization.test_cases.initialize_baroclinic as bc
 
             return bc.init_baroclinic_state(
