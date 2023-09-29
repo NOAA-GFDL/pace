@@ -16,7 +16,7 @@ class Cases(Enum, metaclass=MetaEnumStr):
 
 
 def init_analytic_state(
-    analytic_init_str: str,
+    analytic_init_case: str,
     grid_data: GridData,
     quantity_factory: fv3util.QuantityFactory,
     adiabatic: bool,
@@ -38,8 +38,8 @@ def init_analytic_state(
     Returns:
         an instance of DycoreState class
     """
-    if analytic_init_str in Cases:
-        if analytic_init_str == Cases.baroclinic.value:
+    if analytic_init_case in Cases:
+        if analytic_init_case == Cases.baroclinic.value:
             import pace.fv3core.initialization.test_cases.initialize_baroclinic as bc
 
             return bc.init_baroclinic_state(
@@ -51,7 +51,7 @@ def init_analytic_state(
                 comm=comm,
             )
 
-        elif analytic_init_str == Cases.tropicalcyclone.value:
+        elif analytic_init_case == Cases.tropicalcyclone.value:
             import pace.fv3core.initialization.test_cases.initialize_tc as tc
 
             return tc.init_tc_state(
@@ -61,6 +61,6 @@ def init_analytic_state(
                 comm=comm,
             )
         else:
-            raise ValueError(f"Case {analytic_init_str} not implemented")
+            raise ValueError(f"Case {analytic_init_case} not implemented")
     else:
-        raise ValueError(f"Case {analytic_init_str} not recognized")
+        raise ValueError(f"Case {analytic_init_case} not recognized")

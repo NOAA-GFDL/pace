@@ -111,7 +111,7 @@ class AnalyticInit(Initializer):
         grid_data: pace.util.grid.GridData,
     ) -> DriverState:
         dycore_state = analytic_init.init_analytic_state(
-            analytic_init_str=self.case,
+            analytic_init_case=self.case,
             grid_data=grid_data,
             quantity_factory=quantity_factory,
             adiabatic=False,
