@@ -8,7 +8,9 @@ stencil_config:
     format_source: false
     device_sync: false
 initialization:
-  type: tropicalcyclone
+  type: analytic
+  config:
+    case: tropicalcyclone
 performance_config:
   performance_mode: true
   experiment_name: c128_tropical

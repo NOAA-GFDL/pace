@@ -9,7 +9,9 @@ stencil_config:
     device_sync: false
     run_mode: Run
 initialization:
-  type: baroclinic
+  type: analytic
+  config:
+    case: baroclinicc
 performance_config:
   collect_performance: false
 nx_tile: 48

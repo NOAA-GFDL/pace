@@ -5,12 +5,12 @@ from datetime import timedelta
 from typing import Tuple
 
 import pace.dsl.stencil
-import pace.fv3core.initialization.baroclinic as baroclinic_init
+import pace.fv3core.initialization.analytic_init as ai
 import pace.stencils.testing
 import pace.util
 from pace import fv3core
 from pace.dsl.dace.dace_config import DaceConfig
-from pace.fv3core.initialization.dycore_state import DycoreState
+from pace.fv3core.dycore_state import DycoreState
 from pace.stencils.testing import assert_same_temporaries, copy_temporaries
 from pace.util.grid import DampingCoefficients, GridData, MetricTerms
 from pace.util.null_comm import NullComm
@@ -105,8 +105,9 @@ def setup_dycore() -> Tuple[
 
     # create an initial state from the Jablonowski & Williamson Baroclinic
     # test case perturbation. JRMS2006
-    state = baroclinic_init.init_baroclinic_state(
-        grid_data,
+    state = ai.init_analytic_state(
+        analytic_init_case="baroclinic",
+        grid_data=grid_data,
         quantity_factory=quantity_factory,
         adiabatic=config.adiabatic,
         hydrostatic=config.hydrostatic,
