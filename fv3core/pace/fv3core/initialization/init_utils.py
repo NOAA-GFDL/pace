@@ -204,6 +204,7 @@ def initialize_delz(pt, peln):
 
 
 def _initialize_edge_pressure(delp, ptop, shape):
+    # TODO: resolve function duplication
     pe = np.zeros(shape)
     pe[:, :, 0] = ptop
     for k in range(1, pe.shape[2]):
