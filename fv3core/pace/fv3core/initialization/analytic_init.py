@@ -51,7 +51,7 @@ def init_analytic_state(
                 comm=comm,
             )
 
-        elif analytic_init_str == "tropicalcyclone":
+        elif analytic_init_str == Cases.tropicalcyclone.value:
             import pace.fv3core.initialization.test_cases.initialize_tc as tc
 
             return tc.init_tc_state(
