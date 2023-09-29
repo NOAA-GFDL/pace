@@ -180,6 +180,7 @@ def horizontally_averaged_temperature(eta):
 
 
 def _initialize_delp(ak, bk, ps, shape):
+    # TODO: resolve function duplication
     delp = np.zeros(shape)
     delp[:, :, :-1] = (
         ak[None, None, 1:]
