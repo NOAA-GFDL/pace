@@ -9,8 +9,7 @@ import f90nml
 
 import pace.driver
 import pace.dsl
-import pace.fv3core.initialization.baroclinic as baroclinic_init
-import pace.fv3core.initialization.tropical_cyclone as tc_init
+import pace.fv3core.initialization.analytic_init as analytic_init
 import pace.physics
 import pace.stencils
 import pace.util
@@ -93,13 +92,14 @@ class InitializerSelector(Initializer):
         return cls(config=instance, type=config["type"])
 
 
-@InitializerSelector.register("baroclinic")
+@InitializerSelector.register("analytic")
 @dataclasses.dataclass
-class BaroclinicInit(Initializer):
+class AnalyticInit(Initializer):
     """
-    Configuration for baroclinic initialization.
+    Configuration for analytic initialization.
     """
 
+    case: str = "baroclinic"
     start_time: datetime = datetime(2000, 1, 1)
 
     def get_driver_state(
@@ -110,8 +110,8 @@ class BaroclinicInit(Initializer):
         driver_grid_data: pace.util.grid.DriverGridData,
         grid_data: pace.util.grid.GridData,
     ) -> DriverState:
-        assert isinstance(communicator, pace.util.CubedSphereCommunicator)
-        dycore_state = baroclinic_init.init_baroclinic_state(
+        dycore_state = analytic_init.init_analytic_state(
+            analytic_init_case=self.case,
             grid_data=grid_data,
             quantity_factory=quantity_factory,
             adiabatic=False,
@@ -125,57 +125,6 @@ class BaroclinicInit(Initializer):
         tendency_state = TendencyState.init_zeros(
             quantity_factory=quantity_factory,
         )
-        return DriverState(
-            dycore_state=dycore_state,
-            physics_state=physics_state,
-            tendency_state=tendency_state,
-            grid_data=grid_data,
-            damping_coefficients=damping_coefficients,
-            driver_grid_data=driver_grid_data,
-        )
-
-
-@InitializerSelector.register("tropicalcyclone")
-@dataclasses.dataclass
-class TropicalCycloneConfig(Initializer):
-    """
-    Configuration for tropical cyclone initialization.
-    """
-
-    # TODO
-    # this can be cleaned up after grid config is separated
-
-    start_time: datetime = datetime(2000, 1, 1)
-
-    def get_driver_state(
-        self,
-        quantity_factory: pace.util.QuantityFactory,
-        communicator: pace.util.Communicator,
-        damping_coefficients: pace.util.grid.DampingCoefficients,
-        driver_grid_data: pace.util.grid.DriverGridData,
-        grid_data: pace.util.grid.GridData,
-    ) -> DriverState:
-        assert isinstance(communicator, pace.util.CubedSphereCommunicator)
-        dycore_state = tc_init.init_tc_state(
-            grid_data=grid_data,
-            quantity_factory=quantity_factory,
-            hydrostatic=False,
-            comm=communicator,
-        )
-
-        physics_state = pace.physics.PhysicsState.init_zeros(
-            quantity_factory=quantity_factory, active_packages=["microphysics"]
-        )
-        tendency_state = TendencyState.init_zeros(
-            quantity_factory=quantity_factory,
-        )
-
-        print(
-            "delp: ",
-            dycore_state.delp.data[:, :, -2].min(),
-            dycore_state.pt.data[:, :, -2].max(),
-        )
-
         return DriverState(
             dycore_state=dycore_state,
             physics_state=physics_state,

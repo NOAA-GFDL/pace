@@ -6,7 +6,9 @@ stencil_config:
     format_source: false
     device_sync: false
 initialization:
-  type: baroclinic
+  type: analytic
+  config:
+    case: baroclinic
 performance_config:
   collect_performance: false
 nx_tile: 12
