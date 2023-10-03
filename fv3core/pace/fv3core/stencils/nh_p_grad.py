@@ -144,7 +144,6 @@ class NonHydrostaticPressureGradient:
         self.nk = grid_indexing.domain[2]
         self._rdx = grid_data.rdx
         self._rdy = grid_data.rdy
-        self._grid_type = grid_type
 
         self._tmp_wk = quantity_factory.zeros(
             [X_DIM, Y_DIM, Z_INTERFACE_DIM],

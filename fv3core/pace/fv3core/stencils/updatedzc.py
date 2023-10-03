@@ -128,7 +128,7 @@ class UpdateGeopotentialHeightOnCGrid:
     ):
         grid_indexing = stencil_factory.grid_indexing
         self._area = area
-        self.grid_type = grid_type
+        self._grid_type = grid_type
         # TODO: this is needed because GridData.dp_ref does not have access
         # to a QuantityFactory, we should add a way to perform operations on
         # Quantity and persist the QuantityFactory choices
@@ -161,7 +161,7 @@ class UpdateGeopotentialHeightOnCGrid:
 
         ax_offsets = grid_indexing.axis_offsets(full_origin, full_domain)
 
-        if self.grid_type < 3:
+        if self._grid_type < 3:
             self._fill_corners_x_stencil = stencil_factory.from_origin_domain(
                 corners.fill_corners_2cells_x_stencil,
                 externals=ax_offsets,
@@ -207,7 +207,7 @@ class UpdateGeopotentialHeightOnCGrid:
         self._double_copy_stencil(gz, self._gz_x, self._gz_y)
 
         # TODO(eddied): We pass the same fields 2x to avoid GTC validation errors
-        if self.grid_type < 3:
+        if self._grid_type < 3:
             self._fill_corners_x_stencil(self._gz_x, self._gz_x)
             self._fill_corners_y_stencil(self._gz_y, self._gz_y)
 
