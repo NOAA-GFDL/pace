@@ -1608,14 +1608,12 @@ class MetricTerms:
         self._ew1, self._ew2 = self._calculate_vectors_west_cartesian()
         self._es1, self._es2 = self._calculate_vectors_south_cartesian()
         
-        # TODO: ollowing lines just fill fields with nan
+        # TODO: following lines just fill fields with nan
         # presumably these aren't needed other than for testing
         # so best to get rid of them to reduce memory pressure?
         self._ee1, self._ee2 = self._calculate_xy_unit_vectors_cartesian()
         self._vlon, self._vlat = self._calculate_unit_vectors_lonlat_cartesian()
         self._l2c_v, self._l2c_u = self._calculate_latlon_momentum_correction_cartesian()
-
-        set_hybrid_pressure_coefficients
 
     def _init_dgrid(self):
         grid_mirror_ew = self.quantity_factory.zeros(
