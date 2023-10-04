@@ -4,7 +4,7 @@ import pytest
 
 import pace.driver
 import pace.driver.diagnostics
-from pace.fv3core.initialization.dycore_state import DycoreState
+from pace.fv3core.dycore_state import DycoreState
 
 
 def test_returns_null_diagnostics_if_no_path_given():

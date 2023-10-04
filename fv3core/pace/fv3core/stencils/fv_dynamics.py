@@ -12,7 +12,7 @@ from pace.dsl.dace.wrapped_halo_exchange import WrappedHaloUpdater
 from pace.dsl.stencil import StencilFactory
 from pace.dsl.typing import Float, FloatField
 from pace.fv3core._config import DynamicalCoreConfig
-from pace.fv3core.initialization.dycore_state import DycoreState
+from pace.fv3core.dycore_state import DycoreState
 from pace.fv3core.stencils import fvtp2d, tracer_2d_1l
 from pace.fv3core.stencils.basic_operations import copy_defn
 from pace.fv3core.stencils.del2cubed import HyperdiffusionDamping
