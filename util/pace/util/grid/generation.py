@@ -228,7 +228,7 @@ class MetricTerms:
     ):
         self._grid_type = grid_type
         self._dx_const = dx_const
-        self._dy_const = dy_const 
+        self._dy_const = dy_const
         self._deglat = deglat
         self._halo = N_HALO_DEFAULT
         self._comm = communicator
@@ -1562,8 +1562,8 @@ class MetricTerms:
 
     def _init_cartesian(self):
 
-        domain_rad = PI/16.0
-        lat_rad = self._deglat*PI/180.0
+        domain_rad = PI / 16.0
+        lat_rad = self._deglat * PI / 180.0
         lon_rad = 0.0
 
         self._dx, self._dy = self._compute_dxdy_cartesian()
@@ -1572,48 +1572,51 @@ class MetricTerms:
         self._area = self._compute_area_cartesian()
         self._area_c = self._compute_area_c_cartesian()
 
-        self._grid_64.data[:,:,:] = self._np.nan
+        self._grid_64.data[:, :, :] = self._np.nan
         slice_x, slice_y = self._tile_partitioner.subtile_slice(
             self._rank, self._grid_64.dims, (self._npx, self._npy)
         )
 
-        isd = slice_x.start - self._halo 
-        ied = slice_x.stop + self._halo 
+        isd = slice_x.start - self._halo
+        ied = slice_x.stop + self._halo
         isg = max(isd, 0)
         ieg = min(ied, self._npx)
-        isl = isg - isd 
+        isl = isg - isd
         iel = isl + ieg - isg
 
-        jsd = slice_y.start - self._halo 
-        jed = slice_y.stop + self._halo 
+        jsd = slice_y.start - self._halo
+        jed = slice_y.stop + self._halo
         jsg = max(jsd, 0)
         jeg = min(jed, self._npy)
         jsl = jsg - jsd
         jel = jsl + jeg - jsg
 
-        lon_frac = np.array(range(isg, ieg))/(self._npx - 1) - 0.5
-        lon_frac = lon_frac[:,np.newaxis]
-        lat_frac = np.array(range(jsg, jeg))/(self._npy - 1) - 0.5
-        lat_frac = lat_frac[np.newaxis,:]
+        lon_frac = np.array(range(isg, ieg)) / (self._npx - 1) - 0.5
+        lon_frac = lon_frac[:, np.newaxis]
+        lat_frac = np.array(range(jsg, jeg)) / (self._npy - 1) - 0.5
+        lat_frac = lat_frac[np.newaxis, :]
 
-        self._grid_64.data[isl:iel,jsl:jel,0] = lon_rad + lon_frac*domain_rad 
-        self._grid_64.data[isl:iel,jsl:jel,1] = lat_rad + lat_frac*domain_rad 
+        self._grid_64.data[isl:iel, jsl:jel, 0] = lon_rad + lon_frac * domain_rad
+        self._grid_64.data[isl:iel, jsl:jel, 1] = lat_rad + lat_frac * domain_rad
 
-        self._agrid_64.data[:,:,0] = lon_rad 
-        self._agrid_64.data[:,:,1] = lat_rad
+        self._agrid_64.data[:, :, 0] = lon_rad
+        self._agrid_64.data[:, :, 1] = lat_rad
 
         self._init_cell_trigonometry_cartesian()
 
         self._ec1, self._ec2 = self._calculate_center_vectors_cartesian()
         self._ew1, self._ew2 = self._calculate_vectors_west_cartesian()
         self._es1, self._es2 = self._calculate_vectors_south_cartesian()
-        
+
         # TODO: following lines just fill fields with nan
         # presumably these aren't needed other than for testing
         # so best to get rid of them to reduce memory pressure?
         self._ee1, self._ee2 = self._calculate_xy_unit_vectors_cartesian()
         self._vlon, self._vlat = self._calculate_unit_vectors_lonlat_cartesian()
-        self._l2c_v, self._l2c_u = self._calculate_latlon_momentum_correction_cartesian()
+        (
+            self._l2c_v,
+            self._l2c_u,
+        ) = self._calculate_latlon_momentum_correction_cartesian()
 
     def _init_dgrid(self):
         grid_mirror_ew = self.quantity_factory.zeros(
@@ -1915,7 +1918,7 @@ class MetricTerms:
             dtype=np.float64,
             allow_mismatch_float_precision=True,
         )
-        dx_agrid_64.data[:,:] = self._dx_const
+        dx_agrid_64.data[:, :] = self._dx_const
 
         dy_agrid_64 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_DIM],
@@ -1923,7 +1926,7 @@ class MetricTerms:
             dtype=np.float64,
             allow_mismatch_float_precision=True,
         )
-        dy_agrid_64.data[:,:] = self._dy_const
+        dy_agrid_64.data[:, :] = self._dy_const
 
         dx_agrid = quantity_cast_to_model_float(self.quantity_factory, dx_agrid_64)
         dy_agrid = quantity_cast_to_model_float(self.quantity_factory, dy_agrid_64)
@@ -2012,7 +2015,7 @@ class MetricTerms:
             dtype=np.float64,
             allow_mismatch_float_precision=True,
         )
-        dx_center_64.data[:,:] = self._dx_const
+        dx_center_64.data[:, :] = self._dx_const
 
         dy_center_64 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_INTERFACE_DIM],
@@ -2020,7 +2023,7 @@ class MetricTerms:
             dtype=np.float64,
             allow_mismatch_float_precision=True,
         )
-        dy_center_64.data[:,:] = self._dy_const
+        dy_center_64.data[:, :] = self._dy_const
 
         dx_center = quantity_cast_to_model_float(self.quantity_factory, dx_center_64)
         self._dxc_64 = dx_center_64
@@ -2055,7 +2058,7 @@ class MetricTerms:
             dtype=np.float64,
             allow_mismatch_float_precision=True,
         )
-        area_64.data[:, :] = self._dx_const*self._dy_const
+        area_64.data[:, :] = self._dx_const * self._dy_const
         return quantity_cast_to_model_float(self.quantity_factory, area_64)
 
     def _compute_area_c(self):
@@ -2109,7 +2112,7 @@ class MetricTerms:
             dtype=np.float64,
             allow_mismatch_float_precision=True,
         )
-        area_cgrid_64.data[:,:] = self._dx_const*self._dy_const
+        area_cgrid_64.data[:, :] = self._dx_const * self._dy_const
         return quantity_cast_to_model_float(self.quantity_factory, area_cgrid_64)
 
     def _set_hybrid_pressure_coefficients(self):
@@ -2671,39 +2674,45 @@ class MetricTerms:
             allow_mismatch_float_precision=True,
         )
 
-        cosa_u_64.data[:,:] = 0.0
-        cosa_v_64.data[:,:] = 0.0
-        cosa_s_64.data[:,:] = 0.0
-        sina_u_64.data[:,:] = 1.0
-        sina_v_64.data[:,:] = 1.0
-        rsin_u_64.data[:,:] = 1.0
-        rsin_v_64.data[:,:] = 1.0
-        rsina_64.data[:,:] = 1.0
-        rsin2_64.data[:,:] = 1.0
-        cosa_64.data[:,:] = 0.0
-        sina_64.data[:,:] = 1.0
+        cosa_u_64.data[:, :] = 0.0
+        cosa_v_64.data[:, :] = 0.0
+        cosa_s_64.data[:, :] = 0.0
+        sina_u_64.data[:, :] = 1.0
+        sina_v_64.data[:, :] = 1.0
+        rsin_u_64.data[:, :] = 1.0
+        rsin_v_64.data[:, :] = 1.0
+        rsina_64.data[:, :] = 1.0
+        rsin2_64.data[:, :] = 1.0
+        cosa_64.data[:, :] = 0.0
+        sina_64.data[:, :] = 1.0
 
-        for i in range(1,10):
+        for i in range(1, 10):
             sin_sg = self.quantity_factory.zeros(
                 [util.X_DIM, util.Y_DIM],
                 "",
                 dtype=np.float64,
-                allow_mismatch_float_precision=True
+                allow_mismatch_float_precision=True,
             )
-            sin_sg.data[:,:] = 1.0
-            setattr(self, f"_sin_sg{i}", 
-                quantity_cast_to_model_float(self.quantity_factory, sin_sg))
+            sin_sg.data[:, :] = 1.0
+            setattr(
+                self,
+                f"_sin_sg{i}",
+                quantity_cast_to_model_float(self.quantity_factory, sin_sg),
+            )
             if i == 5:
                 self._sin_sg5_64 = sin_sg
             cos_sg = self.quantity_factory.zeros(
                 [util.X_DIM, util.Y_DIM],
                 "",
                 dtype=np.float64,
-                allow_mismatch_float_precision=True
+                allow_mismatch_float_precision=True,
             )
-            cos_sg.data[:,:] = 0.0
-            setattr(self, f"_cos_sg{i}", 
-                quantity_cast_to_model_float(self.quantity_factory, cos_sg))
+            cos_sg.data[:, :] = 0.0
+            setattr(
+                self,
+                f"_cos_sg{i}",
+                quantity_cast_to_model_float(self.quantity_factory, cos_sg),
+            )
 
         self._cosa_u = quantity_cast_to_model_float(self.quantity_factory, cosa_u_64)
         self._cosa_v = quantity_cast_to_model_float(self.quantity_factory, cosa_v_64)
@@ -2888,9 +2897,9 @@ class MetricTerms:
             dtype=Float,
             allow_mismatch_float_precision=True,
         )
-        l2c_v_64.data[:] = self._np.nan 
+        l2c_v_64.data[:] = self._np.nan
         l2c_u_64.data[:] = self._np.nan
- 
+
         l2c_v = quantity_cast_to_model_float(self.quantity_factory, l2c_v_64)
         l2c_u = quantity_cast_to_model_float(self.quantity_factory, l2c_u_64)
 
@@ -3121,8 +3130,8 @@ class MetricTerms:
             dtype=np.float64,
             allow_mismatch_float_precision=True,
         )
-        vlon_64.data[:] = self._np.nan 
-        vlat_64.data[:] = self._np.nan 
+        vlon_64.data[:] = self._np.nan
+        vlat_64.data[:] = self._np.nan
 
         vlon = quantity_cast_to_model_float(self.quantity_factory, vlon_64)
         self._vlon_64 = vlon_64

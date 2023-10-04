@@ -513,7 +513,7 @@ class TranslateInitGrid(ParallelTranslateGrid):
             grid_type=namelist.grid_type,
             dx_const=namelist.dx_const,
             dy_const=namelist.dy_const,
-            deglat=namelist.deglat
+            deglat=namelist.deglat,
         )
         state = {}
         for metric_term, metadata in self.outputs.items():
@@ -2321,7 +2321,7 @@ class TranslateInitGridUtils(ParallelTranslateGrid):
             grid_type=namelist.grid_type,
             dx_const=namelist.dx_const,
             dy_const=namelist.dy_const,
-            deglat=namelist.deglat
+            deglat=namelist.deglat,
         )
         input_state = self.state_from_inputs(inputs)
         grid_generator._grid = input_state["grid"]

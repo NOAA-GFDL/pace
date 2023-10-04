@@ -272,7 +272,9 @@ def generate_parallel_stencil_tests(metafunc, *, backend: str):
 
 def get_communicator(comm, layout, dperiodic):
     if (MPI.COMM_WORLD.Get_size() > 1) and (not dperiodic):
-        partitioner = pace.util.CubedSpherePartitioner(pace.util.TilePartitioner(layout))
+        partitioner = pace.util.CubedSpherePartitioner(
+            pace.util.TilePartitioner(layout)
+        )
         communicator = pace.util.CubedSphereCommunicator(comm, partitioner)
     else:
         partitioner = pace.util.TilePartitioner(layout)
@@ -293,6 +295,7 @@ def failure_stride(pytestconfig):
 @pytest.fixture()
 def compute_grid(pytestconfig):
     return pytestconfig.getoption("compute_grid")
+
 
 @pytest.fixture()
 def dperiodic(pytestconfig):
