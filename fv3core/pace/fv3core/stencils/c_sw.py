@@ -727,6 +727,8 @@ class CGridShallowWaterDynamics:
         )
 
         # TODO(eddied): We pass the same fields 2x to avoid GTC validation errors
+        # Aliasing in code is a parallelization risk and
+        # limits our capacity to re-use buffers
         if self._grid_type < 3:
             self._fill_corners_x_delp_pt_w_stencil(delp, pt, w, delp, pt, w)
         # TODO: why is there only a "x" version of this? Is the "y" verison folded
