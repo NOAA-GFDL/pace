@@ -509,7 +509,8 @@ def a2b_interpolation(
 @gtscript.function
 def doubly_periodic_a2b_ord4(qin):
     """
-    Grid conversion is much simpler on a doubly-periodic, orthogonal grid
+    Grid conversion is much simpler on a doubly-periodic, orthogonal grid so we
+    can bypass most of the above code
     """
     qx = b1 * (qin[-1, 0, 0] + qin) + b2 * (qin[-2, 0, 0] + qin[1, 0, 0])
     qy = b1 * (qin[0, -1, 0] + qin) + b2 * (qin[0, -2, 0] + qin[0, 1, 0])
