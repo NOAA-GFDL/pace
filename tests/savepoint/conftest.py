@@ -32,6 +32,12 @@ def calibrate_thresholds(pytestconfig):
     return calibrate_thresholds
 
 
+@pytest.fixture()
+def dperiodic(pytestconfig):
+    dperiodic = pytestconfig.getoption("dperiodic")
+    return dperiodic
+
+
 def pytest_addoption(parser):
     parser.addoption(
         "--backend", action="store", default="numpy", help="gt4py backend name"
@@ -50,4 +56,10 @@ def pytest_addoption(parser):
         action="store_true",
         default=False,
         help="re-calibrate error thresholds for comparison to reference",
+    )
+    parser.addoption(
+        "--dperiodic",
+        action="store_true",
+        default=False,
+        help="configure tests for doubly-periodic domain",
     )

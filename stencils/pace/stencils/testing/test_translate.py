@@ -325,6 +325,12 @@ def get_communicator(comm, layout):
     return communicator
 
 
+def get_tile_communicator(comm, layout):
+    partitioner = pace.util.TilePartitioner(layout)
+    communicator = pace.util.TileCommunicator(comm, partitioner)
+    return communicator
+
+
 @pytest.mark.parallel
 @pytest.mark.skipif(
     MPI is None or MPI.COMM_WORLD.Get_size() == 1,
@@ -341,11 +347,18 @@ def test_parallel_savepoint(
     compute_grid,
     xy_indices=True,
 ):
-    layout = (
-        int((MPI.COMM_WORLD.Get_size() // 6) ** 0.5),
-        int((MPI.COMM_WORLD.Get_size() // 6) ** 0.5),
-    )
-    communicator = get_communicator(MPI.COMM_WORLD, layout)
+    if MPI.COMM_WORLD.Get_size() % 6 != 0:
+        layout = (
+            int(MPI.COMM_WORLD.Get_size() ** 0.5),
+            int(MPI.COMM_WORLD.Get_size() ** 0.5),
+        )
+        communicator = get_tile_communicator(MPI.COMM_WORLD, layout)
+    else:
+        layout = (
+            int((MPI.COMM_WORLD.Get_size() // 6) ** 0.5),
+            int((MPI.COMM_WORLD.Get_size() // 6) ** 0.5),
+        )
+        communicator = get_communicator(MPI.COMM_WORLD, layout)
     if case.testobj is None:
         pytest.xfail(
             f"no translate object available for savepoint {case.savepoint_name}"

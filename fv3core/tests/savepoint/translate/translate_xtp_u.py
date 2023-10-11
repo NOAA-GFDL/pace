@@ -34,7 +34,7 @@ class XTP_U:
             raise NotImplementedError(
                 "Currently xtp_v is only supported for hord_mt == 5,6,7,8"
             )
-        assert grid_type < 3
+        assert (grid_type < 3) or (grid_type == 4)
         grid_indexing = stencil_factory.grid_indexing
 
         origin = grid_indexing.origin_compute()
@@ -49,6 +49,7 @@ class XTP_U:
                 "iord": iord,
                 "mord": iord,
                 "xt_minmax": False,
+                "grid_type": grid_type,
                 **ax_offsets,
             },
             origin=origin,

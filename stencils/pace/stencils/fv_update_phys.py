@@ -87,12 +87,13 @@ class ApplyPhysicsToDycore:
         quantity_factory: pace.util.QuantityFactory,
         grid_data: GridData,
         namelist,
-        comm: pace.util.CubedSphereCommunicator,
+        comm: pace.util.Communicator,
         grid_info: DriverGridData,
         state: fv3core.DycoreState,
         u_dt: pace.util.Quantity,
         v_dt: pace.util.Quantity,
     ):
+        self._grid_type = grid_info.grid_type
         orchestrate(
             obj=self,
             config=stencil_factory.config.dace_config,
@@ -125,6 +126,7 @@ class ApplyPhysicsToDycore:
             grid_data=grid_data,
             order=namelist.c2l_ord,
             comm=comm,
+            grid_type=self._grid_type,
         )
         origin = grid_indexing.origin_compute()
         shape = grid_indexing.max_shape

@@ -12,7 +12,6 @@ import pace.util
 from pace.dsl.dace.dace_config import DaceConfig
 from pace.stencils.testing import ParallelTranslate, TranslateGrid
 from pace.stencils.testing.savepoint import SavepointCase, dataset_to_dict
-from pace.util.communicator import CubedSphereCommunicator
 from pace.util.mpi import MPI
 
 
@@ -103,8 +102,12 @@ def get_parallel_savepoint_names(metafunc, data_path):
 
 def get_ranks(metafunc, layout):
     only_rank = metafunc.config.getoption("which_rank")
+    dperiodic = metafunc.config.getoption("dperiodic")
     if only_rank is None:
-        total_ranks = 6 * layout[0] * layout[1]
+        if dperiodic:
+            total_ranks = layout[0] * layout[1]
+        else:
+            total_ranks = 6 * layout[0] * layout[1]
         return range(total_ranks)
     else:
         return [int(only_rank)]
@@ -114,7 +117,7 @@ def get_namelist(namelist_filename):
     return pace.util.Namelist.from_f90nml(f90nml.read(namelist_filename))
 
 
-def get_config(backend: str, communicator: Optional[CubedSphereCommunicator]):
+def get_config(backend: str, communicator: Optional[pace.util.Communicator]):
     stencil_config = pace.dsl.stencil.StencilConfig(
         compilation_config=pace.dsl.stencil.CompilationConfig(
             backend=backend, rebuild=False, validate_args=True
@@ -133,6 +136,7 @@ def sequential_savepoint_cases(metafunc, data_path, namelist_filename, *, backen
     stencil_config = get_config(backend, None)
     ranks = get_ranks(metafunc, namelist.layout)
     compute_grid = metafunc.config.getoption("compute_grid")
+    dperiodic = metafunc.config.getoption("dperiodic")
     return _savepoint_cases(
         savepoint_names,
         ranks,
@@ -141,6 +145,7 @@ def sequential_savepoint_cases(metafunc, data_path, namelist_filename, *, backen
         backend,
         data_path,
         compute_grid,
+        dperiodic,
     )
 
 
@@ -152,6 +157,7 @@ def _savepoint_cases(
     backend,
     data_path,
     compute_grid: bool,
+    dperiodic: bool,
 ):
     return_list = []
     ds_grid: xr.Dataset = xr.open_dataset(os.path.join(data_path, "Grid-Info.nc")).isel(
@@ -165,7 +171,7 @@ def _savepoint_cases(
             backend=backend,
         ).python_grid()
         if compute_grid:
-            compute_grid_data(grid, namelist, backend, namelist.layout)
+            compute_grid_data(grid, namelist, backend, namelist.layout, dperiodic)
         stencil_factory = pace.dsl.stencil.StencilFactory(
             config=stencil_config,
             grid_indexing=grid.grid_indexing,
@@ -191,12 +197,12 @@ def _savepoint_cases(
     return return_list
 
 
-def compute_grid_data(grid, namelist, backend, layout):
+def compute_grid_data(grid, namelist, backend, layout, dperiodic):
     grid.make_grid_data(
         npx=namelist.npx,
         npy=namelist.npy,
         npz=namelist.npz,
-        communicator=get_communicator(MPI.COMM_WORLD, layout),
+        communicator=get_communicator(MPI.COMM_WORLD, layout, dperiodic),
         backend=backend,
     )
 
@@ -205,7 +211,8 @@ def parallel_savepoint_cases(
     metafunc, data_path, namelist_filename, mpi_rank, *, backend: str, comm
 ):
     namelist = get_namelist(namelist_filename)
-    communicator = get_communicator(comm, namelist.layout)
+    dperiodic = metafunc.config.getoption("dperiodic")
+    communicator = get_communicator(comm, namelist.layout, dperiodic)
     stencil_config = get_config(backend, communicator)
     savepoint_names = get_parallel_savepoint_names(metafunc, data_path)
     compute_grid = metafunc.config.getoption("compute_grid")
@@ -217,6 +224,7 @@ def parallel_savepoint_cases(
         backend,
         data_path,
         compute_grid,
+        dperiodic,
     )
 
 
@@ -261,9 +269,15 @@ def generate_parallel_stencil_tests(metafunc, *, backend: str):
     )
 
 
-def get_communicator(comm, layout):
-    partitioner = pace.util.CubedSpherePartitioner(pace.util.TilePartitioner(layout))
-    communicator = pace.util.CubedSphereCommunicator(comm, partitioner)
+def get_communicator(comm, layout, dperiodic):
+    if (MPI.COMM_WORLD.Get_size() > 1) and (not dperiodic):
+        partitioner = pace.util.CubedSpherePartitioner(
+            pace.util.TilePartitioner(layout)
+        )
+        communicator = pace.util.CubedSphereCommunicator(comm, partitioner)
+    else:
+        partitioner = pace.util.TilePartitioner(layout)
+        communicator = pace.util.TileCommunicator(comm, partitioner)
     return communicator
 
 
@@ -280,3 +294,8 @@ def failure_stride(pytestconfig):
 @pytest.fixture()
 def compute_grid(pytestconfig):
     return pytestconfig.getoption("compute_grid")
+
+
+@pytest.fixture()
+def dperiodic(pytestconfig):
+    return pytestconfig.getoption("dperiodic")

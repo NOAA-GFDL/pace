@@ -506,6 +506,26 @@ def a2b_interpolation(
         qout = 0.5 * (qxx + qyy)
 
 
+@gtscript.function
+def doubly_periodic_a2b_ord4(qin):
+    """
+    Grid conversion is much simpler on a doubly-periodic, orthogonal grid so we
+    can bypass most of the above code
+    """
+    qx = b1 * (qin[-1, 0, 0] + qin) + b2 * (qin[-2, 0, 0] + qin[1, 0, 0])
+    qy = b1 * (qin[0, -1, 0] + qin) + b2 * (qin[0, -2, 0] + qin[0, 1, 0])
+    qout = 0.5 * (
+        a1 * (qx[0, -1, 0] + qx + qy[-1, 0, 0] + qy)
+        + a2 * (qx[0, -2, 0] + qx[0, 1, 0] + qy[-2, 0, 0] + qy[1, 0, 0])
+    )
+    return qout
+
+
+def doubly_periodic_a2b_ord4_stencil(qout: FloatField, qin: FloatField):
+    with computation(PARALLEL), interval(...):
+        qout = doubly_periodic_a2b_ord4(qin)
+
+
 class AGrid2BGridFourthOrder:
     """
     Fortran name is a2b_ord4, test module is A2B_Ord4
@@ -516,7 +536,7 @@ class AGrid2BGridFourthOrder:
         stencil_factory: StencilFactory,
         quantity_factory: pace.util.QuantityFactory,
         grid_data: GridData,
-        grid_type,
+        grid_type: int,
         z_dim=Z_DIM,
         replace: bool = False,
     ):
@@ -528,131 +548,143 @@ class AGrid2BGridFourthOrder:
             replace: boolean, update qin to the B grid as well
         """
         orchestrate(obj=self, config=stencil_factory.config.dace_config)
-        assert grid_type < 3
+        assert grid_type in [0, 4]
         self._idx: GridIndexing = stencil_factory.grid_indexing
         self._stencil_config = stencil_factory.config
-        self._dxa = grid_data.dxa
-        self._dya = grid_data.dya
-
-        self._lon_agrid = grid_data.lon_agrid
-        self._lat_agrid = grid_data.lat_agrid
-        self._lon = grid_data.lon
-        self._lat = grid_data.lat
-        # TODO: maybe compute locally edge_* variables
-        # This is the only place the model uses them
-        self._edge_w = grid_data.edge_w
-        self._edge_e = grid_data.edge_e
-        self._edge_s = grid_data.edge_s
-        self._edge_n = grid_data.edge_n
-
         self.replace = replace
+        self.grid_type = grid_type
 
-        self._tmp_qx = quantity_factory.zeros(
-            dims=[X_INTERFACE_DIM, Y_DIM, z_dim],
-            units="unknown",
-            dtype=Float,
-        )
-        self._tmp_qy = quantity_factory.zeros(
-            dims=[X_DIM, Y_INTERFACE_DIM, z_dim],
-            units="unknown",
-            dtype=Float,
-        )
-        # TODO: the dimensions of tmp_qout_edges may not be correct, verify
-        # with Lucas and either update the code or remove this comment
-        self._tmp_qout_edges = quantity_factory.zeros(
-            dims=[X_DIM, Y_DIM, z_dim],
-            units="unknown",
-            dtype=Float,
-        )
+        if grid_type < 3:
+            self._dxa = grid_data.dxa
+            self._dya = grid_data.dya
 
-        _, (z_domain,) = self._idx.get_origin_domain([z_dim])
-        corner_domain = (1, 1, z_domain)
+            self._lon_agrid = grid_data.lon_agrid
+            self._lat_agrid = grid_data.lat_agrid
+            self._lon = grid_data.lon
+            self._lat = grid_data.lat
+            # TODO: maybe compute locally edge_* variables
+            # This is the only place the model uses them
+            self._edge_w = grid_data.edge_w
+            self._edge_e = grid_data.edge_e
+            self._edge_s = grid_data.edge_s
+            self._edge_n = grid_data.edge_n
 
-        self._sw_corner_stencil = stencil_factory.from_origin_domain(
-            _sw_corner,
-            origin=self._idx.origin_compute(),
-            domain=corner_domain,
-        )
-        self._nw_corner_stencil = stencil_factory.from_origin_domain(
-            _nw_corner,
-            origin=(self._idx.iec + 1, self._idx.jsc, self._idx.origin[2]),
-            domain=corner_domain,
-        )
-        self._ne_corner_stencil = stencil_factory.from_origin_domain(
-            _ne_corner,
-            origin=(self._idx.iec + 1, self._idx.jec + 1, self._idx.origin[2]),
-            domain=corner_domain,
-        )
-        self._se_corner_stencil = stencil_factory.from_origin_domain(
-            _se_corner,
-            origin=(self._idx.isc, self._idx.jec + 1, self._idx.origin[2]),
-            domain=corner_domain,
-        )
-        js2 = self._idx.jsc + 1 if self._idx.south_edge else self._idx.jsc
-        je1 = self._idx.jec if self._idx.north_edge else self._idx.jec + 1
-        dj2 = je1 - js2 + 1
+            self._tmp_qx = quantity_factory.zeros(
+                dims=[X_INTERFACE_DIM, Y_DIM, z_dim],
+                units="unknown",
+                dtype=Float,
+            )
+            self._tmp_qy = quantity_factory.zeros(
+                dims=[X_DIM, Y_INTERFACE_DIM, z_dim],
+                units="unknown",
+                dtype=Float,
+            )
+            # TODO: the dimensions of tmp_qout_edges may not be correct, verify
+            # with Lucas and either update the code or remove this comment
+            self._tmp_qout_edges = quantity_factory.zeros(
+                dims=[X_DIM, Y_DIM, z_dim],
+                units="unknown",
+                dtype=Float,
+            )
 
-        # edge_w is singleton in the I-dimension to work around gt4py not yet
-        # supporting J-fields. As a result, the origin has to be zero for
-        # edge_w, anything higher is outside its index range
-        self._qout_x_edge_west = stencil_factory.from_origin_domain(
-            qout_x_edge,
-            origin={
-                "_all_": (self._idx.isc, js2, self._idx.origin[2]),
-                "edge_w": (0, js2),
-            },
-            domain=(1, dj2, z_domain),
-        )
-        self._qout_x_edge_east = stencil_factory.from_origin_domain(
-            qout_x_edge,
-            origin={
-                "_all_": (self._idx.iec + 1, js2, self._idx.origin[2]),
-                "edge_w": (0, js2),
-            },
-            domain=(1, dj2, z_domain),
-        )
+            _, (z_domain,) = self._idx.get_origin_domain([z_dim])
+            corner_domain = (1, 1, z_domain)
 
-        is2 = self._idx.isc + 1 if self._idx.west_edge else self._idx.isc
-        ie1 = self._idx.iec if self._idx.east_edge else self._idx.iec + 1
-        di2 = ie1 - is2 + 1
-        self._qout_y_edge_south = stencil_factory.from_origin_domain(
-            qout_y_edge,
-            origin=(is2, self._idx.jsc, self._idx.origin[2]),
-            domain=(di2, 1, z_domain),
-        )
-        self._qout_y_edge_north = stencil_factory.from_origin_domain(
-            qout_y_edge,
-            origin=(is2, self._idx.jec + 1, self._idx.origin[2]),
-            domain=(di2, 1, z_domain),
-        )
+            self._sw_corner_stencil = stencil_factory.from_origin_domain(
+                _sw_corner,
+                origin=self._idx.origin_compute(),
+                domain=corner_domain,
+            )
+            self._nw_corner_stencil = stencil_factory.from_origin_domain(
+                _nw_corner,
+                origin=(self._idx.iec + 1, self._idx.jsc, self._idx.origin[2]),
+                domain=corner_domain,
+            )
+            self._ne_corner_stencil = stencil_factory.from_origin_domain(
+                _ne_corner,
+                origin=(self._idx.iec + 1, self._idx.jec + 1, self._idx.origin[2]),
+                domain=corner_domain,
+            )
+            self._se_corner_stencil = stencil_factory.from_origin_domain(
+                _se_corner,
+                origin=(self._idx.isc, self._idx.jec + 1, self._idx.origin[2]),
+                domain=corner_domain,
+            )
+            js2 = self._idx.jsc + 1 if self._idx.south_edge else self._idx.jsc
+            je1 = self._idx.jec if self._idx.north_edge else self._idx.jec + 1
+            dj2 = je1 - js2 + 1
 
-        self._ppm_volume_mean_x_stencil = stencil_factory.from_dims_halo(
-            ppm_volume_mean_x,
-            compute_dims=[X_INTERFACE_DIM, Y_DIM, z_dim],
-            compute_halos=(0, 2),
-        )
+            # edge_w is singleton in the I-dimension to work around gt4py not yet
+            # supporting J-fields. As a result, the origin has to be zero for
+            # edge_w, anything higher is outside its index range
+            self._qout_x_edge_west = stencil_factory.from_origin_domain(
+                qout_x_edge,
+                origin={
+                    "_all_": (self._idx.isc, js2, self._idx.origin[2]),
+                    "edge_w": (0, js2),
+                },
+                domain=(1, dj2, z_domain),
+            )
+            self._qout_x_edge_east = stencil_factory.from_origin_domain(
+                qout_x_edge,
+                origin={
+                    "_all_": (self._idx.iec + 1, js2, self._idx.origin[2]),
+                    "edge_w": (0, js2),
+                },
+                domain=(1, dj2, z_domain),
+            )
 
-        self._ppm_volume_mean_y_stencil = stencil_factory.from_dims_halo(
-            ppm_volume_mean_y,
-            compute_dims=[X_DIM, Y_INTERFACE_DIM, z_dim],
-            compute_halos=(2, 0),
-        )
+            is2 = self._idx.isc + 1 if self._idx.west_edge else self._idx.isc
+            ie1 = self._idx.iec if self._idx.east_edge else self._idx.iec + 1
+            di2 = ie1 - is2 + 1
+            self._qout_y_edge_south = stencil_factory.from_origin_domain(
+                qout_y_edge,
+                origin=(is2, self._idx.jsc, self._idx.origin[2]),
+                domain=(di2, 1, z_domain),
+            )
+            self._qout_y_edge_north = stencil_factory.from_origin_domain(
+                qout_y_edge,
+                origin=(is2, self._idx.jec + 1, self._idx.origin[2]),
+                domain=(di2, 1, z_domain),
+            )
 
-        origin, domain = self._idx.get_origin_domain(
-            dims=(X_INTERFACE_DIM, Y_INTERFACE_DIM, z_dim),
-        )
-        origin, domain = self._exclude_tile_edges(origin, domain)
+            self._ppm_volume_mean_x_stencil = stencil_factory.from_dims_halo(
+                ppm_volume_mean_x,
+                compute_dims=[X_INTERFACE_DIM, Y_DIM, z_dim],
+                compute_halos=(0, 2),
+            )
 
-        ax_offsets = self._idx.axis_offsets(
-            origin,
-            domain,
-        )
-        self._a2b_interpolation_stencil = stencil_factory.from_origin_domain(
-            a2b_interpolation, externals=ax_offsets, origin=origin, domain=domain
-        )
-        self._copy_stencil = stencil_factory.from_dims_halo(
-            copy_defn, compute_dims=[X_INTERFACE_DIM, Y_INTERFACE_DIM, z_dim]
-        )
+            self._ppm_volume_mean_y_stencil = stencil_factory.from_dims_halo(
+                ppm_volume_mean_y,
+                compute_dims=[X_DIM, Y_INTERFACE_DIM, z_dim],
+                compute_halos=(2, 0),
+            )
+
+            origin, domain = self._idx.get_origin_domain(
+                dims=(X_INTERFACE_DIM, Y_INTERFACE_DIM, z_dim),
+            )
+            origin, domain = self._exclude_tile_edges(origin, domain)
+
+            ax_offsets = self._idx.axis_offsets(
+                origin,
+                domain,
+            )
+            self._a2b_interpolation_stencil = stencil_factory.from_origin_domain(
+                a2b_interpolation, externals=ax_offsets, origin=origin, domain=domain
+            )
+            self._copy_stencil = stencil_factory.from_dims_halo(
+                copy_defn, compute_dims=[X_INTERFACE_DIM, Y_INTERFACE_DIM, z_dim]
+            )
+
+        else:  # grid type >= 3:
+            self._doubly_periodic_a2b_ord4 = stencil_factory.from_dims_halo(
+                doubly_periodic_a2b_ord4_stencil,
+                compute_dims=[X_INTERFACE_DIM, Y_INTERFACE_DIM, z_dim],
+            )
+            if self.replace:
+                self._copy_stencil = stencil_factory.from_dims_halo(
+                    copy_defn, compute_dims=[X_INTERFACE_DIM, Y_INTERFACE_DIM, z_dim]
+                )
 
     def _exclude_tile_edges(self, origin, domain, dims=("x", "y")):
         """
@@ -687,81 +719,87 @@ class AGrid2BGridFourthOrder:
             qout (out): Output on B-grid
         """
 
-        self._sw_corner_stencil(
-            qin,
-            qout,
-            self._tmp_qout_edges,
-            self._lon_agrid,
-            self._lat_agrid,
-            self._lon,
-            self._lat,
-        )
+        if self.grid_type < 3:
 
-        self._nw_corner_stencil(
-            qin,
-            qout,
-            self._tmp_qout_edges,
-            self._lon_agrid,
-            self._lat_agrid,
-            self._lon,
-            self._lat,
-        )
-        self._ne_corner_stencil(
-            qin,
-            qout,
-            self._tmp_qout_edges,
-            self._lon_agrid,
-            self._lat_agrid,
-            self._lon,
-            self._lat,
-        )
-        self._se_corner_stencil(
-            qin,
-            qout,
-            self._tmp_qout_edges,
-            self._lon_agrid,
-            self._lat_agrid,
-            self._lon,
-            self._lat,
-        )
-
-        if self._idx.west_edge:
-            self._qout_x_edge_west(
-                qin, self._dxa, self._edge_w, qout, self._tmp_qout_edges
-            )
-        if self._idx.east_edge:
-            self._qout_x_edge_east(
-                qin, self._dxa, self._edge_e, qout, self._tmp_qout_edges
-            )
-
-        if self._idx.south_edge:
-            self._qout_y_edge_south(
-                qin, self._dya, self._edge_s, qout, self._tmp_qout_edges
-            )
-        if self._idx.north_edge:
-            self._qout_y_edge_north(
-                qin, self._dya, self._edge_n, qout, self._tmp_qout_edges
-            )
-
-        self._ppm_volume_mean_x_stencil(
-            qin,
-            self._tmp_qx,
-            self._dxa,
-        )
-        self._ppm_volume_mean_y_stencil(
-            qin,
-            self._tmp_qy,
-            self._dya,
-        )
-
-        self._a2b_interpolation_stencil(
-            self._tmp_qout_edges,
-            qout,
-            self._tmp_qx,
-            self._tmp_qy,
-        )
-        if self.replace:
-            self._copy_stencil(
-                qout,
+            self._sw_corner_stencil(
                 qin,
+                qout,
+                self._tmp_qout_edges,
+                self._lon_agrid,
+                self._lat_agrid,
+                self._lon,
+                self._lat,
             )
+
+            self._nw_corner_stencil(
+                qin,
+                qout,
+                self._tmp_qout_edges,
+                self._lon_agrid,
+                self._lat_agrid,
+                self._lon,
+                self._lat,
+            )
+            self._ne_corner_stencil(
+                qin,
+                qout,
+                self._tmp_qout_edges,
+                self._lon_agrid,
+                self._lat_agrid,
+                self._lon,
+                self._lat,
+            )
+            self._se_corner_stencil(
+                qin,
+                qout,
+                self._tmp_qout_edges,
+                self._lon_agrid,
+                self._lat_agrid,
+                self._lon,
+                self._lat,
+            )
+
+            if self._idx.west_edge:
+                self._qout_x_edge_west(
+                    qin, self._dxa, self._edge_w, qout, self._tmp_qout_edges
+                )
+            if self._idx.east_edge:
+                self._qout_x_edge_east(
+                    qin, self._dxa, self._edge_e, qout, self._tmp_qout_edges
+                )
+
+            if self._idx.south_edge:
+                self._qout_y_edge_south(
+                    qin, self._dya, self._edge_s, qout, self._tmp_qout_edges
+                )
+            if self._idx.north_edge:
+                self._qout_y_edge_north(
+                    qin, self._dya, self._edge_n, qout, self._tmp_qout_edges
+                )
+
+            self._ppm_volume_mean_x_stencil(
+                qin,
+                self._tmp_qx,
+                self._dxa,
+            )
+            self._ppm_volume_mean_y_stencil(
+                qin,
+                self._tmp_qy,
+                self._dya,
+            )
+
+            self._a2b_interpolation_stencil(
+                self._tmp_qout_edges,
+                qout,
+                self._tmp_qx,
+                self._tmp_qy,
+            )
+            if self.replace:
+                self._copy_stencil(
+                    qout,
+                    qin,
+                )
+        else:  # grid type >= 3:
+            self._doubly_periodic_a2b_ord4(qout, qin)
+            if self.replace:
+                self._copy_stencil(qout, qin)

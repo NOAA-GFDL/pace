@@ -31,6 +31,7 @@ class TranslateCubedToLatLon(ParallelTranslate2Py):
             "v": self.grid.x3d_domain_dict(),
         }
         self.stencil_factory = stencil_factory
+        self.grid_type = namelist.grid_type
 
     def compute_parallel(self, inputs, communicator):
         self._base.make_storage_data_input_vars(inputs)
@@ -53,6 +54,7 @@ class TranslateCubedToLatLon(ParallelTranslate2Py):
             grid_data=self.grid.grid_data,
             order=self.namelist.c2l_ord,
             comm=communicator,
+            grid_type=self.grid_type,
         )
         self._cubed_to_latlon(**inputs)
         return self._base.slice_output(inputs)

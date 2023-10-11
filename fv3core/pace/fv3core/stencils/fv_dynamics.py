@@ -89,7 +89,7 @@ class DynamicalCore:
 
     def __init__(
         self,
-        comm: pace.util.CubedSphereCommunicator,
+        comm: pace.util.Communicator,
         grid_data: GridData,
         stencil_factory: StencilFactory,
         quantity_factory: pace.util.QuantityFactory,
@@ -102,7 +102,7 @@ class DynamicalCore:
     ):
         """
         Args:
-            comm: object for cubed sphere inter-process communication
+            comm: object for cubed sphere or tile inter-process communication
             grid_data: metric terms defining the model grid
             stencil_factory: creates stencils
             damping_coefficients: damping configuration/constants
@@ -275,7 +275,13 @@ class DynamicalCore:
             self.config.nf_omega,
         )
         self._cubed_to_latlon = CubedToLatLon(
-            state, stencil_factory, quantity_factory, grid_data, config.c2l_ord, comm
+            state,
+            stencil_factory,
+            quantity_factory,
+            grid_data,
+            self.config.grid_type,
+            config.c2l_ord,
+            comm,
         )
         self._cappa = self.acoustic_dynamics.cappa
 

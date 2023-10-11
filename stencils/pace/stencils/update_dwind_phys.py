@@ -149,6 +149,19 @@ def update_vwind_stencil(
         v = v + dt5 * (ve_1 * ew2_1 + ve_2 * ew2_2 + ve_3 * ew2_3)
 
 
+def doubly_periodic_wind_update(
+    u: FloatField,
+    v: FloatField,
+    u_dt: FloatField,
+    v_dt: FloatField,
+):
+    from __externals__ import dt5
+
+    with computation(PARALLEL), interval(...):
+        u = u + dt5 * (u_dt[0, -1, 0] + u_dt)
+        v = v + dt5 * (v_dt[-1, 0, 0] + v_dt)
+
+
 class AGrid2DGridPhysics:
     """
     Fortran name is update_dwinds_phys
@@ -174,6 +187,7 @@ class AGrid2DGridPhysics:
         self._jm2 = int((npy - 1) / 2) + 2
         self._subtile_index = partitioner.subtile_index(rank)
         layout = self.namelist.layout
+        self._grid_type = grid_info.grid_type
 
         self._subtile_width_x = int((npx - 1) / layout[0])
         self._subtile_width_y = int((npy - 1) / layout[1])
@@ -190,233 +204,262 @@ class AGrid2DGridPhysics:
         def make_quantity():
             return quantity_factory.zeros(dims=[X_DIM, Y_DIM, Z_DIM], units="unknown")
 
-        self._ue_1 = make_quantity()
-        self._ue_2 = make_quantity()
-        self._ue_3 = make_quantity()
-        self._ut_1 = make_quantity()
-        self._ut_2 = make_quantity()
-        self._ut_3 = make_quantity()
-        self._ve_1 = make_quantity()
-        self._ve_2 = make_quantity()
-        self._ve_3 = make_quantity()
-        self._vt_1 = make_quantity()
-        self._vt_2 = make_quantity()
-        self._vt_3 = make_quantity()
+        if self._grid_type <= 3:
+            self._ue_1 = make_quantity()
+            self._ue_2 = make_quantity()
+            self._ue_3 = make_quantity()
+            self._ut_1 = make_quantity()
+            self._ut_2 = make_quantity()
+            self._ut_3 = make_quantity()
+            self._ve_1 = make_quantity()
+            self._ve_2 = make_quantity()
+            self._ve_3 = make_quantity()
+            self._vt_1 = make_quantity()
+            self._vt_2 = make_quantity()
+            self._vt_3 = make_quantity()
 
-        self._update_dwind_prep_stencil = stencil_factory.from_origin_domain(
-            update_dwind_prep_stencil,
-            origin=(grid_indexing.n_halo - 1, grid_indexing.n_halo - 1, 0),
-            domain=(nic + 2, njc + 2, npz),
-        )
-
-        self._set_winds_to_zero_stencil = stencil_factory.from_origin_domain(
-            set_winds_zero,
-            origin=(grid_indexing.n_halo - 1, grid_indexing.n_halo - 1, 0),
-            domain=(nic + 2, njc + 2, npz),
-        )
-
-        self.global_is, self.global_js = self.local_to_global_indices(
-            grid_indexing.isc, grid_indexing.jsc
-        )
-        self.global_ie, self.global_je = self.local_to_global_indices(
-            grid_indexing.iec, grid_indexing.jec
-        )
-
-        if self.west_edge:
-            je_lower = self.global_to_local_y(min(self._jm2, self.global_je))
-            origin_lower = (grid_indexing.n_halo, grid_indexing.n_halo, 0)
-            self._domain_lower_west = (
-                1,
-                je_lower - grid_indexing.jsc + 1,
-                npz,
+            self._update_dwind_prep_stencil = stencil_factory.from_origin_domain(
+                update_dwind_prep_stencil,
+                origin=(grid_indexing.n_halo - 1, grid_indexing.n_halo - 1, 0),
+                domain=(nic + 2, njc + 2, npz),
             )
-            if self.global_js <= self._jm2:
-                if self._domain_lower_west[1] > 0:
-                    self._update_dwind_y_edge_south_stencil1 = (
-                        stencil_factory.from_origin_domain(
-                            update_dwind_y_edge_south_stencil,
-                            origin=origin_lower,
-                            domain=self._domain_lower_west,
-                        )
-                    )
-            if self.global_je > self._jm2:
-                js_upper = self.global_to_local_y(max(self._jm2 + 1, self.global_js))
-                origin_upper = (grid_indexing.n_halo, js_upper, 0)
-                self._domain_upper_west = (
+
+            self._set_winds_to_zero_stencil = stencil_factory.from_origin_domain(
+                set_winds_zero,
+                origin=(grid_indexing.n_halo - 1, grid_indexing.n_halo - 1, 0),
+                domain=(nic + 2, njc + 2, npz),
+            )
+
+            self.global_is, self.global_js = self.local_to_global_indices(
+                grid_indexing.isc, grid_indexing.jsc
+            )
+            self.global_ie, self.global_je = self.local_to_global_indices(
+                grid_indexing.iec, grid_indexing.jec
+            )
+
+            if self.west_edge:
+                je_lower = self.global_to_local_y(min(self._jm2, self.global_je))
+                origin_lower = (grid_indexing.n_halo, grid_indexing.n_halo, 0)
+                self._domain_lower_west = (
                     1,
-                    grid_indexing.jec - js_upper + 1,
+                    je_lower - grid_indexing.jsc + 1,
                     npz,
                 )
-                if self._domain_upper_west[1] > 0:
-                    self._update_dwind_y_edge_north_stencil1 = (
-                        stencil_factory.from_origin_domain(
-                            update_dwind_y_edge_north_stencil,
+                if self.global_js <= self._jm2:
+                    if self._domain_lower_west[1] > 0:
+                        self._update_dwind_y_edge_south_stencil1 = (
+                            stencil_factory.from_origin_domain(
+                                update_dwind_y_edge_south_stencil,
+                                origin=origin_lower,
+                                domain=self._domain_lower_west,
+                            )
+                        )
+                if self.global_je > self._jm2:
+                    js_upper = self.global_to_local_y(
+                        max(self._jm2 + 1, self.global_js)
+                    )
+                    origin_upper = (grid_indexing.n_halo, js_upper, 0)
+                    self._domain_upper_west = (
+                        1,
+                        grid_indexing.jec - js_upper + 1,
+                        npz,
+                    )
+                    if self._domain_upper_west[1] > 0:
+                        self._update_dwind_y_edge_north_stencil1 = (
+                            stencil_factory.from_origin_domain(
+                                update_dwind_y_edge_north_stencil,
+                                origin=origin_upper,
+                                domain=self._domain_upper_west,
+                            )
+                        )
+                        self._copy3_stencil1 = stencil_factory.from_origin_domain(
+                            copy3_stencil,
                             origin=origin_upper,
                             domain=self._domain_upper_west,
                         )
-                    )
-                    self._copy3_stencil1 = stencil_factory.from_origin_domain(
+                if self.global_js <= self._jm2 and self._domain_lower_west[1] > 0:
+                    self._copy3_stencil2 = stencil_factory.from_origin_domain(
                         copy3_stencil,
-                        origin=origin_upper,
-                        domain=self._domain_upper_west,
+                        origin=origin_lower,
+                        domain=self._domain_lower_west,
                     )
-            if self.global_js <= self._jm2 and self._domain_lower_west[1] > 0:
-                self._copy3_stencil2 = stencil_factory.from_origin_domain(
-                    copy3_stencil, origin=origin_lower, domain=self._domain_lower_west
-                )
-        if self.east_edge:
-            i_origin = shape[0] - grid_indexing.n_halo - 1
-            je_lower = self.global_to_local_y(min(self._jm2, self.global_je))
-            origin_lower = (i_origin, grid_indexing.n_halo, 0)
-            self._domain_lower_east = (
-                1,
-                je_lower - grid_indexing.jsc + 1,
-                npz,
-            )
-            if self.global_js <= self._jm2:
-                if self._domain_lower_east[1] > 0:
-                    self._update_dwind_y_edge_south_stencil2 = (
-                        stencil_factory.from_origin_domain(
-                            update_dwind_y_edge_south_stencil,
-                            origin=origin_lower,
-                            domain=self._domain_lower_east,
-                        )
-                    )
-
-            if self.global_je > self._jm2:
-                js_upper = self.global_to_local_y(max(self._jm2 + 1, self.global_js))
-                origin_upper = (i_origin, js_upper, 0)
-                self._domain_upper_east = (
+            if self.east_edge:
+                i_origin = shape[0] - grid_indexing.n_halo - 1
+                je_lower = self.global_to_local_y(min(self._jm2, self.global_je))
+                origin_lower = (i_origin, grid_indexing.n_halo, 0)
+                self._domain_lower_east = (
                     1,
-                    grid_indexing.jec - js_upper + 1,
+                    je_lower - grid_indexing.jsc + 1,
                     npz,
                 )
-                if self._domain_upper_east[1] > 0:
-                    self._update_dwind_y_edge_north_stencil2 = (
-                        stencil_factory.from_origin_domain(
-                            update_dwind_y_edge_north_stencil,
+                if self.global_js <= self._jm2:
+                    if self._domain_lower_east[1] > 0:
+                        self._update_dwind_y_edge_south_stencil2 = (
+                            stencil_factory.from_origin_domain(
+                                update_dwind_y_edge_south_stencil,
+                                origin=origin_lower,
+                                domain=self._domain_lower_east,
+                            )
+                        )
+
+                if self.global_je > self._jm2:
+                    js_upper = self.global_to_local_y(
+                        max(self._jm2 + 1, self.global_js)
+                    )
+                    origin_upper = (i_origin, js_upper, 0)
+                    self._domain_upper_east = (
+                        1,
+                        grid_indexing.jec - js_upper + 1,
+                        npz,
+                    )
+                    if self._domain_upper_east[1] > 0:
+                        self._update_dwind_y_edge_north_stencil2 = (
+                            stencil_factory.from_origin_domain(
+                                update_dwind_y_edge_north_stencil,
+                                origin=origin_upper,
+                                domain=self._domain_upper_east,
+                            )
+                        )
+                        self._copy3_stencil3 = stencil_factory.from_origin_domain(
+                            copy3_stencil,
                             origin=origin_upper,
                             domain=self._domain_upper_east,
                         )
-                    )
-                    self._copy3_stencil3 = stencil_factory.from_origin_domain(
+                if self.global_js <= self._jm2 and self._domain_lower_east[1] > 0:
+                    self._copy3_stencil4 = stencil_factory.from_origin_domain(
                         copy3_stencil,
-                        origin=origin_upper,
-                        domain=self._domain_upper_east,
+                        origin=origin_lower,
+                        domain=self._domain_lower_east,
                     )
-            if self.global_js <= self._jm2 and self._domain_lower_east[1] > 0:
-                self._copy3_stencil4 = stencil_factory.from_origin_domain(
-                    copy3_stencil, origin=origin_lower, domain=self._domain_lower_east
-                )
-        if self.south_edge:
-            ie_lower = self.global_to_local_x(min(self._im2, self.global_ie))
-            origin_lower = (grid_indexing.n_halo, grid_indexing.n_halo, 0)
-            self._domain_lower_south = (
-                ie_lower - grid_indexing.isc + 1,
-                1,
-                npz,
-            )
-            if self.global_is <= self._im2:
-                if self._domain_lower_south[0] > 0:
-                    self._update_dwind_x_edge_west_stencil1 = (
-                        stencil_factory.from_origin_domain(
-                            update_dwind_x_edge_west_stencil,
-                            origin=origin_lower,
-                            domain=self._domain_lower_south,
-                        )
-                    )
-            if self.global_ie > self._im2:
-                is_upper = self.global_to_local_x(max(self._im2 + 1, self.global_is))
-                origin_upper = (is_upper, grid_indexing.n_halo, 0)
-                self._domain_upper_south = (
-                    grid_indexing.iec - is_upper + 1,
+            if self.south_edge:
+                ie_lower = self.global_to_local_x(min(self._im2, self.global_ie))
+                origin_lower = (grid_indexing.n_halo, grid_indexing.n_halo, 0)
+                self._domain_lower_south = (
+                    ie_lower - grid_indexing.isc + 1,
                     1,
                     npz,
                 )
-                self._update_dwind_x_edge_east_stencil1 = (
-                    stencil_factory.from_origin_domain(
-                        update_dwind_x_edge_east_stencil,
-                        origin=origin_upper,
-                        domain=self._domain_upper_south,
-                    )
-                )
-                self._copy3_stencil5 = stencil_factory.from_origin_domain(
-                    copy3_stencil, origin=origin_upper, domain=self._domain_upper_south
-                )
-            if self.global_is <= self._im2 and self._domain_lower_south[0] > 0:
-                self._copy3_stencil6 = stencil_factory.from_origin_domain(
-                    copy3_stencil, origin=origin_lower, domain=self._domain_lower_south
-                )
-        if self.north_edge:
-            j_origin = shape[1] - grid_indexing.n_halo - 1
-            ie_lower = self.global_to_local_x(min(self._im2, self.global_ie))
-            origin_lower = (grid_indexing.n_halo, j_origin, 0)
-            self._domain_lower_north = (
-                ie_lower - grid_indexing.isc + 1,
-                1,
-                npz,
-            )
-            if self.global_is < self._im2:
-                if self._domain_lower_north[0] > 0:
-                    self._update_dwind_x_edge_west_stencil2 = (
-                        stencil_factory.from_origin_domain(
-                            update_dwind_x_edge_west_stencil,
-                            origin=origin_lower,
-                            domain=self._domain_lower_north,
+                if self.global_is <= self._im2:
+                    if self._domain_lower_south[0] > 0:
+                        self._update_dwind_x_edge_west_stencil1 = (
+                            stencil_factory.from_origin_domain(
+                                update_dwind_x_edge_west_stencil,
+                                origin=origin_lower,
+                                domain=self._domain_lower_south,
+                            )
                         )
+                if self.global_ie > self._im2:
+                    is_upper = self.global_to_local_x(
+                        max(self._im2 + 1, self.global_is)
                     )
-            if self.global_ie >= self._im2:
-                is_upper = self.global_to_local_x(max(self._im2 + 1, self.global_is))
-                origin_upper = (is_upper, j_origin, 0)
-                self._domain_upper_north = (
-                    grid_indexing.iec - is_upper + 1,
-                    1,
-                    npz,
-                )
-                if self._domain_upper_north[0] > 0:
-                    self._update_dwind_x_edge_east_stencil2 = (
+                    origin_upper = (is_upper, grid_indexing.n_halo, 0)
+                    self._domain_upper_south = (
+                        grid_indexing.iec - is_upper + 1,
+                        1,
+                        npz,
+                    )
+                    self._update_dwind_x_edge_east_stencil1 = (
                         stencil_factory.from_origin_domain(
                             update_dwind_x_edge_east_stencil,
                             origin=origin_upper,
-                            domain=self._domain_upper_north,
+                            domain=self._domain_upper_south,
                         )
                     )
-                    self._copy3_stencil7 = stencil_factory.from_origin_domain(
+                    self._copy3_stencil5 = stencil_factory.from_origin_domain(
                         copy3_stencil,
                         origin=origin_upper,
-                        domain=self._domain_upper_north,
+                        domain=self._domain_upper_south,
                     )
-            if self.global_is < self._im2 and self._domain_lower_north[0] > 0:
-                self._copy3_stencil8 = stencil_factory.from_origin_domain(
-                    copy3_stencil, origin=origin_lower, domain=self._domain_lower_north
+                if self.global_is <= self._im2 and self._domain_lower_south[0] > 0:
+                    self._copy3_stencil6 = stencil_factory.from_origin_domain(
+                        copy3_stencil,
+                        origin=origin_lower,
+                        domain=self._domain_lower_south,
+                    )
+            if self.north_edge:
+                j_origin = shape[1] - grid_indexing.n_halo - 1
+                ie_lower = self.global_to_local_x(min(self._im2, self.global_ie))
+                origin_lower = (grid_indexing.n_halo, j_origin, 0)
+                self._domain_lower_north = (
+                    ie_lower - grid_indexing.isc + 1,
+                    1,
+                    npz,
                 )
-        self._update_uwind_stencil = stencil_factory.from_origin_domain(
-            update_uwind_stencil,
-            origin=(grid_indexing.n_halo, grid_indexing.n_halo, 0),
-            domain=(nic, njc + 1, npz),
-        )
-        self._update_vwind_stencil = stencil_factory.from_origin_domain(
-            update_vwind_stencil,
-            origin=(grid_indexing.n_halo, grid_indexing.n_halo, 0),
-            domain=(nic + 1, njc, npz),
-        )
-        # [TODO] The following is waiting on grid code vlat and vlon
-        self._vlon1 = grid_info.vlon1
-        self._vlon2 = grid_info.vlon2
-        self._vlon3 = grid_info.vlon3
-        self._vlat1 = grid_info.vlat1
-        self._vlat2 = grid_info.vlat2
-        self._vlat3 = grid_info.vlat3
-        self._edge_vect_w = grid_info.edge_vect_w
-        self._edge_vect_e = grid_info.edge_vect_e
-        self._edge_vect_s = grid_info.edge_vect_s
-        self._edge_vect_n = grid_info.edge_vect_n
-        self._es1_1 = grid_info.es1_1
-        self._es1_2 = grid_info.es1_2
-        self._es1_3 = grid_info.es1_3
-        self._ew2_1 = grid_info.ew2_1
-        self._ew2_2 = grid_info.ew2_2
-        self._ew2_3 = grid_info.ew2_3
+                if self.global_is < self._im2:
+                    if self._domain_lower_north[0] > 0:
+                        self._update_dwind_x_edge_west_stencil2 = (
+                            stencil_factory.from_origin_domain(
+                                update_dwind_x_edge_west_stencil,
+                                origin=origin_lower,
+                                domain=self._domain_lower_north,
+                            )
+                        )
+                if self.global_ie >= self._im2:
+                    is_upper = self.global_to_local_x(
+                        max(self._im2 + 1, self.global_is)
+                    )
+                    origin_upper = (is_upper, j_origin, 0)
+                    self._domain_upper_north = (
+                        grid_indexing.iec - is_upper + 1,
+                        1,
+                        npz,
+                    )
+                    if self._domain_upper_north[0] > 0:
+                        self._update_dwind_x_edge_east_stencil2 = (
+                            stencil_factory.from_origin_domain(
+                                update_dwind_x_edge_east_stencil,
+                                origin=origin_upper,
+                                domain=self._domain_upper_north,
+                            )
+                        )
+                        self._copy3_stencil7 = stencil_factory.from_origin_domain(
+                            copy3_stencil,
+                            origin=origin_upper,
+                            domain=self._domain_upper_north,
+                        )
+                if self.global_is < self._im2 and self._domain_lower_north[0] > 0:
+                    self._copy3_stencil8 = stencil_factory.from_origin_domain(
+                        copy3_stencil,
+                        origin=origin_lower,
+                        domain=self._domain_lower_north,
+                    )
+            self._update_uwind_stencil = stencil_factory.from_origin_domain(
+                update_uwind_stencil,
+                origin=(grid_indexing.n_halo, grid_indexing.n_halo, 0),
+                domain=(nic, njc + 1, npz),
+            )
+            self._update_vwind_stencil = stencil_factory.from_origin_domain(
+                update_vwind_stencil,
+                origin=(grid_indexing.n_halo, grid_indexing.n_halo, 0),
+                domain=(nic + 1, njc, npz),
+            )
+            # [TODO] The following is waiting on grid code vlat and vlon
+            self._vlon1 = grid_info.vlon1
+            self._vlon2 = grid_info.vlon2
+            self._vlon3 = grid_info.vlon3
+            self._vlat1 = grid_info.vlat1
+            self._vlat2 = grid_info.vlat2
+            self._vlat3 = grid_info.vlat3
+            self._edge_vect_w = grid_info.edge_vect_w
+            self._edge_vect_e = grid_info.edge_vect_e
+            self._edge_vect_s = grid_info.edge_vect_s
+            self._edge_vect_n = grid_info.edge_vect_n
+            self._es1_1 = grid_info.es1_1
+            self._es1_2 = grid_info.es1_2
+            self._es1_3 = grid_info.es1_3
+            self._ew2_1 = grid_info.ew2_1
+            self._ew2_2 = grid_info.ew2_2
+            self._ew2_3 = grid_info.ew2_3
+
+        else:  # grid_type > 3:
+            self._doubly_periodic_wind_update = stencil_factory.from_origin_domain(
+                doubly_periodic_wind_update,
+                externals={
+                    "dt5": self._dt5,
+                },
+                origin=grid_indexing.origin_compute(),
+                domain=grid_indexing.domain_compute(),
+            )
 
     def global_to_local_1d(self, global_value, subtile_index, subtile_length):
         return global_value - subtile_index * subtile_length
@@ -454,87 +497,57 @@ class AGrid2DGridPhysics:
         Transforms the wind tendencies from A grid to D grid for the final update
         """
 
-        self._update_dwind_prep_stencil(
-            u_dt,
-            v_dt,
-            self._vlon1,
-            self._vlon2,
-            self._vlon3,
-            self._vlat1,
-            self._vlat2,
-            self._vlat3,
-            self._ue_1,
-            self._ue_2,
-            self._ue_3,
-            self._ve_1,
-            self._ve_2,
-            self._ve_3,
-        )
-        self._set_winds_to_zero_stencil(u_dt, v_dt)
-        if self.west_edge:
-            if self.global_js <= self._jm2:
-                if self._domain_lower_west[1] > 0:
-                    self._update_dwind_y_edge_south_stencil1(
-                        self._ve_1,
-                        self._ve_2,
-                        self._ve_3,
-                        self._vt_1,
-                        self._vt_2,
-                        self._vt_3,
-                        self._edge_vect_w,
-                    )
-            if self.global_je > self._jm2:
-                if self._domain_upper_west[1] > 0:
-                    self._update_dwind_y_edge_north_stencil1(
-                        self._ve_1,
-                        self._ve_2,
-                        self._ve_3,
-                        self._vt_1,
-                        self._vt_2,
-                        self._vt_3,
-                        self._edge_vect_w,
-                    )
-                    self._copy3_stencil1(
-                        self._vt_1,
-                        self._vt_2,
-                        self._vt_3,
-                        self._ve_1,
-                        self._ve_2,
-                        self._ve_3,
-                    )
-            if self.global_js <= self._jm2 and self._domain_lower_west[1] > 0:
-                self._copy3_stencil2(
-                    self._vt_1,
-                    self._vt_2,
-                    self._vt_3,
-                    self._ve_1,
-                    self._ve_2,
-                    self._ve_3,
-                )
-        if self.east_edge:
-            if self.global_js <= self._jm2:
-                if self._domain_lower_east[1] > 0:
-                    self._update_dwind_y_edge_south_stencil2(
-                        self._ve_1,
-                        self._ve_2,
-                        self._ve_3,
-                        self._vt_1,
-                        self._vt_2,
-                        self._vt_3,
-                        self._edge_vect_e,
-                    )
-            if self.global_je > self._jm2:
-                if self._domain_upper_east[1] > 0:
-                    self._update_dwind_y_edge_north_stencil2(
-                        self._ve_1,
-                        self._ve_2,
-                        self._ve_3,
-                        self._vt_1,
-                        self._vt_2,
-                        self._vt_3,
-                        self._edge_vect_e,
-                    )
-                    self._copy3_stencil3(
+        if self._grid_type <= 3:
+            self._update_dwind_prep_stencil(
+                u_dt,
+                v_dt,
+                self._vlon1,
+                self._vlon2,
+                self._vlon3,
+                self._vlat1,
+                self._vlat2,
+                self._vlat3,
+                self._ue_1,
+                self._ue_2,
+                self._ue_3,
+                self._ve_1,
+                self._ve_2,
+                self._ve_3,
+            )
+            self._set_winds_to_zero_stencil(u_dt, v_dt)
+            if self.west_edge:
+                if self.global_js <= self._jm2:
+                    if self._domain_lower_west[1] > 0:
+                        self._update_dwind_y_edge_south_stencil1(
+                            self._ve_1,
+                            self._ve_2,
+                            self._ve_3,
+                            self._vt_1,
+                            self._vt_2,
+                            self._vt_3,
+                            self._edge_vect_w,
+                        )
+                if self.global_je > self._jm2:
+                    if self._domain_upper_west[1] > 0:
+                        self._update_dwind_y_edge_north_stencil1(
+                            self._ve_1,
+                            self._ve_2,
+                            self._ve_3,
+                            self._vt_1,
+                            self._vt_2,
+                            self._vt_3,
+                            self._edge_vect_w,
+                        )
+                        self._copy3_stencil1(
+                            self._vt_1,
+                            self._vt_2,
+                            self._vt_3,
+                            self._ve_1,
+                            self._ve_2,
+                            self._ve_3,
+                        )
+                if self.global_js <= self._jm2 and self._domain_lower_west[1] > 0:
+                    self._copy3_stencil2(
                         self._vt_1,
                         self._vt_2,
                         self._vt_3,
@@ -542,79 +555,119 @@ class AGrid2DGridPhysics:
                         self._ve_2,
                         self._ve_3,
                     )
-            if self.global_js <= self._jm2 and self._domain_lower_east[1] > 0:
-                self._copy3_stencil4(
-                    self._vt_1,
-                    self._vt_2,
-                    self._vt_3,
-                    self._ve_1,
-                    self._ve_2,
-                    self._ve_3,
-                )
-        if self.south_edge:
-            if self.global_is <= self._im2:
-                if self._domain_lower_south[0] > 0:
-                    self._update_dwind_x_edge_west_stencil1(
-                        self._ue_1,
-                        self._ue_2,
-                        self._ue_3,
+            if self.east_edge:
+                if self.global_js <= self._jm2:
+                    if self._domain_lower_east[1] > 0:
+                        self._update_dwind_y_edge_south_stencil2(
+                            self._ve_1,
+                            self._ve_2,
+                            self._ve_3,
+                            self._vt_1,
+                            self._vt_2,
+                            self._vt_3,
+                            self._edge_vect_e,
+                        )
+                if self.global_je > self._jm2:
+                    if self._domain_upper_east[1] > 0:
+                        self._update_dwind_y_edge_north_stencil2(
+                            self._ve_1,
+                            self._ve_2,
+                            self._ve_3,
+                            self._vt_1,
+                            self._vt_2,
+                            self._vt_3,
+                            self._edge_vect_e,
+                        )
+                        self._copy3_stencil3(
+                            self._vt_1,
+                            self._vt_2,
+                            self._vt_3,
+                            self._ve_1,
+                            self._ve_2,
+                            self._ve_3,
+                        )
+                if self.global_js <= self._jm2 and self._domain_lower_east[1] > 0:
+                    self._copy3_stencil4(
+                        self._vt_1,
+                        self._vt_2,
+                        self._vt_3,
+                        self._ve_1,
+                        self._ve_2,
+                        self._ve_3,
+                    )
+            if self.south_edge:
+                if self.global_is <= self._im2:
+                    if self._domain_lower_south[0] > 0:
+                        self._update_dwind_x_edge_west_stencil1(
+                            self._ue_1,
+                            self._ue_2,
+                            self._ue_3,
+                            self._ut_1,
+                            self._ut_2,
+                            self._ut_3,
+                            self._edge_vect_s,
+                        )
+                if self.global_ie > self._im2:
+                    if self._domain_upper_south:
+                        self._update_dwind_x_edge_east_stencil1(
+                            self._ue_1,
+                            self._ue_2,
+                            self._ue_3,
+                            self._ut_1,
+                            self._ut_2,
+                            self._ut_3,
+                            self._edge_vect_s,
+                        )
+                        self._copy3_stencil5(
+                            self._ut_1,
+                            self._ut_2,
+                            self._ut_3,
+                            self._ue_1,
+                            self._ue_2,
+                            self._ue_3,
+                        )
+                if self.global_is <= self._im2 and self._domain_lower_south[0] > 0:
+                    self._copy3_stencil6(
                         self._ut_1,
                         self._ut_2,
                         self._ut_3,
-                        self._edge_vect_s,
-                    )
-            if self.global_ie > self._im2:
-                if self._domain_upper_south:
-                    self._update_dwind_x_edge_east_stencil1(
-                        self._ue_1,
-                        self._ue_2,
-                        self._ue_3,
-                        self._ut_1,
-                        self._ut_2,
-                        self._ut_3,
-                        self._edge_vect_s,
-                    )
-                    self._copy3_stencil5(
-                        self._ut_1,
-                        self._ut_2,
-                        self._ut_3,
                         self._ue_1,
                         self._ue_2,
                         self._ue_3,
                     )
-            if self.global_is <= self._im2 and self._domain_lower_south[0] > 0:
-                self._copy3_stencil6(
-                    self._ut_1,
-                    self._ut_2,
-                    self._ut_3,
-                    self._ue_1,
-                    self._ue_2,
-                    self._ue_3,
-                )
-        if self.north_edge:
-            if self.global_is < self._im2:
-                if self._domain_lower_north[0] > 0:
-                    self._update_dwind_x_edge_west_stencil2(
-                        self._ue_1,
-                        self._ue_2,
-                        self._ue_3,
-                        self._ut_1,
-                        self._ut_2,
-                        self._ut_3,
-                        self._edge_vect_n,
-                    )
-            if self.global_ie >= self._im2:
-                if self._domain_upper_north[0] > 0:
-                    self._update_dwind_x_edge_east_stencil2(
-                        self._ue_1,
-                        self._ue_2,
-                        self._ue_3,
-                        self._ut_1,
-                        self._ut_2,
-                        self._ut_3,
-                        self._edge_vect_n,
-                    )
-                    self._copy3_stencil7(
+            if self.north_edge:
+                if self.global_is < self._im2:
+                    if self._domain_lower_north[0] > 0:
+                        self._update_dwind_x_edge_west_stencil2(
+                            self._ue_1,
+                            self._ue_2,
+                            self._ue_3,
+                            self._ut_1,
+                            self._ut_2,
+                            self._ut_3,
+                            self._edge_vect_n,
+                        )
+                if self.global_ie >= self._im2:
+                    if self._domain_upper_north[0] > 0:
+                        self._update_dwind_x_edge_east_stencil2(
+                            self._ue_1,
+                            self._ue_2,
+                            self._ue_3,
+                            self._ut_1,
+                            self._ut_2,
+                            self._ut_3,
+                            self._edge_vect_n,
+                        )
+                        self._copy3_stencil7(
+                            self._ut_1,
+                            self._ut_2,
+                            self._ut_3,
+                            self._ue_1,
+                            self._ue_2,
+                            self._ue_3,
+                        )
+                if self.global_is < self._im2 and self._domain_lower_north[0] > 0:
+                    self._copy3_stencil8(
                         self._ut_1,
                         self._ut_2,
                         self._ut_3,
@@ -622,32 +675,26 @@ class AGrid2DGridPhysics:
                         self._ue_2,
                         self._ue_3,
                     )
-            if self.global_is < self._im2 and self._domain_lower_north[0] > 0:
-                self._copy3_stencil8(
-                    self._ut_1,
-                    self._ut_2,
-                    self._ut_3,
-                    self._ue_1,
-                    self._ue_2,
-                    self._ue_3,
-                )
-        self._update_uwind_stencil(
-            u,
-            self._es1_1,
-            self._es1_2,
-            self._es1_3,
-            self._ue_1,
-            self._ue_2,
-            self._ue_3,
-            self._dt5,
-        )
-        self._update_vwind_stencil(
-            v,
-            self._ew2_1,
-            self._ew2_2,
-            self._ew2_3,
-            self._ve_1,
-            self._ve_2,
-            self._ve_3,
-            self._dt5,
-        )
+            self._update_uwind_stencil(
+                u,
+                self._es1_1,
+                self._es1_2,
+                self._es1_3,
+                self._ue_1,
+                self._ue_2,
+                self._ue_3,
+                self._dt5,
+            )
+            self._update_vwind_stencil(
+                v,
+                self._ew2_1,
+                self._ew2_2,
+                self._ew2_3,
+                self._ve_1,
+                self._ve_2,
+                self._ve_3,
+                self._dt5,
+            )
+
+        else:  # grid type > 3:
+            self._doubly_periodic_wind_update(u, v, u_dt, v_dt)

@@ -179,6 +179,7 @@ class NonHydrostaticPressureGradient:
             grid_type=grid_type,
             replace=False,
         )
+
         self._set_k0_and_calc_wk_stencil = stencil_factory.from_origin_domain(
             set_k0_and_calc_wk,
             origin=self.orig,
@@ -233,7 +234,6 @@ class NonHydrostaticPressureGradient:
         # TODO: make it clearer that each of these a2b outputs is updated
         # instead of the output being put in tmp_wk1, possibly by removing
         # the second argument and using a temporary instead?
-
         self.a2b_k1(pp, self._tmp_wk1)
         self.a2b_k1(pk3, self._tmp_wk1)
 
