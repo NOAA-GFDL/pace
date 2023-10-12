@@ -179,18 +179,6 @@ def horizontally_averaged_temperature(eta):
     return t_mean
 
 
-def _initialize_delp(ak, bk, ps, shape):
-    # TODO: resolve function duplication
-    delp = np.zeros(shape)
-    delp[:, :, :-1] = (
-        ak[None, None, 1:]
-        - ak[None, None, :-1]
-        + ps[:, :, None] * (bk[None, None, 1:] - bk[None, None, :-1])
-    )
-
-    return delp
-
-
 def initialize_delp(ps, ak, bk):
     return (
         ak[None, None, 1:]
@@ -201,15 +189,6 @@ def initialize_delp(ps, ak, bk):
 
 def initialize_delz(pt, peln):
     return constants.RDG * pt[:, :, :-1] * (peln[:, :, 1:] - peln[:, :, :-1])
-
-
-def _initialize_edge_pressure(delp, ptop, shape):
-    # TODO: resolve function duplication
-    pe = np.zeros(shape)
-    pe[:, :, 0] = ptop
-    for k in range(1, pe.shape[2]):
-        pe[:, :, k] = ptop + np.sum(delp[:, :, :k], axis=2)
-    return pe
 
 
 def initialize_edge_pressure(delp, ptop):
