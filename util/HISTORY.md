@@ -4,6 +4,9 @@ History
 latest
 ------
 
+- Added `from_layout` and `size` methods to TileCommunicator and Communicator
+- Added `__init__` and `total_ranks` abstract methods to Partitioner
+- Added `grid_type` to MetricTerms and DriverGridData
 - Added `dx_const`, `dy_const`, `deglat`, and `u_max` namelist settings for doubly-periodic grids
 - Added `dx_const`, `dy_const`, and `deglat` to grid generation code for doubly-periodic grids
 - Added f32 support to halo exchange data transformation

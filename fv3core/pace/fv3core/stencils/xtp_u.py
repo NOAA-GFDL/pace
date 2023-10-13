@@ -17,7 +17,7 @@ def get_bl_br(u, dx, dxa):
         bl: ???
         br: ???
     """
-    from __externals__ import i_end, i_start, iord, j_end, j_start
+    from __externals__ import grid_type, i_end, i_start, iord, j_end, j_start
 
     if __INLINED(iord < 8):
         u_on_cell_corners = xppm.compute_al(u, dx)
@@ -32,20 +32,24 @@ def get_bl_br(u, dx, dxa):
         compile_assert(iord == 8)
 
         bl, br = xppm.blbr_iord8(u, u_on_cell_corners, dm)
-        bl, br = xppm.bl_br_edges(bl, br, u, dxa, u_on_cell_corners, dm)
 
-        with horizontal(region[i_start + 1, :], region[i_end - 1, :]):
-            bl, br = ppm.pert_ppm_standard_constraint_fcn(u, bl, br)
+        if __INLINED(grid_type < 3):
+            bl, br = xppm.bl_br_edges(bl, br, u, dxa, u_on_cell_corners, dm)
 
-    # Zero corners
-    with horizontal(
-        region[i_start - 1 : i_start + 1, j_start],
-        region[i_start - 1 : i_start + 1, j_end + 1],
-        region[i_end : i_end + 2, j_start],
-        region[i_end : i_end + 2, j_end + 1],
-    ):
-        bl = 0.0
-        br = 0.0
+            with horizontal(region[i_start + 1, :], region[i_end - 1, :]):
+                bl, br = ppm.pert_ppm_standard_constraint_fcn(u, bl, br)
+
+    if __INLINED(grid_type < 3):
+        # Zero corners
+        with horizontal(
+            region[i_start - 1 : i_start + 1, j_start],
+            region[i_start - 1 : i_start + 1, j_end + 1],
+            region[i_end : i_end + 2, j_start],
+            region[i_end : i_end + 2, j_end + 1],
+        ):
+            bl = 0.0
+            br = 0.0
+
     return bl, br
 
 

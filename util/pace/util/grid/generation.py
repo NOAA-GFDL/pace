@@ -220,7 +220,7 @@ class MetricTerms:
         self,
         *,
         quantity_factory: util.QuantityFactory,
-        communicator: util.CubedSphereCommunicator,
+        communicator: util.Communicator,
         grid_type: int = 0,
         dx_const: float = 1000.0,
         dy_const: float = 1000.0,

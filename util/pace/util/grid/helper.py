@@ -674,6 +674,7 @@ class DriverGridData:
     ew2_1: pace.util.Quantity
     ew2_2: pace.util.Quantity
     ew2_3: pace.util.Quantity
+    grid_type: int
 
     @classmethod
     def new_from_metric_terms(cls, metric_terms: MetricTerms) -> "DriverGridData":
@@ -686,6 +687,7 @@ class DriverGridData:
             edge_vect_w=metric_terms.edge_vect_w,
             es1=metric_terms.es1,
             ew2=metric_terms.ew2,
+            grid_type=metric_terms._grid_type,
         )
 
     @classmethod
@@ -699,6 +701,7 @@ class DriverGridData:
         edge_vect_w: pace.util.Quantity,
         es1: pace.util.Quantity,
         ew2: pace.util.Quantity,
+        grid_type: int = 0,
     ) -> "DriverGridData":
         try:
             vlon1, vlon2, vlon3 = split_quantity_along_last_dim(vlon)
@@ -728,6 +731,7 @@ class DriverGridData:
             edge_vect_e=edge_vect_e,
             edge_vect_s=edge_vect_s,
             edge_vect_n=edge_vect_n,
+            grid_type=grid_type,
         )
 
 

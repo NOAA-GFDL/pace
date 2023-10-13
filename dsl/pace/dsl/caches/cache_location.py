@@ -1,10 +1,10 @@
 from pace.dsl.caches.codepath import FV3CodePath
-from pace.util import CubedSpherePartitioner
+from pace.util import Partitioner
 
 
 def identify_code_path(
     rank: int,
-    partitioner: CubedSpherePartitioner,
+    partitioner: Partitioner,
 ) -> FV3CodePath:
     if partitioner.layout == (1, 1) or partitioner.layout == [1, 1]:
         return FV3CodePath.All

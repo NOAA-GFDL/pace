@@ -239,10 +239,16 @@ def compute_kinetic_energy(
             as defined in FV3 documentation by equation 6.3, multiplied by dt
         dt: timestep
     """
+    from __externals__ import grid_type
+
     with computation(PARALLEL), interval(...):
-        ub_contra, vb_contra = interpolate_uc_vc_to_cell_corners(
-            uc, vc, cosa, rsina, uc_contra, vc_contra
-        )
+        if __INLINED(grid_type < 3):
+            ub_contra, vb_contra = interpolate_uc_vc_to_cell_corners(
+                uc, vc, cosa, rsina, uc_contra, vc_contra
+            )
+        else:
+            ub_contra = 0.5 * (uc[0, -1, 0] + uc)
+            vb_contra = 0.5 * (vc[-1, 0, 0] + vc)
         advected_v = advect_v_along_y(v, vb_contra, rdy=rdy, dy=dy, dya=dya, dt=dt)
         advected_u = advect_u_along_x(u, ub_contra, rdx=rdx, dx=dx, dxa=dxa, dt=dt)
         # makes sure the kinetic energy part of the governing equation is computed
@@ -757,7 +763,7 @@ class DGridShallowWaterLagrangianDynamics:
         self._do_stochastic_ke_backscatter = config.do_skeb
 
         self.grid_indexing = stencil_factory.grid_indexing
-        assert config.grid_type < 3, "ubke and vbke only implemented for grid_type < 3"
+        self._grid_type = config.grid_type
         assert not config.inline_q, "inline_q not yet implemented"
         assert (
             config.d_ext <= 0
@@ -855,6 +861,7 @@ class DGridShallowWaterLagrangianDynamics:
         self.fv_prep = FiniteVolumeFluxPrep(
             stencil_factory=stencil_factory,
             grid_data=grid_data,
+            grid_type=self._grid_type,
         )
         self.divergence_damping = DivergenceDamping(
             stencil_factory,
@@ -887,6 +894,7 @@ class DGridShallowWaterLagrangianDynamics:
                 "mord": config.hord_mt,
                 "xt_minmax": False,
                 "yt_minmax": False,
+                "grid_type": config.grid_type,
             },
         )
         self._apply_fluxes = stencil_factory.from_dims_halo(

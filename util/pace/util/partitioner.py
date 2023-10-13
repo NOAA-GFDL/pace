@@ -55,6 +55,11 @@ def get_tile_number(tile_rank: int, total_ranks: int) -> int:
 
 class Partitioner(abc.ABC):
     @abc.abstractmethod
+    def __init__(self):
+        self.tile = None
+        self.layout = None
+
+    @abc.abstractmethod
     def boundary(self, boundary_type: int, rank: int) -> Optional[bd.SimpleBoundary]:
         ...
 
@@ -119,7 +124,8 @@ class Partitioner(abc.ABC):
         """
         pass
 
-    @abc.abstractproperty
+    @property
+    @abc.abstractmethod
     def total_ranks(self) -> int:
         pass
 

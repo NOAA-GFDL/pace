@@ -243,7 +243,7 @@ class AcousticDynamics:
 
         def __init__(
             self,
-            comm: pace.util.CubedSphereCommunicator,
+            comm: pace.util.Communicator,
             grid_indexing: GridIndexing,
             quantity_factory: pace.util.QuantityFactory,
             state: DycoreState,
@@ -364,7 +364,7 @@ class AcousticDynamics:
 
     def __init__(
         self,
-        comm: pace.util.CubedSphereCommunicator,
+        comm: pace.util.Communicator,
         stencil_factory: StencilFactory,
         quantity_factory: pace.util.QuantityFactory,
         grid_data: GridData,
@@ -380,14 +380,14 @@ class AcousticDynamics:
     ):
         """
         Args:
-            comm: object for cubed sphere inter-process communication
+            comm: object for tile or cubed-sphere inter-process communication
             stencil_factory: creates stencils
             quantity_factory: creates quantities
             grid_data: metric terms defining the grid
             damping_coefficients: damping configuration
-            grid_type: ???
-            nested: ???
-            stretched_grid: ???
+            grid_type: grid geometry used
+            nested: if the grid contains a nested, high-res region
+            stretched_grid: if the grid is stretched so tile faces cover different areas
             config: configuration settings
             pfull: atmospheric Eulerian grid reference pressure (Pa)
             phis: surface geopotential height
@@ -560,6 +560,7 @@ class AcousticDynamics:
                 quantity_factory=quantity_factory,
                 area=grid_data.area,
                 dp_ref=grid_data.dp_ref,
+                grid_type=config.grid_type,
             )
         )
 

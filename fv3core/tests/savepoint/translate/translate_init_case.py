@@ -5,14 +5,15 @@ import pytest
 
 import pace.dsl
 import pace.dsl.gt4py_utils as utils
-import pace.fv3core.initialization.baroclinic as baroclinic_init
-import pace.fv3core.initialization.baroclinic_jablonowski_williamson as jablo_init
+import pace.fv3core.initialization.analytic_init as analytic_init
+import pace.fv3core.initialization.init_utils as init_utils
+import pace.fv3core.initialization.test_cases.initialize_baroclinic as baroclinic_init
 import pace.util
 import pace.util as fv3util
 from pace.fv3core.testing import TranslateDycoreFortranData2Py
 from pace.stencils.testing import ParallelTranslateBaseSlicing
 from pace.stencils.testing.grid import TRACER_DIM  # type: ignore
-from pace.util.grid import MetricTerms
+from pace.util.grid import GridData, MetricTerms
 
 
 class TranslateInitCase(ParallelTranslateBaseSlicing):
@@ -204,8 +205,28 @@ class TranslateInitCase(ParallelTranslateBaseSlicing):
             backend=self.stencil_factory.backend,
         )
 
-        state = baroclinic_init.init_baroclinic_state(
-            metric_terms=metric_terms,
+        sizer = pace.util.SubtileGridSizer.from_tile_params(
+            nx_tile=self.namelist.nx_tile,
+            ny_tile=self.namelist.nx_tile,
+            nz=self.namelist.nz,
+            n_halo=pace.util.N_HALO_DEFAULT,
+            extra_dim_lengths={},
+            layout=self.namelist.layout,
+            tile_partitioner=communicator.partitioner.tile,
+            tile_rank=communicator.tile.rank,
+        )
+
+        quantity_factory = pace.util.QuantityFactory.from_backend(
+            sizer, backend=self.stencil_factory.backend
+        )
+
+        grid_data = GridData.new_from_metric_terms(metric_terms)
+        quantity_factory = fv3util.QuantityFactory()
+
+        state = analytic_init.init_analytic_state(
+            analytic_init_case="baroclinic",
+            grid_data=grid_data,
+            quantity_factory=quantity_factory,
             adiabatic=self.namelist.adiabatic,
             hydrostatic=self.namelist.hydrostatic,
             moist_phys=self.namelist.moist_phys,
@@ -280,12 +301,12 @@ class TranslateInitPreJab(TranslateDycoreFortranData2Py):
         inputs["ps"] = np.zeros(full_shape[0:2])
         for zvar in ["eta", "eta_v"]:
             inputs[zvar] = np.zeros(self.grid.npz + 1)
-        inputs["ps"][:] = jablo_init.surface_pressure
+        inputs["ps"][:] = baroclinic_init.SURFACE_PRESSURE
         sliced_inputs = make_sliced_inputs_dict(
             inputs, self.grid.compute_interface()[0:2]
         )
 
-        baroclinic_init.setup_pressure_fields(
+        init_utils.setup_pressure_fields(
             **sliced_inputs,
         )
         return self.slice_output(inputs)
@@ -425,7 +446,7 @@ class TranslatePVarAuxiliaryPressureVars(TranslateDycoreFortranData2Py):
         sliced_inputs = make_sliced_inputs_dict(
             inputs, self.grid.compute_interface()[0:2]
         )
-        baroclinic_init.p_var(
+        init_utils.p_var(
             **sliced_inputs,
             moist_phys=namelist.moist_phys,
             make_nh=(not namelist.hydrostatic),

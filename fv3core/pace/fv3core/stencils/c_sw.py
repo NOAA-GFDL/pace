@@ -1,6 +1,6 @@
-from gt4py.cartesian.gtscript import (
+from gt4py.cartesian.gtscript import (  # noqa
+    __INLINED,
     PARALLEL,
-    compile_assert,
     computation,
     horizontal,
     interval,
@@ -71,89 +71,109 @@ def divergence_corner(
         rarea_c (in): inverse cell areas on c-grid
         divg_d (out): divergence on d-grid (cell corners)
     """
-    from __externals__ import i_end, i_start, j_end, j_start
+    # TODO: move grid metric terms to externals to import them at compile time
+
+    from __externals__ import grid_type, i_end, i_start, j_end, j_start
 
     with computation(PARALLEL), interval(...):
-        uf = (
-            (u - 0.25 * (va[0, -1, 0] + va) * (cos_sg4[0, -1] + cos_sg2))
-            * dyc
-            * 0.5
-            * (sin_sg4[0, -1] + sin_sg2)
-        )
-        """c-grid (?) contravariant component of the wind in the x-direction"""
-        # TODO: refactor this into a call to contravariant()
+        if __INLINED(grid_type == 4):
+            # with horizontal(region[i_start - 1: i_end + 2, j_start - 1: j_end + 2]):
+            # extend computation into the halo?
+            uf = u * dyc
+            vf = v * dxc
+            divg_d = rarea_c * (vf[0, -1, 0] - vf + uf[-1, 0, 0] - uf)
 
-        vf = (
-            (v - 0.25 * (ua[-1, 0, 0] + ua) * (cos_sg3[-1, 0] + cos_sg1))
-            * dxc
-            * 0.5
-            * (sin_sg3[-1, 0] + sin_sg1)
-        )
-
-        divg_d = (vf[0, -1, 0] - vf + uf[-1, 0, 0] - uf) * rarea_c
-
-        # The original code is:
-        # ---------
-        # with horizontal(region[:, j_start], region[:, j_end + 1]):
-        #     uf = u * dyc * 0.5 * (sin_sg4[0, -1] + sin_sg2)
-        # with horizontal(region[i_start, :], region[i_end + 1, :]):
-        #     vf = v * dxc * 0.5 * (sin_sg3[-1, 0] + sin_sg1)
-        # with horizontal(region[i_start, j_start], region[i_end + 1, j_start]):
-        #     divg_d = (-vf + uf[-1, 0, 0] - uf) * rarea_c
-        # with horizontal(region[i_end + 1, j_end + 1], region[i_start, j_end + 1]):
-        #     divg_d = (vf[0, -1, 0] + uf[-1, 0, 0] - uf) * rarea_c
-        # ---------
-        #
-        # Code with regions restrictions:
-        # ---------
-        # variables ending with 1 are the shifted versions
-        # in the future we could use gtscript functions when they support shifts
-
-        with horizontal(region[i_start, :], region[i_end + 1, :]):
-            vf0 = v * dxc * 0.5 * (sin_sg3[-1, 0] + sin_sg1)
-            vf1 = v[0, -1, 0] * dxc[0, -1] * 0.5 * (sin_sg3[-1, -1] + sin_sg1[0, -1])
-            uf1 = (
-                (
-                    u[-1, 0, 0]
-                    - 0.25
-                    * (va[-1, -1, 0] + va[-1, 0, 0])
-                    * (cos_sg4[-1, -1] + cos_sg2[-1, 0])
-                )
-                * dyc[-1, 0]
+        else:
+            uf = (
+                (u - 0.25 * (va[0, -1, 0] + va) * (cos_sg4[0, -1] + cos_sg2))
+                * dyc
                 * 0.5
-                * (sin_sg4[-1, -1] + sin_sg2[-1, 0])
+                * (sin_sg4[0, -1] + sin_sg2)
             )
-            divg_d = (vf1 - vf0 + uf1 - uf) * rarea_c
+            """c-grid (?) contravariant component of the wind in the x-direction"""
+            # TODO: refactor this into a call to contravariant()
 
-        with horizontal(region[:, j_start], region[:, j_end + 1]):
-            uf0 = u * dyc * 0.5 * (sin_sg4[0, -1] + sin_sg2)
-            uf1 = u[-1, 0, 0] * dyc[-1, 0] * 0.5 * (sin_sg4[-1, -1] + sin_sg2[-1, 0])
-            vf1 = (
-                (
-                    v[0, -1, 0]
-                    - 0.25
-                    * (ua[-1, -1, 0] + ua[0, -1, 0])
-                    * (cos_sg3[-1, -1] + cos_sg1[0, -1])
-                )
-                * dxc[0, -1]
+            vf = (
+                (v - 0.25 * (ua[-1, 0, 0] + ua) * (cos_sg3[-1, 0] + cos_sg1))
+                * dxc
                 * 0.5
-                * (sin_sg3[-1, -1] + sin_sg1[0, -1])
+                * (sin_sg3[-1, 0] + sin_sg1)
             )
-            divg_d = (vf1 - vf + uf1 - uf0) * rarea_c
 
-        with horizontal(region[i_start, j_start], region[i_end + 1, j_start]):
-            uf1 = u[-1, 0, 0] * dyc[-1, 0] * 0.5 * (sin_sg4[-1, -1] + sin_sg2[-1, 0])
-            vf0 = v * dxc * 0.5 * (sin_sg3[-1, 0] + sin_sg1)
-            uf0 = u * dyc * 0.5 * (sin_sg4[0, -1] + sin_sg2)
-            divg_d = (-vf0 + uf1 - uf0) * rarea_c
+            divg_d = (vf[0, -1, 0] - vf + uf[-1, 0, 0] - uf) * rarea_c
 
-        with horizontal(region[i_end + 1, j_end + 1], region[i_start, j_end + 1]):
-            vf1 = v[0, -1, 0] * dxc[0, -1] * 0.5 * (sin_sg3[-1, -1] + sin_sg1[0, -1])
-            uf1 = u[-1, 0, 0] * dyc[-1, 0] * 0.5 * (sin_sg4[-1, -1] + sin_sg2[-1, 0])
-            uf0 = u * dyc * 0.5 * (sin_sg4[0, -1] + sin_sg2)
-            divg_d = (vf1 + uf1 - uf0) * rarea_c
+            # The original code is:
+            # ---------
+            # with horizontal(region[:, j_start], region[:, j_end + 1]):
+            #     uf = u * dyc * 0.5 * (sin_sg4[0, -1] + sin_sg2)
+            # with horizontal(region[i_start, :], region[i_end + 1, :]):
+            #     vf = v * dxc * 0.5 * (sin_sg3[-1, 0] + sin_sg1)
+            # with horizontal(region[i_start, j_start], region[i_end + 1, j_start]):
+            #     divg_d = (-vf + uf[-1, 0, 0] - uf) * rarea_c
+            # with horizontal(region[i_end + 1, j_end + 1], region[i_start, j_end + 1]):
+            #     divg_d = (vf[0, -1, 0] + uf[-1, 0, 0] - uf) * rarea_c
+            # ---------
+            #
+            # Code with regions restrictions:
+            # ---------
+            # variables ending with 1 are the shifted versions
+            # in the future we could use gtscript functions when they support shifts
 
-        # ---------
+            with horizontal(region[i_start, :], region[i_end + 1, :]):
+                vf0 = v * dxc * 0.5 * (sin_sg3[-1, 0] + sin_sg1)
+                vf1 = (
+                    v[0, -1, 0] * dxc[0, -1] * 0.5 * (sin_sg3[-1, -1] + sin_sg1[0, -1])
+                )
+                uf1 = (
+                    (
+                        u[-1, 0, 0]
+                        - 0.25
+                        * (va[-1, -1, 0] + va[-1, 0, 0])
+                        * (cos_sg4[-1, -1] + cos_sg2[-1, 0])
+                    )
+                    * dyc[-1, 0]
+                    * 0.5
+                    * (sin_sg4[-1, -1] + sin_sg2[-1, 0])
+                )
+                divg_d = (vf1 - vf0 + uf1 - uf) * rarea_c
+
+            with horizontal(region[:, j_start], region[:, j_end + 1]):
+                uf0 = u * dyc * 0.5 * (sin_sg4[0, -1] + sin_sg2)
+                uf1 = (
+                    u[-1, 0, 0] * dyc[-1, 0] * 0.5 * (sin_sg4[-1, -1] + sin_sg2[-1, 0])
+                )
+                vf1 = (
+                    (
+                        v[0, -1, 0]
+                        - 0.25
+                        * (ua[-1, -1, 0] + ua[0, -1, 0])
+                        * (cos_sg3[-1, -1] + cos_sg1[0, -1])
+                    )
+                    * dxc[0, -1]
+                    * 0.5
+                    * (sin_sg3[-1, -1] + sin_sg1[0, -1])
+                )
+                divg_d = (vf1 - vf + uf1 - uf0) * rarea_c
+
+            with horizontal(region[i_start, j_start], region[i_end + 1, j_start]):
+                uf1 = (
+                    u[-1, 0, 0] * dyc[-1, 0] * 0.5 * (sin_sg4[-1, -1] + sin_sg2[-1, 0])
+                )
+                vf0 = v * dxc * 0.5 * (sin_sg3[-1, 0] + sin_sg1)
+                uf0 = u * dyc * 0.5 * (sin_sg4[0, -1] + sin_sg2)
+                divg_d = (-vf0 + uf1 - uf0) * rarea_c
+
+            with horizontal(region[i_end + 1, j_end + 1], region[i_start, j_end + 1]):
+                vf1 = (
+                    v[0, -1, 0] * dxc[0, -1] * 0.5 * (sin_sg3[-1, -1] + sin_sg1[0, -1])
+                )
+                uf1 = (
+                    u[-1, 0, 0] * dyc[-1, 0] * 0.5 * (sin_sg4[-1, -1] + sin_sg2[-1, 0])
+                )
+                uf0 = u * dyc * 0.5 * (sin_sg4[0, -1] + sin_sg2)
+                divg_d = (vf1 + uf1 - uf0) * rarea_c
+
+            # ---------
 
 
 def geoadjust_ut(
@@ -330,8 +350,7 @@ def transportdelp_update_vorticity_and_kineticenergy(
     from __externals__ import grid_type, i_end, i_start, j_end, j_start
 
     with computation(PARALLEL), interval(...):
-        compile_assert(grid_type < 3)
-        # additional assumption (not grid.nested)
+        # assume (not grid.nested)
         # corresponds to x fluxes function, but for y-direction
         fy1 = delp[0, -1, 0] if vtc > 0.0 else delp
         fy = pt[0, -1, 0] if vtc > 0.0 else pt
@@ -346,20 +365,20 @@ def transportdelp_update_vorticity_and_kineticenergy(
 
     with computation(PARALLEL), interval(...):
         # update vorticity and kinetic energy
-        compile_assert(grid_type < 3)
 
         ke = uc if ua > 0.0 else uc[1, 0, 0]
         vort = vc if va > 0.0 else vc[0, 1, 0]
 
-        with horizontal(region[:, j_start - 1], region[:, j_end]):
-            vort = vort * sin_sg4 + u[0, 1, 0] * cos_sg4 if va <= 0.0 else vort
-        with horizontal(region[:, j_start], region[:, j_end + 1]):
-            vort = vort * sin_sg2 + u * cos_sg2 if va > 0.0 else vort
+        if __INLINED(grid_type < 3):
+            with horizontal(region[:, j_start - 1], region[:, j_end]):
+                vort = vort * sin_sg4 + u[0, 1, 0] * cos_sg4 if va <= 0.0 else vort
+            with horizontal(region[:, j_start], region[:, j_end + 1]):
+                vort = vort * sin_sg2 + u * cos_sg2 if va > 0.0 else vort
 
-        with horizontal(region[i_end, :], region[i_start - 1, :]):
-            ke = ke * sin_sg3 + v[1, 0, 0] * cos_sg3 if ua <= 0.0 else ke
-        with horizontal(region[i_end + 1, :], region[i_start, :]):
-            ke = ke * sin_sg1 + v * cos_sg1 if ua > 0.0 else ke
+            with horizontal(region[i_end, :], region[i_start - 1, :]):
+                ke = ke * sin_sg3 + v[1, 0, 0] * cos_sg3 if ua <= 0.0 else ke
+            with horizontal(region[i_end + 1, :], region[i_start, :]):
+                ke = ke * sin_sg1 + v * cos_sg1 if ua > 0.0 else ke
 
         ke = 0.5 * dt2 * (ua * ke + va * vort)
 
@@ -431,12 +450,12 @@ def update_x_velocity(
     from __externals__ import grid_type, i_end, i_start
 
     with computation(PARALLEL), interval(...):
-        compile_assert(grid_type < 3)
-        # additional assumption: not __INLINED(spec.grid.nested)
+        # assume: not __INLINED(spec.grid.nested)
 
         tmp_flux = dt2 * (velocity - velocity_c * cosa) / sina
-        with horizontal(region[i_start, :], region[i_end + 1, :]):
-            tmp_flux = dt2 * velocity
+        if __INLINED(grid_type < 3):
+            with horizontal(region[i_start, :], region[i_end + 1, :]):
+                tmp_flux = dt2 * velocity
 
         flux = vorticity[0, 0, 0] if tmp_flux > 0.0 else vorticity[0, 1, 0]
         velocity_c = velocity_c + tmp_flux * flux + rdxc * (ke[-1, 0, 0] - ke)
@@ -465,13 +484,13 @@ def update_y_velocity(
     from __externals__ import grid_type, j_end, j_start
 
     with computation(PARALLEL), interval(...):
-        compile_assert(grid_type < 3)
-        # additional assumption: not __INLINED(spec.grid.nested)
+        # assume: not __INLINED(spec.grid.nested)
 
         # first-order upwind voriticity flux
         tmp_flux = dt2 * (velocity - velocity_c * cosa) / sina
-        with horizontal(region[:, j_start], region[:, j_end + 1]):
-            tmp_flux = dt2 * velocity
+        if __INLINED(grid_type < 3):
+            with horizontal(region[:, j_start], region[:, j_end + 1]):
+                tmp_flux = dt2 * velocity
 
         flux = vorticity[0, 0, 0] if tmp_flux > 0.0 else vorticity[1, 0, 0]
         # forward-stepped y velocity
@@ -498,6 +517,8 @@ class CGridShallowWaterDynamics:
         self.grid_data = grid_data
         self._dord4 = True
         self._fC = self.grid_data.fC
+        self._grid_data = grid_data
+        self._grid_type = grid_type
         # TODO: double-check the dimensions on these, they may be incorrect
         # as they are only documentation and not used by the code
         self.delpc = quantity_factory.zeros(
@@ -550,6 +571,7 @@ class CGridShallowWaterDynamics:
             self._divergence_corner = stencil_factory.from_dims_halo(
                 func=divergence_corner,
                 compute_dims=[X_INTERFACE_DIM, Y_INTERFACE_DIM, Z_DIM],
+                externals={"grid_type": grid_type},
             )
         else:
             self._divergence_corner = None
@@ -566,12 +588,13 @@ class CGridShallowWaterDynamics:
             compute_halos=(1, 1),
         )
 
-        self._fill_corners_x_delp_pt_w_stencil = stencil_factory.from_dims_halo(
-            fill_corners_delp_pt_w,
-            externals={"fill_corners_func": corners.fill_corners_2cells_x},
-            compute_dims=[X_DIM, Y_DIM, Z_DIM],
-            compute_halos=(3, 3),
-        )
+        if grid_type < 3:
+            self._fill_corners_x_delp_pt_w_stencil = stencil_factory.from_dims_halo(
+                fill_corners_delp_pt_w,
+                externals={"fill_corners_func": corners.fill_corners_2cells_x},
+                compute_dims=[X_DIM, Y_DIM, Z_DIM],
+                compute_halos=(3, 3),
+            )
 
         self._compute_nonhydro_fluxes_x_stencil = stencil_factory.from_dims_halo(
             compute_nonhydrostatic_fluxes_x,
@@ -579,12 +602,13 @@ class CGridShallowWaterDynamics:
             compute_halos=(1, 1),
         )
 
-        self._fill_corners_y_delp_pt_w_stencil = stencil_factory.from_dims_halo(
-            fill_corners_delp_pt_w,
-            externals={"fill_corners_func": corners.fill_corners_2cells_y},
-            compute_dims=[X_DIM, Y_DIM, Z_DIM],
-            compute_halos=(3, 3),
-        )
+        if grid_type < 3:
+            self._fill_corners_y_delp_pt_w_stencil = stencil_factory.from_dims_halo(
+                fill_corners_delp_pt_w,
+                externals={"fill_corners_func": corners.fill_corners_2cells_y},
+                compute_dims=[X_DIM, Y_DIM, Z_DIM],
+                compute_halos=(3, 3),
+            )
 
         self._transportdelp_updatevorticity_and_ke = stencil_factory.from_dims_halo(
             func=transportdelp_update_vorticity_and_kineticenergy,
@@ -703,13 +727,17 @@ class CGridShallowWaterDynamics:
         )
 
         # TODO(eddied): We pass the same fields 2x to avoid GTC validation errors
-        self._fill_corners_x_delp_pt_w_stencil(delp, pt, w, delp, pt, w)
+        # Aliasing in code is a parallelization risk and
+        # limits our capacity to re-use buffers
+        if self._grid_type < 3:
+            self._fill_corners_x_delp_pt_w_stencil(delp, pt, w, delp, pt, w)
         # TODO: why is there only a "x" version of this? Is the "y" verison folded
         # into the next routine?
         self._compute_nonhydro_fluxes_x_stencil(
             delp, pt, ut, w, self._tmp_fx, self._tmp_fx1, self._tmp_fx2
         )
-        self._fill_corners_y_delp_pt_w_stencil(delp, pt, w, delp, pt, w)
+        if self._grid_type < 3:
+            self._fill_corners_y_delp_pt_w_stencil(delp, pt, w, delp, pt, w)
         self._transportdelp_updatevorticity_and_ke(
             delp,
             pt,

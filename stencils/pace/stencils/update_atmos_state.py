@@ -242,7 +242,7 @@ class UpdateAtmosphereState:
         stencil_factory: StencilFactory,
         grid_data: GridData,
         namelist,
-        comm: pace.util.CubedSphereCommunicator,
+        comm: pace.util.Communicator,
         grid_info: DriverGridData,
         state: fv3core.DycoreState,
         quantity_factory: pace.util.QuantityFactory,
