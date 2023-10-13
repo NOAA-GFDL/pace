@@ -535,8 +535,8 @@ def init_tc_state(
     # for now, take from metric terms
     ak = _define_ak()
     bk = _define_bk()
-    delp = init_utils._initialize_delp(ak, bk, ps, shape)
-    pe = init_utils._initialize_edge_pressure(delp, tc_properties["ptop"], shape)
+    delp = init_utils.initialize_delp(ps, ak, bk)
+    pe = init_utils.initialize_edge_pressure(delp, tc_properties["ptop"])
     peln = np.log(pe)
     pk, pkz = init_utils.initialize_kappa_pressures(pe, peln, tc_properties["ptop"])
 
