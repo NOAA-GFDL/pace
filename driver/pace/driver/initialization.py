@@ -36,7 +36,7 @@ class Initializer(abc.ABC):
     def get_driver_state(
         self,
         quantity_factory: pace.util.QuantityFactory,
-        communicator: pace.util.CubedSphereCommunicator,
+        communicator: pace.util.Communicator,
         damping_coefficients: pace.util.grid.DampingCoefficients,
         driver_grid_data: pace.util.grid.DriverGridData,
         grid_data: pace.util.grid.GridData,
@@ -73,7 +73,7 @@ class InitializerSelector(Initializer):
     def get_driver_state(
         self,
         quantity_factory: pace.util.QuantityFactory,
-        communicator: pace.util.CubedSphereCommunicator,
+        communicator: pace.util.Communicator,
         damping_coefficients: pace.util.grid.DampingCoefficients,
         driver_grid_data: pace.util.grid.DriverGridData,
         grid_data: pace.util.grid.GridData,
@@ -105,7 +105,7 @@ class AnalyticInit(Initializer):
     def get_driver_state(
         self,
         quantity_factory: pace.util.QuantityFactory,
-        communicator: pace.util.CubedSphereCommunicator,
+        communicator: pace.util.Communicator,
         damping_coefficients: pace.util.grid.DampingCoefficients,
         driver_grid_data: pace.util.grid.DriverGridData,
         grid_data: pace.util.grid.GridData,
@@ -148,7 +148,7 @@ class RestartInit(Initializer):
     def get_driver_state(
         self,
         quantity_factory: pace.util.QuantityFactory,
-        communicator: pace.util.CubedSphereCommunicator,
+        communicator: pace.util.Communicator,
         damping_coefficients: pace.util.grid.DampingCoefficients,
         driver_grid_data: pace.util.grid.DriverGridData,
         grid_data: pace.util.grid.GridData,
@@ -197,7 +197,7 @@ class FortranRestartInit(Initializer):
     def get_driver_state(
         self,
         quantity_factory: pace.util.QuantityFactory,
-        communicator: pace.util.CubedSphereCommunicator,
+        communicator: pace.util.Communicator,
         damping_coefficients: pace.util.grid.DampingCoefficients,
         driver_grid_data: pace.util.grid.DriverGridData,
         grid_data: pace.util.grid.GridData,
@@ -246,7 +246,7 @@ class SerialboxInit(Initializer):
 
     def _get_serialized_grid(
         self,
-        communicator: pace.util.CubedSphereCommunicator,
+        communicator: pace.util.Communicator,
         backend: str,
     ) -> pace.stencils.testing.grid.Grid:  # type: ignore
         ser = self._serializer(communicator)
@@ -255,7 +255,7 @@ class SerialboxInit(Initializer):
         ).python_grid()
         return grid
 
-    def _serializer(self, communicator: pace.util.CubedSphereCommunicator):
+    def _serializer(self, communicator: pace.util.Communicator):
         import serialbox
 
         serializer = serialbox.Serializer(
@@ -268,7 +268,7 @@ class SerialboxInit(Initializer):
     def get_driver_state(
         self,
         quantity_factory: pace.util.QuantityFactory,
-        communicator: pace.util.CubedSphereCommunicator,
+        communicator: pace.util.Communicator,
         damping_coefficients: pace.util.grid.DampingCoefficients,
         driver_grid_data: pace.util.grid.DriverGridData,
         grid_data: pace.util.grid.GridData,
@@ -295,7 +295,7 @@ class SerialboxInit(Initializer):
 
     def _initialize_dycore_state(
         self,
-        communicator: pace.util.CubedSphereCommunicator,
+        communicator: pace.util.Communicator,
         backend: str,
     ) -> fv3core.DycoreState:
         grid = self._get_serialized_grid(communicator=communicator, backend=backend)
@@ -345,7 +345,7 @@ class PredefinedStateInit(Initializer):
     def get_driver_state(
         self,
         quantity_factory: pace.util.QuantityFactory,
-        communicator: pace.util.CubedSphereCommunicator,
+        communicator: pace.util.Communicator,
         damping_coefficients: pace.util.grid.DampingCoefficients,
         driver_grid_data: pace.util.grid.DriverGridData,
         grid_data: pace.util.grid.GridData,

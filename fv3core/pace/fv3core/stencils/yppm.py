@@ -156,7 +156,7 @@ def compute_al(q: FloatField, dya: FloatFieldIJ):
     Returns:
         q interpolated to y-interfaces
     """
-    from __externals__ import j_end, j_start, jord
+    from __externals__ import grid_type, j_end, j_start, jord
 
     compile_assert(jord < 8)
 
@@ -166,17 +166,21 @@ def compute_al(q: FloatField, dya: FloatFieldIJ):
         compile_assert(False)
         al = max(al, 0.0)
 
-    with horizontal(region[:, j_start - 1], region[:, j_end]):
-        al = ppm.c1 * q[0, -2, 0] + ppm.c2 * q[0, -1, 0] + ppm.c3 * q
-    with horizontal(region[:, j_start], region[:, j_end + 1]):
-        al = 0.5 * (
-            ((2.0 * dya[0, -1] + dya[0, -2]) * q[0, -1, 0] - dya[0, -1] * q[0, -2, 0])
-            / (dya[0, -2] + dya[0, -1])
-            + ((2.0 * dya[0, 0] + dya[0, 1]) * q[0, 0, 0] - dya[0, 0] * q[0, 1, 0])
-            / (dya[0, 0] + dya[0, 1])
-        )
-    with horizontal(region[:, j_start + 1], region[:, j_end + 2]):
-        al = ppm.c3 * q[0, -1, 0] + ppm.c2 * q[0, 0, 0] + ppm.c1 * q[0, 1, 0]
+    if __INLINED(grid_type < 3):
+        with horizontal(region[:, j_start - 1], region[:, j_end]):
+            al = ppm.c1 * q[0, -2, 0] + ppm.c2 * q[0, -1, 0] + ppm.c3 * q
+        with horizontal(region[:, j_start], region[:, j_end + 1]):
+            al = 0.5 * (
+                (
+                    (2.0 * dya[0, -1] + dya[0, -2]) * q[0, -1, 0]
+                    - dya[0, -1] * q[0, -2, 0]
+                )
+                / (dya[0, -2] + dya[0, -1])
+                + ((2.0 * dya[0, 0] + dya[0, 1]) * q[0, 0, 0] - dya[0, 0] * q[0, 1, 0])
+                / (dya[0, 0] + dya[0, 1])
+            )
+        with horizontal(region[:, j_start + 1], region[:, j_end + 2]):
+            al = ppm.c3 * q[0, -1, 0] + ppm.c2 * q[0, 0, 0] + ppm.c1 * q[0, 1, 0]
 
     return al
 
@@ -248,7 +252,7 @@ def bl_br_edges(bl, br, q, dya, al, dm):
 
 @gtscript.function
 def compute_blbr_ord8plus(q: FloatField, dya: FloatFieldIJ):
-    from __externals__ import j_end, j_start, jord
+    from __externals__ import grid_type, j_end, j_start, jord
 
     dm = dm_jord8plus(q)
     al = al_jord8plus(q, dm)
@@ -256,12 +260,14 @@ def compute_blbr_ord8plus(q: FloatField, dya: FloatFieldIJ):
     compile_assert(jord == 8)
 
     bl, br = blbr_jord8(q, al, dm)
-    bl, br = bl_br_edges(bl, br, q, dya, al, dm)
 
-    with horizontal(
-        region[:, j_start - 1 : j_start + 2], region[:, j_end - 1 : j_end + 2]
-    ):
-        bl, br = ppm.pert_ppm_standard_constraint_fcn(q, bl, br)
+    if __INLINED(grid_type < 3):
+        bl, br = bl_br_edges(bl, br, q, dya, al, dm)
+
+        with horizontal(
+            region[:, j_start - 1 : j_start + 2], region[:, j_end - 1 : j_end + 2]
+        ):
+            bl, br = ppm.pert_ppm_standard_constraint_fcn(q, bl, br)
 
     return bl, br
 
@@ -304,7 +310,7 @@ class YPiecewiseParabolic:
         # Arguments come from:
         # namelist.grid_type
         # grid.dya
-        assert grid_type < 3
+        assert (grid_type < 3) or (grid_type == 4)
         self._dya = dya
         ax_offsets = stencil_factory.grid_indexing.axis_offsets(origin, domain)
         self._compute_flux_stencil = stencil_factory.from_origin_domain(
@@ -315,6 +321,7 @@ class YPiecewiseParabolic:
                 "yt_minmax": True,
                 "j_start": ax_offsets["j_start"],
                 "j_end": ax_offsets["j_end"],
+                "grid_type": grid_type,
             },
             origin=origin,
             domain=domain,

@@ -81,7 +81,7 @@ def test_fv_dynamics(
                 extra_dim_lengths={},
                 layout=namelist.layout,
             ),
-            cube=communicator,
+            comm=communicator,
         ),
     )
     grid = get_grid(

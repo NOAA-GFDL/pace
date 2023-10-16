@@ -376,7 +376,7 @@ def configure_stencil(
     )
 
     grid_indexing = GridIndexing.from_sizer_and_communicator(
-        sizer=domain_configuration["sizer"], cube=domain_configuration["communicator"]
+        sizer=domain_configuration["sizer"], comm=domain_configuration["communicator"]
     )
 
     stencil_factory = StencilFactory(config=stencil_config, grid_indexing=grid_indexing)

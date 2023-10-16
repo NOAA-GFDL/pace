@@ -6,6 +6,7 @@ from gt4py.cartesian.gtscript import (
     horizontal,
     interval,
     region,
+    sqrt,
 )
 
 import pace.fv3core.stencils.basic_operations as basic
@@ -14,7 +15,10 @@ import pace.util
 from pace.dsl.dace.orchestration import dace_inhibitor, orchestrate
 from pace.dsl.stencil import StencilFactory, get_stencils_with_varied_bounds
 from pace.dsl.typing import Float, FloatField, FloatFieldIJ, FloatFieldK
-from pace.fv3core.stencils.a2b_ord4 import AGrid2BGridFourthOrder
+from pace.fv3core.stencils.a2b_ord4 import (
+    AGrid2BGridFourthOrder,
+    doubly_periodic_a2b_ord4,
+)
 from pace.fv3core.stencils.d2a2c_vect import contravariant
 from pace.util import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_DIM
 from pace.util.grid import DampingCoefficients, GridData
@@ -251,6 +255,50 @@ def smagorinsky_diffusion_approx(delpc: FloatField, vort: FloatField, absdt: Flo
         vort = absdt * (delpc ** 2.0 + vort ** 2.0) ** 0.5
 
 
+def smag_corner(
+    u: FloatField,
+    v: FloatField,
+    dx: FloatFieldIJ,
+    dxc: FloatFieldIJ,
+    dy: FloatFieldIJ,
+    dyc: FloatFieldIJ,
+    rarea: FloatFieldIJ,
+    rarea_c: FloatFieldIJ,
+    smag_c: FloatField,
+    dt: Float,
+):
+    """
+    Smagorinsky diffusion for a doubly-periodic domain
+    Args:
+        u (in): d-grid u wind
+        v (in): d-grid v wind
+        dx (in): Distance between grid corners along the x-direction
+        dxc (in): Distance between grid centers along the x-direction
+        dy (in): Distance between grid corners along the y-direction
+        dyc (in): Distance between grid centers along the y-direction
+        rarea (in): 1/cell area
+        rarea_c (in): 1/ c-grid cell area
+        smag_c (out): tension shear strain on cell corners
+        dt (in): timestep
+    """
+
+    with computation(PARALLEL), interval(...):
+        # compute tension strain at corners:
+        shear = 0.0
+
+        ut = u * dyc
+        vt = v * dxc
+        smag_c_t = rarea_c * (vt[0, -1, 0] - vt - ut[-1, 0, 0] + ut)
+
+        # compute shear strain:
+        vt2 = u * dx
+        ut2 = v * dy
+        wk = rarea * (vt2 - vt2[0, 1, 0] + ut2 - ut2[1, 0, 0])
+
+        shear = doubly_periodic_a2b_ord4(wk)
+        smag_c = dt * sqrt(shear ** 2 + smag_c_t ** 2)
+
+
 class DivergenceDamping:
     """
     A large section in Fortran's d_sw that applies divergence damping
@@ -277,7 +325,7 @@ class DivergenceDamping:
         )
         self.grid_indexing = stencil_factory.grid_indexing
         assert not nested, "nested not implemented"
-        assert grid_type < 3, "Not implemented, grid_type>=3, specifically smag_corner"
+        # assert grid_type < 3, "Not implemented, grid_type>=3"
         # TODO: make dddmp a compile-time external, instead of runtime scalar
         self._dddmp = dddmp
         # TODO: make da_min_c a compile-time external, instead of runtime scalar
@@ -287,6 +335,7 @@ class DivergenceDamping:
         self._grid_type = grid_type
         self._nord_column = nord_col
         self._d2_bg_column = d2_bg
+        self._rarea = grid_data.rarea
         self._rarea_c = grid_data.rarea_c
         self._sin_sg1 = grid_data.sin_sg1
         self._sin_sg2 = grid_data.sin_sg2
@@ -296,6 +345,8 @@ class DivergenceDamping:
         self._cosa_v = grid_data.cosa_v
         self._sina_u = grid_data.sina_u
         self._sina_v = grid_data.sina_v
+        self._dx = grid_data.dx
+        self._dy = grid_data.dy
         self._dxc = grid_data.dxc
         self._dyc = grid_data.dyc
         # TODO: maybe compute locally divg_* grid variables
@@ -433,21 +484,31 @@ class DivergenceDamping:
             compute_halos=(self.grid_indexing.n_halo, self.grid_indexing.n_halo),
         )
 
-        self.a2b_ord4 = AGrid2BGridFourthOrder(
-            stencil_factory=high_k_stencil_factory,
-            quantity_factory=quantity_factory,
-            grid_data=grid_data,
-            grid_type=self._grid_type,
-            replace=False,
-        )
+        if self._grid_type < 3:
+            self.a2b_ord4 = AGrid2BGridFourthOrder(
+                stencil_factory=high_k_stencil_factory,
+                quantity_factory=quantity_factory,
+                grid_data=grid_data,
+                grid_type=self._grid_type,
+                replace=False,
+            )
 
-        self._smagorinksy_diffusion_approx_stencil = (
-            high_k_stencil_factory.from_dims_halo(
-                func=smagorinsky_diffusion_approx,
+            self._smagorinksy_diffusion_approx_stencil = (
+                high_k_stencil_factory.from_dims_halo(
+                    func=smagorinsky_diffusion_approx,
+                    compute_dims=[X_INTERFACE_DIM, Y_INTERFACE_DIM, Z_DIM],
+                    compute_halos=(0, 0),
+                )
+            )
+        else:
+            self._smag_corner = high_k_stencil_factory.from_dims_halo(
+                func=smag_corner,
+                externals={
+                    "replace": False,
+                },
                 compute_dims=[X_INTERFACE_DIM, Y_INTERFACE_DIM, Z_DIM],
                 compute_halos=(0, 0),
             )
-        )
 
         self._damping_nord_highorder_stencil = high_k_stencil_factory.from_dims_halo(
             func=damping_nord_highorder_stencil,
@@ -614,12 +675,26 @@ class DivergenceDamping:
             # take the cell centered relative vorticity and regrid it to cell corners
             # for smagorinsky diffusion
             #
-            self.a2b_ord4(rel_vort_agrid, damped_rel_vort_bgrid)
-            self._smagorinksy_diffusion_approx_stencil(
-                delpc,
-                damped_rel_vort_bgrid,
-                abs(dt),
-            )
+            if self._grid_type < 3:
+                self.a2b_ord4(rel_vort_agrid, damped_rel_vort_bgrid)
+                self._smagorinksy_diffusion_approx_stencil(
+                    delpc,
+                    damped_rel_vort_bgrid,
+                    abs(dt),
+                )
+            else:
+                self._smag_corner(
+                    u,
+                    v,
+                    self._dx,
+                    self._dxc,
+                    self._dy,
+                    self._dyc,
+                    self._rarea,
+                    self._rarea_c,
+                    damped_rel_vort_bgrid,
+                    abs(dt),
+                )
 
         da_min: Float = self._get_da_min()
         if self._stretched_grid:

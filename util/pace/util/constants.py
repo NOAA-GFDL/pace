@@ -8,7 +8,7 @@ from pace.util.logging import pace_log
 # package and the other used for the Dycore. Their difference are small but significant
 # In addition the GSFC's GEOS model as its own variables
 class ConstantVersions(Enum):
-    FV3DYCORE = "FV3DYCORE"  # NOAA's FV3 dynamical core constants (original port)
+    GFDL = "GFDL"  # NOAA's FV3 dynamical core constants (original port)
     GFS = "GFS"  # Constant as defined in NOAA GFS
     GEOS = "GEOS"  # Constant as defined in GEOS v13
 
@@ -66,9 +66,7 @@ N_HALO_DEFAULT = 3
 if CONST_VERSION == ConstantVersions.GEOS:
     # 'qlcd' is exchanged in GEOS
     NQ = 9
-elif (
-    CONST_VERSION == ConstantVersions.GFS or CONST_VERSION == ConstantVersions.FV3DYCORE
-):
+elif CONST_VERSION == ConstantVersions.GFS or CONST_VERSION == ConstantVersions.GFDL:
     NQ = 8
 else:
     raise RuntimeError("Constant selector failed, bad code.")
@@ -104,7 +102,7 @@ elif CONST_VERSION == ConstantVersions.GFS:
     KAPPA = RDGAS / CP_AIR  # Specific heat capacity of dry air at
     TFREEZE = 273.15
     SAT_ADJUST_THRESHOLD = 1.0e-8
-elif CONST_VERSION == ConstantVersions.FV3DYCORE:
+elif CONST_VERSION == ConstantVersions.GFDL:
     RADIUS = 6371.0e3  # Radius of the Earth [m] #6371.0e3
     PI = 3.14159265358979323846  # 3.14159265358979323846
     OMEGA = 7.292e-5  # Rotation of the earth  # 7.292e-5

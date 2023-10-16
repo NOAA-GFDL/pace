@@ -10,7 +10,7 @@ from pace.dsl.caches.cache_location import identify_code_path
 from pace.dsl.caches.codepath import FV3CodePath
 from pace.dsl.gt4py_utils import is_gpu_backend
 from pace.util._optional_imports import cupy as cp
-from pace.util.communicator import CubedSphereCommunicator, CubedSpherePartitioner
+from pace.util.communicator import Communicator, Partitioner
 
 
 # This can be turned on to revert compilation for orchestration
@@ -19,7 +19,7 @@ from pace.util.communicator import CubedSphereCommunicator, CubedSpherePartition
 DEACTIVATE_DISTRIBUTED_DACE_COMPILE = False
 
 
-def _is_corner(rank: int, partitioner: CubedSpherePartitioner) -> bool:
+def _is_corner(rank: int, partitioner: Partitioner) -> bool:
     if partitioner.tile.on_tile_bottom(rank):
         if partitioner.tile.on_tile_left(rank):
             return True
@@ -55,7 +55,7 @@ def _smallest_rank_middle(x: int, y: int, layout: Tuple[int, int]):
 
 def _determine_compiling_ranks(
     config: "DaceConfig",
-    partitioner: CubedSpherePartitioner,
+    partitioner: Partitioner,
 ) -> bool:
     """
     We try to map every layout to a 3x3 layout which MPI ranks
@@ -149,7 +149,7 @@ class FrozenCompiledSDFG:
 class DaceConfig:
     def __init__(
         self,
-        communicator: Optional[CubedSphereCommunicator],
+        communicator: Optional[Communicator],
         backend: str,
         tile_nx: int = 0,
         tile_nz: int = 0,

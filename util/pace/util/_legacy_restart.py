@@ -5,7 +5,7 @@ from typing import BinaryIO, Generator, Iterable
 from . import _xarray as xr
 from . import constants, filesystem, io
 from ._properties import RESTART_PROPERTIES, RestartProperties
-from .communicator import CubedSphereCommunicator
+from .communicator import Communicator
 from .partitioner import get_tile_index
 from .quantity import Quantity
 
@@ -19,7 +19,7 @@ COUPLER_RES_NAME = "coupler.res"
 
 def open_restart(
     dirname: str,
-    communicator: CubedSphereCommunicator,
+    communicator: Communicator,
     label: str = "",
     only_names: Iterable[str] = None,
     to_state: dict = None,
@@ -29,7 +29,7 @@ def open_restart(
 
     Args:
         dirname: location of restart files, can be local or remote
-        communicator: object for communication over the cubed sphere
+        communicator: object for communication over the cubed sphere or tile
         label: prepended string on the restart files to load
         only_names (optional): list of standard names to load
         to_state (optional): if given, assign loaded data into pre-allocated quantities

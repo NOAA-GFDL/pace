@@ -22,7 +22,7 @@ def init_analytic_state(
     adiabatic: bool,
     hydrostatic: bool,
     moist_phys: bool,
-    comm: fv3util.CubedSphereCommunicator,
+    comm: fv3util.Communicator,
 ) -> DycoreState:
     """
     This method initializes the choosen analytic test case type
@@ -42,6 +42,8 @@ def init_analytic_state(
         if analytic_init_case == Cases.baroclinic.value:
             import pace.fv3core.initialization.test_cases.initialize_baroclinic as bc
 
+            assert isinstance(comm, fv3util.CubedSphereCommunicator)
+
             return bc.init_baroclinic_state(
                 grid_data=grid_data,
                 quantity_factory=quantity_factory,
@@ -53,6 +55,8 @@ def init_analytic_state(
 
         elif analytic_init_case == Cases.tropicalcyclone.value:
             import pace.fv3core.initialization.test_cases.initialize_tc as tc
+
+            assert isinstance(comm, fv3util.CubedSphereCommunicator)
 
             return tc.init_tc_state(
                 grid_data=grid_data,
