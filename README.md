@@ -70,7 +70,7 @@ After the run completes, you will see an output direcotry `output.zarr`. An exam
 ### Environment variable configuration
 
 - `PACE_CONSTANTS`: Pace is bundled with various constants (see _util/pace/util/constants.py_).
-  - `FV3DYCORE` NOAA's FV3 dynamical core constants (original port)
+  - `GFDL` NOAA's FV3 dynamical core constants (original port)
   - `GFS` Constant as defined in NOAA GFS
   - `GEOS`  Constant as defined in GEOS v13
 - `PACE_FLOAT_PRECISION`: default precision of the field & scalars in the numerics. Default to 64.
