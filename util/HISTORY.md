@@ -4,6 +4,8 @@ History
 latest
 ------
 
+- Added `fill_for_translate_test` to MetricTerms to fill fields with NaNs only when required for testing
+- Added `init_cartesian` method to MetricTerms to handle grid generation for orthogonal grids
 - Added `from_layout` and `size` methods to TileCommunicator and Communicator
 - Added `__init__` and `total_ranks` abstract methods to Partitioner
 - Added `grid_type` to MetricTerms and DriverGridData
