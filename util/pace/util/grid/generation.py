@@ -2616,37 +2616,37 @@ class MetricTerms:
             dtype=np.float64,
             allow_mismatch_float_precision=True,
         )
-        sina_u_64 = self.quantity_factory.zeros(
+        sina_u_64 = self.quantity_factory.ones(
             [util.X_INTERFACE_DIM, util.Y_DIM],
             "",
             dtype=np.float64,
             allow_mismatch_float_precision=True,
         )
-        sina_v_64 = self.quantity_factory.zeros(
+        sina_v_64 = self.quantity_factory.ones(
             [util.X_DIM, util.Y_INTERFACE_DIM],
             "",
             dtype=np.float64,
             allow_mismatch_float_precision=True,
         )
-        rsin_u_64 = self.quantity_factory.zeros(
+        rsin_u_64 = self.quantity_factory.ones(
             [util.X_INTERFACE_DIM, util.Y_DIM],
             "",
             dtype=np.float64,
             allow_mismatch_float_precision=True,
         )
-        rsin_v_64 = self.quantity_factory.zeros(
+        rsin_v_64 = self.quantity_factory.ones(
             [util.X_DIM, util.Y_INTERFACE_DIM],
             "",
             dtype=np.float64,
             allow_mismatch_float_precision=True,
         )
-        rsina_64 = self.quantity_factory.zeros(
+        rsina_64 = self.quantity_factory.ones(
             [util.X_INTERFACE_DIM, util.Y_INTERFACE_DIM],
             "",
             dtype=np.float64,
             allow_mismatch_float_precision=True,
         )
-        rsin2_64 = self.quantity_factory.zeros(
+        rsin2_64 = self.quantity_factory.ones(
             [util.X_DIM, util.Y_DIM],
             "",
             dtype=np.float64,
@@ -2658,33 +2658,20 @@ class MetricTerms:
             dtype=np.float64,
             allow_mismatch_float_precision=True,
         )
-        sina_64 = self.quantity_factory.zeros(
+        sina_64 = self.quantity_factory.ones(
             [util.X_INTERFACE_DIM, util.Y_INTERFACE_DIM],
             "",
             dtype=np.float64,
             allow_mismatch_float_precision=True,
         )
 
-        cosa_u_64.data[:, :] = 0.0
-        cosa_v_64.data[:, :] = 0.0
-        cosa_s_64.data[:, :] = 0.0
-        sina_u_64.data[:, :] = 1.0
-        sina_v_64.data[:, :] = 1.0
-        rsin_u_64.data[:, :] = 1.0
-        rsin_v_64.data[:, :] = 1.0
-        rsina_64.data[:, :] = 1.0
-        rsin2_64.data[:, :] = 1.0
-        cosa_64.data[:, :] = 0.0
-        sina_64.data[:, :] = 1.0
-
         for i in range(1, 10):
-            sin_sg = self.quantity_factory.zeros(
+            sin_sg = self.quantity_factory.ones(
                 [util.X_DIM, util.Y_DIM],
                 "",
                 dtype=np.float64,
                 allow_mismatch_float_precision=True,
             )
-            sin_sg.data[:, :] = 1.0
             setattr(
                 self,
                 f"_sin_sg{i}",
@@ -2698,7 +2685,6 @@ class MetricTerms:
                 dtype=np.float64,
                 allow_mismatch_float_precision=True,
             )
-            cos_sg.data[:, :] = 0.0
             setattr(
                 self,
                 f"_cos_sg{i}",
