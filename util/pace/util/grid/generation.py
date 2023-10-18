@@ -2238,10 +2238,7 @@ class MetricTerms:
             allow_mismatch_float_precision=True,
         )
         ew1_64.data[:, :, 0] = 1.0
-        ew1_64.data[:, :, 1:3] = 0.0
-        ew2_64.data[:, :, 0] = 0.0
         ew2_64.data[:, :, 1] = 1.0
-        ew2_64.data[:, :, 2] = 0.0
 
         ew1 = quantity_cast_to_model_float(self.quantity_factory, ew1_64)
         ew2 = quantity_cast_to_model_float(self.quantity_factory, ew2_64)
