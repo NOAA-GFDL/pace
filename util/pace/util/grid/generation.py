@@ -2283,10 +2283,7 @@ class MetricTerms:
             allow_mismatch_float_precision=True,
         )
         es1_64.data[:, :, 0] = 1.0
-        es1_64.data[:, :, 1:2] = 0.0
-        es2_64.data[:, :, 0] = 0.0
         es2_64.data[:, :, 1] = 1.0
-        es2_64.data[:, :, 2] = 0.0
 
         es1 = quantity_cast_to_model_float(self.quantity_factory, es1_64)
         es2 = quantity_cast_to_model_float(self.quantity_factory, es2_64)
