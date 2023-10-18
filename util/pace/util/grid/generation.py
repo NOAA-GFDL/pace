@@ -2187,10 +2187,7 @@ class MetricTerms:
             allow_mismatch_float_precision=True,
         )
         ec1_64.data[:, :, 0] = 1.0
-        ec1_64.data[:, :, 1:3] = 0.0
-        ec2_64.data[:, :, 0] = 0.0
         ec2_64.data[:, :, 1] = 1.0
-        ec2_64.data[:, :, 2] = 0.0
 
         ec1 = quantity_cast_to_model_float(self.quantity_factory, ec1_64)
         self._ec1_64 = ec1_64
