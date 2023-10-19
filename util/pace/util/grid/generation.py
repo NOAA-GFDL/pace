@@ -3375,7 +3375,7 @@ class MetricTerms:
         if self._z11_64 is None:
             self._z11, self._z12, self._z21, self._z22 = self._calculate_grid_z()
         if self._sin_sg5_64 is None:
-            if self._is_cartesian():
+            if self._is_cartesian:
                 self._init_cell_trigonometry_cartesian()
             else:
                 self._init_cell_trigonometry()
