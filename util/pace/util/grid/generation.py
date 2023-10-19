@@ -224,14 +224,12 @@ class MetricTerms:
         grid_type: int = 0,
         dx_const: float = 1000.0,
         dy_const: float = 1000.0,
-        deglat: float = 15.0,
-        fill_for_translate_test: bool = False,
+        deglat: float = 15.0
     ):
         self._grid_type = grid_type
         self._dx_const = dx_const
         self._dy_const = dy_const
         self._deglat = deglat
-        self._fill_for_translate_test = fill_for_translate_test
         self._halo = N_HALO_DEFAULT
         self._comm = communicator
         self._partitioner = self._comm.partitioner
@@ -394,8 +392,7 @@ class MetricTerms:
         grid_type: int = 0,
         dx_const: float = 1000.0,
         dy_const: float = 1000.0,
-        deglat: float = 15.0,
-        fill_for_translate_test: bool = False,
+        deglat: float = 15.0
     ) -> "MetricTerms":
         sizer = util.SubtileGridSizer.from_tile_params(
             nx_tile=npx - 1,
@@ -417,7 +414,6 @@ class MetricTerms:
             dx_const=dx_const,
             dy_const=dy_const,
             deglat=deglat,
-            fill_for_translate_test=fill_for_translate_test,
         )
 
     @property
