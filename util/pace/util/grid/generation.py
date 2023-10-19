@@ -225,6 +225,7 @@ class MetricTerms:
         dx_const: float = 1000.0,
         dy_const: float = 1000.0,
         deglat: float = 15.0,
+        calc_flag: bool = False,
     ):
         assert grid_type < 3
         self._grid_type = grid_type
@@ -366,8 +367,44 @@ class MetricTerms:
         self._vlon_64 = None
         self._vlat_64 = None
 
-        self._init_dgrid()
-        self._init_agrid()
+        if calc_flag is False:
+            self._init_dgrid()
+            self._init_agrid()
+
+    @classmethod
+    def from_generated(
+        cls,
+        x,
+        y,
+        dx,
+        dy,
+        area,
+        quantity_factory: util.QuantityFactory,
+        communicator: util.Communicator,
+        grid_type: int = 0,
+        dx_const: float = 1000.0,
+        dy_const: float = 1000.0,
+        deglat: float = 15.0,
+        calc_flag: bool = True,
+    ) -> "MetricTerms":
+        mt_obj = MetricTerms(
+            quantity_factory=quantity_factory,
+            communicator=communicator,
+            grid_type=grid_type,
+            dx_const=dx_const,
+            dy_const=dy_const,
+            deglat=deglat,
+            calc_flag=calc_flag,
+        )
+
+        mt_obj.grid.data[:, :, 0] = x
+        mt_obj.grid.data[:, :, 1] = y
+        mt_obj._dx = dx
+        mt_obj._dy = dy
+
+        mt_obj._init_agrid()
+
+        return mt_obj
 
     @classmethod
     def from_tile_sizing(
