@@ -1,6 +1,7 @@
 #!/usr/bin/env python3
 
 import os
+import pytest
 import numpy as np
 from pace.util.grid import set_hybrid_pressure_coefficients
 
@@ -68,7 +69,7 @@ bk_ref = np.array([
 
 def write_files(ak_in=ak_ref, bk_in=bk_ref, eta_file='./input/eta79.txt'):
 
-    """  write eta files for testing """
+    """  Write eta files for testing """
 
     if os.path.isfile(eta_file) : cleanup(eta_file)
     os.mkdir(input_dir)
@@ -78,24 +79,24 @@ def write_files(ak_in=ak_ref, bk_in=bk_ref, eta_file='./input/eta79.txt'):
 
 def cleanup(eta_file='./input/eta79.txt') :
 
-    """ remove input directory """
+    """ Remove input directory """
 
-    os.remove(eta_file)
-    os.rmdir(input_dir)
+    if( os.path.isfile(eta_file)  ) : os.remove(eta_file)
+    if( os.path.isfile(input_dir) ) : os.rmdir(input_dir)
 
 
-#@pytest.mark.xfail
+@pytest.mark.xfail
 def test_set_hybrid_pressure_coefficients_nofile() :
 
-    # file does not exist
+    """ File does not exist.  Test should fail """
+
     km = 79
-    try :
-        pressure_data = set_hybrid_pressure_coefficients( km )
-    except :
-        print("expected failure so success!")
+    pressure_data = set_hybrid_pressure_coefficients( km )
 
 
 def test_set_hybrid_pressure_coefficients_correct(km=79) :
+
+    """  Good values of ak, bk.  Test should pass """
 
     ak = ak_ref[:]
     bk = bk_ref[:]
@@ -120,21 +121,18 @@ def test_set_hybrid_pressure_coefficients_correct(km=79) :
     cleanup('./input/eta79.txt')
 
 
-#@pytest.mark.xfail
+@pytest.mark.xfail
 def test_set_hybrid_pressure_coefficients_nonincreasing(km=79) :
+
+    """
+    Array bk is not monotonically increasing.
+    Test is expected to fail
+    """
 
     ak = ak_ref[:]
     bk = bk_ref[:]
 
-    ak[10]=142. #random number
     bk[10]=142. #random number
 
     write_files(ak_in=ak, bk_in=bk, eta_file="./input/eta79.txt")
-    try :
-        pressure_data = set_hybrid_pressure_coefficients( km )
-    except :
-        print("expected failure so success!")
-
-test_set_hybrid_pressure_coefficients_nofile()
-test_set_hybrid_pressure_coefficients_correct( km=79 )
-test_set_hybrid_pressure_coefficients_nonincreasing( km=79 )
+    pressure_data = set_hybrid_pressure_coefficients( km )
