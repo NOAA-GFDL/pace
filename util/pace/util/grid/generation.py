@@ -371,6 +371,11 @@ class MetricTerms:
             self._init_dgrid()
             self._init_agrid()
 
+    # from_generated class method
+    # Generates a metric terms object, which will perform
+    # the same function as the __init__ method for MetricTerms
+    # initializing the dgrid by input from data contained in an
+    # externally generated tile file
     @classmethod
     def from_generated(
         cls,
