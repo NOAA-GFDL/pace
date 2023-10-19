@@ -136,3 +136,7 @@ def test_set_hybrid_pressure_coefficients_nonincreasing(km=79) :
 
     write_files(ak_in=ak, bk_in=bk, eta_file="./input/eta79.txt")
     pressure_data = set_hybrid_pressure_coefficients( km )
+
+
+def test_cleanup():
+    cleanup("./input/eta79.txt")
