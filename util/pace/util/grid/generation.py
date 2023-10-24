@@ -2198,7 +2198,7 @@ class MetricTerms:
         self._ec2_64 = ec2_64
         return ec1, ec2
 
-    def _calculate_vectors_west(self):
+    def _calculate_vectors_west_cube_sphere(self):
         ew1_64 = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_DIM, self.CARTESIAN_DIM],
             "",
@@ -2247,7 +2247,7 @@ class MetricTerms:
         ew2 = quantity_cast_to_model_float(self.quantity_factory, ew2_64)
         return ew1, ew2
 
-    def _calculate_vectors_south(self):
+    def _calculate_vectors_south_cube_sphere(self):
         es1_64 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_INTERFACE_DIM, self.CARTESIAN_DIM],
             "",
