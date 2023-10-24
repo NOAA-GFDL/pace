@@ -224,7 +224,7 @@ class MetricTerms:
         grid_type: int = 0,
         dx_const: float = 1000.0,
         dy_const: float = 1000.0,
-        deglat: float = 15.0
+        deglat: float = 15.0,
     ):
         self._grid_type = grid_type
         self._dx_const = dx_const
@@ -371,11 +371,34 @@ class MetricTerms:
         self._vlon_64 = None
         self._vlat_64 = None
 
+        # Initialize grids and configure internal numerics
         if grid_type == 4:
-            self._is_cartesian = True
+            self._compute_dxdy = self._compute_dxdy_cartesian
+            self._compute_dxdy_agrid = self._compute_dxdy_agrid_cartesian
+            self._compute_dxdy_center = self._compute_dxdy_center_cartesian
+            self._compute_area = self._compute_area_cartesian
+            self._compute_area_c = self._compute_area_c_cartesian
+            self._calculate_center_vectors = self._calculate_center_vectors_cartesian
+            self._calculate_vectors_west = self._calculate_vectors_west_cartesian
+            self._calculate_vectors_south = self._calculate_vectors_south_cartesian
+            self._init_cell_trigonometry = self._init_cell_trigonometry_cartesian
+            self._calculate_latlon_momentum_correction = self._calculate_latlon_momentum_correction_cartesian
+            self._calculate_xy_unit_vectors = self._calculate_xy_unit_vectors_cartesian
+            self._calculate_unit_vectors_lonlat = self._calculate_unit_vectors_lonlat_cartesian
             self._init_cartesian()
         elif grid_type < 3:
-            self._is_cartesian = False
+            self._compute_dxdy = self._compute_dxdy_cube_sphere
+            self._compute_dxdy_agrid = self._compute_dxdy_agrid_cube_sphere
+            self._compute_dxdy_center = self._compute_dxdy_center_cube_sphere
+            self._compute_area = self._compute_area_cube_sphere
+            self._compute_area_c = self._compute_area_c_cube_sphere
+            self._calculate_center_vectors = self._calculate_center_vectors_cube_sphere
+            self._calculate_vectors_west = self._calculate_vectors_west_cube_sphere
+            self._calculate_vectors_south = self._calculate_vectors_south_cube_sphere
+            self._init_cell_trigonometry = self._init_cell_trigonometry_cube_sphere
+            self._calculate_latlon_momentum_correction = self._calculate_latlon_momentum_correction_cube_sphere
+            self._calculate_xy_unit_vectors = self._calculate_xy_unit_vectors_cube_sphere
+            self._calculate_unit_vectors_lonlat = self._calculate_unit_vectors_lonlat_cube_sphere
             self._init_dgrid()
             self._init_agrid()
         else:
@@ -392,7 +415,7 @@ class MetricTerms:
         grid_type: int = 0,
         dx_const: float = 1000.0,
         dy_const: float = 1000.0,
-        deglat: float = 15.0
+        deglat: float = 15.0,
     ) -> "MetricTerms":
         sizer = util.SubtileGridSizer.from_tile_params(
             nx_tile=npx - 1,
@@ -500,11 +523,7 @@ class MetricTerms:
         the distance between grid corners along the x-direction
         """
         if self._dx is None:
-            self._dx, self._dy = (
-                self._compute_dxdy_cartesian()
-                if self._is_cartesian
-                else self._compute_dxdy()
-            )
+            self._dx, self._dy = self._compute_dxdy()
         return self._dx
 
     @property
@@ -513,11 +532,7 @@ class MetricTerms:
         the distance between grid corners along the y-direction
         """
         if self._dy is None:
-            self._dx, self._dy = (
-                self._compute_dxdy_cartesian()
-                if self._is_cartesian
-                else self._compute_dxdy()
-            )
+            self._dx, self._dy = self._compute_dxdy()
         return self._dy
 
     @property
@@ -526,11 +541,7 @@ class MetricTerms:
         the with of each grid cell along the x-direction
         """
         if self._dx_agrid is None:
-            self._dx_agrid, self._dy_agrid = (
-                self._compute_dxdy_agrid_cartesian()
-                if self._is_cartesian
-                else self._compute_dxdy_agrid()
-            )
+            self._dx_agrid, self._dy_agrid = self._compute_dxdy_agrid()
         return self._dx_agrid
 
     @property
@@ -539,11 +550,7 @@ class MetricTerms:
         the with of each grid cell along the y-direction
         """
         if self._dy_agrid is None:
-            self._dx_agrid, self._dy_agrid = (
-                self._compute_dxdy_agrid_cartesian()
-                if self._is_cartesian
-                else self._compute_dxdy_agrid()
-            )
+            self._dx_agrid, self._dy_agrid = self._compute_dxdy_agrid()
         return self._dy_agrid
 
     @property
@@ -552,11 +559,7 @@ class MetricTerms:
         the distance between cell centers along the x-direction
         """
         if self._dx_center is None:
-            self._dx_center, self._dy_center = (
-                self._compute_dxdy_center_cartesian()
-                if self._is_cartesian
-                else self._compute_dxdy_center()
-            )
+            self._dx_center, self._dy_center = self._compute_dxdy_center()
         return self._dx_center
 
     @property
@@ -565,11 +568,7 @@ class MetricTerms:
         the distance between cell centers along the y-direction
         """
         if self._dy_center is None:
-            self._dx_center, self._dy_center = (
-                self._compute_dxdy_center_cartesian()
-                if self._is_cartesian
-                else self._compute_dxdy_center()
-            )
+            self._dx_center, self._dy_center = self._compute_dxdy_center()
         return self._dy_center
 
     @property
@@ -638,11 +637,7 @@ class MetricTerms:
         3d array whose last dimension is length 3 and indicates cartesian x/y/z value
         """
         if self._ec1 is None:
-            self._ec1, self._ec2 = (
-                self._calculate_center_vectors_cartesian()
-                if self._is_cartesian
-                else self._calculate_center_vectors()
-            )
+            self._ec1, self._ec2 = self._calculate_center_vectors()
         return self._ec1
 
     @property
@@ -653,11 +648,7 @@ class MetricTerms:
         3d array whose last dimension is length 3 and indicates cartesian x/y/z value
         """
         if self._ec2 is None:
-            self._ec1, self._ec2 = (
-                self._calculate_center_vectors_cartesian()
-                if self._is_cartesian
-                else self._calculate_center_vectors()
-            )
+            self._ec1, self._ec2 = self._calculate_center_vectors()
         return self._ec2
 
     @property
@@ -668,11 +659,7 @@ class MetricTerms:
         3d array whose last dimension is length 3 and indicates cartesian x/y/z value
         """
         if self._ew1 is None:
-            self._ew1, self._ew2 = (
-                self._calculate_vectors_west_cartesian()
-                if self._is_cartesian
-                else self._calculate_vectors_west()
-            )
+            self._ew1, self._ew2 = self._calculate_vectors_west()
         return self._ew1
 
     @property
@@ -683,11 +670,7 @@ class MetricTerms:
         3d array whose last dimension is length 3 and indicates cartesian x/y/z value
         """
         if self._ew2 is None:
-            self._ew1, self._ew2 = (
-                self._calculate_vectors_west_cartesian()
-                if self._is_cartesian
-                else self._calculate_vectors_west()
-            )
+            self._ew1, self._ew2 = self._calculate_vectors_west()
         return self._ew2
 
     @property
@@ -701,10 +684,7 @@ class MetricTerms:
         6---2---7
         """
         if self._cos_sg1 is None:
-            if self._is_cartesian:
-                self._init_cell_trigonometry_cartesian()
-            else:
-                self._init_cell_trigonometry()
+            self._init_cell_trigonometry()
         return self._cos_sg1
 
     @property
@@ -718,10 +698,7 @@ class MetricTerms:
         6---2---7
         """
         if self._cos_sg2 is None:
-            if self._is_cartesian:
-                self._init_cell_trigonometry_cartesian()
-            else:
-                self._init_cell_trigonometry()
+            self._init_cell_trigonometry()
         return self._cos_sg2
 
     @property
@@ -735,10 +712,7 @@ class MetricTerms:
         6---2---7
         """
         if self._cos_sg3 is None:
-            if self._is_cartesian:
-                self._init_cell_trigonometry_cartesian()
-            else:
-                self._init_cell_trigonometry()
+            self._init_cell_trigonometry()
         return self._cos_sg3
 
     @property
@@ -752,10 +726,7 @@ class MetricTerms:
         6---2---7
         """
         if self._cos_sg4 is None:
-            if self._is_cartesian:
-                self._init_cell_trigonometry_cartesian()
-            else:
-                self._init_cell_trigonometry()
+            self._init_cell_trigonometry()
         return self._cos_sg4
 
     @property
@@ -770,10 +741,7 @@ class MetricTerms:
         The inner product of ec1 and ec2 for point 5
         """
         if self._cos_sg5 is None:
-            if self._is_cartesian:
-                self._init_cell_trigonometry_cartesian()
-            else:
-                self._init_cell_trigonometry()
+            self._init_cell_trigonometry()
         return self._cos_sg5
 
     @property
@@ -787,10 +755,7 @@ class MetricTerms:
         6---2---7
         """
         if self._cos_sg6 is None:
-            if self._is_cartesian:
-                self._init_cell_trigonometry_cartesian()
-            else:
-                self._init_cell_trigonometry()
+            self._init_cell_trigonometry()
         return self._cos_sg6
 
     @property
@@ -804,10 +769,7 @@ class MetricTerms:
         6---2---7
         """
         if self._cos_sg7 is None:
-            if self._is_cartesian:
-                self._init_cell_trigonometry_cartesian()
-            else:
-                self._init_cell_trigonometry()
+            self._init_cell_trigonometry()
         return self._cos_sg7
 
     @property
@@ -821,10 +783,7 @@ class MetricTerms:
         6---2---7
         """
         if self._cos_sg8 is None:
-            if self._is_cartesian:
-                self._init_cell_trigonometry_cartesian()
-            else:
-                self._init_cell_trigonometry()
+            self._init_cell_trigonometry()
         return self._cos_sg8
 
     @property
@@ -838,10 +797,7 @@ class MetricTerms:
         6---2---7
         """
         if self._cos_sg9 is None:
-            if self._is_cartesian:
-                self._init_cell_trigonometry_cartesian()
-            else:
-                self._init_cell_trigonometry()
+            self._init_cell_trigonometry()
         return self._cos_sg9
 
     @property
@@ -855,10 +811,7 @@ class MetricTerms:
         6---2---7
         """
         if self._sin_sg1 is None:
-            if self._is_cartesian:
-                self._init_cell_trigonometry_cartesian()
-            else:
-                self._init_cell_trigonometry()
+            self._init_cell_trigonometry()
         return self._sin_sg1
 
     @property
@@ -872,10 +825,7 @@ class MetricTerms:
         6---2---7
         """
         if self._sin_sg2 is None:
-            if self._is_cartesian:
-                self._init_cell_trigonometry_cartesian()
-            else:
-                self._init_cell_trigonometry()
+            self._init_cell_trigonometry()
         return self._sin_sg2
 
     @property
@@ -889,10 +839,7 @@ class MetricTerms:
         6---2---7
         """
         if self._sin_sg3 is None:
-            if self._is_cartesian:
-                self._init_cell_trigonometry_cartesian()
-            else:
-                self._init_cell_trigonometry()
+            self._init_cell_trigonometry()
         return self._sin_sg3
 
     @property
@@ -906,10 +853,7 @@ class MetricTerms:
         6---2---7
         """
         if self._sin_sg4 is None:
-            if self._is_cartesian:
-                self._init_cell_trigonometry_cartesian()
-            else:
-                self._init_cell_trigonometry()
+            self._init_cell_trigonometry()
         return self._sin_sg4
 
     @property
@@ -924,10 +868,7 @@ class MetricTerms:
         For the center point this is one minus the inner product of ec1 and ec2 squared
         """
         if self._sin_sg5 is None:
-            if self._is_cartesian:
-                self._init_cell_trigonometry_cartesian()
-            else:
-                self._init_cell_trigonometry()
+            self._init_cell_trigonometry()
         return self._sin_sg5
 
     @property
@@ -941,10 +882,7 @@ class MetricTerms:
         6---2---7
         """
         if self._sin_sg6 is None:
-            if self._is_cartesian:
-                self._init_cell_trigonometry_cartesian()
-            else:
-                self._init_cell_trigonometry()
+            self._init_cell_trigonometry()
         return self._sin_sg6
 
     @property
@@ -958,10 +896,7 @@ class MetricTerms:
         6---2---7
         """
         if self._sin_sg7 is None:
-            if self._is_cartesian:
-                self._init_cell_trigonometry_cartesian()
-            else:
-                self._init_cell_trigonometry()
+            self._init_cell_trigonometry()
         return self._sin_sg7
 
     @property
@@ -975,10 +910,7 @@ class MetricTerms:
         6---2---7
         """
         if self._sin_sg8 is None:
-            if self._is_cartesian:
-                self._init_cell_trigonometry_cartesian()
-            else:
-                self._init_cell_trigonometry()
+            self._init_cell_trigonometry()
         return self._sin_sg8
 
     @property
@@ -992,10 +924,7 @@ class MetricTerms:
         6---2---7
         """
         if self._sin_sg9 is None:
-            if self._is_cartesian:
-                self._init_cell_trigonometry_cartesian()
-            else:
-                self._init_cell_trigonometry()
+            self._init_cell_trigonometry()
         return self._sin_sg9
 
     @property
@@ -1005,10 +934,7 @@ class MetricTerms:
         averaged to ensure consistent answers
         """
         if self._cosa is None:
-            if self._is_cartesian:
-                self._init_cell_trigonometry_cartesian()
-            else:
-                self._init_cell_trigonometry()
+            self._init_cell_trigonometry()
         return self._cosa
 
     @property
@@ -1017,10 +943,7 @@ class MetricTerms:
         as cosa but sine
         """
         if self._sina is None:
-            if self._is_cartesian:
-                self._init_cell_trigonometry_cartesian()
-            else:
-                self._init_cell_trigonometry()
+            self._init_cell_trigonometry()
         return self._sina
 
     @property
@@ -1029,10 +952,7 @@ class MetricTerms:
         as cosa but defined at the left and right cell edges
         """
         if self._cosa_u is None:
-            if self._is_cartesian:
-                self._init_cell_trigonometry_cartesian()
-            else:
-                self._init_cell_trigonometry()
+            self._init_cell_trigonometry()
         return self._cosa_u
 
     @property
@@ -1041,10 +961,7 @@ class MetricTerms:
         as cosa but defined at the top and bottom cell edges
         """
         if self._cosa_v is None:
-            if self._is_cartesian:
-                self._init_cell_trigonometry_cartesian()
-            else:
-                self._init_cell_trigonometry()
+            self._init_cell_trigonometry()
         return self._cosa_v
 
     @property
@@ -1053,10 +970,7 @@ class MetricTerms:
         as cosa but defined at cell centers
         """
         if self._cosa_s is None:
-            if self._is_cartesian:
-                self._init_cell_trigonometry_cartesian()
-            else:
-                self._init_cell_trigonometry()
+            self._init_cell_trigonometry()
         return self._cosa_s
 
     @property
@@ -1065,10 +979,7 @@ class MetricTerms:
         as cosa_u but with sine
         """
         if self._sina_u is None:
-            if self._is_cartesian:
-                self._init_cell_trigonometry_cartesian()
-            else:
-                self._init_cell_trigonometry()
+            self._init_cell_trigonometry()
         return self._sina_u
 
     @property
@@ -1077,10 +988,7 @@ class MetricTerms:
         as cosa_v but with sine
         """
         if self._sina_v is None:
-            if self._is_cartesian:
-                self._init_cell_trigonometry_cartesian()
-            else:
-                self._init_cell_trigonometry()
+            self._init_cell_trigonometry()
         return self._sina_v
 
     @property
@@ -1090,10 +998,7 @@ class MetricTerms:
         defined as the inverse-squrared as it is only used as such
         """
         if self._rsin_u is None:
-            if self._is_cartesian:
-                self._init_cell_trigonometry_cartesian()
-            else:
-                self._init_cell_trigonometry()
+            self._init_cell_trigonometry()
         return self._rsin_u
 
     @property
@@ -1103,10 +1008,7 @@ class MetricTerms:
         defined as the inverse-squrared as it is only used as such
         """
         if self._rsin_v is None:
-            if self._is_cartesian:
-                self._init_cell_trigonometry_cartesian()
-            else:
-                self._init_cell_trigonometry()
+            self._init_cell_trigonometry()
         return self._rsin_v
 
     @property
@@ -1116,10 +1018,7 @@ class MetricTerms:
         defined as the inverse-squrared as it is only used as such
         """
         if self._rsina is None:
-            if self._is_cartesian:
-                self._init_cell_trigonometry_cartesian()
-            else:
-                self._init_cell_trigonometry()
+            self._init_cell_trigonometry()
         return self._rsina
 
     @property
@@ -1129,10 +1028,7 @@ class MetricTerms:
         defined as the inverse-squrared as it is only used as such
         """
         if self._rsin2 is None:
-            if self._is_cartesian:
-                self._init_cell_trigonometry_cartesian()
-            else:
-                self._init_cell_trigonometry()
+            self._init_cell_trigonometry()
         return self._rsin2
 
     @property
@@ -1142,11 +1038,7 @@ class MetricTerms:
         from lat/lon to cartesian coordinates
         """
         if self._l2c_v is None:
-            self._l2c_v, self._l2c_u = (
-                self._calculate_latlon_momentum_correction_cartesian()
-                if self._is_cartesian
-                else self._calculate_latlon_momentum_correction()
-            )
+            self._l2c_v, self._l2c_u = self._calculate_latlon_momentum_correction()
         return self._l2c_v
 
     @property
@@ -1156,11 +1048,7 @@ class MetricTerms:
         from lat/lon to cartesian coordinates
         """
         if self._l2c_u is None:
-            self._l2c_v, self._l2c_u = (
-                self._calculate_latlon_momentum_correction_cartesian()
-                if self._is_cartesian
-                else self._calculate_latlon_momentum_correction()
-            )
+            self._l2c_v, self._l2c_u = self._calculate_latlon_momentum_correction()
         return self._l2c_u
 
     @property
@@ -1171,11 +1059,7 @@ class MetricTerms:
         3d array whose last dimension is length 3 and indicates cartesian x/y/z value
         """
         if self._es1 is None:
-            self._es1, self._es2 = (
-                self._calculate_vectors_south_cartesian()
-                if self._is_cartesian
-                else self._calculate_vectors_south()
-            )
+            self._es1, self._es2 = self._calculate_vectors_south()
         return self._es1
 
     @property
@@ -1186,11 +1070,7 @@ class MetricTerms:
         3d array whose last dimension is length 3 and indicates cartesian x/y/z value
         """
         if self._es2 is None:
-            self._es1, self._es2 = (
-                self._calculate_vectors_south_cartesian()
-                if self._is_cartesian
-                else self._calculate_vectors_south()
-            )
+            self._es1, self._es2 = self._calculate_vectors_south()
         return self._es2
 
     @property
@@ -1201,11 +1081,7 @@ class MetricTerms:
         3d array whose last dimension is length 3 and indicates cartesian x/y/z value
         """
         if self._ee1 is None:
-            self._ee1, self._ee2 = (
-                self._calculate_xy_unit_vectors_cartesian()
-                if self._is_cartesian
-                else self._calculate_xy_unit_vectors()
-            )
+            self._ee1, self._ee2 = self._calculate_xy_unit_vectors()
         return self._ee1
 
     @property
@@ -1216,11 +1092,7 @@ class MetricTerms:
         3d array whose last dimension is length 3 and indicates cartesian x/y/z value
         """
         if self._ee2 is None:
-            self._ee1, self._ee2 = (
-                self._calculate_xy_unit_vectors_cartesian()
-                if self._is_cartesian
-                else self._calculate_xy_unit_vectors()
-            )
+            self._ee1, self._ee2 = self._calculate_xy_unit_vectors()
         return self._ee2
 
     @property
@@ -1286,11 +1158,7 @@ class MetricTerms:
         3d array whose last dimension is length 3 and indicates x/y/z value
         """
         if self._vlon is None:
-            self._vlon, self._vlat = (
-                self._calculate_unit_vectors_lonlat_cartesian()
-                if self._is_cartesian
-                else self._calculate_unit_vectors_lonlat()
-            )
+            self._vlon, self._vlat = self._calculate_unit_vectors_lonlat()
         return self._vlon
 
     @property
@@ -1300,11 +1168,7 @@ class MetricTerms:
         3d array whose last dimension is length 3 and indicates x/y/z value
         """
         if self._vlat is None:
-            self._vlon, self._vlat = (
-                self._calculate_unit_vectors_lonlat_cartesian()
-                if self._is_cartesian
-                else self._calculate_unit_vectors_lonlat()
-            )
+            self._vlon, self._vlat = self._calculate_unit_vectors_lonlat()
         return self._vlat
 
     @property
@@ -1571,11 +1435,7 @@ class MetricTerms:
         the area of each a-grid cell
         """
         if self._area is None:
-            self._area = (
-                self._compute_area_cartesian()
-                if self._is_cartesian
-                else self._compute_area()
-            )
+            self._area = self._compute_area()
         return self._area
 
     @property
@@ -1584,11 +1444,7 @@ class MetricTerms:
         the area of each c-grid cell
         """
         if self._area_c is None:
-            self._area_c = (
-                self._compute_area_c_cartesian()
-                if self._is_cartesian
-                else self._compute_area_c()
-            )
+            self._area_c = self._compute_area_c()
         return self._area_c
 
     @cached_property
@@ -1935,7 +1791,7 @@ class MetricTerms:
             direction="y",
         )
 
-    def _compute_dxdy(self):
+    def _compute_dxdy_cube_sphere(self):
         dx_64 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_INTERFACE_DIM],
             "m",
@@ -2009,7 +1865,7 @@ class MetricTerms:
 
         return dx, dy
 
-    def _compute_dxdy_agrid(self):
+    def _compute_dxdy_agrid_cube_sphere(self):
         dx_agrid_64 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_DIM],
             "m",
@@ -2080,7 +1936,7 @@ class MetricTerms:
 
         return dx_agrid, dy_agrid
 
-    def _compute_dxdy_center(self):
+    def _compute_dxdy_center_cube_sphere(self):
         dx_center_64 = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_DIM],
             "m",
@@ -2179,7 +2035,7 @@ class MetricTerms:
 
         return dx_center, dy_center
 
-    def _compute_area(self):
+    def _compute_area_cube_sphere(self):
         area_64 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_DIM],
             "m^2",
@@ -2208,7 +2064,7 @@ class MetricTerms:
         area_64.data[:, :] = self._dx_const * self._dy_const
         return quantity_cast_to_model_float(self.quantity_factory, area_64)
 
-    def _compute_area_c(self):
+    def _compute_area_c_cube_sphere(self):
         area_cgrid_64 = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_INTERFACE_DIM],
             "m^2",
@@ -2290,7 +2146,7 @@ class MetricTerms:
         bk.data[:] = asarray(pressure_coefficients.bk, type(bk.data))
         return ks, ptop, ak, bk
 
-    def _calculate_center_vectors(self):
+    def _calculate_center_vectors_cube_sphere(self):
         ec1_64 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_DIM, self.CARTESIAN_DIM],
             "",
@@ -2538,7 +2394,7 @@ class MetricTerms:
             quantity_cast_to_model_float(self.quantity_factory, rsin2_64),
         )
 
-    def _init_cell_trigonometry(self):
+    def _init_cell_trigonometry_cube_sphere(self):
         cosa_u_64 = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_DIM],
             "",
@@ -2615,11 +2471,7 @@ class MetricTerms:
         #  6---2---7
 
         if self._ec1_64 is None:
-            self._ec1, self._ec2 = (
-                self._calculate_center_vectors_cartesian()
-                if self._is_cartesian
-                else self._calculate_center_vectors()
-            )
+            self._ec1, self._ec2 = self._calculate_center_vectors()
 
         cos_sg, sin_sg = calculate_supergrid_cos_sin(
             self._dgrid_xyz_64,
@@ -2989,7 +2841,7 @@ class MetricTerms:
         self._rsina = quantity_cast_to_model_float(self.quantity_factory, rsina_64)
         self._rsin2 = quantity_cast_to_model_float(self.quantity_factory, rsin2_64)
 
-    def _calculate_latlon_momentum_correction(self):
+    def _calculate_latlon_momentum_correction_cube_sphere(self):
         l2c_v_64 = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_DIM],
             "",
@@ -3033,7 +2885,7 @@ class MetricTerms:
 
         return l2c_v, l2c_u
 
-    def _calculate_xy_unit_vectors(self):
+    def _calculate_xy_unit_vectors_cube_sphere(self):
         ee1_64 = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_INTERFACE_DIM, self.CARTESIAN_DIM],
             "",
@@ -3115,22 +2967,11 @@ class MetricTerms:
         ]
         sin_sg = self._np.array(sin_sg).transpose(1, 2, 0)
         if self._sina_u_64 is None:
-            if self._is_cartesian:
-                self._init_cell_trigonometry_cartesian()
-            else:
-                self._init_cell_trigonometry()
+            self._init_cell_trigonometry()
         if self._dx_64 is None:
-            self._dx, self._dy = (
-                self._compute_dxdy_cartesian()
-                if self._is_cartesian
-                else self._compute_dxdy()
-            )
+            self._dx, self._dy = self._compute_dxdy()
         if self._dxc_64 is None:
-            self._dx_center, self._dy_center = (
-                self._compute_dxdy_center_cartesian()
-                if self._is_cartesian
-                else self._compute_dxdy_center()
-            )
+            self._dx_center, self._dy_center = self._compute_dxdy_center()
         (
             divg_u_64.data[:-1, :],
             divg_v_64.data[:, :-1],
@@ -3231,7 +3072,7 @@ class MetricTerms:
         self._del6_v = quantity_cast_to_model_float(self.quantity_factory, del6_v_64)
         self._del6_u = quantity_cast_to_model_float(self.quantity_factory, del6_u_64)
 
-    def _calculate_unit_vectors_lonlat(self):
+    def _calculate_unit_vectors_lonlat_cube_sphere(self):
         vlon_64 = self.quantity_factory.zeros(
             [util.X_DIM, util.Y_DIM, self.CARTESIAN_DIM],
             "",
@@ -3306,17 +3147,9 @@ class MetricTerms:
         )
 
         if self._ec1_64 is None:
-            self._ec1, self._ec2 = (
-                self._calculate_center_vectors_cartesian()
-                if self._is_cartesian
-                else self._calculate_center_vectors()
-            )
+            self._ec1, self._ec2 = self._calculate_center_vectors()
         if self._vlon_64 is None:
-            self._vlon, self._vlat = (
-                self._calculate_center_vectors_cartesian()
-                if self._is_cartesian
-                else self._calculate_unit_vectors_lonlat()
-            )
+            self._vlon, self._vlat = self._calculate_unit_vectors_lonlat()
 
         (
             z11_64.data[:-1, :-1],
@@ -3371,10 +3204,7 @@ class MetricTerms:
         if self._z11_64 is None:
             self._z11, self._z12, self._z21, self._z22 = self._calculate_grid_z()
         if self._sin_sg5_64 is None:
-            if self._is_cartesian:
-                self._init_cell_trigonometry_cartesian()
-            else:
-                self._init_cell_trigonometry()
+            self._init_cell_trigonometry()
 
         (
             a11_64.data[:-1, :-1],
