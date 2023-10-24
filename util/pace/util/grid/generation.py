@@ -382,9 +382,13 @@ class MetricTerms:
             self._calculate_vectors_west = self._calculate_vectors_west_cartesian
             self._calculate_vectors_south = self._calculate_vectors_south_cartesian
             self._init_cell_trigonometry = self._init_cell_trigonometry_cartesian
-            self._calculate_latlon_momentum_correction = self._calculate_latlon_momentum_correction_cartesian
+            self._calculate_latlon_momentum_correction = (
+                self._calculate_latlon_momentum_correction_cartesian
+            )
             self._calculate_xy_unit_vectors = self._calculate_xy_unit_vectors_cartesian
-            self._calculate_unit_vectors_lonlat = self._calculate_unit_vectors_lonlat_cartesian
+            self._calculate_unit_vectors_lonlat = (
+                self._calculate_unit_vectors_lonlat_cartesian
+            )
             self._init_cartesian()
         elif grid_type < 3:
             self._compute_dxdy = self._compute_dxdy_cube_sphere
@@ -396,9 +400,15 @@ class MetricTerms:
             self._calculate_vectors_west = self._calculate_vectors_west_cube_sphere
             self._calculate_vectors_south = self._calculate_vectors_south_cube_sphere
             self._init_cell_trigonometry = self._init_cell_trigonometry_cube_sphere
-            self._calculate_latlon_momentum_correction = self._calculate_latlon_momentum_correction_cube_sphere
-            self._calculate_xy_unit_vectors = self._calculate_xy_unit_vectors_cube_sphere
-            self._calculate_unit_vectors_lonlat = self._calculate_unit_vectors_lonlat_cube_sphere
+            self._calculate_latlon_momentum_correction = (
+                self._calculate_latlon_momentum_correction_cube_sphere
+            )
+            self._calculate_xy_unit_vectors = (
+                self._calculate_xy_unit_vectors_cube_sphere
+            )
+            self._calculate_unit_vectors_lonlat = (
+                self._calculate_unit_vectors_lonlat_cube_sphere
+            )
             self._init_dgrid()
             self._init_agrid()
         else:
@@ -410,7 +420,7 @@ class MetricTerms:
         npx: int,
         npy: int,
         npz: int,
-        communicator: util.CubedSphereCommunicator,
+        communicator: util.Communicator,
         backend: str,
         grid_type: int = 0,
         dx_const: float = 1000.0,
