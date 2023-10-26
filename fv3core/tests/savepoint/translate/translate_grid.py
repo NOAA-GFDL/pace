@@ -510,6 +510,10 @@ class TranslateInitGrid(ParallelTranslateGrid):
             npz=1,
             communicator=communicator,
             backend=self.stencil_factory.backend,
+            grid_type=namelist.grid_type,
+            dx_const=namelist.dx_const,
+            dy_const=namelist.dy_const,
+            deglat=namelist.deglat,
         )
         state = {}
         for metric_term, metadata in self.outputs.items():
@@ -2314,6 +2318,10 @@ class TranslateInitGridUtils(ParallelTranslateGrid):
             npz=int(inputs["npz"]),
             communicator=communicator,
             backend=self.stencil_factory.backend,
+            grid_type=namelist.grid_type,
+            dx_const=namelist.dx_const,
+            dy_const=namelist.dy_const,
+            deglat=namelist.deglat,
         )
         input_state = self.state_from_inputs(inputs)
         grid_generator._grid = input_state["grid"]
