@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 
+from .utils import compute_eta
 import numpy as np
 import os
 
@@ -50,9 +51,14 @@ def set_hybrid_pressure_coefficients(km: int) -> HybridPressureCoefficients:
     if ak.size-1 != km : raise ValueError("size of ak array is not equal to km="+str(km))
     if bk.size-1 != km : raise ValueError("size of bk array is not equal to km="+str(km))
 
-    # check bk is monotonically increasing
-    if( not np.array_equal(bk, bk.sort()) ) : raise ValueError(" bk array is not monotonically increasing")
+    # check that the eta values computed from ak and bk are monotonically increasing
+    eta, etav = compute_eta(ak, bk)
 
+    ( eta_sorted, etav_sorted ) = ( np.sort(eta), np.sort(etav) )
+    for i in range( eta.size ) :
+        if eta_sorted[i]  != eta[i]  : raise ValueError("ETA values are not monotonically increasing")
+        if etav_sorted[i] != etav[i] : raise ValueError("ETAV values are not monotonically increasing")
+        
     if 0.0 in bk:
         ks = 0 if km == 91 else np.where(bk == 0)[0][-1]
         ptop = ak[0]
@@ -60,4 +66,5 @@ def set_hybrid_pressure_coefficients(km: int) -> HybridPressureCoefficients:
         raise ValueError("bk must contain at least one 0.")
 
     pressure_data = HybridPressureCoefficients(ks, ptop, ak, bk)
+    
     return pressure_data

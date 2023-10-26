@@ -3,7 +3,7 @@ import math
 import numpy as np
 
 import pace.util.constants as constants
-from pace.util.grid import great_circle_distance_lon_lat
+from pace.util.grid import great_circle_distance_lon_lat, vertical_coordinate, compute_eta
 
 
 """
@@ -19,7 +19,6 @@ u0 = 35.0  # From Table VI of DCMIP2016
 pcen = [math.pi / 9.0, 2.0 * math.pi / 9.0]  # From Table VI of DCMIP2016
 u1 = 1.0
 pt0 = 0.0
-eta_0 = 0.252
 eta_surface = 1.0
 eta_tropopause = 0.2
 t_0 = 288.0
@@ -28,24 +27,6 @@ lapse_rate = 0.005  # From Table VI of DCMIP2016
 surface_pressure = 1.0e5  # units of (Pa), from Table VI of DCMIP2016
 # NOTE RADIUS = 6.3712e6 in FV3 vs Jabowski paper 6.371229e6
 R = constants.RADIUS / 10.0  # Perturbation radiusfor test case 13
-
-
-def vertical_coordinate(eta_value):
-    """
-    Equation (1) JRMS2006
-    computes eta_v, the auxiliary variable vertical coordinate
-    """
-    return (eta_value - eta_0) * math.pi * 0.5
-
-
-def compute_eta(ak, bk):
-    """
-    Equation (1) JRMS2006
-    eta is the vertical coordinate and eta_v is an auxiliary vertical coordinate
-    """
-    eta = 0.5 * ((ak[:-1] + ak[1:]) / surface_pressure + bk[:-1] + bk[1:])
-    eta_v = vertical_coordinate(eta)
-    return eta, eta_v
 
 
 def zonal_wind(eta_v, lat):

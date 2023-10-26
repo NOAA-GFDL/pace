@@ -3,12 +3,15 @@
 import os
 import pytest
 import numpy as np
-from pace.util.grid import set_hybrid_pressure_coefficients
+from main.test_util.generate_eta_file import write_eta_file
+from main.test_util.global_utils import remove_file, remove_input_dir
+from pace.util.grid.eta import set_hybrid_pressure_coefficients
 
+km = 79
 input_dir='./input/'
+eta_file = input_dir + 'eta' + str(km) + '.txt'
 
-ak_ref = np.array(
-    [
+ak_79 = [
     300,      646.7159, 1045.222,
     1469.188, 1897.829, 2325.385,
     2754.396, 3191.294, 3648.332,
@@ -35,9 +38,9 @@ ak_ref = np.array(
     1685.079, 1421.479, 1175.419,
     947.6516, 738.8688, 549.713,
     380.7626, 232.5417, 105.481,
-    -0.0008381903, 0])
+    -0.0008381903, 0]
 
-bk_ref = np.array([
+bk_79 = [
     0, 0, 0,
     0, 0, 0,
     0, 0, 0,
@@ -64,79 +67,68 @@ bk_ref = np.array([
     0.9095779,   0.9232264,   0.9359506,
     0.9477157,   0.9584892,   0.9682413,
     0.9769447,   0.9845753,   0.9911126,
-    0.9965372,   1])
-
-
-def write_files(ak_in=ak_ref, bk_in=bk_ref, eta_file='./input/eta79.txt'):
-
-    """  Write eta files for testing """
-
-    if os.path.isfile(eta_file) : cleanup(eta_file)
-    os.mkdir(input_dir)
-    with open(eta_file,'w') as myfile:
-        for i in range(80): myfile.write('{0}  {1}\n'.format(ak_in[i],bk_in[i]))
-
-
-def cleanup(eta_file='./input/eta79.txt') :
-
-    """ Remove input directory """
-
-    if( os.path.isfile(eta_file)  ) : os.remove(eta_file)
-    if( os.path.isfile(input_dir) ) : os.rmdir(input_dir)
+    0.9965372,   1]
 
 
 @pytest.mark.xfail
-def test_set_hybrid_pressure_coefficients_nofile() :
+def test_set_hybrid_pressure_coefficients_nofile( ) :
 
     """ File does not exist.  Test should fail """
 
-    km = 79
+    remove_file( eta_file )
     pressure_data = set_hybrid_pressure_coefficients( km )
+    
 
-
-def test_set_hybrid_pressure_coefficients_correct(km=79) :
+def test_set_hybrid_pressure_coefficients_correct( ) :
 
     """  Good values of ak, bk.  Test should pass """
 
-    ak = ak_ref[:]
-    bk = bk_ref[:]
+    ks = 18
+    ptop = 300.0
 
-    ak_answer=ak_ref[:]
-    bk_answer=bk_ref[:]
-    ks_answer = 18
-    ptop_answer = 300.0
+    remove_file( eta_file )
+    write_eta_file( eta_file, ak_79, bk_79 )
 
-    write_files(ak_in=ak, bk_in=bk, eta_file='./input/eta79.txt')
     pressure_data = set_hybrid_pressure_coefficients( km )
-
-    if( not np.array_equal(ak_answer,pressure_data.ak) ) :
+    
+    if( not np.array_equal(ak_79,pressure_data.ak) ) :
         raise ValueError("Unexpected values in ak array")
-    if( not np.array_equal(bk_answer,pressure_data.bk) ) :
+
+    if( not np.array_equal(bk_79,pressure_data.bk) ) :
         raise ValueError("Unexpected values in bk array")
-    if( ks_answer != pressure_data.ks ) :
+
+    if( ks != pressure_data.ks ) :
         raise ValueError("Unexpected ks value")
-    if( ptop_answer != pressure_data.ptop) :
+
+    if( ptop != pressure_data.ptop) :
         raise ValueError("Unexpected ptopt value")
 
-    cleanup('./input/eta79.txt')
+    remove_file( eta_file )
 
 
 @pytest.mark.xfail
-def test_set_hybrid_pressure_coefficients_nonincreasing(km=79) :
+def test_set_hybrid_pressure_coefficients_nonincreasing( ) :
 
     """
     Array bk is not monotonically increasing.
     Test is expected to fail
     """
 
-    ak = ak_ref[:]
-    bk = bk_ref[:]
+    ak_cp = a_79k[:]
+    bk_cp = bk_79[:]
 
-    bk[10]=142. #random number
+    bk_cp[10]=0.1 #random number
+    ak_cp[13]=1.4 #random number
 
-    write_files(ak_in=ak, bk_in=bk, eta_file="./input/eta79.txt")
+    remove_file( eta_file )
+    write_eta_file( eta_file, ak_cp, bk_cp)
+
     pressure_data = set_hybrid_pressure_coefficients( km )
 
+    
+def test_cleanup( ):
 
-def test_cleanup():
-    cleanup("./input/eta79.txt")
+    """ Remove all input files produced during testing """
+    
+    remove_file(eta_file)
+

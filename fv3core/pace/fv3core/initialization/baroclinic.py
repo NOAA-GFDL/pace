@@ -10,7 +10,7 @@ import pace.util as fv3util
 import pace.util.constants as constants
 from pace.dsl.typing import Float
 from pace.fv3core.initialization.dycore_state import DycoreState
-from pace.util.grid import GridData, lon_lat_midpoint
+from pace.util.grid import GridData, lon_lat_midpoint, compute_eta
 
 
 nhalo = fv3util.N_HALO_DEFAULT
@@ -240,7 +240,7 @@ def setup_pressure_fields(
     pe[:] = initialize_edge_pressure(delp, ptop)
     peln[:] = initialize_log_pressure_interfaces(pe, ptop)
     pk[:], pkz[:] = initialize_kappa_pressures(pe, peln, ptop)
-    eta[:-1], eta_v[:-1] = jablo_init.compute_eta(ak, bk)
+    eta[:-1], eta_v[:-1] = compute_eta(ak, bk)
 
 
 def baroclinic_initialization(
