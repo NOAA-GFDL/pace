@@ -223,6 +223,8 @@ class ExternalGridConfig(GridInitializer):
     dy = ds.dy.values
     area = ds.area.values
 
+    # TODO: Area read in?
+
     def get_grid(
         self,
         quantity_factory: QuantityFactory,
@@ -236,14 +238,13 @@ class ExternalGridConfig(GridInitializer):
             y=self.y,
             dx=self.dx,
             dy=self.dy,
-            area=self.area,
             quantity_factory=quantity_factory,
             communicator=communicator,
             grid_type=self.grid_type,
             dx_const=self.dx_const,
             dy_const=self.dy_const,
             deglat=self.deglat,
-            calc_flag=True,
+            extdgrid=True,
         )
 
         horizontal_data = HorizontalGridData.new_from_metric_terms(metric_terms)

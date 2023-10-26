@@ -225,7 +225,7 @@ class MetricTerms:
         dx_const: float = 1000.0,
         dy_const: float = 1000.0,
         deglat: float = 15.0,
-        calc_flag: bool = False,
+        extdgrid: bool = False,
     ):
         assert grid_type < 3
         self._grid_type = grid_type
@@ -367,7 +367,7 @@ class MetricTerms:
         self._vlon_64 = None
         self._vlat_64 = None
 
-        if calc_flag is False:
+        if extdgrid is False:
             self._init_dgrid()
             self._init_agrid()
 
@@ -383,14 +383,13 @@ class MetricTerms:
         y,
         dx,
         dy,
-        area,
         quantity_factory: util.QuantityFactory,
         communicator: util.Communicator,
         grid_type: int = 0,
         dx_const: float = 1000.0,
         dy_const: float = 1000.0,
         deglat: float = 15.0,
-        calc_flag: bool = True,
+        extdgrid: bool = True,
     ) -> "MetricTerms":
         mt_obj = MetricTerms(
             quantity_factory=quantity_factory,
@@ -399,11 +398,11 @@ class MetricTerms:
             dx_const=dx_const,
             dy_const=dy_const,
             deglat=deglat,
-            calc_flag=calc_flag,
+            extdgrid=extdgrid,
         )
 
-        mt_obj.grid.data[:, :, 0] = x
-        mt_obj.grid.data[:, :, 1] = y
+        mt_obj.grid.data[:, :, 0] = x * (PI / 180)
+        mt_obj.grid.data[:, :, 1] = y * (PI / 180)
         mt_obj._dx = dx
         mt_obj._dy = dy
 
