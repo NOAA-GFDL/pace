@@ -446,8 +446,9 @@ class MetricTerms:
             extdgrid=extdgrid,
         )
 
-        terms.grid.data[:, :, 0] = x * (PI / 180)
-        terms.grid.data[:, :, 1] = y * (PI / 180)
+        rad_conv = PI / 180.0
+        terms.grid.data[:, :, 0] = np.dot(rad_conv, x)
+        terms.grid.data[:, :, 1] = np.dot(rad_conv, y)
         terms._dx = dx
         terms._dy = dy
 

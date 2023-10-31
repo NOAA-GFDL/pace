@@ -215,14 +215,6 @@ class ExternalGridConfig(GridInitializer):
     dy_const: Optional[float] = 1000.0
     deglat: Optional[float] = 15.0
 
-    # TODO: Probably still need to change this, but a good placeholder
-    ds = xr.open_dataset("../../../input/file.nc")
-    x = ds.x.values
-    y = ds.y.values
-    dx = ds.dx.values
-    dy = ds.dy.values
-    area = ds.area.values
-
     # TODO: Area read in?
 
     def get_grid(
@@ -233,11 +225,26 @@ class ExternalGridConfig(GridInitializer):
 
         pace_log.info("Using external grid data")
 
+        ds = xr.open_dataset("../../../input/file.nc")
+        lon = ds.x.values
+        lat = ds.y.values
+        dx = ds.dx.values
+        dy = ds.dy.values
+        npx = ds.nxp.values.size
+        npy = ds.nyp.values.size
+
+        subtile_slice = communicator.partitioner.subtile_slice(
+            rank=communicator.rank,
+            global_dims=[pace.util.X_DIM, pace.util.Y_DIM],
+            global_extent=(npx, npy),
+            overlap=True,
+        )
+
         metric_terms = MetricTerms.from_generated(
-            x=self.x,
-            y=self.y,
-            dx=self.dx,
-            dy=self.dy,
+            x=lon[subtile_slice],
+            y=lat[subtile_slice],
+            dx=dx,
+            dy=dy,
             quantity_factory=quantity_factory,
             communicator=communicator,
             grid_type=self.grid_type,

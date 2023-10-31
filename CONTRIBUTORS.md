@@ -12,6 +12,7 @@ List format (alphabetical order):  Surname, Name. Employer/Affiliation
 * George, Rhea. Allen Institute for AI.
 * Harris, Lucas. GFDL.
 * Kung, Chris. NASA.
+* Malatino, Frank. GFDL
 * McGibbon, Jeremy. Allen Institute for AI.
 * Niedermayr, Yannick. ETH.
 * Savarin, Ajda. University of Washington.

@@ -755,7 +755,7 @@ def subtile_index(
 ) -> Tuple[int, int]:
     within_tile_rank = rank % ranks_per_tile
     j = within_tile_rank // layout[1]
-    i = within_tile_rank % layout[1]
+    i = within_tile_rank % layout[0]
     return j, i
 
 
