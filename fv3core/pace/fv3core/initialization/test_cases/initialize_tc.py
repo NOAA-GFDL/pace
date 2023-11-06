@@ -1,132 +1,10 @@
 import numpy as np
 
+import pace.fv3core.initialization.init_utils as init_utils
 import pace.util as fv3util
 import pace.util.constants as constants
-from pace.fv3core.initialization.dycore_state import DycoreState
+from pace.fv3core.dycore_state import DycoreState
 from pace.util.grid import GridData, great_circle_distance_lon_lat
-from pace.util.grid.gnomonic import (
-    get_lonlat_vect,
-    get_unit_vector_direction,
-    lon_lat_midpoint,
-)
-
-from .baroclinic import empty_numpy_dycore_state, initialize_kappa_pressures
-
-
-nhalo = fv3util.N_HALO_DEFAULT
-
-
-def init_tc_state(
-    grid_data: GridData,
-    quantity_factory: fv3util.QuantityFactory,
-    hydrostatic: bool,
-    comm: fv3util.CubedSphereCommunicator,
-) -> DycoreState:
-    """
-    --WARNING--WARNING--WARNING--WARNING--WARNING--WARNING--WARNING---
-    --                                                              --
-    --WARNING: THIS IS KNOW TO HAVE BUGS AND REQUIRE NUMERICAL DEBUG--
-    --                                                              --
-    --WARNING--WARNING--WARNING--WARNING--WARNING--WARNING--WARNING---
-    Create a DycoreState object with quantities initialized to the
-    FV3 tropical cyclone test case (test_case 55).
-
-    This case involves a grid_transformation (done on metric terms)
-    to locally increase resolution.
-    """
-
-    sample_quantity = grid_data.lat
-    shape = (*sample_quantity.data.shape[:2], grid_data.ak.data.shape[0])
-    numpy_state = empty_numpy_dycore_state(shape)
-
-    tc_properties = {
-        "hydrostatic": hydrostatic,
-        "dp": 1115.0,
-        "exppr": 1.5,
-        "exppz": 2.0,
-        "gamma": 0.007,
-        "lat_tc": 10.0,
-        "lon_tc": 180.0,
-        "p_ref": 101500.0,
-        "ptop": 1.0,
-        "qtrop": 1e-11,
-        "q00": 0.021,
-        "rp": 282000.0,
-        "Ts0": 302.15,
-        "vort": True,
-        "ztrop": 15000.0,
-        "zp": 7000.0,
-        "zq1": 3000.0,
-        "zq2": 8000.0,
-    }
-
-    calc = _some_inital_calculations(tc_properties)
-
-    ps_output = _initialize_vortex_ps_phis(grid_data, shape, tc_properties, calc)
-    ps, ps_u, ps_v = ps_output["ps"], ps_output["ps_uc"], ps_output["ps_vc"]
-
-    # TODO restart file had different ak, bk. Figure out where they came from;
-    # for now, take from metric terms
-    ak = _define_ak()
-    bk = _define_bk()
-    delp = _initialize_delp(ak, bk, ps, shape)
-    pe = _initialize_edge_pressure(delp, tc_properties["ptop"], shape)
-    peln = np.log(pe)
-    pk, pkz = initialize_kappa_pressures(pe, peln, tc_properties["ptop"])
-
-    pe_u = _initialize_edge_pressure_cgrid(ak, bk, ps_u, shape, tc_properties["ptop"])
-    pe_v = _initialize_edge_pressure_cgrid(ak, bk, ps_v, shape, tc_properties["ptop"])
-
-    ud, vd = _initialize_wind_dgrid(
-        grid_data, tc_properties, calc, pe_u, pe_v, ps_u, ps_v, shape
-    )
-    ua, va = _interpolate_winds_dgrid_agrid(grid_data, ud, vd, tc_properties, shape)
-
-    qvapor, pt = _initialize_qvapor_temperature(
-        grid_data, pe, ps, tc_properties, calc, shape
-    )
-    delz, w = _initialize_delz_w(pe, ps, pt, qvapor, tc_properties, calc, shape)
-
-    # numpy_state.cxd[:] =
-    # numpy_state.cyd[:] =
-    numpy_state.delp[:] = delp
-    numpy_state.delz[:] = delz
-    # numpy_state.diss_estd[:] =
-    # numpy_state.mfxd[:] =
-    # numpy_state.mfyd[:] =
-    # numpy_state.omga[:] =
-    numpy_state.pe[:] = pe
-    numpy_state.peln[:] = peln
-    numpy_state.phis[:] = ps_output["phis"]
-    numpy_state.pk[:] = pk
-    numpy_state.pkz[:] = pkz
-    numpy_state.ps[:] = pe[:, :, -1]
-    numpy_state.pt[:] = pt
-    # numpy_state.qcld[:] =
-    # numpy_state.qgraupel[:] =
-    # numpy_state.qice[:] =
-    # numpy_state.qliquid[:] =
-    # numpy_state.qo3mr[:] =
-    # numpy_state.qrain[:] =
-    # numpy_state.qsgs_tke[:] =
-    # numpy_state.qsnow[:] =
-    numpy_state.qvapor[:] = qvapor
-    # numpy_state.q_con[:] =
-    numpy_state.u[:] = ud
-    numpy_state.ua[:] = ua
-    # numpy_state.uc[:] =
-    numpy_state.v[:] = vd
-    numpy_state.va[:] = va
-    # numpy_state.vc[:] =
-    numpy_state.w[:] = w
-    breakpoint()
-    state = DycoreState.init_from_numpy_arrays(
-        numpy_state.__dict__,
-        sizer=quantity_factory.sizer,
-        backend=sample_quantity.metadata.gt4py_backend,
-    )
-
-    return state
 
 
 def _calculate_distance_from_tc_center(pe_v, ps_v, muv, calc, tc_properties):
@@ -403,103 +281,6 @@ def _define_bk():
     return bk
 
 
-def _find_midpoint_unit_vectors(p1, p2):
-
-    midpoint = np.array(
-        lon_lat_midpoint(p1[:, :, 0], p2[:, :, 0], p1[:, :, 1], p2[:, :, 1], np)
-    ).transpose([1, 2, 0])
-    unit_dir = get_unit_vector_direction(p1, p2, np)
-    exv, eyv = get_lonlat_vect(midpoint, np)
-
-    muv = {"midpoint": midpoint, "unit_dir": unit_dir, "exv": exv, "eyv": eyv}
-
-    return muv
-
-
-def _initialize_delp(ak, bk, ps, shape):
-    delp = np.zeros(shape)
-    delp[:, :, :-1] = (
-        ak[None, None, 1:]
-        - ak[None, None, :-1]
-        + ps[:, :, None] * (bk[None, None, 1:] - bk[None, None, :-1])
-    )
-
-    return delp
-
-
-def _initialize_delz_w(pe, ps, pt, qvapor, tc_properties, calc, shape):
-
-    delz = np.zeros(shape)
-    w = np.zeros(shape)
-    delz[:, :, :-1] = (
-        constants.RDGAS
-        * pt[:, :, :-1]
-        * (1 + constants.ZVIR * qvapor[:, :, :-1])
-        / constants.GRAV
-        * np.log(pe[:, :, :-1] / pe[:, :, 1:])
-    )
-
-    return delz, w
-
-
-def _initialize_edge_pressure(delp, ptop, shape):
-    pe = np.zeros(shape)
-    pe[:, :, 0] = ptop
-    for k in range(1, pe.shape[2]):
-        pe[:, :, k] = ptop + np.sum(delp[:, :, :k], axis=2)
-    return pe
-
-
-def _initialize_edge_pressure_cgrid(ak, bk, ps, shape, ptop):
-    """
-    Initialize edge pressure on c-grid for u and v points,
-    depending on which ps is input (ps_uc or ps_vc)
-    """
-    pe_cgrid = np.zeros(shape)
-    pe_cgrid[:, :, 0] = ptop
-
-    pe_cgrid[:, :, :] = ak[None, None, :] + ps[:, :, None] * bk[None, None, :]
-
-    return pe_cgrid
-
-
-def _initialize_qvapor_temperature(grid_data, pe, ps, tc_properties, calc, shape):
-
-    qvapor = np.zeros(shape)
-    pt = np.zeros(shape)
-    height = np.zeros(shape)
-
-    ptmp = 0.5 * (pe[:, :, :-1] + pe[:, :, 1:])
-    height[:, :, :-1] = (calc["t00"] / tc_properties["gamma"]) * (
-        1.0 - (ptmp / ps[:, :, None]) ** calc["exponent"]
-    )
-    qvapor = (
-        tc_properties["q00"]
-        * np.exp(-height / tc_properties["zq1"])
-        * np.exp(-((height / tc_properties["zq2"]) ** tc_properties["exppz"]))
-    )
-
-    p2 = np.transpose(
-        np.stack(
-            [
-                grid_data._horizontal_data.lon_agrid.data,
-                grid_data._horizontal_data.lat_agrid.data,
-            ]
-        ),
-        [1, 2, 0],
-    )
-    r = great_circle_distance_lon_lat(
-        calc["p0"][0], p2[:, :, 0], calc["p0"][1], p2[:, :, 1], constants.RADIUS, np
-    )
-
-    pt = _calculate_pt_height(height, qvapor, r, tc_properties, calc)
-
-    qvapor[height > tc_properties["ztrop"]] = tc_properties["qtrop"]
-    pt[height > tc_properties["ztrop"]] = calc["ttrop"]
-
-    return qvapor, pt
-
-
 def _initialize_vortex_ps_phis(grid_data, shape, tc_properties, calc):
     p0 = [np.deg2rad(tc_properties["lon_tc"]), np.deg2rad(tc_properties["lat_tc"])]
 
@@ -540,6 +321,43 @@ def _initialize_vortex_ps_phis(grid_data, shape, tc_properties, calc):
     return output_dict
 
 
+def _initialize_qvapor_temperature(grid_data, pe, ps, tc_properties, calc, shape):
+
+    qvapor = np.zeros(shape)
+    pt = np.zeros(shape)
+    height = np.zeros(shape)
+
+    ptmp = 0.5 * (pe[:, :, :-1] + pe[:, :, 1:])
+    height[:, :, :-1] = (calc["t00"] / tc_properties["gamma"]) * (
+        1.0 - (ptmp / ps[:, :, None]) ** calc["exponent"]
+    )
+    qvapor = (
+        tc_properties["q00"]
+        * np.exp(-height / tc_properties["zq1"])
+        * np.exp(-((height / tc_properties["zq2"]) ** tc_properties["exppz"]))
+    )
+
+    p2 = np.transpose(
+        np.stack(
+            [
+                grid_data._horizontal_data.lon_agrid.data,
+                grid_data._horizontal_data.lat_agrid.data,
+            ]
+        ),
+        [1, 2, 0],
+    )
+    r = great_circle_distance_lon_lat(
+        calc["p0"][0], p2[:, :, 0], calc["p0"][1], p2[:, :, 1], constants.RADIUS, np
+    )
+
+    pt = _calculate_pt_height(height, qvapor, r, tc_properties, calc)
+
+    qvapor[height > tc_properties["ztrop"]] = tc_properties["qtrop"]
+    pt[height > tc_properties["ztrop"]] = calc["ttrop"]
+
+    return qvapor, pt
+
+
 def _initialize_wind_dgrid(
     grid_data, tc_properties, calc, pe_u, pe_v, ps_u, ps_v, shape
 ):
@@ -554,7 +372,7 @@ def _initialize_wind_dgrid(
     )
     p1 = grid[:-1, :, :]
     p2 = grid[1:, :, :]
-    muv = _find_midpoint_unit_vectors(p1, p2)
+    muv = init_utils._find_midpoint_unit_vectors(p1, p2)
     dist = _calculate_distance_from_tc_center(pe_u, ps_u, muv, calc, tc_properties)
 
     utmp = _calculate_utmp(dist["height"][:-1, :, :], dist, calc, tc_properties)
@@ -572,7 +390,7 @@ def _initialize_wind_dgrid(
     vd = np.zeros(shape)
     p1 = grid[:, :-1, :]
     p2 = grid[:, 1:, :]
-    muv = _find_midpoint_unit_vectors(p1, p2)
+    muv = init_utils._find_midpoint_unit_vectors(p1, p2)
     dist = _calculate_distance_from_tc_center(pe_v, ps_v, muv, calc, tc_properties)
 
     utmp = _calculate_utmp(dist["height"][:, :-1, :], dist, calc, tc_properties)
@@ -647,3 +465,117 @@ def _some_inital_calculations(tc_properties):
     }
 
     return calc
+
+
+def _initialize_delz_w(pe, ps, pt, qvapor, tc_properties, calc, shape):
+
+    delz = np.zeros(shape)
+    w = np.zeros(shape)
+    delz[:, :, :-1] = (
+        constants.RDGAS
+        * pt[:, :, :-1]
+        * (1 + constants.ZVIR * qvapor[:, :, :-1])
+        / constants.GRAV
+        * np.log(pe[:, :, :-1] / pe[:, :, 1:])
+    )
+
+    return delz, w
+
+
+def init_tc_state(
+    grid_data: GridData,
+    quantity_factory: fv3util.QuantityFactory,
+    hydrostatic: bool,
+    comm: fv3util.CubedSphereCommunicator,
+) -> DycoreState:
+    """
+    --WARNING--WARNING--WARNING--WARNING--WARNING--WARNING--WARNING---
+    --                                                              --
+    --WARNING: THIS IS KNOW TO HAVE BUGS AND REQUIRE NUMERICAL DEBUG--
+    --                                                              --
+    --WARNING--WARNING--WARNING--WARNING--WARNING--WARNING--WARNING---
+    Create a DycoreState object with quantities initialized to the
+    FV3 tropical cyclone test case (test_case 55).
+
+    This case involves a grid_transformation (done on metric terms)
+    to locally increase resolution.
+    """
+
+    sample_quantity = grid_data.lat
+    shape = (*sample_quantity.data.shape[:2], grid_data.ak.data.shape[0])
+    numpy_state = init_utils.empty_numpy_dycore_state(shape)
+
+    tc_properties = {
+        "hydrostatic": hydrostatic,
+        "dp": 1115.0,
+        "exppr": 1.5,
+        "exppz": 2.0,
+        "gamma": 0.007,
+        "lat_tc": 10.0,
+        "lon_tc": 180.0,
+        "p_ref": 101500.0,
+        "ptop": 1.0,
+        "qtrop": 1e-11,
+        "q00": 0.021,
+        "rp": 282000.0,
+        "Ts0": 302.15,
+        "vort": True,
+        "ztrop": 15000.0,
+        "zp": 7000.0,
+        "zq1": 3000.0,
+        "zq2": 8000.0,
+    }
+
+    calc = _some_inital_calculations(tc_properties)
+
+    ps_output = _initialize_vortex_ps_phis(grid_data, shape, tc_properties, calc)
+    ps, ps_u, ps_v = ps_output["ps"], ps_output["ps_uc"], ps_output["ps_vc"]
+
+    # TODO restart file had different ak, bk. Figure out where they came from;
+    # for now, take from metric terms
+    ak = _define_ak()
+    bk = _define_bk()
+    delp = init_utils.initialize_delp(ps, ak, bk)
+    pe = init_utils.initialize_edge_pressure(delp, tc_properties["ptop"])
+    peln = np.log(pe)
+    pk, pkz = init_utils.initialize_kappa_pressures(pe, peln, tc_properties["ptop"])
+
+    pe_u = init_utils._initialize_edge_pressure_cgrid(
+        ak, bk, ps_u, shape, tc_properties["ptop"]
+    )
+    pe_v = init_utils._initialize_edge_pressure_cgrid(
+        ak, bk, ps_v, shape, tc_properties["ptop"]
+    )
+
+    ud, vd = _initialize_wind_dgrid(
+        grid_data, tc_properties, calc, pe_u, pe_v, ps_u, ps_v, shape
+    )
+    ua, va = _interpolate_winds_dgrid_agrid(grid_data, ud, vd, tc_properties, shape)
+
+    qvapor, pt = _initialize_qvapor_temperature(
+        grid_data, pe, ps, tc_properties, calc, shape
+    )
+    delz, w = _initialize_delz_w(pe, ps, pt, qvapor, tc_properties, calc, shape)
+
+    numpy_state.delp[:] = delp
+    numpy_state.delz[:] = delz
+    numpy_state.pe[:] = pe
+    numpy_state.peln[:] = peln
+    numpy_state.phis[:] = ps_output["phis"]
+    numpy_state.pk[:] = pk
+    numpy_state.pkz[:] = pkz
+    numpy_state.ps[:] = pe[:, :, -1]
+    numpy_state.pt[:] = pt
+    numpy_state.qvapor[:] = qvapor
+    numpy_state.u[:] = ud
+    numpy_state.ua[:] = ua
+    numpy_state.v[:] = vd
+    numpy_state.va[:] = va
+    numpy_state.w[:] = w
+    state = DycoreState.init_from_numpy_arrays(
+        numpy_state.__dict__,
+        sizer=quantity_factory.sizer,
+        backend=sample_quantity.metadata.gt4py_backend,
+    )
+
+    return state

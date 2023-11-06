@@ -21,6 +21,7 @@ class TranslateUpdateDzC(TranslateDycoreFortranData2Py):
             quantity_factory=self.grid.quantity_factory,
             area=grid.grid_data.area,
             dp_ref=grid.grid_data.dp_ref,
+            grid_type=namelist.grid_type,
         )
 
         def compute(**kwargs):

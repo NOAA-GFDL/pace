@@ -6,7 +6,9 @@ stencil_config:
     format_source: false
     device_sync: true
 initialization:
-  type: baroclinic
+  type: analytic
+  config:
+    case: baroclinic
 diagnostics_config:
   path: "output.zarr"
   names:

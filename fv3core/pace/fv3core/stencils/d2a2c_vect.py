@@ -391,6 +391,9 @@ class DGrid2AGrid2CGridVectors:
         grid_type: int,
         dord4: bool,
     ):
+        if grid_type not in [0, 4]:
+            raise NotImplementedError(f"unimplemented grid_type {grid_type}")
+
         orchestrate(obj=self, config=stencil_factory.config.dace_config)
 
         grid_indexing = stencil_factory.grid_indexing
@@ -406,9 +409,8 @@ class DGrid2AGrid2CGridVectors:
         self._sin_sg2 = grid_data.sin_sg2
         self._sin_sg3 = grid_data.sin_sg3
         self._sin_sg4 = grid_data.sin_sg4
+        self._grid_type = grid_type
 
-        if grid_type >= 3:
-            raise NotImplementedError("unimplemented grid_type >= 3")
         self._big_number = 1e30  # 1e8 if 32 bit
         nx = grid_indexing.iec + 1  # grid.npx + 2
         ny = grid_indexing.jec + 1  # grid.npy + 2
@@ -416,9 +418,38 @@ class DGrid2AGrid2CGridVectors:
         j1 = grid_indexing.jsc - 1
         id_ = 1 if dord4 else 0
         pad = 2 + 2 * id_
-        npt = 4 if not nested else 0
-        if npt > grid_indexing.domain[0] - 1 or npt > grid_indexing.domain[1] - 1:
-            npt = 0
+        if (grid_type < 3) and (not nested):
+            npt = 4
+            if npt > grid_indexing.domain[0] - 1 or npt > grid_indexing.domain[1] - 1:
+                npt = 0
+            ifirst = (
+                grid_indexing.isc + 2
+                if grid_indexing.west_edge
+                else grid_indexing.isc - 1
+            )
+            ilast = (
+                grid_indexing.iec - 1
+                if grid_indexing.east_edge
+                else grid_indexing.iec + 2
+            )
+
+            jfirst = (
+                grid_indexing.jsc + 2
+                if grid_indexing.south_edge
+                else grid_indexing.jsc - 1
+            )
+            jlast = (
+                grid_indexing.jec - 1
+                if grid_indexing.north_edge
+                else grid_indexing.jec + 2
+            )
+        else:
+            npt = -2
+            ifirst = grid_indexing.isc - 1
+            ilast = grid_indexing.iec + 2
+            jfirst = grid_indexing.jsc - 1
+            jlast = grid_indexing.jec + 2
+
         self._utmp = quantity_factory.zeros(
             [X_DIM, Y_DIM, Z_DIM],
             units="m/s",
@@ -430,30 +461,29 @@ class DGrid2AGrid2CGridVectors:
             dtype=Float,
         )
 
-        js1 = npt + OFFSET if grid_indexing.south_edge else grid_indexing.jsc - 1
-        je1 = ny - npt if grid_indexing.north_edge else grid_indexing.jec + 1
-        is1 = npt + OFFSET if grid_indexing.west_edge else grid_indexing.isd
-        ie1 = nx - npt if grid_indexing.east_edge else grid_indexing.ied
+        if (grid_type < 3) and (not nested):
+            js1 = npt + OFFSET if grid_indexing.south_edge else grid_indexing.jsc - 1
+            je1 = ny - npt if grid_indexing.north_edge else grid_indexing.jec + 1
+            is1 = npt + OFFSET if grid_indexing.west_edge else grid_indexing.isd
+            ie1 = nx - npt if grid_indexing.east_edge else grid_indexing.ied
 
-        is2 = npt + OFFSET if grid_indexing.west_edge else grid_indexing.isc - 1
-        ie2 = nx - npt if grid_indexing.east_edge else grid_indexing.iec + 1
-        js2 = npt + OFFSET if grid_indexing.south_edge else grid_indexing.jsd
-        je2 = ny - npt if grid_indexing.north_edge else grid_indexing.jed
+            is2 = npt + OFFSET if grid_indexing.west_edge else grid_indexing.isc - 1
+            ie2 = nx - npt if grid_indexing.east_edge else grid_indexing.iec + 1
+            js2 = npt + OFFSET if grid_indexing.south_edge else grid_indexing.jsd
+            je2 = ny - npt if grid_indexing.north_edge else grid_indexing.jed
 
-        ifirst = (
-            grid_indexing.isc + 2 if grid_indexing.west_edge else grid_indexing.isc - 1
-        )
-        ilast = (
-            grid_indexing.iec - 1 if grid_indexing.east_edge else grid_indexing.iec + 2
-        )
+        else:
+            js1 = grid_indexing.jsc - 1
+            je1 = grid_indexing.jec + 1
+            is1 = grid_indexing.isd
+            ie1 = grid_indexing.ied
+
+            is2 = grid_indexing.isc - 1
+            ie2 = grid_indexing.iec + 1
+            js2 = grid_indexing.jsd
+            je2 = grid_indexing.jed
+
         idiff = ilast - ifirst + 1
-
-        jfirst = (
-            grid_indexing.jsc + 2 if grid_indexing.south_edge else grid_indexing.jsc - 1
-        )
-        jlast = (
-            grid_indexing.jec - 1 if grid_indexing.north_edge else grid_indexing.jec + 2
-        )
         jdiff = jlast - jfirst + 1
 
         self._set_tmps = stencil_factory.from_dims_halo(
@@ -482,12 +512,13 @@ class DGrid2AGrid2CGridVectors:
         else:
             d2a2c_avg_offset = 3
 
-        self._avg_box = stencil_factory.from_dims_halo(
-            func=avg_box,
-            externals={"D2A2C_AVG_OFFSET": d2a2c_avg_offset},
-            compute_dims=[X_DIM, Y_DIM, Z_DIM],
-            compute_halos=(3, 3),
-        )
+        if self._grid_type < 3:
+            self._avg_box = stencil_factory.from_dims_halo(
+                func=avg_box,
+                externals={"D2A2C_AVG_OFFSET": d2a2c_avg_offset},
+                compute_dims=[X_DIM, Y_DIM, Z_DIM],
+                compute_halos=(3, 3),
+            )
 
         self._contravariant_components = stencil_factory.from_origin_domain(
             func=contravariant_components,
@@ -510,17 +541,18 @@ class DGrid2AGrid2CGridVectors:
             domain=(idiff, grid_indexing.domain[1] + 2, grid_indexing.domain[2]),
         )
 
-        self._east_west_edges = stencil_factory.from_origin_domain(
-            func=east_west_edges,
-            externals={
-                "i_end": ax_offsets_edges["i_end"],
-                "i_start": ax_offsets_edges["i_start"],
-                "local_je": ax_offsets_edges["local_je"],
-                "local_js": ax_offsets_edges["local_js"],
-            },
-            origin=origin_edges,
-            domain=domain_edges,
-        )
+        if grid_type < 3:
+            self._east_west_edges = stencil_factory.from_origin_domain(
+                func=east_west_edges,
+                externals={
+                    "i_end": ax_offsets_edges["i_end"],
+                    "i_start": ax_offsets_edges["i_start"],
+                    "local_je": ax_offsets_edges["local_je"],
+                    "local_js": ax_offsets_edges["local_js"],
+                },
+                origin=origin_edges,
+                domain=domain_edges,
+            )
 
         # Ydir:
         self._fill_corners_y = stencil_factory.from_origin_domain(
@@ -532,19 +564,20 @@ class DGrid2AGrid2CGridVectors:
             domain=domain_edges,
         )
 
-        self._north_south_edges = stencil_factory.from_origin_domain(
-            func=north_south_edges,
-            externals={
-                "j_end": ax_offsets_edges["j_end"],
-                "j_start": ax_offsets_edges["j_start"],
-                "local_ie": ax_offsets_edges["local_ie"],
-                "local_is": ax_offsets_edges["local_is"],
-                "local_je": ax_offsets_edges["local_je"],
-                "local_js": ax_offsets_edges["local_js"],
-            },
-            origin=origin_edges,
-            domain=domain_edges,
-        )
+        if grid_type < 3:
+            self._north_south_edges = stencil_factory.from_origin_domain(
+                func=north_south_edges,
+                externals={
+                    "j_end": ax_offsets_edges["j_end"],
+                    "j_start": ax_offsets_edges["j_start"],
+                    "local_ie": ax_offsets_edges["local_ie"],
+                    "local_is": ax_offsets_edges["local_is"],
+                    "local_je": ax_offsets_edges["local_je"],
+                    "local_js": ax_offsets_edges["local_js"],
+                },
+                origin=origin_edges,
+                domain=domain_edges,
+            )
 
         self._vt_main = stencil_factory.from_origin_domain(
             func=vt_main,
@@ -583,12 +616,13 @@ class DGrid2AGrid2CGridVectors:
         )
 
         # tmp edges
-        self._avg_box(
-            u,
-            v,
-            self._utmp,
-            self._vtmp,
-        )
+        if self._grid_type < 3:
+            self._avg_box(
+                u,
+                v,
+                self._utmp,
+                self._vtmp,
+            )
 
         # contra-variant components at cell center
         self._contravariant_components(
@@ -617,19 +651,20 @@ class DGrid2AGrid2CGridVectors:
             utc,
         )
 
-        self._east_west_edges(
-            u,
-            ua,
-            uc,
-            utc,
-            self._utmp,
-            v,
-            self._sin_sg1,
-            self._sin_sg3,
-            self._cosa_u,
-            self._rsin_u,
-            self._dxa,
-        )
+        if self._grid_type < 3:
+            self._east_west_edges(
+                u,
+                ua,
+                uc,
+                utc,
+                self._utmp,
+                v,
+                self._sin_sg1,
+                self._sin_sg3,
+                self._cosa_u,
+                self._rsin_u,
+                self._dxa,
+            )
 
         # Ydir:
         self._fill_corners_y(
@@ -639,19 +674,20 @@ class DGrid2AGrid2CGridVectors:
             va,
         )
 
-        self._north_south_edges(
-            v,
-            va,
-            vc,
-            vtc,
-            self._vtmp,
-            u,
-            self._sin_sg2,
-            self._sin_sg4,
-            self._cosa_v,
-            self._rsin_v,
-            self._dya,
-        )
+        if self._grid_type < 3:
+            self._north_south_edges(
+                v,
+                va,
+                vc,
+                vtc,
+                self._vtmp,
+                u,
+                self._sin_sg2,
+                self._sin_sg4,
+                self._cosa_v,
+                self._rsin_v,
+                self._dya,
+            )
 
         self._vt_main(
             self._vtmp,

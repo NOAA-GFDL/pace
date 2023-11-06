@@ -2,6 +2,7 @@
 
 List format (alphabetical order):  Surname, Name. Employer/Affiliation
 
+* Abbott, Tristan. GFDL.
 * Cheeseman, Mark. Vulcan Inc.
 * Dahm, Johann. Allen Institute for AI.
 * Davis, Eddie. Allen Institute for AI.

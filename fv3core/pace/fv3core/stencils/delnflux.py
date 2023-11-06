@@ -1092,6 +1092,7 @@ class DelnFluxNoSG:
         self._del6_u = damping_coefficients.del6_u
         self._del6_v = damping_coefficients.del6_v
         self._rarea = rarea
+        nord.data[:] = nord.data[:].round().astype(int)
         self._nmax = int(max(nord.view[:]))
         if self._nmax > 3:
             raise ValueError("nord must be less than 3")

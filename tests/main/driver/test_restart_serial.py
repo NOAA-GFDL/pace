@@ -9,7 +9,7 @@ import yaml
 import pace.dsl
 from pace.driver import CreatesComm, DriverConfig
 from pace.driver.driver import RestartConfig
-from pace.driver.initialization import BaroclinicInit
+from pace.driver.initialization import AnalyticInit
 from pace.util.null_comm import NullComm
 
 
@@ -71,7 +71,7 @@ def test_restart_save_to_disk():
             driver_grid_data,
             grid_data,
         ) = pace.driver.GeneratedGridConfig().get_grid(quantity_factory, communicator)
-        init = BaroclinicInit()
+        init = AnalyticInit()
         driver_state = init.get_driver_state(
             quantity_factory=quantity_factory,
             communicator=communicator,
@@ -158,4 +158,5 @@ def test_restart_save_to_disk():
                     )
 
     finally:
-        shutil.rmtree("RESTART")
+        os.sync()
+        shutil.rmtree("RESTART", ignore_errors=True)

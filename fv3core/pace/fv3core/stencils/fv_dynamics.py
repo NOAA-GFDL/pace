@@ -12,7 +12,7 @@ from pace.dsl.dace.wrapped_halo_exchange import WrappedHaloUpdater
 from pace.dsl.stencil import StencilFactory
 from pace.dsl.typing import Float, FloatField
 from pace.fv3core._config import DynamicalCoreConfig
-from pace.fv3core.initialization.dycore_state import DycoreState
+from pace.fv3core.dycore_state import DycoreState
 from pace.fv3core.stencils import fvtp2d, tracer_2d_1l
 from pace.fv3core.stencils.basic_operations import copy_defn
 from pace.fv3core.stencils.del2cubed import HyperdiffusionDamping
@@ -89,7 +89,7 @@ class DynamicalCore:
 
     def __init__(
         self,
-        comm: pace.util.CubedSphereCommunicator,
+        comm: pace.util.Communicator,
         grid_data: GridData,
         stencil_factory: StencilFactory,
         quantity_factory: pace.util.QuantityFactory,
@@ -102,7 +102,7 @@ class DynamicalCore:
     ):
         """
         Args:
-            comm: object for cubed sphere inter-process communication
+            comm: object for cubed sphere or tile inter-process communication
             grid_data: metric terms defining the model grid
             stencil_factory: creates stencils
             damping_coefficients: damping configuration/constants
@@ -275,7 +275,13 @@ class DynamicalCore:
             self.config.nf_omega,
         )
         self._cubed_to_latlon = CubedToLatLon(
-            state, stencil_factory, quantity_factory, grid_data, config.c2l_ord, comm
+            state,
+            stencil_factory,
+            quantity_factory,
+            grid_data,
+            self.config.grid_type,
+            config.c2l_ord,
+            comm,
         )
         self._cappa = self.acoustic_dynamics.cappa
 

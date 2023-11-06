@@ -23,6 +23,7 @@ class TranslateFxAdv(TranslateDycoreFortranData2Py):
         self.compute_func = FiniteVolumeFluxPrep(  # type: ignore
             self.stencil_factory,
             self.grid.grid_data,
+            namelist.grid_type,
         )
         self.in_vars["data_vars"] = {
             "uc": {},

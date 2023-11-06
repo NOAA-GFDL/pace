@@ -153,7 +153,7 @@ class GeosDycoreWrapper:
         )
 
         self._grid_indexing = pace.dsl.stencil.GridIndexing.from_sizer_and_communicator(
-            sizer=sizer, cube=self.communicator
+            sizer=sizer, comm=self.communicator
         )
         stencil_factory = pace.dsl.StencilFactory(
             config=stencil_config, grid_indexing=self._grid_indexing

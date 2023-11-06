@@ -284,6 +284,9 @@ class DynamicalCoreConfig:
             dycore_config = self.from_f90nml(f90_nml)
             for var in dycore_config.__dict__.keys():
                 setattr(self, var, dycore_config.__dict__[var])
+        # Single tile cartesian grids
+        if self.grid_type > 3:
+            self.nf_omega = 0
 
     @classmethod
     def from_f90nml(self, f90_namelist: f90nml.Namelist) -> "DynamicalCoreConfig":

@@ -365,7 +365,7 @@ class DycoreState:
         cls,
         *,
         quantity_factory: pace.util.QuantityFactory,
-        communicator: pace.util.CubedSphereCommunicator,
+        communicator: pace.util.Communicator,
         path: str,
     ):
         state_dict: Mapping[str, pace.util.Quantity] = pace.util.open_restart(
