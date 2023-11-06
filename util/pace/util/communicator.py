@@ -73,10 +73,26 @@ class Communicator(abc.ABC):
     def tile(self) -> "TileCommunicator":
         pass
 
+    @classmethod
+    @abc.abstractmethod
+    def from_layout(
+        cls,
+        comm,
+        layout: Tuple[int, int],
+        force_cpu: bool = False,
+        timer: Optional[Timer] = None,
+    ):
+        pass
+
     @property
     def rank(self) -> int:
         """rank of the current process within this communicator"""
         return self.comm.Get_rank()
+
+    @property
+    def size(self) -> int:
+        """Total number of ranks in this communicator"""
+        return self.comm.Get_size()
 
     def _maybe_force_cpu(self, module: NumpyModule) -> NumpyModule:
         """
@@ -591,6 +607,17 @@ class TileCommunicator(Communicator):
             comm, partitioner, force_cpu=force_cpu, timer=timer
         )
         self.partitioner: TilePartitioner = partitioner
+
+    @classmethod
+    def from_layout(
+        cls,
+        comm,
+        layout: Tuple[int, int],
+        force_cpu: bool = False,
+        timer: Optional[Timer] = None,
+    ) -> "TileCommunicator":
+        partitioner = TilePartitioner(layout=layout)
+        return cls(comm=comm, partitioner=partitioner, force_cpu=force_cpu, timer=timer)
 
     @property
     def tile(self):

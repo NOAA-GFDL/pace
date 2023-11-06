@@ -1,2 +1,1 @@
-from .baroclinic import init_baroclinic_state
-from .tropical_cyclone import init_tc_state
+from .analytic_init import init_analytic_state

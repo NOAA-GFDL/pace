@@ -181,7 +181,7 @@ class TracerAdvection:
         quantity_factory: pace.util.QuantityFactory,
         transport: FiniteVolumeTransport,
         grid_data,
-        comm: pace.util.CubedSphereCommunicator,
+        comm: pace.util.Communicator,
         tracers: Dict[str, pace.util.Quantity],
     ):
         orchestrate(

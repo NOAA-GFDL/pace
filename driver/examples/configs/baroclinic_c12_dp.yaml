@@ -13,7 +13,9 @@ grid_config:
     dy_const: 3000.0
     deglat: 10.0
 initialization:
-  type: baroclinic
+  type: analytic
+  config:
+    case: baroclinic
 performance_config:
   collect_performance: true
   experiment_name: c12_baroclinic

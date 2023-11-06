@@ -151,6 +151,8 @@ common options for our tests, which you can add to `TEST_ARGS`:
 
 * `--threshold_overrides_file` - will read a yaml file with error thresholds specified for specific backend and platform (docker or metal) configurations, overriding the max_error thresholds defined in the Translate classes. Format of the yaml file is described [here](tests/savepoint/translate/overrides/README.md).
 
+* `--dperiodic` - run tests on a doubly-periodic domain. Will look for only one tile's worth of test data and parallel tests will be run with a TileCommunicator instead of a CubedSphereCommunicator.
+
 **NOTE:** FV3 is current assumed to be by default in a "development mode", where stencils are checked each time they execute for code changes (which can trigger regeneration). This process is somewhat expensive, so there is an option to put FV3 in a performance mode by telling it that stencils should not automatically be rebuilt:
 
 ```shell

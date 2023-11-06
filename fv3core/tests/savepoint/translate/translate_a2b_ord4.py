@@ -16,7 +16,15 @@ class A2B_Ord4Compute:
             dace_compiletime_args=["divdamp"],
         )
 
-    def __call__(self, divdamp, wk, vort, delpc, dt):
+    def __call__(
+        self,
+        divdamp,
+        wk,
+        vort,
+        delpc,
+        dt,
+        grid_type,
+    ):
         # this function is kept because it has a translate test, if its
         # structure is changed significantly from __call__ of DivergenceDamping
         # consider deleting this method and the translate test, or altering the
@@ -26,12 +34,15 @@ class A2B_Ord4Compute:
             divdamp._set_value(vort, 0.0)
         else:
             # TODO: what is wk/vort here?
-            divdamp.a2b_ord4(wk, vort)
-            divdamp._smagorinksy_diffusion_approx_stencil(
-                delpc,
-                vort,
-                abs(dt),
-            )
+            if grid_type < 3:
+                divdamp.a2b_ord4(wk, vort)
+                divdamp._smagorinksy_diffusion_approx_stencil(
+                    delpc,
+                    vort,
+                    abs(dt),
+                )
+            else:
+                pass
 
 
 class TranslateA2B_Ord4(TranslateDycoreFortranData2Py):
@@ -42,6 +53,7 @@ class TranslateA2B_Ord4(TranslateDycoreFortranData2Py):
         stencil_factory: pace.dsl.StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
+        assert namelist.grid_type < 3
         self.in_vars["data_vars"] = {"wk": {}, "vort": {}, "delpc": {}, "nord_col": {}}
         self.in_vars["parameters"] = ["dt"]
         self.out_vars: Dict[str, Any] = {"wk": {}, "vort": {}}

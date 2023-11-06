@@ -77,7 +77,7 @@ class DriverState:
         grid_data: pace.util.grid.GridData,
     ) -> "DriverState":
         comm = driver_config.comm_config.get_comm()
-        communicator = pace.util.CubedSphereCommunicator.from_layout(
+        communicator = pace.util.Communicator.from_layout(
             comm=comm, layout=driver_config.layout
         )
         sizer = pace.util.SubtileGridSizer.from_tile_params(
@@ -172,7 +172,7 @@ def _restart_driver_state(
     path: str,
     rank: int,
     quantity_factory: pace.util.QuantityFactory,
-    communicator: pace.util.CubedSphereCommunicator,
+    communicator: pace.util.Communicator,
     damping_coefficients: pace.util.grid.DampingCoefficients,
     driver_grid_data: pace.util.grid.DriverGridData,
     grid_data: pace.util.grid.GridData,

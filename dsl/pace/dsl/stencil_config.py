@@ -7,9 +7,9 @@ from gt4py.cartesian.gtc.passes.oir_pipeline import DefaultPipeline, OirPipeline
 
 from pace.dsl.dace.dace_config import DaceConfig, DaCeOrchestration
 from pace.dsl.gt4py_utils import is_gpu_backend
-from pace.util.communicator import CubedSphereCommunicator
+from pace.util.communicator import Communicator
 from pace.util.decomposition import determine_rank_is_compiling, set_distributed_caches
-from pace.util.partitioner import CubedSpherePartitioner
+from pace.util.partitioner import Partitioner
 
 
 class RunMode(enum.Enum):
@@ -35,7 +35,7 @@ class CompilationConfig:
         device_sync: bool = False,
         run_mode: RunMode = RunMode.BuildAndRun,
         use_minimal_caching: bool = False,
-        communicator: Optional[CubedSphereCommunicator] = None,
+        communicator: Optional[Communicator] = None,
     ) -> None:
         if (not ("gpu" in backend or "cuda" in backend)) and device_sync is True:
             raise RuntimeError("Device sync is true on a CPU based backend")
@@ -57,11 +57,11 @@ class CompilationConfig:
         if communicator:
             set_distributed_caches(self)
 
-    def check_communicator(self, communicator: CubedSphereCommunicator) -> None:
+    def check_communicator(self, communicator: Communicator) -> None:
         """Checks that the communicator has a square layout
 
         Args:
-            communicator (CubedSphereCommunicator): communicator to use
+            communicator (Communicator): communicator to use
 
         Raises:
             RuntimeError: If non-square layout is given
@@ -72,7 +72,7 @@ class CompilationConfig:
             )
 
     def determine_compiling_equivalent(
-        self, rank: int, partitioner: CubedSpherePartitioner
+        self, rank: int, partitioner: Partitioner
     ) -> int:
         """From my rank & the current partitioner we determine which
         rank we should read from"""
@@ -117,12 +117,12 @@ class CompilationConfig:
         raise RuntimeError("Illegal partition specified")
 
     def get_decomposition_info_from_comm(
-        self, communicator: Optional[CubedSphereCommunicator]
+        self, communicator: Optional[Communicator]
     ) -> Tuple[int, int, int, bool]:
         if communicator:
             self.check_communicator(communicator)
             rank = communicator.rank
-            size = communicator.partitioner.total_ranks
+            size = communicator.size
             if self.use_minimal_caching:
                 equivalent_compiling_rank = self.determine_compiling_equivalent(
                     rank, communicator.partitioner
