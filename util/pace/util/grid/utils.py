@@ -1,9 +1,9 @@
 import math
 
-import numpy as np
 
 eta_0 = 0.252
 surface_pressure = 1.0e5  # units of (Pa), from Table VI of DCMIP2016
+
 
 def vertical_coordinate(eta_value):
     """
@@ -21,5 +21,3 @@ def compute_eta(ak, bk):
     eta = 0.5 * ((ak[:-1] + ak[1:]) / surface_pressure + bk[:-1] + bk[1:])
     eta_v = vertical_coordinate(eta)
     return eta, eta_v
-
-

@@ -10,7 +10,7 @@ import pace.util as fv3util
 import pace.util.constants as constants
 from pace.dsl.typing import Float
 from pace.fv3core.initialization.dycore_state import DycoreState
-from pace.util.grid import GridData, lon_lat_midpoint, compute_eta
+from pace.util.grid import GridData, compute_eta, lon_lat_midpoint
 
 
 nhalo = fv3util.N_HALO_DEFAULT
