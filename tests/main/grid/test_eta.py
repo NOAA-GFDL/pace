@@ -14,7 +14,7 @@ ak_79, bk_79 = np.loadtxt(eta_file, unpack=True)
 @pytest.mark.xfail
 def test_set_hybrid_pressure_coefficients_nofile():
 
-    """ File does not exist.  Test should fail """
+    """ File, eta90.txt,  does not exist.  Test should fail """
 
     pressure_data = set_hybrid_pressure_coefficients(km=90)
 
@@ -45,7 +45,7 @@ def test_set_hybrid_pressure_coefficients_correct():
 def test_set_hybrid_pressure_coefficients_nonincreasing():
 
     """
-    Array bk is not monotonically increasing.
+    eta values are not monotically increasing
     Test is expected to fail
     """
 
