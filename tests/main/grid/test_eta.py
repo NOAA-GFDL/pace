@@ -3,8 +3,6 @@
 import os
 import pytest
 import numpy as np
-from main.test_util.generate_eta_file import write_eta_file
-from main.test_util.global_utils import remove_file, remove_input_dir
 from pace.util.grid.eta import set_hybrid_pressure_coefficients
 
 km = 79
