@@ -9,6 +9,7 @@ import pace.driver
 import pace.dsl
 import pace.physics
 import pace.stencils
+import pace.util
 import pace.util.grid
 from pace.stencils.testing import TranslateGrid
 from pace.util import Communicator, QuantityFactory
@@ -66,7 +67,8 @@ class GridInitializerSelector(GridInitializer):
         communicator: Communicator,
     ) -> Tuple[DampingCoefficients, DriverGridData, GridData]:
         return self.config.get_grid(
-            quantity_factory=quantity_factory, communicator=communicator
+            quantity_factory=quantity_factory,
+            communicator=communicator,
         )
 
     @classmethod
@@ -209,11 +211,8 @@ class ExternalGridConfig(GridInitializer):
     and grid_data variables
     """
 
-    restart_path: Optional[str] = None
     grid_type: Optional[int] = 0
-    dx_const: Optional[float] = 1000.0
-    dy_const: Optional[float] = 1000.0
-    deglat: Optional[float] = 15.0
+    grid_file_path: str = "/input/tilefile"
 
     # TODO: Area read in?
 
@@ -225,7 +224,15 @@ class ExternalGridConfig(GridInitializer):
 
         pace_log.info("Using external grid data")
 
-        ds = xr.open_dataset("../../../input/file.nc")
+        if self.grid_type <= 3:
+            tile_num = pace.util.get_tile_index(
+                communicator.rank, communicator.partitioner.total_ranks
+            )
+            tile_file = self.grid_file_path + str(tile_num) + ".nc"
+        else:
+            tile_file = self.grid_file_path
+
+        ds = xr.open_dataset(tile_file)
         lon = ds.x.values
         lat = ds.y.values
         dx = ds.dx.values
@@ -233,34 +240,40 @@ class ExternalGridConfig(GridInitializer):
         npx = ds.nxp.values.size
         npy = ds.nyp.values.size
 
-        subtile_slice = communicator.partitioner.subtile_slice(
+        subtile_slice_grid = communicator.partitioner.subtile_slice(
             rank=communicator.rank,
-            global_dims=[pace.util.X_DIM, pace.util.Y_DIM],
+            global_dims=[pace.util.X_INTERFACE_DIM, pace.util.Y_INTERFACE_DIM],
             global_extent=(npx, npy),
             overlap=True,
         )
 
+        subtile_slice_dx = communicator.partitioner.subtile_slice(
+            rank=communicator.rank,
+            global_dims=[pace.util.X_INTERFACE_DIM, pace.util.Y_DIM],
+            global_extent=(npx - 1, npy),
+            overlap=True,
+        )
+
+        subtile_slice_dy = communicator.partitioner.subtile_slice(
+            rank=communicator.rank,
+            global_dims=[pace.util.X_DIM, pace.util.Y_INTERFACE_DIM],
+            global_extent=(npx, npy - 1),
+            overlap=True,
+        )
+
         metric_terms = MetricTerms.from_generated(
-            x=lon[subtile_slice],
-            y=lat[subtile_slice],
-            dx=dx,
-            dy=dy,
+            x=lon[subtile_slice_grid],
+            y=lat[subtile_slice_grid],
+            dx=dx[subtile_slice_dx],
+            dy=dy[subtile_slice_dy],
             quantity_factory=quantity_factory,
             communicator=communicator,
             grid_type=self.grid_type,
-            dx_const=self.dx_const,
-            dy_const=self.dy_const,
-            deglat=self.deglat,
             extdgrid=True,
         )
 
         horizontal_data = HorizontalGridData.new_from_metric_terms(metric_terms)
-        if self.restart_path is not None:
-            vertical_data = VerticalGridData.from_restart(
-                self.restart_path, quantity_factory=quantity_factory
-            )
-        else:
-            vertical_data = VerticalGridData.new_from_metric_terms(metric_terms)
+        vertical_data = VerticalGridData.new_from_metric_terms(metric_terms)
         contravariant_data = ContravariantGridData.new_from_metric_terms(metric_terms)
         angle_data = AngleGridData.new_from_metric_terms(metric_terms)
         grid_data = GridData(

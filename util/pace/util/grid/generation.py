@@ -428,21 +428,15 @@ class MetricTerms:
         y,
         dx,
         dy,
-        quantity_factory: util.QuantityFactory,
-        communicator: util.Communicator,
-        grid_type: int = 0,
-        dx_const: float = 1000.0,
-        dy_const: float = 1000.0,
-        deglat: float = 15.0,
+        quantity_factory,
+        communicator,
+        grid_type,
         extdgrid: bool = True,
     ) -> "MetricTerms":
         terms = MetricTerms(
             quantity_factory=quantity_factory,
             communicator=communicator,
             grid_type=grid_type,
-            dx_const=dx_const,
-            dy_const=dy_const,
-            deglat=deglat,
             extdgrid=extdgrid,
         )
 
