@@ -4,7 +4,9 @@ import numpy as np
 
 import pace.fv3core
 import pace.util
-from pace.fv3core.initialization import init_baroclinic_state
+from pace.fv3core.initialization.test_cases.initialize_baroclinic import (
+    init_baroclinic_state,
+)
 from pace.util.grid import MetricTerms
 from pace.util.mpi import MPIComm
 from pace.util.quantity import Quantity

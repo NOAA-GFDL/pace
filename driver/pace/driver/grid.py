@@ -249,19 +249,19 @@ class ExternalGridConfig(GridInitializer):
 
         subtile_slice_dx = communicator.partitioner.subtile_slice(
             rank=communicator.rank,
-            global_dims=[pace.util.X_INTERFACE_DIM, pace.util.Y_DIM],
-            global_extent=(npx - 1, npy),
+            global_dims=[pace.util.X_DIM, pace.util.Y_INTERFACE_DIM],
+            global_extent=(npx, npy),
             overlap=True,
         )
 
         subtile_slice_dy = communicator.partitioner.subtile_slice(
             rank=communicator.rank,
-            global_dims=[pace.util.X_DIM, pace.util.Y_INTERFACE_DIM],
-            global_extent=(npx, npy - 1),
+            global_dims=[pace.util.X_INTERFACE_DIM, pace.util.Y_DIM],
+            global_extent=(npx, npy),
             overlap=True,
         )
 
-        metric_terms = MetricTerms.from_generated(
+        metric_terms = MetricTerms.from_external(
             x=lon[subtile_slice_grid],
             y=lat[subtile_slice_grid],
             dx=dx[subtile_slice_dx],

@@ -422,7 +422,7 @@ class MetricTerms:
     # initializing the dgrid by input from data contained in an
     # externally generated tile file
     @classmethod
-    def from_generated(
+    def from_external(
         cls,
         x,
         y,
@@ -440,11 +440,37 @@ class MetricTerms:
             extdgrid=extdgrid,
         )
 
+        # TODO: Using quantity factory to create quantities
+        # for dx and dy, quantity_factory.from_array()
+
         rad_conv = PI / 180.0
-        terms.grid.data[:, :, 0] = np.dot(rad_conv, x)
-        terms.grid.data[:, :, 1] = np.dot(rad_conv, y)
-        terms._dx = dx
-        terms._dy = dy
+        terms._grid_64.view[:, :, 0] = np.dot(rad_conv, x)
+        terms._grid_64.view[:, :, 1] = np.dot(rad_conv, y)
+
+        dx_64 = terms.quantity_factory.zeros(
+            [util.Y_INTERFACE_DIM, util.X_DIM],
+            "m",
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
+        )
+
+        dx_64.view[:, :] = dx
+        terms._dx_64 = dx_64
+
+        dy_64 = terms.quantity_factory.zeros(
+            [util.Y_DIM, util.X_INTERFACE_DIM],
+            "m",
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
+        )
+        dy_64.view[:, :] = dy
+        terms._dy_64 = dy_64
+
+        terms._comm.halo_update(terms._grid_64, n_points=terms._halo)
+        terms._comm.vector_halo_update(terms._dx_64, terms._dy_64, n_points=terms._halo)
+
+        # terms._dx = quantity_cast_to_model_float(terms.quantity_factory, terms._dx_64)
+        # terms._dy = quantity_cast_to_model_float(terms.quantity_factory, terms._dy_64)
 
         terms._init_agrid()
 
