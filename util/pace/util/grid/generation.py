@@ -1,7 +1,7 @@
 import dataclasses
 import functools
 import warnings
-from typing import Tuple
+from typing import Optional, Tuple
 
 import numpy as np
 
@@ -275,13 +275,13 @@ class MetricTerms:
         # for the selected floating point precision
         self._agrid = None
         self._np = self._grid_64.np
-        self._dx = None
-        self._dy = None
+        self._dx: Optional[util.Quantity] = None
+        self._dy: Optional[util.Quantity] = None
         self._dx_agrid = None
         self._dy_agrid = None
         self._dx_center = None
         self._dy_center = None
-        self._area = None
+        self._area: Optional[util.Quantity] = None
         self._area_c = None
         self._ks = None
         self._ak = None
@@ -428,6 +428,7 @@ class MetricTerms:
         y,
         dx,
         dy,
+        area,
         quantity_factory,
         communicator,
         grid_type,
@@ -440,9 +441,6 @@ class MetricTerms:
             extdgrid=extdgrid,
         )
 
-        # TODO: Using quantity factory to create quantities
-        # for dx and dy, quantity_factory.from_array()
-
         rad_conv = PI / 180.0
         terms._grid_64.view[:, :, 0] = np.dot(rad_conv, x)
         terms._grid_64.view[:, :, 1] = np.dot(rad_conv, y)
@@ -453,7 +451,6 @@ class MetricTerms:
             dtype=np.float64,
             allow_mismatch_float_precision=True,
         )
-
         dx_64.view[:, :] = dx
         terms._dx_64 = dx_64
 
@@ -469,8 +466,18 @@ class MetricTerms:
         terms._comm.halo_update(terms._grid_64, n_points=terms._halo)
         terms._comm.vector_halo_update(terms._dx_64, terms._dy_64, n_points=terms._halo)
 
-        # terms._dx = quantity_cast_to_model_float(terms.quantity_factory, terms._dx_64)
-        # terms._dy = quantity_cast_to_model_float(terms.quantity_factory, terms._dy_64)
+        terms._dx = quantity_cast_to_model_float(terms.quantity_factory, terms._dx_64)
+        terms._dy = quantity_cast_to_model_float(terms.quantity_factory, terms._dy_64)
+
+        area_64 = terms.quantity_factory.zeros(
+            [util.X_DIM, util.Y_DIM],
+            "m^2",
+            dtype=np.float64,
+            allow_mismatch_float_precision=True,
+        )
+        area_64.view[:, :] = area
+
+        terms._area = quantity_cast_to_model_float(terms.quantity_factory, area_64)
 
         terms._init_agrid()
 

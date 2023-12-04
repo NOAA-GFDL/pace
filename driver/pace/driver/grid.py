@@ -225,8 +225,11 @@ class ExternalGridConfig(GridInitializer):
         pace_log.info("Using external grid data")
 
         if self.grid_type <= 3:
-            tile_num = pace.util.get_tile_index(
-                communicator.rank, communicator.partitioner.total_ranks
+            tile_num = (
+                pace.util.get_tile_index(
+                    communicator.rank, communicator.partitioner.total_ranks
+                )
+                + 1
             )
             tile_file = self.grid_file_path + str(tile_num) + ".nc"
         else:
@@ -237,27 +240,37 @@ class ExternalGridConfig(GridInitializer):
         lat = ds.y.values
         dx = ds.dx.values
         dy = ds.dy.values
+        area = ds.area.values
+        nx = ds.nx.values.size
+        ny = ds.ny.values.size
         npx = ds.nxp.values.size
         npy = ds.nyp.values.size
 
-        subtile_slice_grid = communicator.partitioner.subtile_slice(
+        subtile_slice_grid = communicator.partitioner.tile.subtile_slice(
             rank=communicator.rank,
             global_dims=[pace.util.X_INTERFACE_DIM, pace.util.Y_INTERFACE_DIM],
             global_extent=(npx, npy),
             overlap=True,
         )
 
-        subtile_slice_dx = communicator.partitioner.subtile_slice(
+        subtile_slice_dx = communicator.partitioner.tile.subtile_slice(
             rank=communicator.rank,
-            global_dims=[pace.util.X_DIM, pace.util.Y_INTERFACE_DIM],
-            global_extent=(npx, npy),
+            global_dims=[pace.util.Y_INTERFACE_DIM, pace.util.X_DIM],
+            global_extent=(npy, nx),
             overlap=True,
         )
 
-        subtile_slice_dy = communicator.partitioner.subtile_slice(
+        subtile_slice_dy = communicator.partitioner.tile.subtile_slice(
             rank=communicator.rank,
-            global_dims=[pace.util.X_INTERFACE_DIM, pace.util.Y_DIM],
-            global_extent=(npx, npy),
+            global_dims=[pace.util.Y_DIM, pace.util.X_INTERFACE_DIM],
+            global_extent=(ny, npx),
+            overlap=True,
+        )
+
+        subtile_slice_area = communicator.partitioner.tile.subtile_slice(
+            rank=communicator.rank,
+            global_dims=[pace.util.Y_DIM, pace.util.X_DIM],
+            global_extent=(ny, nx),
             overlap=True,
         )
 
@@ -266,6 +279,7 @@ class ExternalGridConfig(GridInitializer):
             y=lat[subtile_slice_grid],
             dx=dx[subtile_slice_dx],
             dy=dy[subtile_slice_dy],
+            area=area[subtile_slice_area],
             quantity_factory=quantity_factory,
             communicator=communicator,
             grid_type=self.grid_type,

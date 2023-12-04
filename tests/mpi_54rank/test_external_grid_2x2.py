@@ -1,8 +1,9 @@
 import numpy as np
 import xarray as xr
+import yaml
 
-import pace.driver
 import pace.util
+from pace.driver import Driver, DriverConfig
 from pace.util.grid import MetricTerms
 from pace.util.mpi import MPIComm
 
@@ -31,26 +32,28 @@ def get_tile_num(comm: MPIComm):
     return pace.util.get_tile_index(comm.rank, comm.partitioner.total_ranks)
 
 
-def test_extgrid_equals_generated_1x1_6():
-    nx_tile, ny_tile, nz = 6, 6, 5
-    comm_1by1 = MPIComm()
-    cube_comm = get_cube_comm(layout=(1, 1), comm=comm_1by1)
-    metric_terms_gen = MetricTerms(
-        quantity_factory=get_quantity_factory(
-            layout=(1, 1), nx_tile=nx_tile, ny_tile=ny_tile, nz=nz
-        ),
-        communicator=cube_comm,
-    )
+def test_extgrid_equals_generated_2x2():
 
-    metric_terms_gen._dx, metric_terms_gen._dy = metric_terms_gen._compute_dxdy()
+    with open("../../driver/examples/configs/test_external_C12_2x2.yaml", "r") as ext_f:
+        ext_config = yaml.safe_load(ext_f)
+        ext_driver_config = DriverConfig.from_dict(ext_config)
+
+    ext_driver = Driver(ext_driver_config)
+
+    nx_tile, ny_tile, nz = 12, 12, 5
+    comm_2by2 = MPIComm()
+    cube_comm = get_cube_comm(layout=(2, 2), comm=comm_2by2)
 
     tile_num = get_tile_num(cube_comm) + 1
-    tile_file = "../../test_input/ext_test_6.tile" + str(tile_num) + ".nc"
+    tile_file = "../../test_input/C12.tile" + str(tile_num) + ".nc"
     ds = xr.open_dataset(tile_file)
     lon = ds.x.values
     lat = ds.y.values
     dx = ds.dx.values
     dy = ds.dy.values
+    area = ds.area.values
+    nx = ds.nx.values.size
+    ny = ds.ny.values.size
     npx = ds.nxp.values.size
     npy = ds.nyp.values.size
 
@@ -64,14 +67,21 @@ def test_extgrid_equals_generated_1x1_6():
     subtile_slice_dx = cube_comm.partitioner.tile.subtile_slice(
         rank=cube_comm.rank,
         global_dims=[pace.util.Y_INTERFACE_DIM, pace.util.X_DIM],
-        global_extent=(npx, npy),
+        global_extent=(npy, nx),
         overlap=True,
     )
 
     subtile_slice_dy = cube_comm.partitioner.tile.subtile_slice(
         rank=cube_comm.rank,
         global_dims=[pace.util.Y_DIM, pace.util.X_INTERFACE_DIM],
-        global_extent=(npx, npy),
+        global_extent=(ny, npx),
+        overlap=True,
+    )
+
+    subtile_slice_area = cube_comm.partitioner.tile.subtile_slice(
+        rank=cube_comm.rank,
+        global_dims=[pace.util.Y_DIM, pace.util.X_DIM],
+        global_extent=(ny, nx),
         overlap=True,
     )
 
@@ -80,37 +90,45 @@ def test_extgrid_equals_generated_1x1_6():
         y=lat[subtile_slice_grid],
         dx=dx[subtile_slice_dx],
         dy=dy[subtile_slice_dy],
+        area=area[subtile_slice_area],
         quantity_factory=get_quantity_factory(
-            layout=(1, 1), nx_tile=nx_tile, ny_tile=ny_tile, nz=nz
+            layout=(2, 2), nx_tile=nx_tile, ny_tile=ny_tile, nz=nz
         ),
         communicator=cube_comm,
         grid_type=0,
         extdgrid=True,
     )
 
-    print(metric_terms_ext._dx)
-
     errors = []
 
     if (
-        metric_terms_gen.grid.data[:, :, 0].any()
+        ext_driver.state.grid_data.lon.data.any()
         != metric_terms_ext.grid.data[:, :, 0].any()
     ):
         errors.append("lon data mismatch between generated and external grid data")
 
     if (
-        metric_terms_gen.grid.data[:, :, 1].any()
+        ext_driver.state.grid_data.lat.data.any()
         != metric_terms_ext.grid.data[:, :, 1].any()
     ):
-        errors.append("lat data mismatch between generated and external grid data")
+        errors.append("lon data mismatch between generated and external grid data")
 
-    if metric_terms_gen._dx.view[:, :].any() != metric_terms_ext._dx.view[:, :].any():
+    if (
+        ext_driver.state.grid_data.dx.data.any()
+        != metric_terms_ext._dx.view[:, :].any()
+    ):
         errors.append("dx data mismatch between generated and external grid data")
 
-    if metric_terms_gen._dy.view[:, :].any() != metric_terms_ext._dy.view[:, :].any():
+    if (
+        ext_driver.state.grid_data.dy.data.any()
+        != metric_terms_ext._dy.view[:, :].any()
+    ):
         errors.append("dy data mismatch between generated and external grid data")
 
-    # if metric_terms_gen._area.data[:,:].any() != metric_terms_ext._area.any():
-    #    errors.append("area data mismatch between generated and external grid data")
+    if (
+        ext_driver.state.grid_data.area.data.any()
+        != metric_terms_ext._area.view[:, :].any()
+    ):
+        errors.append("area data mismatch between generated and external grid data")
 
-    assert not errors, "errors occured in 1x1_6:\n{}".format("\n".join(errors))
+    assert not errors, "errors occured in 2x2:\n{}".format("\n".join(errors))

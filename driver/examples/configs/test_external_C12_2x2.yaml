@@ -8,11 +8,8 @@ stencil_config:
 grid_config:
   type: external
   config:
-    grid_type: 4
-    dx_const: 3000.0
-    dy_const: 3000.0
-    deglat: 10.0
-    grid_file_path: /input/C12_grid.tile
+    grid_type: 0
+    grid_file_path: "../../test_input/C12.tile"
 initialization:
   type: analytic
   config:
