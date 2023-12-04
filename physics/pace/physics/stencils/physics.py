@@ -1,3 +1,4 @@
+from enum import Enum
 from typing import List
 
 import gt4py.cartesian.gtscript as gtscript
@@ -27,8 +28,8 @@ from pace.util.grid import GridData
 from .._config import PhysicsConfig
 
 
-PHYSICS_PACKAGES = Literal["microphysics"]
-
+class PHYSICS_PACKAGES(Enum, metaclass=pace.util.MetaEnumStr):
+    microphysics = "microphysics"
 
 def atmos_phys_driver_statein(
     prsik: FloatField,
@@ -208,8 +209,13 @@ class Physics:
         quantity_factory: pace.util.QuantityFactory,
         grid_data: GridData,
         namelist: PhysicsConfig,
-        active_packages: List[Literal[PHYSICS_PACKAGES]],
+        schemes: list[str],
     ):
+        for scheme in schemes:
+            if scheme not in PHYSICS_PACKAGES:
+                raise NotImplementedError(
+                    f"{scheme} is not an implemented physics parameterization"
+                )
         orchestrate(
             obj=self,
             config=stencil_factory.config.dace_config,
@@ -249,7 +255,7 @@ class Physics:
                 "pktop": self._pktop,
             },
         )
-        if "microphysics" in active_packages:
+        if "microphysics" in schemes:
             self._do_microphysics = True
             self._prepare_microphysics = stencil_factory.from_origin_domain(
                 func=prepare_microphysics,

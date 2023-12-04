@@ -231,6 +231,7 @@ class DriverConfig:
             damping_coefficients=damping_coefficients,
             driver_grid_data=driver_grid_data,
             grid_data=grid_data,
+            schemes=self.physics_config.schemes
         )
 
     @classmethod
@@ -508,7 +509,6 @@ class Driver:
                     quantity_factory=self.quantity_factory,
                     grid_data=self.state.grid_data,
                     namelist=self.config.physics_config,
-                    active_packages=["microphysics"],
                 )
             else:
                 # Make sure those are set to None to raise any issues

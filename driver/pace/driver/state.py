@@ -75,6 +75,7 @@ class DriverState:
         damping_coefficients: pace.util.grid.DampingCoefficients,
         driver_grid_data: pace.util.grid.DriverGridData,
         grid_data: pace.util.grid.GridData,
+        schemes: list[str],
     ) -> "DriverState":
         comm = driver_config.comm_config.get_comm()
         communicator = pace.util.Communicator.from_layout(
@@ -102,6 +103,7 @@ class DriverState:
             damping_coefficients=damping_coefficients,
             driver_grid_data=driver_grid_data,
             grid_data=grid_data,
+            schemes=schemes
         )
         return state
 
@@ -176,6 +178,7 @@ def _restart_driver_state(
     damping_coefficients: pace.util.grid.DampingCoefficients,
     driver_grid_data: pace.util.grid.DriverGridData,
     grid_data: pace.util.grid.GridData,
+    schemes: list[str],
 ):
     fs = pace.util.get_fs(path)
 
@@ -197,12 +200,11 @@ def _restart_driver_state(
             "restart_dycore_state",
         )
 
-    active_packages = ["microphysics"]
     physics_state = pace.physics.PhysicsState.init_zeros(
-        quantity_factory=quantity_factory, active_packages=active_packages
+        quantity_factory=quantity_factory, schemes=schemes
     )
 
-    physics_state.__post_init__(quantity_factory, active_packages)
+    physics_state.__post_init__(quantity_factory, schemes)
     tendency_state = TendencyState.init_zeros(
         quantity_factory=quantity_factory,
     )

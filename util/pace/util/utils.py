@@ -1,4 +1,5 @@
-from typing import Iterable, Sequence, Tuple, TypeVar, Union
+from enum import EnumMeta
+from typing import Any, Iterable, Sequence, Tuple, TypeVar, Union
 
 import numpy as np
 
@@ -19,6 +20,11 @@ else:
     GPU_AVAILABLE = False
 
 T = TypeVar("T")
+
+
+class MetaEnumStr(EnumMeta):
+    def __contains__(cls, item) -> bool:
+        return item in cls.__members__.keys()
 
 
 def list_by_dims(

@@ -281,13 +281,13 @@ class PhysicsState:
         }
     )
     quantity_factory: InitVar[pace.util.QuantityFactory]
-    active_packages: InitVar[List[str]]
+    schemes: InitVar[List[str]]
 
     def __post_init__(
-        self, quantity_factory: pace.util.QuantityFactory, active_packages: List[str]
+        self, quantity_factory: pace.util.QuantityFactory, schemes: List[str]
     ):
         # storage for tendency variables not in PhysicsState
-        if "microphysics" in active_packages:
+        if "microphysics" in schemes:
             tendency = quantity_factory.zeros(
                 [pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM],
                 "unknown",
@@ -317,7 +317,7 @@ class PhysicsState:
             self.microphysics = None
 
     @classmethod
-    def init_zeros(cls, quantity_factory, active_packages: List[str]) -> "PhysicsState":
+    def init_zeros(cls, quantity_factory, schemes: List[str]) -> "PhysicsState":
         initial_arrays = {}
         for _field in fields(cls):
             if "dims" in _field.metadata.keys():
@@ -329,7 +329,7 @@ class PhysicsState:
         return cls(
             **initial_arrays,
             quantity_factory=quantity_factory,
-            active_packages=active_packages,
+            schemes=schemes,
         )
 
     @classmethod
@@ -338,7 +338,7 @@ class PhysicsState:
         storages: Mapping[str, Any],
         sizer: pace.util.GridSizer,
         quantity_factory: pace.util.QuantityFactory,
-        active_packages: List[str],
+        schemes: List[str],
     ) -> "PhysicsState":
         inputs: Dict[str, pace.util.Quantity] = {}
         for _field in fields(cls):
@@ -353,14 +353,14 @@ class PhysicsState:
                 )
                 inputs[_field.name] = quantity
         return cls(
-            **inputs, quantity_factory=quantity_factory, active_packages=active_packages
+            **inputs, quantity_factory=quantity_factory, schemes=schemes
         )
 
     @property
     def xr_dataset(self):
         data_vars = {}
         for name, field_info in self.__dataclass_fields__.items():
-            if name not in ["quantity_factory", "active_packages"]:
+            if name not in ["quantity_factory", "schemes"]:
                 if issubclass(field_info.type, pace.util.Quantity):
                     dims = [
                         f"{dim_name}_{name}" for dim_name in field_info.metadata["dims"]

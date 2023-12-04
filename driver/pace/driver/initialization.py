@@ -40,6 +40,7 @@ class Initializer(abc.ABC):
         damping_coefficients: pace.util.grid.DampingCoefficients,
         driver_grid_data: pace.util.grid.DriverGridData,
         grid_data: pace.util.grid.GridData,
+        schemes: list[str],
     ) -> DriverState:
         ...
 
@@ -77,6 +78,7 @@ class InitializerSelector(Initializer):
         damping_coefficients: pace.util.grid.DampingCoefficients,
         driver_grid_data: pace.util.grid.DriverGridData,
         grid_data: pace.util.grid.GridData,
+        schemes: list[str],
     ) -> DriverState:
         return self.config.get_driver_state(
             quantity_factory=quantity_factory,
@@ -84,6 +86,7 @@ class InitializerSelector(Initializer):
             damping_coefficients=damping_coefficients,
             driver_grid_data=driver_grid_data,
             grid_data=grid_data,
+            schemes=schemes
         )
 
     @classmethod
@@ -109,6 +112,7 @@ class AnalyticInit(Initializer):
         damping_coefficients: pace.util.grid.DampingCoefficients,
         driver_grid_data: pace.util.grid.DriverGridData,
         grid_data: pace.util.grid.GridData,
+        schemes: list[str],
     ) -> DriverState:
         dycore_state = analytic_init.init_analytic_state(
             analytic_init_case=self.case,
@@ -120,7 +124,7 @@ class AnalyticInit(Initializer):
             comm=communicator,
         )
         physics_state = pace.physics.PhysicsState.init_zeros(
-            quantity_factory=quantity_factory, active_packages=["microphysics"]
+            quantity_factory=quantity_factory, schemes=schemes
         )
         tendency_state = TendencyState.init_zeros(
             quantity_factory=quantity_factory,
@@ -152,6 +156,7 @@ class RestartInit(Initializer):
         damping_coefficients: pace.util.grid.DampingCoefficients,
         driver_grid_data: pace.util.grid.DriverGridData,
         grid_data: pace.util.grid.GridData,
+        schemes: list[str],
     ) -> DriverState:
         state = _restart_driver_state(
             self.path,
@@ -161,6 +166,7 @@ class RestartInit(Initializer):
             damping_coefficients,
             driver_grid_data,
             grid_data,
+            schemes,
         )
 
         return state
@@ -201,6 +207,7 @@ class FortranRestartInit(Initializer):
         damping_coefficients: pace.util.grid.DampingCoefficients,
         driver_grid_data: pace.util.grid.DriverGridData,
         grid_data: pace.util.grid.GridData,
+        schemes: list[str],
     ) -> DriverState:
         state = _restart_driver_state(
             self.path,
@@ -210,6 +217,7 @@ class FortranRestartInit(Initializer):
             damping_coefficients,
             driver_grid_data,
             grid_data,
+            schemes,
         )
 
         _update_fortran_restart_pe_peln(state)
@@ -272,6 +280,7 @@ class SerialboxInit(Initializer):
         damping_coefficients: pace.util.grid.DampingCoefficients,
         driver_grid_data: pace.util.grid.DriverGridData,
         grid_data: pace.util.grid.GridData,
+        schemes: list[str],
     ) -> DriverState:
         backend = quantity_factory.zeros(
             dims=[pace.util.X_DIM, pace.util.Y_DIM], units="unknown"
@@ -280,7 +289,7 @@ class SerialboxInit(Initializer):
         dycore_state = self._initialize_dycore_state(communicator, backend)
         physics_state = pace.physics.PhysicsState.init_zeros(
             quantity_factory=quantity_factory,
-            active_packages=["microphysics"],
+            schemes=schemes,
         )
         tendency_state = TendencyState.init_zeros(quantity_factory=quantity_factory)
 

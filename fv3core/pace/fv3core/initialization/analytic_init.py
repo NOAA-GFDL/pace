@@ -1,13 +1,9 @@
-from enum import Enum, EnumMeta
+from enum import Enum
 
 import pace.util as fv3util
+from pace.util import MetaEnumStr
 from pace.fv3core.dycore_state import DycoreState
 from pace.util.grid import GridData
-
-
-class MetaEnumStr(EnumMeta):
-    def __contains__(cls, item):
-        return item in cls.__members__.keys()
 
 
 class Cases(Enum, metaclass=MetaEnumStr):
