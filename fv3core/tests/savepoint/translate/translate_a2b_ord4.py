@@ -23,7 +23,7 @@ class A2B_Ord4Compute:
         vort,
         delpc,
         dt,
-        grid_type,
+        grid_type: int,
     ):
         # this function is kept because it has a translate test, if its
         # structure is changed significantly from __call__ of DivergenceDamping
@@ -80,5 +80,6 @@ class TranslateA2B_Ord4(TranslateDycoreFortranData2Py):
             nord_col,
             nord_col,
         )
+        inputs["grid_type"] = 0
         self.compute_obj(divdamp, **inputs)
         return inputs
