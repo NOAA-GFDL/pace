@@ -3,6 +3,7 @@ import functools
 import warnings
 from typing import Tuple
 
+import eta  # import set_hybrid_pressure_coefficients
 import numpy as np
 
 from pace import util
@@ -18,7 +19,6 @@ from pace.stencils.corners import (
 from pace.util import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_INTERFACE_DIM
 from pace.util.constants import N_HALO_DEFAULT, PI, RADIUS
 
-from .eta import set_hybrid_pressure_coefficients
 from .geometry import (
     calc_unit_vector_south,
     calc_unit_vector_west,
@@ -581,62 +581,70 @@ class MetricTerms:
             self._dx_center, self._dy_center = self._compute_dxdy_center()
         return self._dy_center
 
-    @property
-    def ks(self) -> util.Quantity:
+    def ks(self, eta_file="") -> util.Quantity:
         """
         number of levels where the vertical coordinate is purely pressure-based
         """
         if self._ks is None:
-            (
-                self._ks,
-                self._ptop,
-                self._ak,
-                self._bk,
-            ) = self._set_hybrid_pressure_coefficients()
+            if not eta_file == "":
+                (
+                    self._ks,
+                    self._ptop,
+                    self._ak,
+                    self._bk,
+                ) = self._set_hybrid_pressure_coefficients(eta_file)
+            else:
+                raise IOError("eta file is not specified")
         return self._ks
 
-    @property
-    def ak(self) -> util.Quantity:
+    def ak(self, eta_file="") -> util.Quantity:
         """
         the ak coefficient used to calculate the pressure at a given k-level:
         pk = ak + (bk * ps)
         """
         if self._ak is None:
-            (
-                self._ks,
-                self._ptop,
-                self._ak,
-                self._bk,
-            ) = self._set_hybrid_pressure_coefficients()
+            if not eta_file == "":
+                (
+                    self._ks,
+                    self._ptop,
+                    self._ak,
+                    self._bk,
+                ) = self._set_hybrid_pressure_coefficients(eta_file)
+            else:
+                raise IOError("eta file is not specified")
         return self._ak
 
-    @property
-    def bk(self) -> util.Quantity:
+    def bk(self, eta_file="") -> util.Quantity:
         """
         the bk coefficient used to calculate the pressure at a given k-level:
         pk = ak + (bk * ps)
         """
         if self._bk is None:
-            (
-                self._ks,
-                self._ptop,
-                self._ak,
-                self._bk,
-            ) = self._set_hybrid_pressure_coefficients()
+            if not eta_file == "":
+                (
+                    self._ks,
+                    self._ptop,
+                    self._ak,
+                    self._bk,
+                ) = self._set_hybrid_pressure_coefficients(eta_file)
+            else:
+                raise IOError("eta file is not specified")
         return self._bk
 
-    @property
-    def ptop(self) -> util.Quantity:
+    def ptop(self, eta_file="") -> util.Quantity:
         """
         the pressure of the top of atmosphere level
         """
         if self._ptop is None:
-            (
-                self._ks,
-                self._ptop,
-                self._ak,
-                self._bk,
-            ) = self._set_hybrid_pressure_coefficients()
+            if not eta_file == "":
+                (
+                    self._ks,
+                    self._ptop,
+                    self._ak,
+                    self._bk,
+                ) = self._set_hybrid_pressure_coefficients(eta_file)
+            else:
+                raise IOError("eta file is not specified")
         return self._ptop
 
     @property
@@ -2128,7 +2136,7 @@ class MetricTerms:
         area_cgrid_64.data[:, :] = self._dx_const * self._dy_const
         return quantity_cast_to_model_float(self.quantity_factory, area_cgrid_64)
 
-    def _set_hybrid_pressure_coefficients(self):
+    def _set_hybrid_pressure_coefficients(self, eta_file=""):
         ks = self.quantity_factory.zeros(
             [],
             "",
@@ -2149,7 +2157,10 @@ class MetricTerms:
             "",
             dtype=Float,
         )
-        pressure_coefficients = set_hybrid_pressure_coefficients(self._npz)
+        pressure_coefficients = eta.HybridPressureCoefficients
+        pressure_coefficients = pressure_coefficients.set_hybrid_pressure_coefficients(
+            self._npz, eta_file
+        )
         ks = pressure_coefficients.ks
         ptop = pressure_coefficients.ptop
         ak.data[:] = asarray(pressure_coefficients.ak, type(ak.data))

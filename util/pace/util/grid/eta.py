@@ -24,7 +24,9 @@ class HybridPressureCoefficients:
     bk: np.ndarray
 
 
-def set_hybrid_pressure_coefficients(km: int) -> HybridPressureCoefficients:
+def set_hybrid_pressure_coefficients(
+    km: int, eta_file: str
+) -> HybridPressureCoefficients:
     """
     Sets the coefficients describing the hybrid pressure coordinates.
 
@@ -39,11 +41,8 @@ def set_hybrid_pressure_coefficients(km: int) -> HybridPressureCoefficients:
         a HybridPressureCoefficients dataclass
     """
 
-    # set path where the eta file lives
-    GRID_DIR = os.path.join(os.path.abspath("./"), "input/")
-
-    # set filename, e.g, eta79.txt for km=79
-    eta_file = GRID_DIR + "eta" + str(km) + ".txt"
+    if eta_file == "None":
+        raise IOError("eta file not specified")
     if not os.path.isfile(eta_file):
         raise IOError("file " + eta_file + " does not exist")
 

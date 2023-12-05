@@ -143,10 +143,12 @@ class VerticalGridData:
         self._p_interface = None
 
     @classmethod
-    def new_from_metric_terms(cls, metric_terms: MetricTerms) -> "VerticalGridData":
+    def new_from_metric_terms(
+        cls, metric_terms: MetricTerms, eta_file: str
+    ) -> "VerticalGridData":
         return cls(
-            ak=metric_terms.ak,
-            bk=metric_terms.bk,
+            ak=metric_terms.ak(eta_file),
+            bk=metric_terms.bk(eta_file),
         )
 
     @classmethod
@@ -321,9 +323,11 @@ class GridData:
         self._fC_agrid = None
 
     @classmethod
-    def new_from_metric_terms(cls, metric_terms: MetricTerms):
+    def new_from_metric_terms(cls, metric_terms: MetricTerms, eta_file=""):
         horizontal_data = HorizontalGridData.new_from_metric_terms(metric_terms)
-        vertical_data = VerticalGridData.new_from_metric_terms(metric_terms)
+        vertical_data = VerticalGridData.new_from_metric_terms(
+            metric_terms, eta_file=""
+        )
         contravariant_data = ContravariantGridData.new_from_metric_terms(metric_terms)
         angle_data = AngleGridData.new_from_metric_terms(metric_terms)
         return cls(horizontal_data, vertical_data, contravariant_data, angle_data)

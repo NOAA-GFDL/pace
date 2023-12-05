@@ -99,6 +99,7 @@ class GeneratedGridConfig(GridInitializer):
     dx_const: Optional[float] = 1000.0
     dy_const: Optional[float] = 1000.0
     deglat: Optional[float] = 15.0
+    eta_file: str = "None"
 
     def get_grid(
         self,
@@ -124,7 +125,9 @@ class GeneratedGridConfig(GridInitializer):
                 self.restart_path, quantity_factory=quantity_factory
             )
         else:
-            vertical_data = VerticalGridData.new_from_metric_terms(metric_terms)
+            vertical_data = VerticalGridData.new_from_metric_terms(
+                metric_terms, self.eta_file
+            )
         contravariant_data = ContravariantGridData.new_from_metric_terms(metric_terms)
         angle_data = AngleGridData.new_from_metric_terms(metric_terms)
         grid_data = GridData(
