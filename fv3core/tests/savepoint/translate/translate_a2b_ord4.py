@@ -23,7 +23,7 @@ class A2B_Ord4Compute:
         vort,
         delpc,
         dt,
-        grid_type: int,
+        grid_type: int,  # TODO: swap grid_type type hint when refactor into an enum
     ):
         # this function is kept because it has a translate test, if its
         # structure is changed significantly from __call__ of DivergenceDamping
@@ -80,6 +80,7 @@ class TranslateA2B_Ord4(TranslateDycoreFortranData2Py):
             nord_col,
             nord_col,
         )
+        # TODO: use proper grid_type values when refactor into an enum
         inputs["grid_type"] = 0
         self.compute_obj(divdamp, **inputs)
         return inputs
