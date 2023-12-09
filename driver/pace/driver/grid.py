@@ -224,6 +224,7 @@ class ExternalGridConfig(GridInitializer):
 
         pace_log.info("Using external grid data")
 
+        # ToDo: refactor when grid_type is an enum
         if self.grid_type <= 3:
             tile_num = (
                 pace.util.get_tile_index(
