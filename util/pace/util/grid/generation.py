@@ -416,11 +416,6 @@ class MetricTerms:
         else:
             raise NotImplementedError(f"Unsupported grid_type = {grid_type}")
 
-    # from_generated class method
-    # Generates a metric terms object, which will perform
-    # the same function as the __init__ method for MetricTerms
-    # initializing the dgrid by input from data contained in an
-    # externally generated tile file
     @classmethod
     def from_external(
         cls,
@@ -434,6 +429,10 @@ class MetricTerms:
         grid_type,
         extdgrid: bool = True,
     ) -> "MetricTerms":
+    """
+    Generates a metric terms object, using input from data contained in an
+    externally generated tile file
+    """
         terms = MetricTerms(
             quantity_factory=quantity_factory,
             communicator=communicator,
