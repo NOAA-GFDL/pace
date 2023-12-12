@@ -58,6 +58,7 @@ def test_state_from_fortran_restart():
         damping_coefficients=damping_coefficients,
         driver_grid_data=driver_grid_data,
         grid_data=grid_data,
+        schemes=["GFS_microphysics"],
     )
     ds = xr.open_dataset(os.path.join(restart_dir, "fv_core.res.tile1.nc"))
     np.testing.assert_array_equal(

@@ -129,18 +129,17 @@ class TranslateGFSPhysicsDriver(TranslatePhysicsFortranData2Py):
         quantity_factory = util.QuantityFactory.from_backend(
             sizer, self.stencil_factory.backend
         )
-        active_packages = ["microphysics"]
+        schemes = ["GFS_microphysics"]
         physics_state = PhysicsState(
             **inputs,
             quantity_factory=quantity_factory,
-            active_packages=active_packages,
+            schemes=schemes,
         )
         physics = Physics(
             self.stencil_factory,
             self.grid.quantity_factory,
             self.grid.grid_data,
             self.namelist,
-            active_packages=active_packages,
         )
         # TODO, self.namelist doesn't have fv_sg_adj because it is PhysicsConfig
         # either move where GFSPhysicsDriver starts, or pass the full namelist or

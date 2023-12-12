@@ -27,7 +27,7 @@ from .._config import PhysicsConfig
 
 
 class PHYSICS_PACKAGES(Enum, metaclass=pace.util.MetaEnumStr):
-    microphysics = "GFS_microphysics"
+    GFS_microphysics = "GFS_microphysics"
 
 
 def atmos_phys_driver_statein(

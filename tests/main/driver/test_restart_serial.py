@@ -78,6 +78,7 @@ def test_restart_save_to_disk():
             damping_coefficients=damping_coefficients,
             driver_grid_data=driver_grid_data,
             grid_data=grid_data,
+            schemes=["GFS_microphysics"],
         )
         time = datetime(2016, 1, 1, 0, 0, 0)
 

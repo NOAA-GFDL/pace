@@ -1,5 +1,6 @@
 import dataclasses
 from dataclasses import fields
+from typing import List
 
 import xarray as xr
 
@@ -75,7 +76,7 @@ class DriverState:
         damping_coefficients: pace.util.grid.DampingCoefficients,
         driver_grid_data: pace.util.grid.DriverGridData,
         grid_data: pace.util.grid.GridData,
-        schemes: list[str],
+        schemes: List[str],
     ) -> "DriverState":
         comm = driver_config.comm_config.get_comm()
         communicator = pace.util.Communicator.from_layout(
@@ -103,7 +104,7 @@ class DriverState:
             damping_coefficients=damping_coefficients,
             driver_grid_data=driver_grid_data,
             grid_data=grid_data,
-            schemes=schemes
+            schemes=schemes,
         )
         return state
 
@@ -178,7 +179,7 @@ def _restart_driver_state(
     damping_coefficients: pace.util.grid.DampingCoefficients,
     driver_grid_data: pace.util.grid.DriverGridData,
     grid_data: pace.util.grid.GridData,
-    schemes: list[str],
+    schemes: List[str],
 ):
     fs = pace.util.get_fs(path)
 

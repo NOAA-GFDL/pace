@@ -8,6 +8,7 @@ from pace.util import Namelist, NamelistDefaults
 
 DEFAULT_INT = 0
 DEFAULT_BOOL = False
+DEFAULT_SCHEMES = ["GFS_microphysics"]
 
 
 @dataclasses.dataclass
@@ -18,7 +19,7 @@ class PhysicsConfig:
     npy: int = DEFAULT_INT
     npz: int = DEFAULT_INT
     nwat: int = DEFAULT_INT
-    schemes: List[str] = ["GFS_microphysics"]
+    schemes: List[str] = None
     do_qa: bool = DEFAULT_BOOL
     c_cracw: float = NamelistDefaults.c_cracw
     c_paut: float = NamelistDefaults.c_paut
@@ -101,6 +102,8 @@ class PhysicsConfig:
     namelist_override: Optional[str] = None
 
     def __post_init__(self):
+        if self.schemes is None:
+            self.schemes = DEFAULT_SCHEMES
         if self.namelist_override is not None:
             try:
                 f90_nml = f90nml.read(self.namelist_override)

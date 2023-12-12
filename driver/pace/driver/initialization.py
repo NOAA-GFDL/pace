@@ -3,7 +3,7 @@ import dataclasses
 import os
 import pathlib
 from datetime import datetime
-from typing import Callable, ClassVar, Type, TypeVar
+from typing import Callable, ClassVar, List, Type, TypeVar
 
 import f90nml
 
@@ -40,7 +40,7 @@ class Initializer(abc.ABC):
         damping_coefficients: pace.util.grid.DampingCoefficients,
         driver_grid_data: pace.util.grid.DriverGridData,
         grid_data: pace.util.grid.GridData,
-        schemes: list[str],
+        schemes: List[str],
     ) -> DriverState:
         ...
 
@@ -78,7 +78,7 @@ class InitializerSelector(Initializer):
         damping_coefficients: pace.util.grid.DampingCoefficients,
         driver_grid_data: pace.util.grid.DriverGridData,
         grid_data: pace.util.grid.GridData,
-        schemes: list[str],
+        schemes: List[str],
     ) -> DriverState:
         return self.config.get_driver_state(
             quantity_factory=quantity_factory,
@@ -112,7 +112,7 @@ class AnalyticInit(Initializer):
         damping_coefficients: pace.util.grid.DampingCoefficients,
         driver_grid_data: pace.util.grid.DriverGridData,
         grid_data: pace.util.grid.GridData,
-        schemes: list[str],
+        schemes: List[str],
     ) -> DriverState:
         dycore_state = analytic_init.init_analytic_state(
             analytic_init_case=self.case,
@@ -156,7 +156,7 @@ class RestartInit(Initializer):
         damping_coefficients: pace.util.grid.DampingCoefficients,
         driver_grid_data: pace.util.grid.DriverGridData,
         grid_data: pace.util.grid.GridData,
-        schemes: list[str],
+        schemes: List[str],
     ) -> DriverState:
         state = _restart_driver_state(
             self.path,
@@ -207,7 +207,7 @@ class FortranRestartInit(Initializer):
         damping_coefficients: pace.util.grid.DampingCoefficients,
         driver_grid_data: pace.util.grid.DriverGridData,
         grid_data: pace.util.grid.GridData,
-        schemes: list[str],
+        schemes: List[str],
     ) -> DriverState:
         state = _restart_driver_state(
             self.path,
@@ -280,7 +280,7 @@ class SerialboxInit(Initializer):
         damping_coefficients: pace.util.grid.DampingCoefficients,
         driver_grid_data: pace.util.grid.DriverGridData,
         grid_data: pace.util.grid.GridData,
-        schemes: list[str],
+        schemes: List[str],
     ) -> DriverState:
         backend = quantity_factory.zeros(
             dims=[pace.util.X_DIM, pace.util.Y_DIM], units="unknown"
@@ -358,7 +358,7 @@ class PredefinedStateInit(Initializer):
         damping_coefficients: pace.util.grid.DampingCoefficients,
         driver_grid_data: pace.util.grid.DriverGridData,
         grid_data: pace.util.grid.GridData,
-        schemes: list[str],
+        schemes: List[str],
     ) -> DriverState:
         return DriverState(
             dycore_state=self.dycore_state,

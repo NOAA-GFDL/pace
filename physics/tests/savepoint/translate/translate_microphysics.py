@@ -88,7 +88,7 @@ class TranslateMicroph(TranslatePhysicsFortranData2Py):
             inputs,
             sizer=sizer,
             quantity_factory=quantity_factory,
-            active_packages=["microphysics"],
+            schemes=["GFS_microphysics"],
         )
         microphysics = Microphysics(
             self.stencil_factory, quantity_factory, self.grid.grid_data, self.namelist
