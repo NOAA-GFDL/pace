@@ -2157,8 +2157,7 @@ class MetricTerms:
             "",
             dtype=Float,
         )
-        pressure_coefficients = eta.HybridPressureCoefficients
-        pressure_coefficients = pressure_coefficients.set_hybrid_pressure_coefficients(
+        pressure_coefficients = eta.set_hybrid_pressure_coefficients(
             self._npz, eta_file
         )
         ks = pressure_coefficients.ks
