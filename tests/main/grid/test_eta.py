@@ -10,14 +10,14 @@ import pace.driver
 
 def set_answers(config_file):
 
-    eta_file = "./input/eta79.nc"
+    eta_file = "tests/main/input/eta79.nc"
     data = xr.open_dataset(eta_file)
     return data["ak"].values, data["bk"].values
 
 
 def test_set_hybrid_pressure_coefficients_correct():
 
-    config_file = "./input/test_config_79.yaml"
+    config_file = "tests/main/grid/input/test_config_79.yaml"
     with open(config_file, "r") as f:
         yaml_config = yaml.safe_load(f)
 
@@ -43,7 +43,7 @@ def test_set_hybrid_pressure_coefficients_correct():
 @pytest.mark.xfail
 def test_set_hybrid_pressure_coefficients_nofile():
 
-    config_file = "./input/test_config_nofile.yaml"
+    config_file = "tests/main/grid/input/test_config_nofile.yaml"
     with open(config_file, "r") as f:
         yaml_config = yaml.safe_load(f)
 
@@ -54,7 +54,7 @@ def test_set_hybrid_pressure_coefficients_nofile():
 @pytest.mark.xfail
 def test_set_hybrid_pressure_coefficients_nonmonotonic():
 
-    config_file = "./input/test_config_not_mono.yaml"
+    config_file = "tests/main/grid/input/test_config_not_mono.yaml"
     with open(config_file, "r") as f:
         yaml_config = yaml.safe_load(f)
 

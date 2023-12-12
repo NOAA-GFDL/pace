@@ -13,7 +13,7 @@ grid_config:
     dx_const: 3000.0
     dy_const: 3000.0
     deglat: 10.0
-    eta_file: './input/eta79.nc'
+    eta_file: 'tests/main/input/eta79.nc'
 initialization:
   type: analytic
   config:
