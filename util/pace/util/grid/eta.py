@@ -2,7 +2,7 @@ import os
 from dataclasses import dataclass
 
 import numpy as np
-import xrray as xr
+import xarray as xr
 
 from .utils import compute_eta
 
