@@ -1,3 +1,5 @@
+import os
+
 import numpy as np
 import xarray as xr
 import yaml
@@ -6,6 +8,9 @@ import pace.util
 from pace.driver import Driver, DriverConfig
 from pace.util.grid import MetricTerms
 from pace.util.mpi import MPIComm
+
+
+DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 def get_quantity_factory(layout, nx_tile, ny_tile, nz):
@@ -34,7 +39,10 @@ def get_tile_num(comm: MPIComm):
 
 def test_extgrid_equals_generated_2x2():
 
-    with open("../../driver/examples/configs/test_external_C12_2x2.yaml", "r") as ext_f:
+    with open(
+        os.path.join(DIR, "../../driver/examples/configs/test_external_C12_2x2.yaml"),
+        "r",
+    ) as ext_f:
         ext_config = yaml.safe_load(ext_f)
         ext_driver_config = DriverConfig.from_dict(ext_config)
 
@@ -46,7 +54,7 @@ def test_extgrid_equals_generated_2x2():
 
     tile_num = get_tile_num(cube_comm) + 1
     tile_file = "../../test_input/C12.tile" + str(tile_num) + ".nc"
-    ds = xr.open_dataset(tile_file)
+    ds = xr.open_dataset(os.path.join(DIR, tile_file))
     lon = ds.x.values
     lat = ds.y.values
     dx = ds.dx.values

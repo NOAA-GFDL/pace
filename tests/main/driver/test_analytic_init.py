@@ -7,8 +7,10 @@ import yaml
 import pace.driver
 
 
+DIR = os.path.dirname(os.path.abspath(__file__))
+
 TESTED_CONFIGS: List[str] = [
-    "driver/examples/configs/analytic_test.yaml",
+    "../../../driver/examples/configs/analytic_test.yaml",
 ]
 
 
@@ -20,7 +22,7 @@ TESTED_CONFIGS: List[str] = [
 )
 def test_analytic_init_config(tested_configs: List[str]):
     for config_file in tested_configs:
-        with open(os.path.abspath(config_file), "r") as f:
+        with open(os.path.join(DIR, config_file), "r") as f:
             config = yaml.safe_load(f)
         driver_config = pace.driver.DriverConfig.from_dict(config)
         assert driver_config.initialization.type == "analytic"

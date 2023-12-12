@@ -214,8 +214,6 @@ class ExternalNetcdfGridConfig(GridInitializer):
     grid_type: Optional[int] = 0
     grid_file_path: str = "/input/tilefile"
 
-    # TODO: Area read in?
-
     def get_grid(
         self,
         quantity_factory: QuantityFactory,
