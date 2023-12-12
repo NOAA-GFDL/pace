@@ -22,6 +22,7 @@ def test_set_hybrid_pressure_coefficients_correct():
         yaml_config = yaml.safe_load(f)
 
     driver_config = pace.driver.DriverConfig.from_dict(yaml_config)
+    driver_config.comm_config = pace.driver.NullCommConfig(rank=0, total_ranks=6)
     driver = pace.driver.Driver(config=driver_config)
 
     p_results = driver.state.grid_data.p.data
@@ -48,6 +49,7 @@ def test_set_hybrid_pressure_coefficients_nofile():
         yaml_config = yaml.safe_load(f)
 
     driver_config = pace.driver.DriverConfig.from_dict(yaml_config)
+    driver_config.comm_config = pace.driver.NullCommConfig(rank=0, total_ranks=6)
     driver = pace.driver.Driver(config=driver_config)
 
 
@@ -59,4 +61,5 @@ def test_set_hybrid_pressure_coefficients_nonmonotonic():
         yaml_config = yaml.safe_load(f)
 
     driver_config = pace.driver.DriverConfig.from_dict(yaml_config)
+    driver_config.comm_config = pace.driver.NullCommConfig(rank=0, total_ranks=6)
     driver = pace.driver.Driver(config=driver_config)
