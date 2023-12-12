@@ -86,7 +86,7 @@ class InitializerSelector(Initializer):
             damping_coefficients=damping_coefficients,
             driver_grid_data=driver_grid_data,
             grid_data=grid_data,
-            schemes=schemes
+            schemes=schemes,
         )
 
     @classmethod
@@ -358,6 +358,7 @@ class PredefinedStateInit(Initializer):
         damping_coefficients: pace.util.grid.DampingCoefficients,
         driver_grid_data: pace.util.grid.DriverGridData,
         grid_data: pace.util.grid.GridData,
+        schemes: list[str],
     ) -> DriverState:
         return DriverState(
             dycore_state=self.dycore_state,

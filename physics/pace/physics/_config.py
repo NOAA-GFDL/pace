@@ -1,5 +1,5 @@
 import dataclasses
-from typing import Optional, Tuple
+from typing import List, Optional, Tuple
 
 import f90nml
 
@@ -18,7 +18,7 @@ class PhysicsConfig:
     npy: int = DEFAULT_INT
     npz: int = DEFAULT_INT
     nwat: int = DEFAULT_INT
-    schemes: list[str] = ["gfs_microphysics"]
+    schemes: List[str] = ["GFS_microphysics"]
     do_qa: bool = DEFAULT_BOOL
     c_cracw: float = NamelistDefaults.c_cracw
     c_paut: float = NamelistDefaults.c_paut

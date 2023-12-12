@@ -287,7 +287,7 @@ class PhysicsState:
         self, quantity_factory: pace.util.QuantityFactory, schemes: List[str]
     ):
         # storage for tendency variables not in PhysicsState
-        if "microphysics" in schemes:
+        if "GFS_microphysics" in schemes:
             tendency = quantity_factory.zeros(
                 [pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM],
                 "unknown",
@@ -352,9 +352,7 @@ class PhysicsState:
                     extent=sizer.get_extent(dims),
                 )
                 inputs[_field.name] = quantity
-        return cls(
-            **inputs, quantity_factory=quantity_factory, schemes=schemes
-        )
+        return cls(**inputs, quantity_factory=quantity_factory, schemes=schemes)
 
     @property
     def xr_dataset(self):

@@ -43,7 +43,7 @@ class TranslateDriver(TranslateFVDynamics):
             sizer, backend=self.stencil_config.compilation_config.backend
         )
         physics_state = PhysicsState.init_zeros(
-            quantity_factory=quantity_factory, schemes=["microphysics"]
+            quantity_factory=quantity_factory, schemes=["GFS_microphysics"]
         )
         tendency_state = TendencyState.init_zeros(
             quantity_factory=quantity_factory,

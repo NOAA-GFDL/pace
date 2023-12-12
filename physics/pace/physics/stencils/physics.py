@@ -1,5 +1,4 @@
 from enum import Enum
-from typing import List
 
 import gt4py.cartesian.gtscript as gtscript
 from gt4py.cartesian.gtscript import (
@@ -11,7 +10,6 @@ from gt4py.cartesian.gtscript import (
     interval,
     log,
 )
-from typing_extensions import Literal
 
 import pace.util
 import pace.util.constants as constants
@@ -29,7 +27,8 @@ from .._config import PhysicsConfig
 
 
 class PHYSICS_PACKAGES(Enum, metaclass=pace.util.MetaEnumStr):
-    microphysics = "microphysics"
+    microphysics = "GFS_microphysics"
+
 
 def atmos_phys_driver_statein(
     prsik: FloatField,
@@ -209,8 +208,8 @@ class Physics:
         quantity_factory: pace.util.QuantityFactory,
         grid_data: GridData,
         namelist: PhysicsConfig,
-        schemes: list[str],
     ):
+        schemes = namelist.schemes
         for scheme in schemes:
             if scheme not in PHYSICS_PACKAGES:
                 raise NotImplementedError(
@@ -255,8 +254,8 @@ class Physics:
                 "pktop": self._pktop,
             },
         )
-        if "microphysics" in schemes:
-            self._do_microphysics = True
+        if "GFS_microphysics" in schemes:
+            self._gfs_microphysics = True
             self._prepare_microphysics = stencil_factory.from_origin_domain(
                 func=prepare_microphysics,
                 origin=grid_indexing.origin_compute(),
@@ -273,7 +272,7 @@ class Physics:
                 stencil_factory, quantity_factory, grid_data, namelist=namelist
             )
         else:
-            self._do_microphysics = False
+            self._gfs_microphysics = False
 
     def _setup_statein(self):
         self._NQ = 8  # state.nq_tot - spec.namelist.dnats
@@ -317,7 +316,7 @@ class Physics:
             physics_state.phii,
             physics_state.phil,
         )
-        if self._do_microphysics:
+        if self._gfs_microphysics:
             self._prepare_microphysics(
                 physics_state.dz,
                 physics_state.phii,
