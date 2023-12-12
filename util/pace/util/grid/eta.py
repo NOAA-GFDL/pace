@@ -2,6 +2,7 @@ import os
 from dataclasses import dataclass
 
 import numpy as np
+import xrray as xr
 
 from .utils import compute_eta
 
@@ -47,7 +48,9 @@ def set_hybrid_pressure_coefficients(
         raise IOError("file " + eta_file + " does not exist")
 
     # read file into ak, bk arrays
-    ak, bk = np.loadtxt(eta_file, unpack=True)
+    data = xr.open_dataset(eta_file)
+    ak = data["ak"].values
+    bk = data["bk"].values
 
     # check size of ak and bk array is km+1
     if ak.size - 1 != km:
