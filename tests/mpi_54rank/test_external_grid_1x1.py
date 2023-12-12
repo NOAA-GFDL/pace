@@ -6,7 +6,6 @@ import yaml
 
 import pace.util
 from pace.driver import Driver, DriverConfig
-from pace.util.grid import MetricTerms
 from pace.util.mpi import MPIComm
 
 
@@ -40,7 +39,7 @@ def get_tile_num(comm: MPIComm):
 def test_extgrid_equals_generated_1x1():
 
     with open(
-        os.path.join(DIR, "../../driver/examples/configs/test_external_C12_2x2.yaml"),
+        os.path.join(DIR, "../../driver/examples/configs/test_external_C12_1x1.yaml"),
         "r",
     ) as ext_f:
         ext_config = yaml.safe_load(ext_f)
@@ -93,50 +92,21 @@ def test_extgrid_equals_generated_1x1():
         overlap=True,
     )
 
-    metric_terms_ext = MetricTerms.from_external(
-        x=lon[subtile_slice_grid],
-        y=lat[subtile_slice_grid],
-        dx=dx[subtile_slice_dx],
-        dy=dy[subtile_slice_dy],
-        area=area[subtile_slice_area],
-        quantity_factory=get_quantity_factory(
-            layout=(1, 1), nx_tile=nx_tile, ny_tile=ny_tile, nz=nz
-        ),
-        communicator=cube_comm,
-        grid_type=0,
-        extdgrid=True,
-    )
-
     errors = []
 
-    if (
-        ext_driver.state.grid_data.lon.data.any()
-        != metric_terms_ext.grid.data[:, :, 0].any()
-    ):
+    if ext_driver.state.grid_data.lon.data.any() != lon[subtile_slice_grid].any():
         errors.append("lon data mismatch between generated and external grid data")
 
-    if (
-        ext_driver.state.grid_data.lat.data.any()
-        != metric_terms_ext.grid.data[:, :, 1].any()
-    ):
+    if ext_driver.state.grid_data.lat.data.any() != lat[subtile_slice_grid].any():
         errors.append("lon data mismatch between generated and external grid data")
 
-    if (
-        ext_driver.state.grid_data.dx.data.any()
-        != metric_terms_ext._dx.view[:, :].any()
-    ):
+    if ext_driver.state.grid_data.dx.data.any() != dx[subtile_slice_dx].any():
         errors.append("dx data mismatch between generated and external grid data")
 
-    if (
-        ext_driver.state.grid_data.dy.data.any()
-        != metric_terms_ext._dy.view[:, :].any()
-    ):
+    if ext_driver.state.grid_data.dy.data.any() != dy[subtile_slice_dy].any():
         errors.append("dy data mismatch between generated and external grid data")
 
-    if (
-        ext_driver.state.grid_data.area.data.any()
-        != metric_terms_ext._area.view[:, :].any()
-    ):
+    if ext_driver.state.grid_data.area.data.any() != area[subtile_slice_area].any():
         errors.append("area data mismatch between generated and external grid data")
 
     assert not errors, "errors occured in 1x1:\n{}".format("\n".join(errors))
