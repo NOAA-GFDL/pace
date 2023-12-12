@@ -101,7 +101,9 @@ def setup_dycore() -> Tuple[
         quantity_factory=quantity_factory,
         communicator=communicator,
     )
-    grid_data = GridData.new_from_metric_terms(metric_terms)
+    grid_data = GridData.new_from_metric_terms(
+        metric_terms, eta_file="tests/main/input/eta79.nc"
+    )
 
     # create an initial state from the Jablonowski & Williamson Baroclinic
     # test case perturbation. JRMS2006
