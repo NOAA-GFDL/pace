@@ -429,10 +429,10 @@ class MetricTerms:
         grid_type,
         extdgrid: bool = True,
     ) -> "MetricTerms":
-    """
-    Generates a metric terms object, using input from data contained in an
-    externally generated tile file
-    """
+        """
+        Generates a metric terms object, using input from data contained in an
+        externally generated tile file
+        """
         terms = MetricTerms(
             quantity_factory=quantity_factory,
             communicator=communicator,
