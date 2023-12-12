@@ -421,9 +421,6 @@ class MetricTerms:
         cls,
         x,
         y,
-        dx,
-        dy,
-        area,
         quantity_factory,
         communicator,
         grid_type,
@@ -443,40 +440,6 @@ class MetricTerms:
         rad_conv = PI / 180.0
         terms._grid_64.view[:, :, 0] = np.dot(rad_conv, x)
         terms._grid_64.view[:, :, 1] = np.dot(rad_conv, y)
-
-        dx_64 = terms.quantity_factory.zeros(
-            [util.Y_INTERFACE_DIM, util.X_DIM],
-            "m",
-            dtype=np.float64,
-            allow_mismatch_float_precision=True,
-        )
-        dx_64.view[:, :] = dx
-        terms._dx_64 = dx_64
-
-        dy_64 = terms.quantity_factory.zeros(
-            [util.Y_DIM, util.X_INTERFACE_DIM],
-            "m",
-            dtype=np.float64,
-            allow_mismatch_float_precision=True,
-        )
-        dy_64.view[:, :] = dy
-        terms._dy_64 = dy_64
-
-        terms._comm.halo_update(terms._grid_64, n_points=terms._halo)
-        terms._comm.vector_halo_update(terms._dx_64, terms._dy_64, n_points=terms._halo)
-
-        terms._dx = quantity_cast_to_model_float(terms.quantity_factory, terms._dx_64)
-        terms._dy = quantity_cast_to_model_float(terms.quantity_factory, terms._dy_64)
-
-        area_64 = terms.quantity_factory.zeros(
-            [util.X_DIM, util.Y_DIM],
-            "m^2",
-            dtype=np.float64,
-            allow_mismatch_float_precision=True,
-        )
-        area_64.view[:, :] = area
-
-        terms._area = quantity_cast_to_model_float(terms.quantity_factory, area_64)
 
         terms._init_agrid()
 

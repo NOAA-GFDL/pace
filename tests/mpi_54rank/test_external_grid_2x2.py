@@ -47,7 +47,6 @@ def test_extgrid_equals_generated_2x2():
 
     ext_driver = Driver(ext_driver_config)
 
-    nx_tile, ny_tile, nz = 12, 12, 5
     comm_2by2 = MPIComm()
     cube_comm = get_cube_comm(layout=(2, 2), comm=comm_2by2)
 

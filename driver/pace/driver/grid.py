@@ -237,11 +237,6 @@ class ExternalNetcdfGridConfig(GridInitializer):
         ds = xr.open_dataset(tile_file)
         lon = ds.x.values
         lat = ds.y.values
-        dx = ds.dx.values
-        dy = ds.dy.values
-        area = ds.area.values
-        nx = ds.nx.values.size
-        ny = ds.ny.values.size
         npx = ds.nxp.values.size
         npy = ds.nyp.values.size
 
@@ -252,33 +247,9 @@ class ExternalNetcdfGridConfig(GridInitializer):
             overlap=True,
         )
 
-        subtile_slice_dx = communicator.partitioner.tile.subtile_slice(
-            rank=communicator.rank,
-            global_dims=[pace.util.Y_INTERFACE_DIM, pace.util.X_DIM],
-            global_extent=(npy, nx),
-            overlap=True,
-        )
-
-        subtile_slice_dy = communicator.partitioner.tile.subtile_slice(
-            rank=communicator.rank,
-            global_dims=[pace.util.Y_DIM, pace.util.X_INTERFACE_DIM],
-            global_extent=(ny, npx),
-            overlap=True,
-        )
-
-        subtile_slice_area = communicator.partitioner.tile.subtile_slice(
-            rank=communicator.rank,
-            global_dims=[pace.util.Y_DIM, pace.util.X_DIM],
-            global_extent=(ny, nx),
-            overlap=True,
-        )
-
         metric_terms = MetricTerms.from_external(
             x=lon[subtile_slice_grid],
             y=lat[subtile_slice_grid],
-            dx=dx[subtile_slice_dx],
-            dy=dy[subtile_slice_dy],
-            area=area[subtile_slice_area],
             quantity_factory=quantity_factory,
             communicator=communicator,
             grid_type=self.grid_type,
