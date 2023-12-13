@@ -1,5 +1,5 @@
 from enum import EnumMeta
-from typing import Any, Iterable, Sequence, Tuple, TypeVar, Union
+from typing import Iterable, Sequence, Tuple, TypeVar, Union
 
 import numpy as np
 

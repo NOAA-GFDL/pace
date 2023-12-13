@@ -231,7 +231,7 @@ class DriverConfig:
             damping_coefficients=damping_coefficients,
             driver_grid_data=driver_grid_data,
             grid_data=grid_data,
-            schemes=self.physics_config.schemes
+            schemes=self.physics_config.schemes,
         )
 
     @classmethod
