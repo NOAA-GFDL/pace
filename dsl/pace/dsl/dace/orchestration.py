@@ -175,9 +175,8 @@ def _build_sdfg(
                     memory_pooled += arr.total_size * arr.dtype.bytes
                     arr.lifetime = dace.AllocationLifetime.Scope
             memory_pooled = float(memory_pooled) / (1024 * 1024)
-            DaCeProgress.log(
-                DaCeProgress.default_prefix(config),
-                f"Pooled {memory_pooled} mb",
+            pace_log.debug(
+                f"{DaCeProgress.default_prefix(config)} Pooled {memory_pooled} mb",
             )
 
         # Set of debug tools inserted in the SDFG when dace.conf "syncdebug"
@@ -195,12 +194,10 @@ def _build_sdfg(
 
         # Printing analysis of the compiled SDFG
         with DaCeProgress(config, "Build finished. Running memory static analysis"):
-            DaCeProgress.log(
-                DaCeProgress.default_prefix(config),
-                report_memory_static_analysis(
-                    sdfg, memory_static_analysis(sdfg), False
-                ),
+            report = report_memory_static_analysis(
+                sdfg, memory_static_analysis(sdfg), False
             )
+            pace_log.info(f"{DaCeProgress.default_prefix(config)} {report}")
 
     # Compilation done.
     # On Build: all ranks sync, then exit.
@@ -211,17 +208,13 @@ def _build_sdfg(
     # a true multi-machine sync, outside of our own communicator class.
     if config.get_orchestrate() == DaCeOrchestration.Build:
         MPI.COMM_WORLD.Barrier()  # Protect against early exist which kill SLURM jobs
-        DaCeProgress.log(
-            DaCeProgress.default_prefix(config),
-            "Build only, exiting.",
-        )
+        pace_log.info(f"{DaCeProgress.default_prefix(config)} Build only, exiting.")
         exit(0)
     elif config.get_orchestrate() == DaCeOrchestration.BuildAndRun:
         if not is_compiling:
-            DaCeProgress.log(
-                DaCeProgress.default_prefix(config),
-                "Rank is not compiling. "
-                "Waiting for compilation to end on all other ranks...",
+            pace_log.info(
+                f"{DaCeProgress.default_prefix(config)} Rank is not compiling."
+                "Waiting for compilation to end on all other ranks..."
             )
         MPI.COMM_WORLD.Barrier()
 
