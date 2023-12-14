@@ -12,7 +12,7 @@ from pace.util.mpi import MPIComm
 DIR = os.path.dirname(os.path.abspath(__file__))
 
 
-def test_extgrid_equals_generated_2x2():
+def test_extgrid_equals_generated_1x1():
 
     with open(
         os.path.join(DIR, "../../driver/examples/configs/test_external_C12_1x1.yaml"),
