@@ -209,6 +209,9 @@ class ExternalNetcdfGridConfig(GridInitializer):
     the MetricTerms class method from_generated which generates
     an object of MetricTerms to be used to generate the
     damping_coefficients, driver_grid_data, and grid_data variables
+    It is imperative that the user ensures that the constants used
+    to generate the input grid data matches that of the constants
+    used in Pace to develop accurate metric terms.
     """
 
     grid_type: Optional[int] = 0
