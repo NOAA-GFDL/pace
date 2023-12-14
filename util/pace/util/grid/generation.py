@@ -1,7 +1,7 @@
 import dataclasses
 import functools
 import warnings
-from typing import Optional, Tuple
+from typing import Tuple
 
 import numpy as np
 
@@ -275,13 +275,13 @@ class MetricTerms:
         # for the selected floating point precision
         self._agrid = None
         self._np = self._grid_64.np
-        self._dx: Optional[util.Quantity] = None
-        self._dy: Optional[util.Quantity] = None
+        self._dx = None
+        self._dy = None
         self._dx_agrid = None
         self._dy_agrid = None
         self._dx_center = None
         self._dy_center = None
-        self._area: Optional[util.Quantity] = None
+        self._area = None
         self._area_c = None
         self._ks = None
         self._ak = None
@@ -424,7 +424,6 @@ class MetricTerms:
         quantity_factory,
         communicator,
         grid_type,
-        extdgrid: bool = True,
     ) -> "MetricTerms":
         """
         Generates a metric terms object, using input from data contained in an
@@ -434,12 +433,12 @@ class MetricTerms:
             quantity_factory=quantity_factory,
             communicator=communicator,
             grid_type=grid_type,
-            extdgrid=extdgrid,
+            extdgrid=True,
         )
 
         rad_conv = PI / 180.0
-        terms._grid_64.view[:, :, 0] = np.dot(rad_conv, x)
-        terms._grid_64.view[:, :, 1] = np.dot(rad_conv, y)
+        terms._grid_64.view[:, :, 0] = rad_conv * x
+        terms._grid_64.view[:, :, 1] = rad_conv * y
 
         terms._init_agrid()
 

@@ -209,9 +209,9 @@ class ExternalNetcdfGridConfig(GridInitializer):
     the MetricTerms class method from_generated which generates
     an object of MetricTerms to be used to generate the
     damping_coefficients, driver_grid_data, and grid_data variables
-    It is imperative that the user ensures that the constants used
-    to generate the input grid data matches that of the constants
-    used in Pace to develop accurate metric terms.
+    We do not read in the dx, dy, or area values as there may be
+    inconsistencies in the constants used during calculation of the
+    input data and the model use.
     """
 
     grid_type: Optional[int] = 0
@@ -245,8 +245,8 @@ class ExternalNetcdfGridConfig(GridInitializer):
 
         subtile_slice_grid = communicator.partitioner.tile.subtile_slice(
             rank=communicator.rank,
-            global_dims=[pace.util.X_INTERFACE_DIM, pace.util.Y_INTERFACE_DIM],
-            global_extent=(npx, npy),
+            global_dims=[pace.util.Y_INTERFACE_DIM, pace.util.X_INTERFACE_DIM],
+            global_extent=(npy, npx),
             overlap=True,
         )
 
@@ -256,7 +256,6 @@ class ExternalNetcdfGridConfig(GridInitializer):
             quantity_factory=quantity_factory,
             communicator=communicator,
             grid_type=self.grid_type,
-            extdgrid=True,
         )
 
         horizontal_data = HorizontalGridData.new_from_metric_terms(metric_terms)
