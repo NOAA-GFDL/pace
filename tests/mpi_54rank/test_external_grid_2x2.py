@@ -86,31 +86,57 @@ def test_extgrid_equals_generated_2x2():
     lat_rad = lat * (PI / 180)
 
     errors = []
+    diffs = []
 
     if not np.isclose(
         ext_driver.state.grid_data.lon.view[:, :], lon_rad[subtile_slice_grid]
     ).all():
         errors.append("Lon data mismatch")
 
+    diff_lon = np.amax(
+        ext_driver.state.grid_data.lon.view[:, :] - lon_rad[subtile_slice_grid]
+    ) / np.amax(lon_rad[subtile_slice_grid])
+    diffs.append(f"Lon maximum relative error = {diff_lon}")
+
     if not np.isclose(
         ext_driver.state.grid_data.lat.view[:, :], lat_rad[subtile_slice_grid]
     ).all():
         errors.append("Lat data mismatch")
+
+    diff_lat = np.amax(
+        ext_driver.state.grid_data.lat.view[:, :] - lat_rad[subtile_slice_grid]
+    ) / np.amax(lat_rad[subtile_slice_grid])
+    diffs.append(f"Lat maximum relative error = {diff_lat}")
 
     if not np.isclose(
         ext_driver.state.grid_data.dy.view[:, :], dx[subtile_slice_dx]
     ).all():
         errors.append("dx data mismatch")
 
+    diff_dx = np.amax(
+        ext_driver.state.grid_data.dy.view[:, :] - dx[subtile_slice_dx]
+    ) / np.amax(dx[subtile_slice_dx])
+    diffs.append(f"dx maximum relative error = {diff_dx}")
+
     if not np.isclose(
         ext_driver.state.grid_data.dx.view[:, :], dy[subtile_slice_dy]
     ).all():
         errors.append("dy data mismatch")
 
+    diff_dy = np.amax(
+        ext_driver.state.grid_data.dx.view[:, :] - dy[subtile_slice_dy]
+    ) / np.amax(dy[subtile_slice_dy])
+    diffs.append(f"dy maximum relative error = {diff_dy}")
+
     if not np.isclose(
         ext_driver.state.grid_data.area.view[:, :], area[subtile_slice_area]
     ).all():
         errors.append("area data mismatch")
+
+    diff_area = np.amax(
+        ext_driver.state.grid_data.area.view[:, :] - area[subtile_slice_area]
+    ) / np.amax(area[subtile_slice_area])
+    diffs.append(f"Area maximum relative error = {diff_area}")
 
     assert not errors, "errors occured in 2x2:\n{}".format("\n".join(errors))
 
