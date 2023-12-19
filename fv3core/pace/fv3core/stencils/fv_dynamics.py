@@ -21,7 +21,7 @@ from pace.fv3core.stencils.neg_adj3 import AdjustNegativeTracerMixingRatio
 from pace.fv3core.stencils.remapping import LagrangianToEulerian
 from pace.stencils.c2l_ord import CubedToLatLon
 from pace.util import X_DIM, Y_DIM, Z_INTERFACE_DIM, Timer, constants
-from pace.util.grid import DampingCoefficients, GridData
+from pace.util.grid.helper import DampingCoefficients, GridData
 from pace.util.logging import pace_log
 from pace.util.mpi import MPI
 

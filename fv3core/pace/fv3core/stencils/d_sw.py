@@ -24,7 +24,7 @@ from pace.fv3core.stencils.fxadv import FiniteVolumeFluxPrep
 from pace.fv3core.stencils.xtp_u import advect_u_along_x
 from pace.fv3core.stencils.ytp_v import advect_v_along_y
 from pace.util import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_DIM
-from pace.util.grid import DampingCoefficients, GridData
+from pace.util.grid.helper import DampingCoefficients, GridData
 
 
 dcon_threshold = 1e-5

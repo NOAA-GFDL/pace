@@ -4,7 +4,7 @@ from dataclasses import dataclass
 import numpy as np
 import xarray as xr
 
-from .utils import compute_eta
+from pace.fv3core.initialization.init_utils import compute_eta
 
 
 @dataclass

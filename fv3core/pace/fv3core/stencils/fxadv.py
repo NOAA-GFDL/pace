@@ -11,7 +11,7 @@ from pace.dsl.dace import orchestrate
 from pace.dsl.stencil import StencilFactory
 from pace.dsl.typing import Float, FloatField, FloatFieldIJ
 from pace.fv3core.stencils.d2a2c_vect import contravariant
-from pace.util.grid import GridData
+from pace.util.grid.helper import GridData
 
 
 def main_uc_vc_contra(

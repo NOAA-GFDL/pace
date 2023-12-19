@@ -581,12 +581,12 @@ class MetricTerms:
             self._dx_center, self._dy_center = self._compute_dxdy_center()
         return self._dy_center
 
-    def ks(self, eta_file="") -> util.Quantity:
+    def ks(self, eta_file="None") -> util.Quantity:
         """
         number of levels where the vertical coordinate is purely pressure-based
         """
         if self._ks is None:
-            if not eta_file == "":
+            if not eta_file == "None":
                 (
                     self._ks,
                     self._ptop,
@@ -597,13 +597,13 @@ class MetricTerms:
                 raise IOError("eta file is not specified")
         return self._ks
 
-    def ak(self, eta_file="") -> util.Quantity:
+    def ak(self, eta_file="None") -> util.Quantity:
         """
         the ak coefficient used to calculate the pressure at a given k-level:
         pk = ak + (bk * ps)
         """
         if self._ak is None:
-            if not eta_file == "":
+            if not eta_file == "None":
                 (
                     self._ks,
                     self._ptop,
@@ -614,13 +614,13 @@ class MetricTerms:
                 raise IOError("eta file is not specified")
         return self._ak
 
-    def bk(self, eta_file="") -> util.Quantity:
+    def bk(self, eta_file="None") -> util.Quantity:
         """
         the bk coefficient used to calculate the pressure at a given k-level:
         pk = ak + (bk * ps)
         """
         if self._bk is None:
-            if not eta_file == "":
+            if not eta_file == "None":
                 (
                     self._ks,
                     self._ptop,
@@ -631,12 +631,12 @@ class MetricTerms:
                 raise IOError("eta file is not specified")
         return self._bk
 
-    def ptop(self, eta_file="") -> util.Quantity:
+    def ptop(self, eta_file="None") -> util.Quantity:
         """
         the pressure of the top of atmosphere level
         """
         if self._ptop is None:
-            if not eta_file == "":
+            if not eta_file == "None":
                 (
                     self._ks,
                     self._ptop,
@@ -2136,7 +2136,7 @@ class MetricTerms:
         area_cgrid_64.data[:, :] = self._dx_const * self._dy_const
         return quantity_cast_to_model_float(self.quantity_factory, area_cgrid_64)
 
-    def _set_hybrid_pressure_coefficients(self, eta_file=""):
+    def _set_hybrid_pressure_coefficients(self, eta_file="None"):
         ks = self.quantity_factory.zeros(
             [],
             "",

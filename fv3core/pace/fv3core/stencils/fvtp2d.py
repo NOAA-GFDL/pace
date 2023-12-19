@@ -12,7 +12,7 @@ from pace.fv3core.stencils.delnflux import DelnFlux
 from pace.fv3core.stencils.xppm import XPiecewiseParabolic
 from pace.fv3core.stencils.yppm import YPiecewiseParabolic
 from pace.util import X_DIM, Y_DIM, Z_DIM
-from pace.util.grid import DampingCoefficients, GridData
+from pace.util.grid.helper import DampingCoefficients, GridData
 
 
 @gtscript.function

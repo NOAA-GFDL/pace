@@ -21,4 +21,3 @@ from .helper import (
     VerticalGridData,
 )
 from .stretch_transformation import direct_transform
-from .utils import compute_eta, vertical_coordinate

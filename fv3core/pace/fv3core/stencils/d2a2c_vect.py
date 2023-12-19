@@ -8,7 +8,7 @@ from pace.dsl.typing import Float, FloatField, FloatFieldIJ
 from pace.fv3core.stencils.a2b_ord4 import a1, a2, lagrange_x_func, lagrange_y_func
 from pace.stencils import corners
 from pace.util import X_DIM, Y_DIM, Z_DIM
-from pace.util.grid import GridData
+from pace.util.grid.helper import GridData
 
 
 c1 = -2.0 / 14.0

@@ -6,7 +6,7 @@ from pace.dsl.stencil import StencilFactory
 from pace.dsl.typing import Float, FloatField, FloatFieldIJ
 from pace.fv3core.stencils.a2b_ord4 import AGrid2BGridFourthOrder
 from pace.util import X_DIM, Y_DIM, Z_INTERFACE_DIM
-from pace.util.grid import GridData
+from pace.util.grid.helper import GridData
 
 
 def set_k0_and_calc_wk(

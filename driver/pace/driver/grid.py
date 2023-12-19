@@ -11,19 +11,17 @@ import pace.stencils
 import pace.util.grid
 from pace.stencils.testing import TranslateGrid
 from pace.util import Communicator, QuantityFactory
-from pace.util.grid import (
-    DampingCoefficients,
-    DriverGridData,
-    GridData,
-    MetricTerms,
-    direct_transform,
-)
 from pace.util.grid.helper import (
     AngleGridData,
     ContravariantGridData,
+    DampingCoefficients,
+    DriverGridData,
+    GridData,
     HorizontalGridData,
+    MetricTerms,
     VerticalGridData,
 )
+from pace.util.grid.stretch_transformation import direct_transform
 from pace.util.logging import pace_log
 from pace.util.namelist import Namelist
 

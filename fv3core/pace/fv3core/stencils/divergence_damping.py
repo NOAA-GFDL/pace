@@ -21,7 +21,7 @@ from pace.fv3core.stencils.a2b_ord4 import (
 )
 from pace.fv3core.stencils.d2a2c_vect import contravariant
 from pace.util import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_DIM
-from pace.util.grid import DampingCoefficients, GridData
+from pace.util.grid.helper import DampingCoefficients, GridData
 
 
 @gtscript.function
