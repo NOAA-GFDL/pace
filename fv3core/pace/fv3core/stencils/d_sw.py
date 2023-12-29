@@ -764,19 +764,45 @@ class DGridShallowWaterLagrangianDynamics:
 
         self.grid_indexing = stencil_factory.grid_indexing
         self._grid_type = config.grid_type
-        assert not config.inline_q, "inline_q not yet implemented"
-        assert (
-            config.d_ext <= 0
-        ), "untested d_ext > 0. need to call a2b_ord2, not yet implemented"
-        assert (column_namelist["damp_vt"].view[:] > dcon_threshold).all()
+        if config.inline_q:
+            raise NotImplementedError(
+                "D-Grid Shallow Water Lagrangian Dynamics (D_SW):"
+                " inline_q not implemented."
+            )
+        if config.d_ext > 0:
+            raise NotImplementedError(
+                "D-Grid Shallow Water Lagrangian Dynamics (D_SW):"
+                " untested d_ext > 0. need to call a2b_ord2, not implemented."
+            )
         # TODO: in theory, we should check if damp_vt > 1e-5 for each k-level and
         # only compute delnflux for k-levels where this is true
-        assert (column_namelist["damp_w"].view[:] > dcon_threshold).all()
+        all_damp_vt_above_dcon = (
+            column_namelist["damp_vt"].view[:] > dcon_threshold
+        ).all()
+        if not all_damp_vt_above_dcon:
+            raise NotImplementedError(
+                "D-Grid Shallow Water Lagrangian Dynamics (D_SW):"
+                " damp_vt misconfiguration, some are above a d_con of"
+                f" {dcon_threshold}."
+            )
         # TODO: in theory, we should check if damp_w > 1e-5 for each k-level and
         # only compute delnflux for k-levels where this is true
+        all_damp_w_above_dcon = (
+            column_namelist["damp_w"].view[:] > dcon_threshold
+        ).all()
+        if not all_damp_w_above_dcon:
+            raise NotImplementedError(
+                "D-Grid Shallow Water Lagrangian Dynamics (D_SW):"
+                f" damp_w misconfiguration, some are above a d_con of {dcon_threshold}."
+            )
 
         # only compute for k-levels where this is true
         self.hydrostatic = config.hydrostatic
+        if self.hydrostatic:
+            raise NotImplementedError(
+                "D-Grid Shallow Water Lagrangian Dynamics (D_SW):"
+                " Hydrostatic is not implemented"
+            )
 
         def make_quantity():
             return quantity_factory.zeros(

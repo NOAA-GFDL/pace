@@ -99,7 +99,6 @@ def init(
     qsgs_tke: FloatField,
     qcld: FloatField,
 ):
-
     with computation(PARALLEL), interval(...):
         t0 = ta
         u0 = ua
@@ -783,12 +782,17 @@ class DryConvectiveAdjustment:
         n_sponge: int,
         hydrostatic: bool,
     ):
-        assert not hydrostatic, "Hydrostatic not implemented for fv_subgridz"
+        if hydrostatic:
+            raise NotImplementedError(
+                "DryConvectiveAdjustment (fv_subgridz):"
+                " Hydrostatic is not implemented"
+            )
         grid_indexing = stencil_factory.grid_indexing
         self._k_sponge = n_sponge
-        if self._k_sponge is not None:
-            if self._k_sponge < 3:
-                return
+        if self._k_sponge is not None and self._k_sponge < 3:
+            raise NotImplementedError(
+                "DryConvectiveAdjustment (fv_subgridz): n_sponge < 3 is not handled."
+            )
         else:
             self._k_sponge = grid_indexing.domain[2]
         if self._k_sponge < min(grid_indexing.domain[2], 24):

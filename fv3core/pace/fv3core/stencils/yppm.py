@@ -310,7 +310,11 @@ class YPiecewiseParabolic:
         # Arguments come from:
         # namelist.grid_type
         # grid.dya
-        assert (grid_type < 3) or (grid_type == 4)
+        if grid_type == 3 and grid_type > 4:
+            raise NotImplementedError(
+                "Y Piecewise Parabolic (xppm): "
+                f" grid type {grid_type} not implemented. <3 or 4 available."
+            )
         self._dya = dya
         ax_offsets = stencil_factory.grid_indexing.axis_offsets(origin, domain)
         self._compute_flux_stencil = stencil_factory.from_origin_domain(

@@ -429,9 +429,12 @@ class AcousticDynamics:
             self.checkpointer = checkpointer
         grid_indexing = stencil_factory.grid_indexing
         self.config = config
-        assert config.d_ext == 0, "d_ext != 0 is not implemented"
-        assert config.beta == 0, "beta != 0 is not implemented"
-        assert not config.use_logp, "use_logp=True is not implemented"
+        if config.d_ext != 0:
+            raise RuntimeError("Acoustics (dyn_core): d_ext != 0 is not implemented")
+        if config.beta != 0:
+            raise RuntimeError("Acoustics (dyn_core): beta != 0 is not implemented")
+        if config.use_logp:
+            raise RuntimeError("Acoustics (dyn_core): use_logp=True is not implemented")
         self._da_min = damping_coefficients.da_min
         self.grid_data = grid_data
         self._ptop = grid_data.ptop
