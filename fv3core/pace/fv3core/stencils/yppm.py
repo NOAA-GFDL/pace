@@ -9,6 +9,7 @@ from gt4py.cartesian.gtscript import (
     region,
 )
 
+from pace.dsl.dace.orchestration import orchestrate
 from pace.dsl.stencil import StencilFactory
 from pace.dsl.typing import FloatField, FloatFieldIJ, Index3D
 from pace.fv3core.stencils import ppm
@@ -295,7 +296,7 @@ def compute_y_flux(
 
 class YPiecewiseParabolic:
     """
-    Fortran name is xppm
+    Fortran name is yppm
     """
 
     def __init__(
@@ -307,6 +308,7 @@ class YPiecewiseParabolic:
         origin: Index3D,
         domain: Index3D,
     ):
+        orchestrate(obj=self, config=stencil_factory.config.dace_config)
         # Arguments come from:
         # namelist.grid_type
         # grid.dya
