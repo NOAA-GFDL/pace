@@ -328,6 +328,9 @@ class DriverConfig:
         config_dict["initialization"]["type"] = "restart"
         config_dict["initialization"]["config"]["start_time"] = time
         config_dict["initialization"]["config"]["path"] = restart_path
+        # convert physics package enum to str
+        schemes = [scheme.value for scheme in config_dict["physics_config"]["schemes"]]
+        config_dict["physics_config"]["schemes"] = schemes
         # restart config doesn't have 'case'
         if "case" in config_dict["initialization"]["config"].keys():
             del config_dict["initialization"]["config"]["case"]

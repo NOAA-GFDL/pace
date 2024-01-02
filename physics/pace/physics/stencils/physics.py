@@ -203,7 +203,7 @@ class Physics:
         grid_data: GridData,
         namelist: PhysicsConfig,
     ):
-        schemes = namelist.schemes
+        schemes = [scheme.value for scheme in namelist.schemes]
         for scheme in schemes:
             if scheme not in PHYSICS_PACKAGES:
                 raise NotImplementedError(

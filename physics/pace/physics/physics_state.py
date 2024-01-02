@@ -8,7 +8,7 @@ import pace.util
 from pace.dsl.typing import Float
 from pace.physics.stencils.microphysics import MicrophysicsState
 
-from .config import PHYSICS_PACKAGES
+from ._config import PHYSICS_PACKAGES
 
 
 @dataclass()
@@ -291,7 +291,7 @@ class PhysicsState:
         schemes: List[PHYSICS_PACKAGES],
     ):
         # storage for tendency variables not in PhysicsState
-        if "GFS_microphysics" in schemes:
+        if "GFS_microphysics" in [scheme.value for scheme in schemes]:
             tendency = quantity_factory.zeros(
                 [pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM],
                 "unknown",

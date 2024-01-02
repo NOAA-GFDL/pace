@@ -25,7 +25,7 @@ class PhysicsConfig:
     npy: int = DEFAULT_INT
     npz: int = DEFAULT_INT
     nwat: int = DEFAULT_INT
-    schemes: List[PHYSICS_PACKAGES] = None
+    schemes: List = None
     do_qa: bool = DEFAULT_BOOL
     c_cracw: float = NamelistDefaults.c_cracw
     c_paut: float = NamelistDefaults.c_paut
@@ -110,6 +110,12 @@ class PhysicsConfig:
     def __post_init__(self):
         if self.schemes is None:
             self.schemes = DEFAULT_SCHEMES
+        package_schemes = []
+        for scheme in self.schemes:
+            if scheme not in PHYSICS_PACKAGES:
+                raise NotImplementedError(f"{scheme} physics scheme not implemented")
+            package_schemes.append(PHYSICS_PACKAGES[scheme])
+        self.schemes = package_schemes
         if self.namelist_override is not None:
             try:
                 f90_nml = f90nml.read(self.namelist_override)
