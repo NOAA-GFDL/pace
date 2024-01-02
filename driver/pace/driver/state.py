@@ -76,7 +76,7 @@ class DriverState:
         damping_coefficients: pace.util.grid.DampingCoefficients,
         driver_grid_data: pace.util.grid.DriverGridData,
         grid_data: pace.util.grid.GridData,
-        schemes: List[str],
+        schemes: List[pace.physics.PHYSICS_PACKAGES],
     ) -> "DriverState":
         comm = driver_config.comm_config.get_comm()
         communicator = pace.util.Communicator.from_layout(
@@ -179,7 +179,7 @@ def _restart_driver_state(
     damping_coefficients: pace.util.grid.DampingCoefficients,
     driver_grid_data: pace.util.grid.DriverGridData,
     grid_data: pace.util.grid.GridData,
-    schemes: List[str],
+    schemes: List[pace.physics.PHYSICS_PACKAGES],
 ):
     fs = pace.util.get_fs(path)
 

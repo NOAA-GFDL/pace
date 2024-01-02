@@ -1,5 +1,3 @@
-from enum import Enum
-
 import gt4py.cartesian.gtscript as gtscript
 from gt4py.cartesian.gtscript import (
     BACKWARD,
@@ -23,11 +21,7 @@ from pace.physics.stencils.microphysics import Microphysics
 from pace.util import X_DIM, Y_DIM, Z_DIM
 from pace.util.grid import GridData
 
-from .._config import PhysicsConfig
-
-
-class PHYSICS_PACKAGES(Enum, metaclass=pace.util.MetaEnumStr):
-    GFS_microphysics = "GFS_microphysics"
+from .._config import PHYSICS_PACKAGES, PhysicsConfig
 
 
 def atmos_phys_driver_statein(

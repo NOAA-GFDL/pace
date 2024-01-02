@@ -1,14 +1,20 @@
 import dataclasses
+from enum import Enum, unique
 from typing import List, Optional, Tuple
 
 import f90nml
 
-from pace.util import Namelist, NamelistDefaults
+from pace.util import MetaEnumStr, Namelist, NamelistDefaults
 
 
 DEFAULT_INT = 0
 DEFAULT_BOOL = False
 DEFAULT_SCHEMES = ["GFS_microphysics"]
+
+
+@unique
+class PHYSICS_PACKAGES(Enum, metaclass=MetaEnumStr):
+    GFS_microphysics = "GFS_microphysics"
 
 
 @dataclasses.dataclass
@@ -19,7 +25,7 @@ class PhysicsConfig:
     npy: int = DEFAULT_INT
     npz: int = DEFAULT_INT
     nwat: int = DEFAULT_INT
-    schemes: List[str] = None
+    schemes: List[PHYSICS_PACKAGES] = None
     do_qa: bool = DEFAULT_BOOL
     c_cracw: float = NamelistDefaults.c_cracw
     c_paut: float = NamelistDefaults.c_paut

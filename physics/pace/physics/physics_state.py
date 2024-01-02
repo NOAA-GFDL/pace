@@ -8,6 +8,8 @@ import pace.util
 from pace.dsl.typing import Float
 from pace.physics.stencils.microphysics import MicrophysicsState
 
+from .config import PHYSICS_PACKAGES
+
 
 @dataclass()
 class PhysicsState:
@@ -281,10 +283,12 @@ class PhysicsState:
         }
     )
     quantity_factory: InitVar[pace.util.QuantityFactory]
-    schemes: InitVar[List[str]]
+    schemes: InitVar[List[PHYSICS_PACKAGES]]
 
     def __post_init__(
-        self, quantity_factory: pace.util.QuantityFactory, schemes: List[str]
+        self,
+        quantity_factory: pace.util.QuantityFactory,
+        schemes: List[PHYSICS_PACKAGES],
     ):
         # storage for tendency variables not in PhysicsState
         if "GFS_microphysics" in schemes:
@@ -317,7 +321,9 @@ class PhysicsState:
             self.microphysics = None
 
     @classmethod
-    def init_zeros(cls, quantity_factory, schemes: List[str]) -> "PhysicsState":
+    def init_zeros(
+        cls, quantity_factory, schemes: List[PHYSICS_PACKAGES]
+    ) -> "PhysicsState":
         initial_arrays = {}
         for _field in fields(cls):
             if "dims" in _field.metadata.keys():
@@ -338,7 +344,7 @@ class PhysicsState:
         storages: Mapping[str, Any],
         sizer: pace.util.GridSizer,
         quantity_factory: pace.util.QuantityFactory,
-        schemes: List[str],
+        schemes: List[PHYSICS_PACKAGES],
     ) -> "PhysicsState":
         inputs: Dict[str, pace.util.Quantity] = {}
         for _field in fields(cls):
