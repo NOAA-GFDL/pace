@@ -2,6 +2,7 @@ import copy
 
 import pace.dsl.gt4py_utils as utils
 import pace.util as util
+from pace.physics import PHYSICS_PACKAGES
 from pace.physics.stencils.physics import Physics, PhysicsState
 from pace.stencils import update_atmos_state
 from pace.stencils.testing.translate_physics import TranslatePhysicsFortranData2Py
@@ -129,7 +130,7 @@ class TranslateGFSPhysicsDriver(TranslatePhysicsFortranData2Py):
         quantity_factory = util.QuantityFactory.from_backend(
             sizer, self.stencil_factory.backend
         )
-        schemes = ["GFS_microphysics"]
+        schemes = [PHYSICS_PACKAGES["GFS_microphysics"]]
         physics_state = PhysicsState(
             **inputs,
             quantity_factory=quantity_factory,

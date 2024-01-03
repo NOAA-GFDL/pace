@@ -8,7 +8,7 @@ from pace.fv3core._config import DynamicalCoreConfig
 # but also, driver tests should not be in physics
 from pace.fv3core.testing.translate_fvdynamics import TranslateFVDynamics
 from pace.fv3core.testing.validation import enable_selective_validation
-from pace.physics import PhysicsConfig, PhysicsState
+from pace.physics import PHYSICS_PACKAGES, PhysicsConfig, PhysicsState
 from pace.util.namelist import Namelist
 
 
@@ -43,7 +43,8 @@ class TranslateDriver(TranslateFVDynamics):
             sizer, backend=self.stencil_config.compilation_config.backend
         )
         physics_state = PhysicsState.init_zeros(
-            quantity_factory=quantity_factory, schemes=["GFS_microphysics"]
+            quantity_factory=quantity_factory,
+            schemes=[PHYSICS_PACKAGES["GFS_microphysics"]],
         )
         tendency_state = TendencyState.init_zeros(
             quantity_factory=quantity_factory,

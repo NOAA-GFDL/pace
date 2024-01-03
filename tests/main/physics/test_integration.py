@@ -73,7 +73,7 @@ def setup_physics():
         physics_config,
     )
     physics_state = pace.physics.PhysicsState.init_zeros(
-        quantity_factory, schemes=["GFS_microphysics"]
+        quantity_factory, schemes=[pace.physics.PHYSICS_PACKAGES["GFS_microphysics"]]
     )
     random = np.random.RandomState(0)
     for field in fields(pace.physics.PhysicsState):
