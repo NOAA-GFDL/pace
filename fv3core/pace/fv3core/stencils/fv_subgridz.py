@@ -62,7 +62,7 @@ def standard_cm(cpm, cvm, q0_vapor, q0_liquid, q0_rain, q0_ice, q0_snow, q0_grau
 
 @gtscript.function
 def tvol(gz, u0, v0, w0):
-    return gz + 0.5 * (u0 ** 2 + v0 ** 2 + w0 ** 2)
+    return gz + 0.5 * (u0**2 + v0**2 + w0**2)
 
 
 def init(
@@ -790,8 +790,8 @@ class DryConvectiveAdjustment:
         grid_indexing = stencil_factory.grid_indexing
         self._k_sponge = n_sponge
         if self._k_sponge is not None and self._k_sponge < 3:
-            raise NotImplementedError(
-                "DryConvectiveAdjustment (fv_subgridz): n_sponge < 3 is not handled."
+            raise ValueError(
+                "DryConvectiveAdjustment (fv_subgridz): n_sponge < 3 is invalid."
             )
         else:
             self._k_sponge = grid_indexing.domain[2]
