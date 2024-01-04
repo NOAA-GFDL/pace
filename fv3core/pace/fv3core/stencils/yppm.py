@@ -310,7 +310,7 @@ class YPiecewiseParabolic:
         # Arguments come from:
         # namelist.grid_type
         # grid.dya
-        if grid_type == 3 and grid_type > 4:
+        if grid_type == 3 or grid_type > 4:
             raise NotImplementedError(
                 "Y Piecewise Parabolic (xppm): "
                 f" grid type {grid_type} not implemented. <3 or 4 available."

@@ -310,7 +310,7 @@ class XPiecewiseParabolic:
         # Arguments come from:
         # namelist.grid_type
         # grid.dxa
-        if grid_type == 3 and grid_type > 4:
+        if grid_type == 3 or grid_type > 4:
             raise NotImplementedError(
                 "X Piecewise Parabolic (xppm): "
                 f" grid type {grid_type} not implemented. <3 or 4 available."
