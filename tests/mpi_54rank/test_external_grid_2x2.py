@@ -24,7 +24,7 @@ def get_cube_comm(layout, comm: MPIComm):
 
 
 def get_tile_num(comm: MPIComm):
-    return pace.util.get_tile_index(comm.rank, comm.partitioner.total_ranks)
+    return pace.util.get_tile_number(comm.rank, comm.partitioner.total_ranks)
 
 
 def test_extgrid_equals_generated_2x2():
@@ -41,7 +41,7 @@ def test_extgrid_equals_generated_2x2():
     comm_2by2 = MPIComm()
     cube_comm = get_cube_comm(layout=(2, 2), comm=comm_2by2)
 
-    tile_num = get_tile_num(cube_comm) + 1
+    tile_num = get_tile_num(cube_comm)
     tile_file = "../../test_input/C12.tile" + str(tile_num) + ".nc"
     ds = xr.open_dataset(os.path.join(DIR, tile_file))
     lon = ds.x.values
@@ -137,6 +137,8 @@ def test_extgrid_equals_generated_2x2():
         ext_driver.state.grid_data.area.view[:, :] - area[subtile_slice_area]
     ) / np.amax(area[subtile_slice_area])
     diffs.append(f"Area maximum relative error = {diff_area}")
+
+    print(diffs)
 
     assert not errors, "errors occured in 2x2:\n{}".format("\n".join(errors))
 
