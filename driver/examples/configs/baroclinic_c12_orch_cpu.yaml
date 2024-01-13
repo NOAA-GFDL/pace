@@ -14,10 +14,10 @@ performance_config:
 nx_tile: 12
 nz: 79
 dt_atmos: 225
-minutes: 5
+seconds: 675
 layout:
-  - 1
-  - 1
+  - 2
+  - 2
 dycore_config:
   a_imp: 1.0
   beta: 0.

@@ -14,7 +14,7 @@ from gt4py.cartesian.gtscript import (
 import pace.physics.functions.microphysics_funcs as functions
 import pace.util
 import pace.util.constants as constants
-from pace.dsl.dace.orchestration import orchestrate
+from pace.dsl.dace.orchestration import dace_inhibitor, orchestrate
 from pace.dsl.stencil import StencilFactory
 from pace.dsl.typing import Float, FloatField, FloatFieldIJ, Int
 from pace.util import X_DIM, Y_DIM, Z_DIM
@@ -2227,6 +2227,7 @@ class Microphysics:
         self._ces0 = constants.EPS * es0
         self._set_timestep(dt_atmos)
 
+    @dace_inhibitor
     def _update_timestep_if_needed(self, timestep: float):
         if timestep != self._timestep:
             self._set_timestep(timestep=timestep)
