@@ -2,7 +2,7 @@ stencil_config:
   compilation_config:
     backend: dace:cpu
     rebuild: false
-    validate_args: true
+    validate_args: false
     format_source: false
     device_sync: false
 initialization:
@@ -10,14 +10,15 @@ initialization:
   config:
     case: baroclinic
 performance_config:
-  collect_performance: false
-nx_tile: 12
+  collect_performance: true
+  experiment_name: c384_baroclinic
+nx_tile: 384
 nz: 79
-dt_atmos: 225
-seconds: 675
+dt_atmos: 450
+days: 9
 layout:
-  - 2
-  - 2
+  - 16
+  - 16
 diagnostics_config:
   path: output
   output_format: netcdf
@@ -43,12 +44,12 @@ dycore_config:
   beta: 0.
   consv_te: 0.
   d2_bg: 0.
-  d2_bg_k1: 0.2
-  d2_bg_k2: 0.1
+  d2_bg_k1: 0.16
+  d2_bg_k2: 0.02
   d4_bg: 0.15
   d_con: 1.0
   d_ext: 0.0
-  dddmp: 0.5
+  dddmp: 0.2
   delt_max: 0.002
   do_sat_adj: true
   do_vort_damp: true
@@ -59,19 +60,19 @@ dycore_config:
   hord_tr: 8
   hord_vt: 6
   hydrostatic: false
-  k_split: 1
+  k_split: 3
   ke_bg: 0.
-  kord_mt: 9
-  kord_tm: -9
-  kord_tr: 9
-  kord_wz: 9
-  n_split: 1
+  kord_mt: 10
+  kord_tm: -10
+  kord_tr: 10
+  kord_wz: 10
+  n_split: 6
   nord: 3
   nwat: 6
-  p_fac: 0.05
-  rf_cutoff: 3000.
-  rf_fast: true
-  tau: 10.
+  p_fac: 0.1
+  rf_cutoff: 800.
+  rf_fast: false
+  tau: 5.
   vtdm4: 0.06
   z_tracer: true
   do_qa: true
@@ -87,7 +88,7 @@ dycore_config:
   tau_l2v: 300.
   tau_v2l: 90.
   fv_sg_adj: 0
-  n_sponge: 48
+  n_sponge: 4
 
 physics_config:
   hydrostatic: false

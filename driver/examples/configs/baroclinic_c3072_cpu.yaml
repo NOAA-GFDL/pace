@@ -2,7 +2,7 @@ stencil_config:
   compilation_config:
     backend: dace:cpu
     rebuild: false
-    validate_args: true
+    validate_args: false
     format_source: false
     device_sync: false
 initialization:
@@ -10,14 +10,15 @@ initialization:
   config:
     case: baroclinic
 performance_config:
-  collect_performance: false
-nx_tile: 12
+  collect_performance: true
+  experiment_name: c3072_baroclinic
+nx_tile: 3072
 nz: 79
 dt_atmos: 225
-seconds: 675
+days: 9
 layout:
-  - 2
-  - 2
+  - 36
+  - 36
 diagnostics_config:
   path: output
   output_format: netcdf
@@ -50,22 +51,22 @@ dycore_config:
   d_ext: 0.0
   dddmp: 0.5
   delt_max: 0.002
-  do_sat_adj: true
+  do_sat_adj: false
   do_vort_damp: true
   fill: true
-  hord_dp: 6
-  hord_mt: 6
-  hord_tm: 6
-  hord_tr: 8
-  hord_vt: 6
+  hord_dp: -5
+  hord_mt: 5
+  hord_tm: 5
+  hord_tr: -5
+  hord_vt: 5
   hydrostatic: false
-  k_split: 1
+  k_split: 7
   ke_bg: 0.
   kord_mt: 9
   kord_tm: -9
   kord_tr: 9
   kord_wz: 9
-  n_split: 1
+  n_split: 8
   nord: 3
   nwat: 6
   p_fac: 0.05
