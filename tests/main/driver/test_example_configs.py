@@ -28,6 +28,10 @@ EXCLUDED_CONFIGS: List[str] = [
     "baroclinic_c12_orch_cpu.yaml",
     "tropical_read_restart_fortran.yml",
     "tropicalcyclone_c128.yaml",
+    "baroclinic_c384_cpu.yaml",
+    "baroclinic_c384_gpu.yaml",
+    "baroclinic_c3072_cpu.yaml",
+    "baroclinic_c3072_gpu.yaml",
 ]
 
 JENKINS_CONFIGS_DIR = os.path.join(dirname, "../../../.jenkins/driver_configs/")
