@@ -8,11 +8,8 @@ import pace.util as fv3util
 import pace.util.constants as constants
 from pace.dsl.typing import Float
 from pace.fv3core.dycore_state import DycoreState
-from pace.util.grid.gnomonic import (
-    get_lonlat_vect,
-    get_unit_vector_direction,
-    lon_lat_midpoint,
-)
+from pace.util.grid import lon_lat_midpoint
+from pace.util.grid.gnomonic import get_lonlat_vect, get_unit_vector_direction
 
 
 # maximum windspeed amplitude - close to windspeed of zonal-mean time-mean

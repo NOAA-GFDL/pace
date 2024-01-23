@@ -17,7 +17,7 @@ from pace.dsl.stencil import GridIndexing, StencilFactory
 from pace.dsl.typing import Float, FloatField, FloatFieldI, FloatFieldIJ
 from pace.fv3core.stencils.basic_operations import copy_defn
 from pace.util import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_DIM
-from pace.util.grid.helper import GridData
+from pace.util.grid import GridData
 
 
 # comact 4-pt cubic interpolation
