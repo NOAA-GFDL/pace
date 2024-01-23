@@ -7,10 +7,11 @@ from typing import List, Optional, Union
 import pace.driver
 import pace.dsl
 import pace.stencils
+import pace.util
+import pace.util.grid
 from pace.dsl.dace.orchestration import dace_inhibitor
 from pace.fv3core.dycore_state import DycoreState
 from pace.util.constants import RGRAV
-from pace.util.grid.helper import GridData
 
 from .state import DriverState
 
@@ -27,7 +28,7 @@ class Diagnostics(abc.ABC):
         ...
 
     @abc.abstractmethod
-    def store_grid(self, grid_data: GridData):
+    def store_grid(self, grid_data: pace.util.grid.GridData):
         ...
 
     @abc.abstractmethod
@@ -197,7 +198,7 @@ class MonitorDiagnostics(Diagnostics):
             z_select_state.update(zselect.select_data(state))
         return z_select_state
 
-    def store_grid(self, grid_data: GridData):
+    def store_grid(self, grid_data: pace.util.grid.GridData):
         zarr_grid = {
             "lat": grid_data.lat,
             "lon": grid_data.lon,
@@ -217,7 +218,7 @@ class NullDiagnostics(Diagnostics):
     def store(self, time: Union[datetime, timedelta], state: DriverState):
         pass
 
-    def store_grid(self, grid_data: GridData):
+    def store_grid(self, grid_data: pace.util.grid.GridData):
         pass
 
     def cleanup(self):
