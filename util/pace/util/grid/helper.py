@@ -321,7 +321,7 @@ class GridData:
         self._fC_agrid = None
 
     @classmethod
-    def new_from_metric_terms(cls, metric_terms: MetricTerms, eta_file="None"):
+    def new_from_metric_terms(cls, metric_terms: MetricTerms):
         horizontal_data = HorizontalGridData.new_from_metric_terms(metric_terms)
         vertical_data = VerticalGridData.new_from_metric_terms(metric_terms)
         contravariant_data = ContravariantGridData.new_from_metric_terms(metric_terms)

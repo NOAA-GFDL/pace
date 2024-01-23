@@ -127,9 +127,7 @@ class GeosDycoreWrapper:
             quantity_factory=quantity_factory, communicator=self.communicator
         )
 
-        grid_data = pace.util.grid.GridData.new_from_metric_terms(
-            metric_terms, eta_file=namelist["grid_config"]["config"]["eta_file"]
-        )
+        grid_data = pace.util.grid.GridData.new_from_metric_terms(metric_terms)
 
         stencil_config = pace.dsl.stencil.StencilConfig(
             compilation_config=pace.dsl.stencil.CompilationConfig(
