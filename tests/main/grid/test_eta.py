@@ -47,10 +47,17 @@ def test_set_hybrid_pressure_coefficients_correct(km):
     driver.safety_checker.clear_all_checks()
 
 
+@pytest.mark.parametrize(
+    "cfile",
+    [
+        "tests/main/grid/input/test_config_nofile.yaml",
+        "tests/main/grid/input/test_config_not_mono.yaml",
+    ],
+)
 @pytest.mark.xfail
-def test_set_hybrid_pressure_coefficients_nofile():
+def test_set_hybrid_pressure_coefficients_nofile(cfile):
 
-    config_file = "tests/main/grid/input/test_config_nofile.yaml"
+    config_file = cfile
     with open(config_file, "r") as f:
         yaml_config = yaml.safe_load(f)
 
@@ -59,13 +66,13 @@ def test_set_hybrid_pressure_coefficients_nofile():
     driver = pace.driver.Driver(config=driver_config)
 
 
-@pytest.mark.xfail
-def test_set_hybrid_pressure_coefficients_nonmonotonic():
-
-    config_file = "tests/main/grid/input/test_config_not_mono.yaml"
-    with open(config_file, "r") as f:
-        yaml_config = yaml.safe_load(f)
-
-    driver_config = pace.driver.DriverConfig.from_dict(yaml_config)
-    driver_config.comm_config = pace.driver.NullCommConfig(rank=0, total_ranks=6)
-    driver = pace.driver.Driver(config=driver_config)
+# @pytest.mark.xfail
+# def test_set_hybrid_pressure_coefficients_nonmonotonic():
+#
+#    config_file = "tests/main/grid/input/test_config_not_mono.yaml"
+#    with open(config_file, "r") as f:
+#        yaml_config = yaml.safe_load(f)
+#
+#    driver_config = pace.driver.DriverConfig.from_dict(yaml_config)
+#    driver_config.comm_config = pace.driver.NullCommConfig(rank=0, total_ranks=6)
+#    driver = pace.driver.Driver(config=driver_config)
