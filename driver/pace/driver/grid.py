@@ -111,6 +111,7 @@ class GeneratedGridConfig(GridInitializer):
             dx_const=self.dx_const,
             dy_const=self.dy_const,
             deglat=self.deglat,
+            eta_file=self.eta_file,
         )
         if self.stretch_factor != 1:  # do horizontal grid transformation
             _transform_horizontal_grid(
@@ -123,9 +124,7 @@ class GeneratedGridConfig(GridInitializer):
                 self.restart_path, quantity_factory=quantity_factory
             )
         else:
-            vertical_data = VerticalGridData.new_from_metric_terms(
-                metric_terms, self.eta_file
-            )
+            vertical_data = VerticalGridData.new_from_metric_terms(metric_terms)
         contravariant_data = ContravariantGridData.new_from_metric_terms(metric_terms)
         angle_data = AngleGridData.new_from_metric_terms(metric_terms)
         grid_data = GridData(
