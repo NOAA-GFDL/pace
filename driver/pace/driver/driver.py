@@ -13,6 +13,8 @@ import pace.driver
 import pace.dsl
 import pace.physics
 import pace.stencils
+import pace.util
+import pace.util.grid
 from pace import fv3core
 from pace.driver.safety_checks import SafetyChecker
 from pace.dsl.dace.dace_config import DaceConfig
@@ -27,7 +29,6 @@ from pace.util.communicator import (
     CubedSphereCommunicator,
     TileCommunicator,
 )
-from pace.util.grid.helper import DampingCoefficients, DriverGridData, GridData
 from pace.util.logging import pace_log
 
 from . import diagnostics
@@ -164,7 +165,11 @@ class DriverConfig:
         self,
         communicator: pace.util.Communicator,
         quantity_factory: Optional[pace.util.QuantityFactory] = None,
-    ) -> Tuple[DampingCoefficients, DriverGridData, GridData]:
+    ) -> Tuple[
+        pace.util.grid.DampingCoefficients,
+        pace.util.grid.DriverGridData,
+        pace.util.grid.GridData,
+    ]:
         if quantity_factory is None:
             sizer = pace.util.SubtileGridSizer.from_tile_params(
                 nx_tile=self.nx_tile,
@@ -188,9 +193,9 @@ class DriverConfig:
     def get_driver_state(
         self,
         communicator: pace.util.Communicator,
-        damping_coefficients: DampingCoefficients,
-        driver_grid_data: DriverGridData,
-        grid_data: GridData,
+        damping_coefficients: pace.util.grid.DampingCoefficients,
+        driver_grid_data: pace.util.grid.DriverGridData,
+        grid_data: pace.util.grid.GridData,
         quantity_factory: Optional[pace.util.QuantityFactory] = None,
         stencil_factory: Optional[pace.dsl.StencilFactory] = None,
     ) -> DriverState:
