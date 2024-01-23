@@ -5,9 +5,10 @@ import xarray as xr
 
 import pace.dsl.gt4py_utils as gt_utils
 import pace.physics
+import pace.util
+import pace.util.grid
 from pace import fv3core
 from pace.dsl.typing import Float
-from pace.util.grid.helper import DampingCoefficients, DriverGridData, GridData
 
 
 @dataclasses.dataclass()
@@ -59,9 +60,9 @@ class DriverState:
     dycore_state: fv3core.DycoreState
     physics_state: pace.physics.PhysicsState
     tendency_state: TendencyState
-    grid_data: GridData
-    damping_coefficients: DampingCoefficients
-    driver_grid_data: DriverGridData
+    grid_data: pace.util.grid.GridData
+    damping_coefficients: pace.util.grid.DampingCoefficients
+    driver_grid_data: pace.util.grid.DriverGridData
 
     # TODO: the driver_config argument here isn't type hinted from
     # import due to a circular dependency. This can be fixed by refactoring
@@ -71,9 +72,9 @@ class DriverState:
         cls,
         restart_path: str,
         driver_config,
-        damping_coefficients: DampingCoefficients,
-        driver_grid_data: DriverGridData,
-        grid_data: GridData,
+        damping_coefficients: pace.util.grid.DampingCoefficients,
+        driver_grid_data: pace.util.grid.DriverGridData,
+        grid_data: pace.util.grid.GridData,
     ) -> "DriverState":
         comm = driver_config.comm_config.get_comm()
         communicator = pace.util.Communicator.from_layout(
@@ -172,9 +173,9 @@ def _restart_driver_state(
     rank: int,
     quantity_factory: pace.util.QuantityFactory,
     communicator: pace.util.Communicator,
-    damping_coefficients: DampingCoefficients,
-    driver_grid_data: DriverGridData,
-    grid_data: GridData,
+    damping_coefficients: pace.util.grid.DampingCoefficients,
+    driver_grid_data: pace.util.grid.DriverGridData,
+    grid_data: pace.util.grid.GridData,
 ):
     fs = pace.util.get_fs(path)
 
