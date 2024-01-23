@@ -22,7 +22,7 @@ from pace.physics.stencils.get_phi_fv3 import get_phi_fv3
 from pace.physics.stencils.get_prs_fv3 import get_prs_fv3
 from pace.physics.stencils.microphysics import Microphysics
 from pace.util import X_DIM, Y_DIM, Z_DIM
-from pace.util.grid.helper import GridData
+from pace.util.grid import GridData
 
 from .._config import PhysicsConfig
 

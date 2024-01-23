@@ -18,7 +18,7 @@ from pace.dsl.dace.orchestration import orchestrate
 from pace.dsl.stencil import StencilFactory
 from pace.dsl.typing import Float, FloatField, FloatFieldIJ, Int
 from pace.util import X_DIM, Y_DIM, Z_DIM
-from pace.util.grid.helper import GridData
+from pace.util.grid import GridData
 
 from .._config import PhysicsConfig
 
