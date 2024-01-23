@@ -17,7 +17,7 @@ from pace.stencils.corners import (
 )
 from pace.util import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_INTERFACE_DIM
 from pace.util.constants import N_HALO_DEFAULT, PI, RADIUS
-from pace.util.grid import eta  # import set_hybrid_pressure_coefficients
+from pace.util.grid import eta
 
 from .geometry import (
     calc_unit_vector_south,
