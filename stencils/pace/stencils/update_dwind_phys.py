@@ -5,7 +5,7 @@ from pace.dsl.dace import orchestrate
 from pace.dsl.stencil import StencilFactory
 from pace.dsl.typing import FloatField, FloatFieldI, FloatFieldIJ
 from pace.util import X_DIM, Y_DIM, Z_DIM
-from pace.util.grid.helper import DriverGridData
+from pace.util.grid import DriverGridData
 
 
 def set_winds_zero(
