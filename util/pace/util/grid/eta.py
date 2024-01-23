@@ -41,9 +41,9 @@ def set_hybrid_pressure_coefficients(
     """
 
     if eta_file == "None":
-        raise IOError("eta file not specified")
+        raise ValueError("eta file not specified")
     if not os.path.isfile(eta_file):
-        raise IOError("file " + eta_file + " does not exist")
+        raise ValueError("file " + eta_file + " does not exist")
 
     # read file into ak, bk arrays
     data = xr.open_dataset(eta_file)
@@ -52,9 +52,9 @@ def set_hybrid_pressure_coefficients(
 
     # check size of ak and bk array is km+1
     if ak.size - 1 != km:
-        raise ValueError("size of ak array is not equal to km=" + str(km))
+        raise ValueError(f"size of ak array is not equal to km={km}")
     if bk.size - 1 != km:
-        raise ValueError("size of bk array is not equal to km=" + str(km))
+        raise ValueError(f"size of bk array is not equal to km={km}")
 
     # check that the eta values computed from ak and bk are monotonically increasing
     eta, etav = check_eta(ak, bk)
