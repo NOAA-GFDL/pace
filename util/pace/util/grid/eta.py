@@ -4,8 +4,6 @@ from dataclasses import dataclass
 import numpy as np
 import xarray as xr
 
-from pace.fv3core.initialization.init_utils import compute_eta
-
 
 @dataclass
 class HybridPressureCoefficients:
@@ -59,7 +57,7 @@ def set_hybrid_pressure_coefficients(
         raise ValueError("size of bk array is not equal to km=" + str(km))
 
     # check that the eta values computed from ak and bk are monotonically increasing
-    eta, etav = compute_eta(ak, bk)
+    eta, etav = check_eta(ak, bk)
 
     (eta_sorted, etav_sorted) = (np.sort(eta), np.sort(etav))
     for i in range(eta.size):
@@ -77,3 +75,9 @@ def set_hybrid_pressure_coefficients(
     pressure_data = HybridPressureCoefficients(ks, ptop, ak, bk)
 
     return pressure_data
+
+
+def check_eta(ak, bk):
+    from pace.fv3core.initialization.init_utils import compute_eta
+
+    return compute_eta(ak, bk)
