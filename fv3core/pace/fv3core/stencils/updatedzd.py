@@ -18,7 +18,7 @@ from pace.util import (
     Z_DIM,
     Z_INTERFACE_DIM,
 )
-from pace.util.grid.helper import DampingCoefficients, GridData
+from pace.util.grid import DampingCoefficients, GridData
 
 
 DZ_MIN = constants.DZ_MIN
