@@ -151,8 +151,5 @@ def test_extgrid_equals_generated_2x2():
     tile_area = mpicomm._comm.gather(rank_area_sum, root=0)
 
     if mpicomm.Get_rank() == 0:
-        # print(ext_driver.state.grid_data.dy.view[:, :])
-        # print("")
-        # print(dx[subtile_slice_dx])
         total_area = math.fsum(tile_area)
         assert np.isclose(total_area, surface_area_true)
