@@ -23,7 +23,7 @@ def set_answers(config_file):
 
     """
     Read in the expected values of ak and bk
-    arrays from the input eta netcdf files.
+    arrays from the input eta NetCDF files.
     """
 
     if "79" in config_file:
@@ -37,10 +37,12 @@ def set_answers(config_file):
 @pytest.mark.parametrize("km", [79, 91])
 def test_set_hybrid_pressure_coefficients_correct(km):
 
-    """This test checks to see if the ak and bk arrays
-    are read-in correctly are stored as
+    """This test checks to see that the ak and bk arrays
+    are read-in correctly and are stored as
     expected.  Both values of km=79 and km=91 are
-    tested.
+    tested and both tests are expected to pass
+    with the stored ak and bk values agreeing with the
+    values read-in directly from the NetCDF file.
     """
 
     config_file = f"tests/main/grid/input/test_config_{km}.yaml"
@@ -84,7 +86,7 @@ def test_set_hybrid_pressure_coefficients_fail(cfile):
     configuration file; and (2), the computed eta values
     increase non-monotonically.  For the latter test, the eta_file
     is specified in test_config_not_mono.yaml file and
-    the ak and bk values in the eta_file have been nonsensically changed
+    the ak and bk values in the eta_file have been changed nonsensically
     to result in erronenous eta values.
     """
 
