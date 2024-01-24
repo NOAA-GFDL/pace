@@ -1,6 +1,7 @@
 import pace.dsl
 import pace.dsl.gt4py_utils as utils
 import pace.util
+from pace.dsl.typing import Float
 from pace.fv3core.stencils.fvtp2d import FiniteVolumeTransport
 from pace.fv3core.testing import TranslateDycoreFortranData2Py
 
@@ -51,11 +52,11 @@ class TranslateFvTp2d(TranslateDycoreFortranData2Py):
             backend=self.stencil_factory.backend,
         )
         nord_col = self.grid.quantity_factory.zeros(
-            dims=[pace.util.Z_DIM], units="unknown"
+            dims=[pace.util.Z_DIM], units="unknown", dtype=Float
         )
         nord_col.data[:] = nord_col.np.asarray(inputs.pop("nord"))
         damp_c = self.grid.quantity_factory.zeros(
-            dims=[pace.util.Z_DIM], units="unknown"
+            dims=[pace.util.Z_DIM], units="unknown", dtype=Float
         )
         damp_c.data[:] = damp_c.np.asarray(inputs.pop("damp_c"))
         for optional_arg in ["mass"]:
