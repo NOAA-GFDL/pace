@@ -1,11 +1,12 @@
-from dataclasses import dataclass, field, fields
-from typing import Any, Mapping
+from dataclasses import asdict, dataclass, field, fields
+from typing import Any, Dict, Mapping, Union
 
 import xarray as xr
 
 import pace.dsl.gt4py_utils as gt_utils
 import pace.util
 from pace.dsl.typing import Float
+from pace.util.quantity import Quantity
 
 
 @dataclass()
@@ -449,6 +450,12 @@ class DycoreState:
 
     def __getitem__(self, item):
         return getattr(self, item)
+
+    def as_dict(self, quantity_only=True) -> Dict[str, Union[Quantity, int]]:
+        if quantity_only:
+            return {k: v for k, v in asdict(self).items() if isinstance(v, Quantity)}
+        else:
+            return {k: v for k, v in asdict(self).items()}
 
 
 TRACER_PROPERTIES = {

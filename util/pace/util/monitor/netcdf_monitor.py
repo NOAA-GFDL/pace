@@ -94,6 +94,7 @@ class _ChunkedNetCDFWriter:
                     chunk=chunk_index, tile=self._tile
                 )
             )
+            Path(self._path).mkdir(exist_ok=True)
             if os.path.exists(chunk_path):
                 os.remove(chunk_path)
             ds.to_netcdf(chunk_path, format="NETCDF4", engine="netcdf4")

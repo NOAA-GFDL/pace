@@ -186,8 +186,17 @@ class DynamicalCore:
         nested = False
         stretched_grid = False
         grid_indexing = stencil_factory.grid_indexing
-        assert config.moist_phys, "fvsetup is only implemented for moist_phys=true"
-        assert config.nwat == 6, "Only nwat=6 has been implemented and tested"
+        if not config.moist_phys:
+            raise NotImplementedError(
+                "Dynamical core (fv_dynamics):"
+                " fvsetup is only implemented for moist_phys=true."
+            )
+        if config.nwat != 6:
+            raise NotImplementedError(
+                "Dynamical core (fv_dynamics):"
+                f" nwat=={config.nwat} is not implemented."
+                " Only nwat=6 has been implemented."
+            )
         self.comm_rank = comm.rank
         self.grid_data = grid_data
         self.grid_indexing = grid_indexing
@@ -286,7 +295,10 @@ class DynamicalCore:
         self._cappa = self.acoustic_dynamics.cappa
 
         if not (not self.config.inline_q and constants.NQ != 0):
-            raise NotImplementedError("tracer_2d not implemented, turn on z_tracer")
+            raise NotImplementedError(
+                "Dynamical core (fv_dynamics):"
+                "tracer_2d not implemented. z_tracer available"
+            )
         self._adjust_tracer_mixing_ratio = AdjustNegativeTracerMixingRatio(
             stencil_factory,
             quantity_factory=quantity_factory,
@@ -466,16 +478,20 @@ class DynamicalCore:
         )
 
         if self._conserve_total_energy > 0:
-            raise NotImplementedError("compute total energy is not implemented")
+            raise NotImplementedError(
+                "Dynamical Core (fv_dynamics): compute total energy is not implemented"
+            )
 
         if (not self.config.rf_fast) and self.config.tau != 0:
             raise NotImplementedError(
-                "Rayleigh_Super, called when rf_fast=False and tau !=0"
+                "Dynamical Core (fv_dynamics): Rayleigh_Super,"
+                " called when rf_fast=False and tau !=0, is not implemented"
             )
 
         if self.config.adiabatic and self.config.kord_tm > 0:
             raise NotImplementedError(
-                "unimplemented namelist options adiabatic with positive kord_tm"
+                "Dynamical Core (fv_dynamics): Adiabatic with positive kord_tm"
+                " is not implemented."
             )
         else:
             if __debug__:

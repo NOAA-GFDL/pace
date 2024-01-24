@@ -548,7 +548,11 @@ class AGrid2BGridFourthOrder:
             replace: boolean, update qin to the B grid as well
         """
         orchestrate(obj=self, config=stencil_factory.config.dace_config)
-        assert grid_type in [0, 4]
+        if grid_type != 0 and grid_type != 4:
+            raise RuntimeError(
+                "A-Grid to B-Grid 4th order (a2b_ord4):"
+                f" grid type {grid_type} is not implemented. 0 and 4 available."
+            )
         self._idx: GridIndexing = stencil_factory.grid_indexing
         self._stencil_config = stencil_factory.config
         self.replace = replace
@@ -720,7 +724,6 @@ class AGrid2BGridFourthOrder:
         """
 
         if self.grid_type < 3:
-
             self._sw_corner_stencil(
                 qin,
                 qout,
