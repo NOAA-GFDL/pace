@@ -21,7 +21,7 @@ def set_answers(config_file):
 @pytest.mark.parametrize("km", [79, 91])
 def test_set_hybrid_pressure_coefficients_correct(km):
 
-    config_file = "tests/main/grid/input/test_config_" + str(km) + ".yaml"
+    config_file = f"tests/main/grid/input/test_config_{km}.yaml"
     with open(config_file, "r") as f:
         yaml_config = yaml.safe_load(f)
 
