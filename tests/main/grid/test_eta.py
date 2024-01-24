@@ -8,7 +8,23 @@ import yaml
 import pace.driver
 
 
+"""
+This test checks to ensure that ak and bk
+values are read-in and stored properly.
+In addition, this test checks to ensure that
+the function set_hybrid_pressure_coefficients
+fail as expected if the computed eta values
+vary non-mononitically and if the eta_file
+is not provided.
+"""
+
+
 def set_answers(config_file):
+
+    """
+    Read in the expected values of ak and bk
+    arrays from the input eta netcdf files.
+    """
 
     if "79" in config_file:
         eta_file = "tests/main/input/eta79.nc"
@@ -20,6 +36,12 @@ def set_answers(config_file):
 
 @pytest.mark.parametrize("km", [79, 91])
 def test_set_hybrid_pressure_coefficients_correct(km):
+
+    """This test checks to see if the ak and bk arrays
+    are read-in correctly are stored as
+    expected.  Both values of km=79 and km=91 are
+    tested.
+    """
 
     config_file = f"tests/main/grid/input/test_config_{km}.yaml"
     with open(config_file, "r") as f:
@@ -55,7 +77,16 @@ def test_set_hybrid_pressure_coefficients_correct(km):
     ],
 )
 @pytest.mark.xfail
-def test_set_hybrid_pressure_coefficients_nofile(cfile):
+def test_set_hybrid_pressure_coefficients_fail(cfile):
+
+    """This test checks to see that the program
+    fails when (1) the eta_file is not specified in the yaml
+    configuration file; and (2), the computed eta values
+    increase non-monotonically.  For the latter test, the eta_file
+    is specified in test_config_not_mono.yaml file and
+    the ak and bk values in the eta_file have been nonsensically changed
+    to result in erronenous eta values.
+    """
 
     config_file = cfile
     with open(config_file, "r") as f:
