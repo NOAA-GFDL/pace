@@ -220,14 +220,10 @@ class ExternalNetcdfGridConfig(GridInitializer):
     |         |         |
     X----X----X----X----X
 
-    Grid construction follows a gnomonic coordinate system. An
-    inscribed cube is projected onto the surface of the sphere of
-    the Earth. This creates six, non-overlapping faces/tiles that
-    contain the surface area of the sphere. For more information
-    on the NOAA-GFDL grid construction methods, please visit:
-    https://repository.library.noaa.gov/view/noaa/30725
-    which is a pdf describing the FV3 dynamical core, by
-    Harris, L.; Chen, X.; Putnam, W.; et. al.
+    The grid data must define the verticies, centroids, and mid-points
+    on edge of the cells contained in the computation. For more information
+    on grid discretization for the FV3 dynamical core please visit:
+    https://www.gfdl.noaa.gov/fv3/
     """
 
     grid_type: Optional[int] = 0
