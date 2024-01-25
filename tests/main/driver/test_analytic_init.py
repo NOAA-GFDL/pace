@@ -9,6 +9,9 @@ import pace.driver
 
 DIR = os.path.dirname(os.path.abspath(__file__))
 
+# TODO: Location of test configurations will be changed after refactor,
+#       need to update after
+
 TESTED_CONFIGS: List[str] = [
     "../../../driver/examples/configs/analytic_test.yaml",
 ]

@@ -9,7 +9,7 @@ grid_config:
   type: external
   config:
     grid_type: 0
-    grid_file_path: "../../test_input/C12.tile"
+    grid_file_path: "../../../test_input/C12.tile"
 initialization:
   type: analytic
   config:
