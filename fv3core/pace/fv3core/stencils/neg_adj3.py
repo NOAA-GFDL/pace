@@ -356,7 +356,10 @@ class AdjustNegativeTracerMixingRatio:
             )
         if hydrostatic:
             self._d0_vap = constants.CP_VAP - constants.C_LIQ
-            raise NotImplementedError("Unimplemented namelist hydrostatic=True")
+            raise NotImplementedError(
+                "Adjust Negative Tracer Mixing Ratio (neg_adj3):"
+                " Hydrostatic is not implemented"
+            )
         else:
             self._d0_vap = constants.CV_VAP - constants.C_LIQ
         self._lv00 = constants.HLV - self._d0_vap * constants.TICE

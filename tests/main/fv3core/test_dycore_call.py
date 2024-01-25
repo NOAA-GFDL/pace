@@ -19,9 +19,9 @@ from pace.util.null_comm import NullComm
 DIR = os.path.abspath(os.path.dirname(__file__))
 
 
-def setup_dycore() -> Tuple[
-    fv3core.DynamicalCore, fv3core.DycoreState, pace.util.Timer
-]:
+def setup_dycore() -> (
+    Tuple[fv3core.DynamicalCore, fv3core.DycoreState, pace.util.Timer]
+):
     backend = "numpy"
     config = fv3core.DynamicalCoreConfig(
         layout=(1, 1),
