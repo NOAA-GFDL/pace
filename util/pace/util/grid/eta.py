@@ -59,12 +59,10 @@ def set_hybrid_pressure_coefficients(
     # check that the eta values computed from ak and bk are monotonically increasing
     eta, etav = check_eta(ak, bk)
 
-    (eta_sorted, etav_sorted) = (np.sort(eta), np.sort(etav))
-    for i in range(eta.size):
-        if eta_sorted[i] != eta[i]:
-            raise ValueError("ETA values are not monotonically increasing")
-        if etav_sorted[i] != etav[i]:
-            raise ValueError("ETAV values are not monotonically increasing")
+    if not np.all(eta[:-1] <= eta[1:]):
+        raise ValueError("ETA values are not monotonically increasing")
+    if not np.all(etav[:-1] <= etav[1:]):
+        raise ValueError("ETAV values are not monotonically increasing")
 
     if 0.0 in bk:
         ks = 0 if km == 91 else np.where(bk == 0)[0][-1]
