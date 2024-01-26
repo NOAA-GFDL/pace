@@ -47,7 +47,9 @@ def test_state_from_fortran_restart():
         damping_coefficients,
         driver_grid_data,
         grid_data,
-    ) = pace.driver.GeneratedGridConfig(restart_path=restart_dir).get_grid(
+    ) = pace.driver.GeneratedGridConfig(
+        restart_path=restart_dir, eta_file=restart_dir + "/fv_core.res.nc"
+    ).get_grid(
         quantity_factory, null_communicator
     )
 
