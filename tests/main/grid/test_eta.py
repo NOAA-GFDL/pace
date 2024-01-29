@@ -1,5 +1,7 @@
 #!/usr/bin/env python3
 
+import os
+
 import numpy as np
 import pytest
 import xarray as xr
@@ -19,17 +21,13 @@ is not provided.
 """
 
 
-def set_answers(config_file):
+def set_answers(eta_file):
 
     """
     Read in the expected values of ak and bk
     arrays from the input eta NetCDF files.
     """
 
-    if "79" in config_file:
-        eta_file = "tests/main/input/eta79.nc"
-    if "91" in config_file:
-        eta_file = "tests/main/input/eta91.nc"
     data = xr.open_dataset(eta_file)
     return data["ak"].values, data["bk"].values
 
@@ -45,9 +43,16 @@ def test_set_hybrid_pressure_coefficients_correct(km):
     values read-in directly from the NetCDF file.
     """
 
-    config_file = f"tests/main/grid/input/test_config_{km}.yaml"
+    dirname = os.path.dirname(os.path.abspath(__file__))
+    config_file = os.path.join(
+        dirname, "../../../driver/examples/configs/baroclinic_c12.yaml"
+    )
+
     with open(config_file, "r") as f:
         yaml_config = yaml.safe_load(f)
+
+    yaml_config["nz"] = km
+    yaml_config["grid_config"]["config"]["eta_file"] = f"tests/main/input/eta{km}.nc"
 
     driver_config = pace.driver.DriverConfig.from_dict(yaml_config)
     driver_config.comm_config = pace.driver.NullCommConfig(rank=0, total_ranks=6)
@@ -56,7 +61,7 @@ def test_set_hybrid_pressure_coefficients_correct(km):
     p_results = driver.state.grid_data.p.data
     ak_results = driver.state.grid_data.ak.data
     bk_results = driver.state.grid_data.bk.data
-    ak_answers, bk_answers = set_answers(config_file)
+    ak_answers, bk_answers = set_answers(f"tests/main/input/eta{km}.nc")
 
     if ak_answers.size != ak_results.size:
         raise ValueError("Unexpected size of bk")
@@ -74,8 +79,8 @@ def test_set_hybrid_pressure_coefficients_correct(km):
 @pytest.mark.parametrize(
     "cfile",
     [
-        "tests/main/grid/input/test_config_nofile.yaml",
-        "tests/main/grid/input/test_config_not_mono.yaml",
+        "file_is_not_here",
+        "tests/main/grid/input/eta_not_mono.nc",
     ],
 )
 @pytest.mark.xfail
@@ -90,9 +95,15 @@ def test_set_hybrid_pressure_coefficients_fail(cfile):
     to result in erronenous eta values.
     """
 
-    config_file = cfile
+    dirname = os.path.dirname(os.path.abspath(__file__))
+    config_file = os.path.join(
+        dirname, "../../../driver/examples/configs/baroclinic_c12.yaml"
+    )
+
     with open(config_file, "r") as f:
         yaml_config = yaml.safe_load(f)
+
+    yaml_config["grid_config"]["config"]["eta_file"] = cfile
 
     driver_config = pace.driver.DriverConfig.from_dict(yaml_config)
     driver_config.comm_config = pace.driver.NullCommConfig(rank=0, total_ranks=6)
