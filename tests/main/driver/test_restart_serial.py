@@ -66,11 +66,14 @@ def test_restart_save_to_disk():
             sizer=sizer, backend=backend
         )
 
+        eta_file = driver_config.grid_config.config.eta_file
         (
             damping_coefficients,
             driver_grid_data,
             grid_data,
-        ) = pace.driver.GeneratedGridConfig().get_grid(quantity_factory, communicator)
+        ) = pace.driver.GeneratedGridConfig(eta_file=eta_file).get_grid(
+            quantity_factory, communicator
+        )
         init = AnalyticInit()
         driver_state = init.get_driver_state(
             quantity_factory=quantity_factory,

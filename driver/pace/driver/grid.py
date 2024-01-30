@@ -102,6 +102,7 @@ class GeneratedGridConfig(GridInitializer):
     dx_const: Optional[float] = 1000.0
     dy_const: Optional[float] = 1000.0
     deglat: Optional[float] = 15.0
+    eta_file: str = "None"
 
     def get_grid(
         self,
@@ -115,6 +116,7 @@ class GeneratedGridConfig(GridInitializer):
             dx_const=self.dx_const,
             dy_const=self.dy_const,
             deglat=self.deglat,
+            eta_file=self.eta_file,
         )
         if self.stretch_factor != 1:  # do horizontal grid transformation
             _transform_horizontal_grid(

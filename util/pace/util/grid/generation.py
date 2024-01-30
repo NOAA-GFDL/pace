@@ -17,8 +17,8 @@ from pace.stencils.corners import (
 )
 from pace.util import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_INTERFACE_DIM
 from pace.util.constants import N_HALO_DEFAULT, PI, RADIUS
+from pace.util.grid import eta
 
-from .eta import set_hybrid_pressure_coefficients
 from .geometry import (
     calc_unit_vector_south,
     calc_unit_vector_west,
@@ -226,6 +226,7 @@ class MetricTerms:
         dy_const: float = 1000.0,
         deglat: float = 15.0,
         extdgrid: bool = False,
+        eta_file: str = "None",
     ):
         self._grid_type = grid_type
         self._dx_const = dx_const
@@ -283,10 +284,12 @@ class MetricTerms:
         self._dy_center = None
         self._area = None
         self._area_c = None
-        self._ks = None
-        self._ak = None
-        self._bk = None
-        self._ptop = None
+        (
+            self._ks,
+            self._ptop,
+            self._ak,
+            self._bk,
+        ) = self._set_hybrid_pressure_coefficients(eta_file)
         self._ec1 = None
         self._ec2 = None
         self._ew1 = None
@@ -424,6 +427,7 @@ class MetricTerms:
         quantity_factory,
         communicator,
         grid_type,
+        eta_file: str = "None",
     ) -> "MetricTerms":
         """
         Generates a metric terms object, using input from data contained in an
@@ -434,6 +438,7 @@ class MetricTerms:
             communicator=communicator,
             grid_type=grid_type,
             extdgrid=True,
+            eta_file=eta_file,
         )
 
         rad_conv = PI / 180.0
@@ -456,6 +461,7 @@ class MetricTerms:
         dx_const: float = 1000.0,
         dy_const: float = 1000.0,
         deglat: float = 15.0,
+        eta_file: str = "None",
     ) -> "MetricTerms":
         sizer = util.SubtileGridSizer.from_tile_params(
             nx_tile=npx - 1,
@@ -477,6 +483,7 @@ class MetricTerms:
             dx_const=dx_const,
             dy_const=dy_const,
             deglat=deglat,
+            eta_file=eta_file,
         )
 
     @property
@@ -616,13 +623,6 @@ class MetricTerms:
         """
         number of levels where the vertical coordinate is purely pressure-based
         """
-        if self._ks is None:
-            (
-                self._ks,
-                self._ptop,
-                self._ak,
-                self._bk,
-            ) = self._set_hybrid_pressure_coefficients()
         return self._ks
 
     @property
@@ -631,13 +631,6 @@ class MetricTerms:
         the ak coefficient used to calculate the pressure at a given k-level:
         pk = ak + (bk * ps)
         """
-        if self._ak is None:
-            (
-                self._ks,
-                self._ptop,
-                self._ak,
-                self._bk,
-            ) = self._set_hybrid_pressure_coefficients()
         return self._ak
 
     @property
@@ -646,13 +639,6 @@ class MetricTerms:
         the bk coefficient used to calculate the pressure at a given k-level:
         pk = ak + (bk * ps)
         """
-        if self._bk is None:
-            (
-                self._ks,
-                self._ptop,
-                self._ak,
-                self._bk,
-            ) = self._set_hybrid_pressure_coefficients()
         return self._bk
 
     @property
@@ -660,13 +646,6 @@ class MetricTerms:
         """
         the pressure of the top of atmosphere level
         """
-        if self._ptop is None:
-            (
-                self._ks,
-                self._ptop,
-                self._ak,
-                self._bk,
-            ) = self._set_hybrid_pressure_coefficients()
         return self._ptop
 
     @property
@@ -2158,7 +2137,7 @@ class MetricTerms:
         area_cgrid_64.data[:, :] = self._dx_const * self._dy_const
         return quantity_cast_to_model_float(self.quantity_factory, area_cgrid_64)
 
-    def _set_hybrid_pressure_coefficients(self):
+    def _set_hybrid_pressure_coefficients(self, eta_file):
         ks = self.quantity_factory.zeros(
             [],
             "",
@@ -2179,7 +2158,9 @@ class MetricTerms:
             "",
             dtype=Float,
         )
-        pressure_coefficients = set_hybrid_pressure_coefficients(self._npz)
+        pressure_coefficients = eta.set_hybrid_pressure_coefficients(
+            self._npz, eta_file
+        )
         ks = pressure_coefficients.ks
         ptop = pressure_coefficients.ptop
         ak.data[:] = asarray(pressure_coefficients.ak, type(ak.data))
