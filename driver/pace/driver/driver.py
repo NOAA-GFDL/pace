@@ -231,6 +231,7 @@ class DriverConfig:
             damping_coefficients=damping_coefficients,
             driver_grid_data=driver_grid_data,
             grid_data=grid_data,
+            schemes=self.physics_config.schemes,
         )
 
     @classmethod
@@ -327,6 +328,9 @@ class DriverConfig:
         config_dict["initialization"]["type"] = "restart"
         config_dict["initialization"]["config"]["start_time"] = time
         config_dict["initialization"]["config"]["path"] = restart_path
+        # convert physics package enum to str
+        schemes = [scheme.value for scheme in config_dict["physics_config"]["schemes"]]
+        config_dict["physics_config"]["schemes"] = schemes
         # restart config doesn't have 'case'
         if "case" in config_dict["initialization"]["config"].keys():
             del config_dict["initialization"]["config"]["case"]
@@ -508,7 +512,6 @@ class Driver:
                     quantity_factory=self.quantity_factory,
                     grid_data=self.state.grid_data,
                     namelist=self.config.physics_config,
-                    active_packages=["microphysics"],
                 )
             else:
                 # Make sure those are set to None to raise any issues

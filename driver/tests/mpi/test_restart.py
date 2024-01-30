@@ -11,6 +11,7 @@ import pace.dsl
 import pace.util
 from pace.driver import DriverConfig
 from pace.driver.state import DriverState
+from pace.physics import PHYSICS_PACKAGES
 
 
 # The packages we import will import MPI, causing an MPI init, but we don't actually
@@ -65,6 +66,7 @@ def test_restart():
             damping_coefficients=damping_coefficients,
             driver_grid_data=driver_grid_data,
             grid_data=grid_data,
+            schemes=[PHYSICS_PACKAGES["GFS_microphysics"]],
         )
 
         assert isinstance(driver_state, DriverState)

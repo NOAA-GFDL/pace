@@ -5,6 +5,7 @@ import numpy as np
 import pace.dsl.gt4py_utils as utils
 import pace.util
 from pace.dsl.typing import Float
+from pace.physics import PHYSICS_PACKAGES
 from pace.physics.stencils.microphysics import Microphysics
 from pace.physics.stencils.physics import PhysicsState
 from pace.stencils.testing.translate_physics import TranslatePhysicsFortranData2Py
@@ -88,7 +89,7 @@ class TranslateMicroph(TranslatePhysicsFortranData2Py):
             inputs,
             sizer=sizer,
             quantity_factory=quantity_factory,
-            active_packages=["microphysics"],
+            schemes=[PHYSICS_PACKAGES["GFS_microphysics"]],
         )
         microphysics = Microphysics(
             self.stencil_factory, quantity_factory, self.grid.grid_data, self.namelist

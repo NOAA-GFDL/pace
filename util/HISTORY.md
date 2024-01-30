@@ -4,6 +4,7 @@ History
 latest
 ------
 
+- Added `MetaEnumStr` to utils to make enums more functional
 - Added `fill_for_translate_test` to MetricTerms to fill fields with NaNs only when required for testing
 - Added `init_cartesian` method to MetricTerms to handle grid generation for orthogonal grids
 - Added `from_layout` and `size` methods to TileCommunicator and Communicator

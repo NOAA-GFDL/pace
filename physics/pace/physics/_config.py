@@ -1,13 +1,20 @@
 import dataclasses
-from typing import Optional, Tuple
+from enum import Enum, unique
+from typing import List, Optional, Tuple
 
 import f90nml
 
-from pace.util import Namelist, NamelistDefaults
+from pace.util import MetaEnumStr, Namelist, NamelistDefaults
 
 
 DEFAULT_INT = 0
 DEFAULT_BOOL = False
+DEFAULT_SCHEMES = ["GFS_microphysics"]
+
+
+@unique
+class PHYSICS_PACKAGES(Enum, metaclass=MetaEnumStr):
+    GFS_microphysics = "GFS_microphysics"
 
 
 @dataclasses.dataclass
@@ -18,6 +25,7 @@ class PhysicsConfig:
     npy: int = DEFAULT_INT
     npz: int = DEFAULT_INT
     nwat: int = DEFAULT_INT
+    schemes: List = None
     do_qa: bool = DEFAULT_BOOL
     c_cracw: float = NamelistDefaults.c_cracw
     c_paut: float = NamelistDefaults.c_paut
@@ -100,6 +108,14 @@ class PhysicsConfig:
     namelist_override: Optional[str] = None
 
     def __post_init__(self):
+        if self.schemes is None:
+            self.schemes = DEFAULT_SCHEMES
+        package_schemes = []
+        for scheme in self.schemes:
+            if scheme not in PHYSICS_PACKAGES:
+                raise NotImplementedError(f"{scheme} physics scheme not implemented")
+            package_schemes.append(PHYSICS_PACKAGES[scheme])
+        self.schemes = package_schemes
         if self.namelist_override is not None:
             try:
                 f90_nml = f90nml.read(self.namelist_override)

@@ -14,6 +14,7 @@ EXAMPLE_CONFIGS_DIR = os.path.join(dirname, "../../../driver/examples/configs/")
 TESTED_CONFIGS: List[str] = [
     "baroclinic_c12.yaml",
     "baroclinic_c12_dp.yaml",
+    "baroclinic_c12_explicit_physics.yaml",
     "baroclinic_c12_comm_read.yaml",
     "baroclinic_c12_comm_write.yaml",
     "baroclinic_c12_null_comm.yaml",
