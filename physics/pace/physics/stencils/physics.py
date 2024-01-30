@@ -1,5 +1,3 @@
-from typing import List
-
 import gt4py.cartesian.gtscript as gtscript
 from gt4py.cartesian.gtscript import (
     BACKWARD,
@@ -10,7 +8,6 @@ from gt4py.cartesian.gtscript import (
     interval,
     log,
 )
-from typing_extensions import Literal
 
 import pace.util
 import pace.util.constants as constants
@@ -24,10 +21,7 @@ from pace.physics.stencils.microphysics import Microphysics
 from pace.util import X_DIM, Y_DIM, Z_DIM
 from pace.util.grid import GridData
 
-from .._config import PhysicsConfig
-
-
-PHYSICS_PACKAGES = Literal["microphysics"]
+from .._config import PHYSICS_PACKAGES, PhysicsConfig
 
 
 def atmos_phys_driver_statein(
@@ -208,8 +202,13 @@ class Physics:
         quantity_factory: pace.util.QuantityFactory,
         grid_data: GridData,
         namelist: PhysicsConfig,
-        active_packages: List[Literal[PHYSICS_PACKAGES]],
     ):
+        schemes = [scheme.value for scheme in namelist.schemes]
+        for scheme in schemes:
+            if scheme not in PHYSICS_PACKAGES:
+                raise NotImplementedError(
+                    f"{scheme} is not an implemented physics parameterization"
+                )
         orchestrate(
             obj=self,
             config=stencil_factory.config.dace_config,
@@ -249,8 +248,8 @@ class Physics:
                 "pktop": self._pktop,
             },
         )
-        if "microphysics" in active_packages:
-            self._do_microphysics = True
+        if "GFS_microphysics" in schemes:
+            self._gfs_microphysics = True
             self._prepare_microphysics = stencil_factory.from_origin_domain(
                 func=prepare_microphysics,
                 origin=grid_indexing.origin_compute(),
@@ -267,7 +266,7 @@ class Physics:
                 stencil_factory, quantity_factory, grid_data, namelist=namelist
             )
         else:
-            self._do_microphysics = False
+            self._gfs_microphysics = False
 
     def _setup_statein(self):
         self._NQ = 8  # state.nq_tot - spec.namelist.dnats
@@ -311,7 +310,7 @@ class Physics:
             physics_state.phii,
             physics_state.phil,
         )
-        if self._do_microphysics:
+        if self._gfs_microphysics:
             self._prepare_microphysics(
                 physics_state.dz,
                 physics_state.phii,

@@ -225,6 +225,7 @@ class MetricTerms:
         dx_const: float = 1000.0,
         dy_const: float = 1000.0,
         deglat: float = 15.0,
+        extdgrid: bool = False,
         eta_file: str = "None",
     ):
         self._grid_type = grid_type
@@ -412,10 +413,41 @@ class MetricTerms:
             self._calculate_unit_vectors_lonlat = (
                 self._calculate_unit_vectors_lonlat_cube_sphere
             )
-            self._init_dgrid()
-            self._init_agrid()
+            if extdgrid is False:
+                self._init_dgrid()
+                self._init_agrid()
         else:
             raise NotImplementedError(f"Unsupported grid_type = {grid_type}")
+
+    @classmethod
+    def from_external(
+        cls,
+        x,
+        y,
+        quantity_factory,
+        communicator,
+        grid_type,
+        eta_file: str = "None",
+    ) -> "MetricTerms":
+        """
+        Generates a metric terms object, using input from data contained in an
+        externally generated tile file
+        """
+        terms = MetricTerms(
+            quantity_factory=quantity_factory,
+            communicator=communicator,
+            grid_type=grid_type,
+            extdgrid=True,
+            eta_file=eta_file,
+        )
+
+        rad_conv = PI / 180.0
+        terms._grid_64.view[:, :, 0] = rad_conv * x
+        terms._grid_64.view[:, :, 1] = rad_conv * y
+
+        terms._init_agrid()
+
+        return terms
 
     @classmethod
     def from_tile_sizing(
