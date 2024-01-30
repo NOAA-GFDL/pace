@@ -4,7 +4,7 @@ import ndsl.dsl.gt4py_utils as utils
 import pace.util as util
 from pace.physics import PHYSICS_PACKAGES
 from pace.physics.stencils.physics import Physics, PhysicsState
-from ndsl.stencils import update_atmos_state
+from pace.physics.update import update_atmos_state
 from physics.tests.savepoint.translate.translate_physics import (
     TranslatePhysicsFortranData2Py,
 )

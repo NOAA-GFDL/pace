@@ -23,7 +23,7 @@ from ndsl.dsl.stencil_config import CompilationConfig, RunMode
 from ndsl.dsl.typing import Float
 
 # TODO: move update_atmos_state into pace.driver
-from ndsl.stencils import update_atmos_state
+from pace.physics.update import update_atmos_state
 from pace.util.communicator import (
     Communicator,
     CubedSphereCommunicator,
