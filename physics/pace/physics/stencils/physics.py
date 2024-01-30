@@ -16,12 +16,11 @@ from ndsl.dsl.stencil import StencilFactory
 from ndsl.dsl.typing import Float, FloatField
 from ndsl.util import X_DIM, Y_DIM, Z_DIM
 from ndsl.util.grid import GridData
+from pace.physics import PHYSICS_PACKAGES, PhysicsConfig
 from pace.physics.physics_state import PhysicsState
 from pace.physics.stencils.get_phi_fv3 import get_phi_fv3
 from pace.physics.stencils.get_prs_fv3 import get_prs_fv3
 from pace.physics.stencils.microphysics import Microphysics
-
-from .._config import PHYSICS_PACKAGES, PhysicsConfig
 
 
 def atmos_phys_driver_statein(
@@ -205,7 +204,7 @@ class Physics:
     ):
         schemes = [scheme.value for scheme in namelist.schemes]
         for scheme in schemes:
-            if scheme not in PHYSICS_PACKAGES:
+            if scheme not in PHYSICS_PACKAGES:  # type: ignore
                 raise NotImplementedError(
                     f"{scheme} is not an implemented physics parameterization"
                 )

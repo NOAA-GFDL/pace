@@ -1,3 +1,5 @@
+from typing import Any, Dict
+
 import ndsl.dsl
 import ndsl.util
 import pace.fv3core
@@ -37,7 +39,7 @@ class TranslatePressureAdjustedTemperature_NonHydrostatic(
             "heat_source": {"serialname": "heat_source_dyn"},
         }
         self.in_vars["parameters"] = ["bdt"]
-        self.out_vars = {"pt": {}}
+        self.out_vars: Dict[str, Dict[Any, Any]] = {"pt": {}}
         self.stencil_factory = stencil_factory
 
     def compute_from_storage(self, inputs):

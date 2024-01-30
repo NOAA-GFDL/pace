@@ -34,8 +34,8 @@ def init_analytic_state(
     Returns:
         an instance of DycoreState class
     """
-    if analytic_init_case in Cases:
-        if analytic_init_case == Cases.baroclinic.value:
+    if analytic_init_case in Cases:  # type: ignore
+        if analytic_init_case == Cases.baroclinic.value:  # type: ignore
             import pace.fv3core.initialization.test_cases.initialize_baroclinic as bc
 
             assert isinstance(comm, fv3util.CubedSphereCommunicator)
@@ -49,7 +49,7 @@ def init_analytic_state(
                 comm=comm,
             )
 
-        elif analytic_init_case == Cases.tropicalcyclone.value:
+        elif analytic_init_case == Cases.tropicalcyclone.value:  # type: ignore
             import pace.fv3core.initialization.test_cases.initialize_tc as tc
 
             assert isinstance(comm, fv3util.CubedSphereCommunicator)
