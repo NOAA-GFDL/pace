@@ -9,7 +9,7 @@ from ndsl.dsl.dace.wrapped_halo_exchange import WrappedHaloUpdater
 from ndsl.dsl.stencil import StencilFactory
 from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ
 from ndsl.stencils.c2l_ord import CubedToLatLon
-from ndsl.stencils.update_dwind_phys import AGrid2DGridPhysics
+from pace.physics.update.update_dwind_phys import AGrid2DGridPhysics
 from pace.util import X_DIM, Y_DIM
 from pace.util.grid import DriverGridData, GridData
 

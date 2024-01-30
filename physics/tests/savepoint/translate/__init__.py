@@ -1,5 +1,7 @@
 # flake8: noqa: F401
-from ndsl.stencils.testing.translate_update_dwind_phys import TranslateUpdateDWindsPhys
+from physics.tests.savepoint.translate.translate_update_dwind_phys import (
+    TranslateUpdateDWindsPhys,
+)
 
 from .translate_atmos_phy_statein import TranslateAtmosPhysDriverStatein
 from .translate_driver import TranslateDriver

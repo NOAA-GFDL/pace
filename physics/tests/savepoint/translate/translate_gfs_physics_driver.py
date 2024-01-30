@@ -5,7 +5,9 @@ import pace.util as util
 from pace.physics import PHYSICS_PACKAGES
 from pace.physics.stencils.physics import Physics, PhysicsState
 from ndsl.stencils import update_atmos_state
-from ndsl.stencils.testing.translate_physics import TranslatePhysicsFortranData2Py
+from physics.tests.savepoint.translate.translate_physics import (
+    TranslatePhysicsFortranData2Py,
+)
 
 
 class TranslateGFSPhysicsDriver(TranslatePhysicsFortranData2Py):

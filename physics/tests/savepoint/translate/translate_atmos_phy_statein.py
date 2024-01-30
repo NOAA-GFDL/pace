@@ -2,7 +2,9 @@ import numpy as np
 
 import ndsl.dsl.gt4py_utils as utils
 from pace.physics.stencils.physics import atmos_phys_driver_statein
-from ndsl.stencils.testing.translate_physics import TranslatePhysicsFortranData2Py
+from physics.tests.savepoint.translate.translate_physics import (
+    TranslatePhysicsFortranData2Py,
+)
 from pace.util.constants import KAPPA
 
 

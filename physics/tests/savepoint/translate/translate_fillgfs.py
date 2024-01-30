@@ -1,8 +1,10 @@
 import numpy as np
 
 import ndsl.dsl.gt4py_utils as utils
-from ndsl.stencils.testing.translate_physics import TranslatePhysicsFortranData2Py
-from ndsl.stencils.update_atmos_state import fill_gfs_delp
+from physics.tests.savepoint.translate.translate_physics import (
+    TranslatePhysicsFortranData2Py,
+)
+from pace.physics.update.update_atmos_state import fill_gfs_delp
 from pace.util.utils import safe_assign_array
 
 
