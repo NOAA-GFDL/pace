@@ -8,7 +8,7 @@ from pace.util.grid.generation import MetricTerms
 
 @pytest.mark.parametrize("npx", [8])
 @pytest.mark.parametrize("npy", [8])
-@pytest.mark.parametrize("npz", [1])
+@pytest.mark.parametrize("npz", [79])
 @pytest.mark.parametrize("dx_const", [1e2, 1e3])
 @pytest.mark.parametrize("dy_const", [2e2, 3e3])
 @pytest.mark.parametrize("deglat", [0.0, 15.0])
@@ -35,6 +35,7 @@ def test_cartesian_grid_generation(
         dx_const=dx_const,
         dy_const=dy_const,
         deglat=deglat,
+        eta_file="tests/main/input/eta79.nc",
     )
     assert np.all(grid_generator.lat_agrid.data == deglat * PI / 180.0)
     assert np.all(grid_generator.lon_agrid.data == 0.0)

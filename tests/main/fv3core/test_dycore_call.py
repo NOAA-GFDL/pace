@@ -97,9 +97,11 @@ def setup_dycore() -> (
     quantity_factory = pace.util.QuantityFactory.from_backend(
         sizer=sizer, backend=backend
     )
+    eta_file = "tests/main/input/eta79.nc"
     metric_terms = MetricTerms(
         quantity_factory=quantity_factory,
         communicator=communicator,
+        eta_file=eta_file,
     )
     grid_data = GridData.new_from_metric_terms(metric_terms)
 
