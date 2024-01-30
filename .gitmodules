@@ -1,3 +1,6 @@
-[submodule "external/ndsl"]
-	path = external/ndsl
-	url = https://github.com/NOAA-GFDL/ndsl.git
+[submodule "external/gt4py"]
+	path = external/gt4py
+	url = https://github.com/gridtools/gt4py.git
+[submodule "external/dace"]
+	path = external/dace
+	url = https://github.com/spcl/dace.git
