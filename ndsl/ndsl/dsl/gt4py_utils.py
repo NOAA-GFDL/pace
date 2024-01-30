@@ -6,6 +6,7 @@ import numpy as np
 
 from ndsl.dsl.typing import DTypes, Field, Float
 from pace.util.logging import pace_log
+from pace.util.constants import N_HALO_DEFAULT
 
 
 try:
@@ -17,9 +18,12 @@ except ImportError:
 managed_memory = True
 
 # Number of halo lines for each field and default origin
-halo = 3
-origin = (halo, halo, 0)
+origin = (N_HALO_DEFAULT, N_HALO_DEFAULT, 0)
 
+# TODO: Both pyFV3 and pySHiELD need to know what is being advected
+#       but the actual value should come from outside of `ndsl`.
+#       There should be a set of API to deal with tracers, that lives in `ndsl`
+#       but their call doesn't.
 # TODO get from field_table
 tracer_variables = [
     "qvapor",

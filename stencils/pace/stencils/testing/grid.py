@@ -47,13 +47,13 @@ class Grid:
         ny = int((npy - 1) / layout[1])
         indices = {
             "isd": 0,
-            "ied": nx + 2 * utils.halo - 1,
-            "is_": utils.halo,
-            "ie": nx + utils.halo - 1,
+            "ied": nx + 2 * pace.util.N_HALO_DEFAULT - 1,
+            "is_": pace.util.N_HALO_DEFAULT,
+            "ie": nx + pace.util.N_HALO_DEFAULT - 1,
             "jsd": 0,
-            "jed": ny + 2 * utils.halo - 1,
-            "js": utils.halo,
-            "je": ny + utils.halo - 1,
+            "jed": ny + 2 * pace.util.N_HALO_DEFAULT - 1,
+            "js": pace.util.N_HALO_DEFAULT,
+            "je": ny + pace.util.N_HALO_DEFAULT - 1,
         }
         return cls(indices, shape_params, rank, layout, backend, local_indices=True)
 
@@ -104,7 +104,7 @@ class Grid:
         self.njd = int(self.jed - self.jsd + 1)
         self.nic = int(self.ie - self.is_ + 1)
         self.njc = int(self.je - self.js + 1)
-        self.halo = utils.halo
+        self.halo = pace.util.N_HALO_DEFAULT
         self.global_is, self.global_js = self.local_to_global_indices(self.is_, self.js)
         self.global_ie, self.global_je = self.local_to_global_indices(self.ie, self.je)
         self.global_isd, self.global_jsd = self.local_to_global_indices(

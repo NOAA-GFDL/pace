@@ -4,7 +4,6 @@ from typing import Dict
 import gt4py.cartesian.gtscript as gtscript
 from gt4py.cartesian.gtscript import PARALLEL, computation, horizontal, interval, region
 
-import ndsl.dsl.gt4py_utils as utils
 import pace.util
 from ndsl.dsl.dace.orchestration import orchestrate
 from ndsl.dsl.dace.wrapped_halo_exchange import WrappedHaloUpdater
@@ -269,7 +268,7 @@ class TracerAdvection:
         # Setup halo updater for tracers
         tracer_halo_spec = quantity_factory.get_quantity_halo_spec(
             dims=[pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM],
-            n_halo=utils.halo,
+            n_halo=pace.util.N_HALO_DEFAULT,
             dtype=Float,
         )
         self._tracers_halo_updater = WrappedHaloUpdater(
