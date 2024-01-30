@@ -3,16 +3,16 @@ import pathlib
 
 import xarray as xr
 
-import pace.util
+import ndsl.util
 
 
 # TODO: if we can remove translate tests in favor of checkpointer tests,
-# we can remove this "disallowed" import (pace.util does not depend on ndsl.dsl)
+# we can remove this "disallowed" import (ndsl.util does not depend on ndsl.dsl)
 try:
     from ndsl.dsl.gt4py_utils import split_cartesian_into_storages
 except ImportError:
     split_cartesian_into_storages = None
-from pace.util import Z_DIM, Z_INTERFACE_DIM, get_fs
+from ndsl.util import Z_DIM, Z_INTERFACE_DIM, get_fs
 
 from .generation import MetricTerms
 
@@ -23,10 +23,10 @@ class DampingCoefficients:
     Terms used to compute damping coefficients.
     """
 
-    divg_u: pace.util.Quantity
-    divg_v: pace.util.Quantity
-    del6_u: pace.util.Quantity
-    del6_v: pace.util.Quantity
+    divg_u: ndsl.util.Quantity
+    divg_v: ndsl.util.Quantity
+    del6_u: ndsl.util.Quantity
+    del6_v: ndsl.util.Quantity
     da_min: float
     da_min_c: float
 
@@ -48,40 +48,40 @@ class HorizontalGridData:
     Terms defining the horizontal grid.
     """
 
-    lon: pace.util.Quantity
-    lat: pace.util.Quantity
-    lon_agrid: pace.util.Quantity
-    lat_agrid: pace.util.Quantity
-    area: pace.util.Quantity
-    area_64: pace.util.Quantity
-    rarea: pace.util.Quantity
+    lon: ndsl.util.Quantity
+    lat: ndsl.util.Quantity
+    lon_agrid: ndsl.util.Quantity
+    lat_agrid: ndsl.util.Quantity
+    area: ndsl.util.Quantity
+    area_64: ndsl.util.Quantity
+    rarea: ndsl.util.Quantity
     # TODO: refactor this to "area_c" and invert where used
-    rarea_c: pace.util.Quantity
-    dx: pace.util.Quantity
-    dy: pace.util.Quantity
-    dxc: pace.util.Quantity
-    dyc: pace.util.Quantity
-    dxa: pace.util.Quantity
-    dya: pace.util.Quantity
+    rarea_c: ndsl.util.Quantity
+    dx: ndsl.util.Quantity
+    dy: ndsl.util.Quantity
+    dxc: ndsl.util.Quantity
+    dyc: ndsl.util.Quantity
+    dxa: ndsl.util.Quantity
+    dya: ndsl.util.Quantity
     # TODO: refactor usages to invert "normal" versions instead
-    rdx: pace.util.Quantity
-    rdy: pace.util.Quantity
-    rdxc: pace.util.Quantity
-    rdyc: pace.util.Quantity
-    rdxa: pace.util.Quantity
-    rdya: pace.util.Quantity
-    ee1: pace.util.Quantity
-    ee2: pace.util.Quantity
-    es1: pace.util.Quantity
-    ew2: pace.util.Quantity
-    a11: pace.util.Quantity
-    a12: pace.util.Quantity
-    a21: pace.util.Quantity
-    a22: pace.util.Quantity
-    edge_w: pace.util.Quantity
-    edge_e: pace.util.Quantity
-    edge_s: pace.util.Quantity
-    edge_n: pace.util.Quantity
+    rdx: ndsl.util.Quantity
+    rdy: ndsl.util.Quantity
+    rdxc: ndsl.util.Quantity
+    rdyc: ndsl.util.Quantity
+    rdxa: ndsl.util.Quantity
+    rdya: ndsl.util.Quantity
+    ee1: ndsl.util.Quantity
+    ee2: ndsl.util.Quantity
+    es1: ndsl.util.Quantity
+    ew2: ndsl.util.Quantity
+    a11: ndsl.util.Quantity
+    a12: ndsl.util.Quantity
+    a21: ndsl.util.Quantity
+    a22: ndsl.util.Quantity
+    edge_w: ndsl.util.Quantity
+    edge_e: ndsl.util.Quantity
+    edge_s: ndsl.util.Quantity
+    edge_n: ndsl.util.Quantity
 
     @classmethod
     def new_from_metric_terms(cls, metric_terms: MetricTerms) -> "HorizontalGridData":
@@ -130,8 +130,8 @@ class VerticalGridData:
     """
 
     # TODO: make these non-optional, make FloatFieldK a true type and use it
-    ak: pace.util.Quantity
-    bk: pace.util.Quantity
+    ak: ndsl.util.Quantity
+    bk: ndsl.util.Quantity
     """
     reference pressure (Pa) used to define pressure at vertical interfaces,
     where p = ak + bk * p_ref
@@ -151,7 +151,7 @@ class VerticalGridData:
 
     @classmethod
     def from_restart(
-        cls, restart_path: str, quantity_factory: pace.util.QuantityFactory
+        cls, restart_path: str, quantity_factory: ndsl.util.QuantityFactory
     ):
         fs = get_fs(restart_path)
         restart_files = fs.ls(restart_path)
@@ -183,10 +183,10 @@ class VerticalGridData:
         return 1e5
 
     @property
-    def p_interface(self) -> pace.util.Quantity:
+    def p_interface(self) -> ndsl.util.Quantity:
         if self._p_interface is None:
             p_interface_data = self.ak.view[:] + self.bk.view[:] * self.p_ref
-            self._p_interface = pace.util.Quantity(
+            self._p_interface = ndsl.util.Quantity(
                 p_interface_data,
                 dims=[Z_INTERFACE_DIM],
                 units="Pa",
@@ -195,14 +195,14 @@ class VerticalGridData:
         return self._p_interface
 
     @property
-    def p(self) -> pace.util.Quantity:
+    def p(self) -> ndsl.util.Quantity:
         if self._p is None:
             p_data = (
                 self.p_interface.view[1:] - self.p_interface.view[:-1]
             ) / self.p_interface.np.log(
                 self.p_interface.view[1:] / self.p_interface.view[:-1]
             )
-            self._p = pace.util.Quantity(
+            self._p = ndsl.util.Quantity(
                 p_data,
                 dims=[Z_DIM],
                 units="Pa",
@@ -211,14 +211,14 @@ class VerticalGridData:
         return self._p
 
     @property
-    def dp(self) -> pace.util.Quantity:
+    def dp(self) -> ndsl.util.Quantity:
         if self._dp_ref is None:
             dp_ref_data = (
                 self.ak.view[1:]
                 - self.ak.view[:-1]
                 + (self.bk.view[1:] - self.bk.view[:-1]) * self.p_ref
             )
-            self._dp_ref = pace.util.Quantity(
+            self._dp_ref = ndsl.util.Quantity(
                 dp_ref_data,
                 dims=[Z_DIM],
                 units="Pa",
@@ -243,16 +243,16 @@ class ContravariantGridData:
     contravariant components.
     """
 
-    cosa: pace.util.Quantity
-    cosa_u: pace.util.Quantity
-    cosa_v: pace.util.Quantity
-    cosa_s: pace.util.Quantity
-    sina_u: pace.util.Quantity
-    sina_v: pace.util.Quantity
-    rsina: pace.util.Quantity
-    rsin_u: pace.util.Quantity
-    rsin_v: pace.util.Quantity
-    rsin2: pace.util.Quantity
+    cosa: ndsl.util.Quantity
+    cosa_u: ndsl.util.Quantity
+    cosa_v: ndsl.util.Quantity
+    cosa_s: ndsl.util.Quantity
+    sina_u: ndsl.util.Quantity
+    sina_v: ndsl.util.Quantity
+    rsina: ndsl.util.Quantity
+    rsin_u: ndsl.util.Quantity
+    rsin_v: ndsl.util.Quantity
+    rsin2: ndsl.util.Quantity
 
     @classmethod
     def new_from_metric_terms(
@@ -280,14 +280,14 @@ class AngleGridData:
     Corresponds in the fortran code to sin_sg and cos_sg.
     """
 
-    sin_sg1: pace.util.Quantity
-    sin_sg2: pace.util.Quantity
-    sin_sg3: pace.util.Quantity
-    sin_sg4: pace.util.Quantity
-    cos_sg1: pace.util.Quantity
-    cos_sg2: pace.util.Quantity
-    cos_sg3: pace.util.Quantity
-    cos_sg4: pace.util.Quantity
+    sin_sg1: ndsl.util.Quantity
+    sin_sg2: ndsl.util.Quantity
+    sin_sg3: ndsl.util.Quantity
+    sin_sg4: ndsl.util.Quantity
+    cos_sg1: ndsl.util.Quantity
+    cos_sg2: ndsl.util.Quantity
+    cos_sg3: ndsl.util.Quantity
+    cos_sg4: ndsl.util.Quantity
 
     @classmethod
     def new_from_metric_terms(cls, metric_terms: MetricTerms) -> "AngleGridData":
@@ -339,20 +339,20 @@ class GridData:
         return self._horizontal_data.lat
 
     @property
-    def lon_agrid(self) -> pace.util.Quantity:
+    def lon_agrid(self) -> ndsl.util.Quantity:
         """longitude on the A-grid (cell centers)"""
         return self._horizontal_data.lon_agrid
 
     @property
-    def lat_agrid(self) -> pace.util.Quantity:
+    def lat_agrid(self) -> ndsl.util.Quantity:
         """latitude on the A-grid (cell centers)"""
         return self._horizontal_data.lat_agrid
 
     @staticmethod
-    def _fC_from_lat(lat: pace.util.Quantity) -> pace.util.Quantity:
+    def _fC_from_lat(lat: ndsl.util.Quantity) -> ndsl.util.Quantity:
         np = lat.np
-        data = 2.0 * pace.util.constants.OMEGA * np.sin(lat.data)
-        return pace.util.Quantity(
+        data = 2.0 * ndsl.util.constants.OMEGA * np.sin(lat.data)
+        return ndsl.util.Quantity(
             data,
             units="1/s",
             dims=lat.dims,
@@ -455,19 +455,19 @@ class GridData:
         return self._horizontal_data.rdya
 
     @property
-    def ee1(self) -> pace.util.Quantity:
+    def ee1(self) -> ndsl.util.Quantity:
         return self._horizontal_data.ee1
 
     @property
-    def ee2(self) -> pace.util.Quantity:
+    def ee2(self) -> ndsl.util.Quantity:
         return self._horizontal_data.ee2
 
     @property
-    def es1(self) -> pace.util.Quantity:
+    def es1(self) -> ndsl.util.Quantity:
         return self._horizontal_data.es1
 
     @property
-    def ew2(self) -> pace.util.Quantity:
+    def ew2(self) -> ndsl.util.Quantity:
         return self._horizontal_data.ew2
 
     @property
@@ -511,14 +511,14 @@ class GridData:
         return self._vertical_data.p_ref
 
     @property
-    def p(self) -> pace.util.Quantity:
+    def p(self) -> ndsl.util.Quantity:
         """
         Reference pressure profile for Eulerian grid, defined at cell centers.
         """
         return self._vertical_data.p
 
     @property
-    def ak(self) -> pace.util.Quantity:
+    def ak(self) -> ndsl.util.Quantity:
         """
         constant used to define pressure at vertical interfaces,
         where p = ak + bk * p_ref
@@ -526,11 +526,11 @@ class GridData:
         return self._vertical_data.ak
 
     @ak.setter
-    def ak(self, value: pace.util.Quantity):
+    def ak(self, value: ndsl.util.Quantity):
         self._vertical_data.ak = value
 
     @property
-    def bk(self) -> pace.util.Quantity:
+    def bk(self) -> ndsl.util.Quantity:
         """
         constant used to define pressure at vertical interfaces,
         where p = ak + bk * p_ref
@@ -538,7 +538,7 @@ class GridData:
         return self._vertical_data.bk
 
     @bk.setter
-    def bk(self, value: pace.util.Quantity):
+    def bk(self, value: ndsl.util.Quantity):
         self._vertical_data.bk = value
 
     @property
@@ -559,7 +559,7 @@ class GridData:
         self._vertical_data.ptop = value
 
     @property
-    def dp_ref(self) -> pace.util.Quantity:
+    def dp_ref(self) -> ndsl.util.Quantity:
         return self._vertical_data.dp
 
     @property
@@ -658,22 +658,22 @@ class DriverGridData:
       ew2_3: z-component of grid local unit vector in y-direction at cell edge
     """
 
-    vlon1: pace.util.Quantity
-    vlon2: pace.util.Quantity
-    vlon3: pace.util.Quantity
-    vlat1: pace.util.Quantity
-    vlat2: pace.util.Quantity
-    vlat3: pace.util.Quantity
-    edge_vect_w: pace.util.Quantity
-    edge_vect_e: pace.util.Quantity
-    edge_vect_s: pace.util.Quantity
-    edge_vect_n: pace.util.Quantity
-    es1_1: pace.util.Quantity
-    es1_2: pace.util.Quantity
-    es1_3: pace.util.Quantity
-    ew2_1: pace.util.Quantity
-    ew2_2: pace.util.Quantity
-    ew2_3: pace.util.Quantity
+    vlon1: ndsl.util.Quantity
+    vlon2: ndsl.util.Quantity
+    vlon3: ndsl.util.Quantity
+    vlat1: ndsl.util.Quantity
+    vlat2: ndsl.util.Quantity
+    vlat3: ndsl.util.Quantity
+    edge_vect_w: ndsl.util.Quantity
+    edge_vect_e: ndsl.util.Quantity
+    edge_vect_s: ndsl.util.Quantity
+    edge_vect_n: ndsl.util.Quantity
+    es1_1: ndsl.util.Quantity
+    es1_2: ndsl.util.Quantity
+    es1_3: ndsl.util.Quantity
+    ew2_1: ndsl.util.Quantity
+    ew2_2: ndsl.util.Quantity
+    ew2_3: ndsl.util.Quantity
     grid_type: int
 
     @classmethod
@@ -693,14 +693,14 @@ class DriverGridData:
     @classmethod
     def new_from_grid_variables(
         cls,
-        vlon: pace.util.Quantity,
-        vlat: pace.util.Quantity,
-        edge_vect_n: pace.util.Quantity,
-        edge_vect_s: pace.util.Quantity,
-        edge_vect_e: pace.util.Quantity,
-        edge_vect_w: pace.util.Quantity,
-        es1: pace.util.Quantity,
-        ew2: pace.util.Quantity,
+        vlon: ndsl.util.Quantity,
+        vlat: ndsl.util.Quantity,
+        edge_vect_n: ndsl.util.Quantity,
+        edge_vect_s: ndsl.util.Quantity,
+        edge_vect_e: ndsl.util.Quantity,
+        edge_vect_w: ndsl.util.Quantity,
+        es1: ndsl.util.Quantity,
+        ew2: ndsl.util.Quantity,
         grid_type: int = 0,
     ) -> "DriverGridData":
         try:
@@ -747,7 +747,7 @@ def split_quantity_along_last_dim(quantity):
     return_list = []
     for i in range(quantity.data.shape[-1]):
         return_list.append(
-            pace.util.Quantity(
+            ndsl.util.Quantity(
                 data=quantity.data[..., i],
                 dims=quantity.dims[:-1],
                 units=quantity.units,

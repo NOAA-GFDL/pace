@@ -2,7 +2,7 @@ from pace.physics.update.fv_update_phys import update_pressure_and_surface_winds
 from physics.tests.savepoint.translate.translate_physics import (
     TranslatePhysicsFortranData2Py,
 )
-from pace.util.constants import KAPPA
+from ndsl.util.constants import KAPPA
 
 
 class TranslatePhysUpdatePressureSurfaceWinds(TranslatePhysicsFortranData2Py):

@@ -4,21 +4,21 @@ from typing import List
 
 import numpy as np
 
-import pace.util
-from pace.util.caching_comm import CachingCommReader, CachingCommWriter
+import ndsl.util
+from ndsl.util.caching_comm import CachingCommReader, CachingCommWriter
 
 
 def test_halo_update_integration():
     shape = (18, 18)
-    dims = [pace.util.X_DIM, pace.util.Y_DIM]
+    dims = [ndsl.util.X_DIM, ndsl.util.Y_DIM]
     origin = (3, 3)
     extent = (12, 12)
     n_ranks = 6
-    partitioner = pace.util.CubedSpherePartitioner(
-        tile=pace.util.TilePartitioner(layout=(1, 1))
+    partitioner = ndsl.util.CubedSpherePartitioner(
+        tile=ndsl.util.TilePartitioner(layout=(1, 1))
     )
     quantity_list = [
-        pace.util.Quantity(
+        ndsl.util.Quantity(
             data=np.random.randn(*shape),
             dims=dims,
             units="",
@@ -28,12 +28,12 @@ def test_halo_update_integration():
         for _ in range(n_ranks)
     ]
     buffer_dict = {}
-    write_communicator_list: List[pace.util.CubedSphereCommunicator] = []
+    write_communicator_list: List[ndsl.util.CubedSphereCommunicator] = []
     for i in range(n_ranks):
         write_communicator_list.append(
-            pace.util.CubedSphereCommunicator(
-                comm=pace.util.CachingCommWriter(
-                    pace.util.LocalComm(
+            ndsl.util.CubedSphereCommunicator(
+                comm=ndsl.util.CachingCommWriter(
+                    ndsl.util.LocalComm(
                         rank=i, total_ranks=n_ranks, buffer_dict=buffer_dict
                     )
                 ),
@@ -43,14 +43,14 @@ def test_halo_update_integration():
     local_comm_quantities = copy.deepcopy(quantity_list)
     perform_serial_halo_updates(write_communicator_list, local_comm_quantities)
 
-    read_communicator_list: List[pace.util.CubedSphereCommunicator] = []
+    read_communicator_list: List[ndsl.util.CubedSphereCommunicator] = []
     for i in range(n_ranks):
         file = io.BytesIO()
         write_communicator_list[i].comm.dump(file)
         file.seek(0)
         read_communicator_list.append(
-            pace.util.CubedSphereCommunicator(
-                comm=pace.util.CachingCommReader.load(file),
+            ndsl.util.CubedSphereCommunicator(
+                comm=ndsl.util.CachingCommReader.load(file),
                 partitioner=partitioner,
             )
         )
@@ -60,8 +60,8 @@ def test_halo_update_integration():
 
 
 def perform_serial_halo_updates(
-    communicator_list: List[pace.util.CubedSphereCommunicator],
-    quantity_list: List[pace.util.Quantity],
+    communicator_list: List[ndsl.util.CubedSphereCommunicator],
+    quantity_list: List[ndsl.util.Quantity],
 ):
     req_list = []
     for communicator, quantity in zip(communicator_list, quantity_list):
@@ -71,8 +71,8 @@ def perform_serial_halo_updates(
 
 
 def test_Recv_inserts_data():
-    comm = pace.util.CachingCommWriter(
-        comm=pace.util.NullComm(rank=0, total_ranks=6, fill_value=0.0)
+    comm = ndsl.util.CachingCommWriter(
+        comm=ndsl.util.NullComm(rank=0, total_ranks=6, fill_value=0.0)
     )
     shape = (12, 12)
     recvbuf = np.random.randn(*shape)
@@ -83,8 +83,8 @@ def test_Recv_inserts_data():
 
 
 def test_Irecv_inserts_data():
-    comm = pace.util.CachingCommWriter(
-        comm=pace.util.NullComm(rank=0, total_ranks=6, fill_value=0.0)
+    comm = ndsl.util.CachingCommWriter(
+        comm=ndsl.util.NullComm(rank=0, total_ranks=6, fill_value=0.0)
     )
     shape = (12, 12)
     recvbuf = np.random.randn(*shape)
@@ -97,8 +97,8 @@ def test_Irecv_inserts_data():
 
 
 def test_bcast_inserts_data():
-    comm = pace.util.CachingCommWriter(
-        comm=pace.util.NullComm(rank=0, total_ranks=6, fill_value=0.0)
+    comm = ndsl.util.CachingCommWriter(
+        comm=ndsl.util.NullComm(rank=0, total_ranks=6, fill_value=0.0)
     )
     shape = (12, 12)
     recvbuf = np.random.randn(*shape)
@@ -123,11 +123,11 @@ def test_Scatter():
     send_array = np.empty([2] + list(array.shape))
     send_array[:] = array[None, :]
     buffer_dict = {}
-    root_comm = pace.util.CachingCommWriter(
-        comm=pace.util.LocalComm(rank=0, total_ranks=2, buffer_dict=buffer_dict)
+    root_comm = ndsl.util.CachingCommWriter(
+        comm=ndsl.util.LocalComm(rank=0, total_ranks=2, buffer_dict=buffer_dict)
     )
-    worker_comm = pace.util.CachingCommWriter(
-        comm=pace.util.LocalComm(rank=1, total_ranks=2, buffer_dict=buffer_dict)
+    worker_comm = ndsl.util.CachingCommWriter(
+        comm=ndsl.util.LocalComm(rank=1, total_ranks=2, buffer_dict=buffer_dict)
     )
     recvbuf_root = np.zeros_like(array)
     recvbuf_worker = np.zeros_like(array)
@@ -151,11 +151,11 @@ def test_Gather():
     array_root = np.random.uniform(size=(50,))
     array_worker = np.random.uniform(size=(50,))
     buffer_dict = {}
-    root_comm = pace.util.CachingCommWriter(
-        comm=pace.util.LocalComm(rank=0, total_ranks=2, buffer_dict=buffer_dict)
+    root_comm = ndsl.util.CachingCommWriter(
+        comm=ndsl.util.LocalComm(rank=0, total_ranks=2, buffer_dict=buffer_dict)
     )
-    worker_comm = pace.util.CachingCommWriter(
-        comm=pace.util.LocalComm(rank=1, total_ranks=2, buffer_dict=buffer_dict)
+    worker_comm = ndsl.util.CachingCommWriter(
+        comm=ndsl.util.LocalComm(rank=1, total_ranks=2, buffer_dict=buffer_dict)
     )
     recvbuf_root = np.empty([2] + list(array_root.shape))
     worker_comm.Gather(array_worker, recvbuf=None, root=0)

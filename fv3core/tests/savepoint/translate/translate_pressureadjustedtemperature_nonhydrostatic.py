@@ -1,6 +1,6 @@
 import ndsl.dsl
 import pace.fv3core
-import pace.util
+import ndsl.util
 from pace.fv3core.stencils import temperature_adjust
 from pace.fv3core.stencils.dyn_core import get_nk_heat_dissipation
 from pace.fv3core.testing import TranslateDycoreFortranData2Py
@@ -12,7 +12,7 @@ class TranslatePressureAdjustedTemperature_NonHydrostatic(
     def __init__(
         self,
         grid,
-        namelist: pace.util.Namelist,
+        namelist: ndsl.util.Namelist,
         stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)

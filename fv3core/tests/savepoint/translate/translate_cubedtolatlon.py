@@ -1,5 +1,5 @@
 import ndsl.dsl
-import pace.util
+import ndsl.util
 from ndsl.stencils.c2l_ord import CubedToLatLon
 from ndsl.stencils.testing import ParallelTranslate2Py
 
@@ -7,11 +7,11 @@ from ndsl.stencils.testing import ParallelTranslate2Py
 class TranslateCubedToLatLon(ParallelTranslate2Py):
     inputs = {
         "u": {
-            "dims": [pace.util.X_DIM, pace.util.Y_INTERFACE_DIM, pace.util.Z_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_INTERFACE_DIM, ndsl.util.Z_DIM],
             "units": "m/s",
         },
         "v": {
-            "dims": [pace.util.X_INTERFACE_DIM, pace.util.Y_DIM, pace.util.Z_DIM],
+            "dims": [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
             "units": "m/s",
         },
     }
@@ -19,7 +19,7 @@ class TranslateCubedToLatLon(ParallelTranslate2Py):
     def __init__(
         self,
         grid,
-        namelist: pace.util.Namelist,
+        namelist: ndsl.util.Namelist,
         stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
@@ -62,7 +62,7 @@ class TranslateCubedToLatLon(ParallelTranslate2Py):
 
 def _quantity_wrap(storage, dims, grid_indexing):
     origin, extent = grid_indexing.get_origin_domain(dims)
-    return pace.util.Quantity(
+    return ndsl.util.Quantity(
         storage,
         dims=dims,
         units="unknown",

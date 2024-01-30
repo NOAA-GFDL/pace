@@ -7,19 +7,19 @@ import pytest
 import ndsl.dsl
 import ndsl.dsl.gt4py_utils as utils
 import pace.fv3core.stencils.fv_dynamics as fv_dynamics
-import pace.util
+import ndsl.util
 from pace.fv3core._config import DynamicalCoreConfig
 from pace.fv3core.dycore_state import DycoreState
 from ndsl.stencils.testing import ParallelTranslateBaseSlicing
 from ndsl.stencils.testing.translate import TranslateFortranData2Py
-from pace.util.grid import GridData
+from ndsl.util.grid import GridData
 
 
 class TranslateDycoreFortranData2Py(TranslateFortranData2Py):
     def __init__(
         self,
         grid,
-        namelist: pace.util.Namelist,
+        namelist: ndsl.util.Namelist,
         stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(grid, stencil_factory)
@@ -31,180 +31,180 @@ class TranslateFVDynamics(ParallelTranslateBaseSlicing):
     inputs: Dict[str, Any] = {
         "q_con": {
             "name": "total_condensate_mixing_ratio",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
             "units": "kg/kg",
         },
         "delp": {
             "name": "pressure_thickness_of_atmospheric_layer",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
             "units": "Pa",
         },
         "delz": {
             "name": "vertical_thickness_of_atmospheric_layer",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
             "units": "m",
         },
         "ps": {
             "name": "surface_pressure",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "Pa",
         },
         "pe": {
             "name": "interface_pressure",
-            "dims": [pace.util.X_DIM, pace.util.Z_INTERFACE_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Z_INTERFACE_DIM, ndsl.util.Y_DIM],
             "units": "Pa",
             "n_halo": 1,
         },
         "ak": {
             "name": "atmosphere_hybrid_a_coordinate",
-            "dims": [pace.util.Z_INTERFACE_DIM],
+            "dims": [ndsl.util.Z_INTERFACE_DIM],
             "units": "Pa",
         },
         "bk": {
             "name": "atmosphere_hybrid_b_coordinate",
-            "dims": [pace.util.Z_INTERFACE_DIM],
+            "dims": [ndsl.util.Z_INTERFACE_DIM],
             "units": "",
         },
         "pk": {
             "name": "interface_pressure_raised_to_power_of_kappa",
             "units": "unknown",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_INTERFACE_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_INTERFACE_DIM],
             "n_halo": 0,
         },
         "pkz": {
             "name": "layer_mean_pressure_raised_to_power_of_kappa",
             "units": "unknown",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
             "n_halo": 0,
         },
         "peln": {
             "name": "logarithm_of_interface_pressure",
             "units": "ln(Pa)",
-            "dims": [pace.util.X_DIM, pace.util.Z_INTERFACE_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Z_INTERFACE_DIM, ndsl.util.Y_DIM],
             "n_halo": 0,
         },
         "mfxd": {
             "name": "accumulated_x_mass_flux",
-            "dims": [pace.util.X_INTERFACE_DIM, pace.util.Y_DIM, pace.util.Z_DIM],
+            "dims": [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
             "units": "unknown",
             "n_halo": 0,
         },
         "mfyd": {
             "name": "accumulated_y_mass_flux",
-            "dims": [pace.util.X_DIM, pace.util.Y_INTERFACE_DIM, pace.util.Z_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_INTERFACE_DIM, ndsl.util.Z_DIM],
             "units": "unknown",
             "n_halo": 0,
         },
         "cxd": {
             "name": "accumulated_x_courant_number",
-            "dims": [pace.util.X_INTERFACE_DIM, pace.util.Y_DIM, pace.util.Z_DIM],
+            "dims": [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
             "units": "",
             "n_halo": (0, 3),
         },
         "cyd": {
             "name": "accumulated_y_courant_number",
-            "dims": [pace.util.X_DIM, pace.util.Y_INTERFACE_DIM, pace.util.Z_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_INTERFACE_DIM, ndsl.util.Z_DIM],
             "units": "",
             "n_halo": (3, 0),
         },
         "diss_estd": {
             "name": "dissipation_estimate_from_heat_source",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
             "units": "unknown",
         },
         "pt": {
             "name": "air_temperature",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
             "units": "degK",
         },
         "u": {
             "name": "x_wind",
-            "dims": [pace.util.X_DIM, pace.util.Y_INTERFACE_DIM, pace.util.Z_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_INTERFACE_DIM, ndsl.util.Z_DIM],
             "units": "m/s",
         },
         "v": {
             "name": "y_wind",
-            "dims": [pace.util.X_INTERFACE_DIM, pace.util.Y_DIM, pace.util.Z_DIM],
+            "dims": [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
             "units": "m/s",
         },
         "ua": {
             "name": "eastward_wind",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
             "units": "m/s",
         },
         "va": {
             "name": "northward_wind",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
             "units": "m/s",
         },
         "uc": {
             "name": "x_wind_on_c_grid",
-            "dims": [pace.util.X_INTERFACE_DIM, pace.util.Y_DIM, pace.util.Z_DIM],
+            "dims": [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
             "units": "m/s",
         },
         "vc": {
             "name": "y_wind_on_c_grid",
-            "dims": [pace.util.X_DIM, pace.util.Y_INTERFACE_DIM, pace.util.Z_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_INTERFACE_DIM, ndsl.util.Z_DIM],
             "units": "m/s",
         },
         "w": {
             "name": "vertical_wind",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
             "units": "m/s",
         },
         "phis": {
             "name": "surface_geopotential",
             "units": "m^2 s^-2",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
         },
         "qvapor": {
             "name": "specific_humidity",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
             "units": "kg/kg",
         },
         "qliquid": {
             "name": "cloud_water_mixing_ratio",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
             "units": "kg/kg",
         },
         "qice": {
             "name": "cloud_ice_mixing_ratio",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
             "units": "kg/kg",
         },
         "qrain": {
             "name": "rain_mixing_ratio",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
             "units": "kg/kg",
         },
         "qsnow": {
             "name": "snow_mixing_ratio",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
             "units": "kg/kg",
         },
         "qgraupel": {
             "name": "graupel_mixing_ratio",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
             "units": "kg/kg",
         },
         "qo3mr": {
             "name": "ozone_mixing_ratio",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
             "units": "kg/kg",
         },
         "qsgs_tke": {
             "name": "turbulent_kinetic_energy",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
             "units": "m**2/s**2",
         },
         "qcld": {
             "name": "cloud_fraction",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
             "units": "",
         },
         "omga": {
             "name": "vertical_pressure_velocity",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
             "units": "Pa/s",
         },
         "bdt": {"dims": []},
@@ -219,7 +219,7 @@ class TranslateFVDynamics(ParallelTranslateBaseSlicing):
     def __init__(
         self,
         grid,
-        namelist: pace.util.Namelist,
+        namelist: ndsl.util.Namelist,
         stencil_factory: ndsl.dsl.StencilFactory,
         *args,
         **kwargs,
@@ -335,7 +335,7 @@ class TranslateFVDynamics(ParallelTranslateBaseSlicing):
             state=state,
             timestep=timedelta(seconds=inputs["bdt"]),
         )
-        self.dycore.step_dynamics(state, pace.util.NullTimer())
+        self.dycore.step_dynamics(state, ndsl.util.NullTimer())
         outputs = self.outputs_from_state(state)
         return outputs
 
@@ -345,7 +345,7 @@ class TranslateFVDynamics(ParallelTranslateBaseSlicing):
         outputs = {}
         storages = {}
         for name, properties in self.outputs.items():
-            if isinstance(state[name], pace.util.Quantity):
+            if isinstance(state[name], ndsl.util.Quantity):
                 storages[name] = state[name].data
             elif len(self.outputs[name]["dims"]) > 0:
                 storages[name] = state[name]  # assume it's a storage

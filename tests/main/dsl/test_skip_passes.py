@@ -15,7 +15,7 @@ from ndsl.dsl.stencil import (
     StencilFactory,
 )
 from ndsl.dsl.typing import FloatField
-from pace.util import X_DIM, Y_DIM, Z_DIM
+from ndsl.util import X_DIM, Y_DIM, Z_DIM
 
 
 def stencil_definition(a: FloatField):

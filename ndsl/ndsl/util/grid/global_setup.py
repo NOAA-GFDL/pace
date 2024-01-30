@@ -1,6 +1,6 @@
 import math
 
-from pace.util.constants import PI, RADIUS
+from ndsl.util.constants import PI, RADIUS
 
 from .generation import MetricTerms
 from .gnomonic import (
@@ -41,7 +41,7 @@ def gnomonic_grid(grid_type: int, lon, lat, np):
 # closer to the Fortran code
 def global_gnomonic_ed(lon, lat, np):
     im = lon.shape[0] - 1
-    alpha = np.arcsin(3 ** -0.5)
+    alpha = np.arcsin(3**-0.5)
     dely = np.multiply(2.0, alpha) / float(im)
     pp = np.zeros((3, im + 1, im + 1))
 
@@ -69,16 +69,16 @@ def global_gnomonic_ed(lon, lat, np):
     i = 0
     for j in range(1, im):
         pp[:, i, j] = _latlon2xyz(lon[i, j], lat[i, j], np)
-        pp[1, i, j] = -pp[1, i, j] * (3 ** -0.5) / pp[0, i, j]
-        pp[2, i, j] = -pp[2, i, j] * (3 ** -0.5) / pp[0, i, j]
+        pp[1, i, j] = -pp[1, i, j] * (3**-0.5) / pp[0, i, j]
+        pp[2, i, j] = -pp[2, i, j] * (3**-0.5) / pp[0, i, j]
 
     j = 0
     for i in range(1, im):
         pp[:, i, j] = _latlon2xyz(lon[i, j], lat[i, j], np)
-        pp[1, i, j] = -pp[1, i, j] * (3 ** -0.5) / pp[0, i, j]
-        pp[2, i, j] = -pp[2, i, j] * (3 ** -0.5) / pp[0, i, j]
+        pp[1, i, j] = -pp[1, i, j] * (3**-0.5) / pp[0, i, j]
+        pp[2, i, j] = -pp[2, i, j] * (3**-0.5) / pp[0, i, j]
 
-    pp[0, :, :] = -(3 ** -0.5)
+    pp[0, :, :] = -(3**-0.5)
     for j in range(1, im + 1):
         # copy y-z face of the cube along j=0
         pp[1, 1:, j] = pp[1, 1:, 0]

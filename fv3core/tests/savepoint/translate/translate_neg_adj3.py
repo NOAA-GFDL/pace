@@ -2,7 +2,7 @@ from typing import Any, Dict
 
 import ndsl.dsl
 import ndsl.dsl.gt4py_utils as utils
-import pace.util
+import ndsl.util
 from pace.fv3core.stencils.neg_adj3 import AdjustNegativeTracerMixingRatio
 from pace.fv3core.testing import TranslateDycoreFortranData2Py
 
@@ -11,7 +11,7 @@ class TranslateNeg_Adj3(TranslateDycoreFortranData2Py):
     def __init__(
         self,
         grid,
-        namelist: pace.util.Namelist,
+        namelist: ndsl.util.Namelist,
         stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)

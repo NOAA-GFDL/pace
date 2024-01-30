@@ -3,21 +3,21 @@ from typing import Dict
 import numpy as np
 
 import pace.fv3core
-import pace.util
+import ndsl.util
 from pace.fv3core.initialization.test_cases.initialize_baroclinic import (
     init_baroclinic_state,
 )
-from pace.util.grid import MetricTerms
-from pace.util.mpi import MPIComm
-from pace.util.quantity import Quantity
-from util.pace.util.grid.helper import GridData
+from ndsl.util.grid import MetricTerms
+from ndsl.util.mpi import MPIComm
+from ndsl.util.quantity import Quantity
+from util.ndsl.util.grid.helper import GridData
 
 
 def get_cube_comm(layout, comm: MPIComm):
-    return pace.util.CubedSphereCommunicator(
+    return ndsl.util.CubedSphereCommunicator(
         comm=comm,
-        partitioner=pace.util.CubedSpherePartitioner(
-            pace.util.TilePartitioner(layout=layout)
+        partitioner=ndsl.util.CubedSpherePartitioner(
+            ndsl.util.TilePartitioner(layout=layout)
         ),
     )
 
@@ -25,8 +25,8 @@ def get_cube_comm(layout, comm: MPIComm):
 def get_quantity_factory(layout, nx_tile, ny_tile, nz):
     nx = nx_tile // layout[0]
     ny = ny_tile // layout[1]
-    return pace.util.QuantityFactory(
-        sizer=pace.util.SubtileGridSizer(
+    return ndsl.util.QuantityFactory(
+        sizer=ndsl.util.SubtileGridSizer(
             nx=nx, ny=ny, nz=nz, n_halo=3, extra_dim_lengths={}
         ),
         numpy=np,
@@ -144,7 +144,7 @@ def dycore_state_to_quantity_dict(
 
 
 def gather_all(
-    quantity_dict: Dict[str, Quantity], tile_comm: pace.util.TileCommunicator
+    quantity_dict: Dict[str, Quantity], tile_comm: ndsl.util.TileCommunicator
 ) -> Dict[str, Quantity]:
     gathered = {}
     for name, quantity in quantity_dict.items():
@@ -235,7 +235,7 @@ def test_baroclinic_init_not_decomposition_dependent():
             assert allclose(computed_1by1[name], gathered_3by3[name], name, global_rank)
 
 
-def allclose(q_1by1: pace.util.Quantity, q_3by3: pace.util.Quantity, name: str, rank):
+def allclose(q_1by1: ndsl.util.Quantity, q_3by3: ndsl.util.Quantity, name: str, rank):
     print("1by1", q_1by1.metadata, "3by3", q_3by3.metadata)
     assert q_1by1.view[:].shape == q_3by3.view[:].shape, name
     same = (q_1by1.view[:] == q_3by3.view[:]) | np.isnan(q_1by1.view[:])

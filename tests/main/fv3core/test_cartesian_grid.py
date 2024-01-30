@@ -1,9 +1,9 @@
 import numpy as np
 import pytest
 
-import pace.util
-from pace.util.constants import PI
-from pace.util.grid.generation import MetricTerms
+import ndsl.util
+from ndsl.util.constants import PI
+from ndsl.util.grid.generation import MetricTerms
 
 
 @pytest.mark.parametrize("npx", [8])
@@ -22,9 +22,9 @@ def test_cartesian_grid_generation(
     deglat: float,
     backend: str,
 ):
-    mpi_comm = pace.util.NullComm(rank=0, total_ranks=1)
-    partitioner = pace.util.TilePartitioner((1, 1))
-    communicator = pace.util.TileCommunicator(mpi_comm, partitioner)
+    mpi_comm = ndsl.util.NullComm(rank=0, total_ranks=1)
+    partitioner = ndsl.util.TilePartitioner((1, 1))
+    communicator = ndsl.util.TileCommunicator(mpi_comm, partitioner)
     grid_generator = MetricTerms.from_tile_sizing(
         npx=npx,
         npy=npy,

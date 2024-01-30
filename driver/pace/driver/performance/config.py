@@ -1,7 +1,7 @@
 import dataclasses
 
-import pace.util
-from pace.util import NullProfiler, Profiler
+import ndsl.util
+from ndsl.util import NullProfiler, Profiler
 
 from .collector import (
     AbstractPerformanceCollector,
@@ -28,7 +28,7 @@ class PerformanceConfig:
     experiment_name: str = "test"
     json_all_rank_threshold: int = 1000
 
-    def build(self, comm: pace.util.Comm) -> AbstractPerformanceCollector:
+    def build(self, comm: ndsl.util.Comm) -> AbstractPerformanceCollector:
         if self.collect_performance:
             return PerformanceCollector(experiment_name=self.experiment_name, comm=comm)
         else:

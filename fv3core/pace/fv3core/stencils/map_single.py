@@ -2,13 +2,13 @@ from typing import Optional, Sequence
 
 from gt4py.cartesian.gtscript import FORWARD, PARALLEL, computation, interval
 
-import pace.util
+import ndsl.util
 from ndsl.dsl.dace import orchestrate
 from ndsl.dsl.stencil import StencilFactory
 from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ, IntFieldIJ  # noqa: F401
 from pace.fv3core.stencils.basic_operations import copy_defn
 from pace.fv3core.stencils.remap_profile import RemapProfile
-from pace.util import X_DIM, Y_DIM, Z_DIM
+from ndsl.util import X_DIM, Y_DIM, Z_DIM
 
 
 def set_dp(dp1: FloatField, pe1: FloatField, lev: IntFieldIJ):
@@ -89,7 +89,7 @@ class MapSingle:
     def __init__(
         self,
         stencil_factory: StencilFactory,
-        quantity_factory: pace.util.QuantityFactory,
+        quantity_factory: ndsl.util.QuantityFactory,
         kord: int,
         mode: int,
         dims: Sequence[str],

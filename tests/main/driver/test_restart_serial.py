@@ -11,7 +11,7 @@ from pace.driver import CreatesComm, DriverConfig
 from pace.driver.driver import RestartConfig
 from pace.driver.initialization import AnalyticInit
 from pace.physics import PHYSICS_PACKAGES
-from pace.util.null_comm import NullComm
+from ndsl.util.null_comm import NullComm
 
 
 DIR = os.path.dirname(os.path.abspath(__file__))
@@ -49,11 +49,11 @@ def test_restart_save_to_disk():
             driver_config = DriverConfig.from_dict(yaml.safe_load(f))
         backend = "numpy"
         mpi_comm = NullComm(rank=0, total_ranks=6, fill_value=0.0)
-        partitioner = pace.util.CubedSpherePartitioner(
-            pace.util.TilePartitioner((1, 1))
+        partitioner = ndsl.util.CubedSpherePartitioner(
+            ndsl.util.TilePartitioner((1, 1))
         )
-        communicator = pace.util.CubedSphereCommunicator(mpi_comm, partitioner)
-        sizer = pace.util.SubtileGridSizer.from_tile_params(
+        communicator = ndsl.util.CubedSphereCommunicator(mpi_comm, partitioner)
+        sizer = ndsl.util.SubtileGridSizer.from_tile_params(
             nx_tile=12,
             ny_tile=12,
             nz=79,
@@ -63,7 +63,7 @@ def test_restart_save_to_disk():
             tile_partitioner=partitioner.tile,
             tile_rank=communicator.tile.rank,
         )
-        quantity_factory = pace.util.QuantityFactory.from_backend(
+        quantity_factory = ndsl.util.QuantityFactory.from_backend(
             sizer=sizer, backend=backend
         )
 
@@ -98,7 +98,7 @@ def test_restart_save_to_disk():
             f"RESTART/restart_dycore_state_{mpi_comm.rank}.nc"
         )
         for var in driver_state.dycore_state.__dict__.keys():
-            if isinstance(driver_state.dycore_state.__dict__[var], pace.util.Quantity):
+            if isinstance(driver_state.dycore_state.__dict__[var], ndsl.util.Quantity):
                 np.testing.assert_allclose(
                     driver_state.dycore_state.__dict__[var].data,
                     restart_dycore[var].values,
@@ -151,7 +151,7 @@ def test_restart_save_to_disk():
             for var in driver_state.dycore_state.__dict__.keys():
                 before_restart = driver_state.dycore_state.__dict__[var]
                 after_restart = restart_state.dycore_state.__dict__[var]
-                if isinstance(before_restart, pace.util.Quantity):
+                if isinstance(before_restart, ndsl.util.Quantity):
                     np.testing.assert_allclose(
                         before_restart.view[:],
                         after_restart.view[:],

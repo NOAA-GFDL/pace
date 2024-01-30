@@ -4,15 +4,15 @@ import gt4py.cartesian.gtscript as gtscript
 from gt4py.cartesian.gtscript import PARALLEL, computation, horizontal, interval, region
 
 import ndsl.stencils.corners as corners
-import pace.util
+import ndsl.util
 from ndsl.dsl.dace.orchestration import orchestrate
 from ndsl.dsl.stencil import StencilFactory
 from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ
 from pace.fv3core.stencils.delnflux import DelnFlux
 from pace.fv3core.stencils.xppm import XPiecewiseParabolic
 from pace.fv3core.stencils.yppm import YPiecewiseParabolic
-from pace.util import X_DIM, Y_DIM, Z_DIM
-from pace.util.grid import DampingCoefficients, GridData
+from ndsl.util import X_DIM, Y_DIM, Z_DIM
+from ndsl.util.grid import DampingCoefficients, GridData
 
 
 @gtscript.function
@@ -129,7 +129,7 @@ class FiniteVolumeTransport:
     def __init__(
         self,
         stencil_factory: StencilFactory,
-        quantity_factory: pace.util.QuantityFactory,
+        quantity_factory: ndsl.util.QuantityFactory,
         grid_data: GridData,
         damping_coefficients: DampingCoefficients,
         grid_type: int,

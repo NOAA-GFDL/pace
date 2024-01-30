@@ -1,6 +1,6 @@
 import dace
 
-from pace.util.logging import pace_log
+from ndsl.util.logging import pace_log
 
 
 def splittable_region_expansion(sdfg: dace.SDFG, verbose: bool = False):

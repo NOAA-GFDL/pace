@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 from pace.driver.safety_checks import SafetyChecker
-from pace.util import Quantity
+from ndsl.util import Quantity
 
 
 def test_register_variable():

@@ -5,7 +5,7 @@ from typing import Tuple
 
 import numpy as np
 
-from pace import util
+from ndsl import util
 from ndsl.dsl.gt4py_utils import asarray
 from ndsl.dsl.stencil import GridIndexing
 from ndsl.dsl.typing import Float
@@ -15,9 +15,9 @@ from ndsl.stencils.corners import (
     fill_corners_cgrid,
     fill_corners_dgrid,
 )
-from pace.util import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_INTERFACE_DIM
-from pace.util.constants import N_HALO_DEFAULT, PI, RADIUS
-from pace.util.grid import eta
+from ndsl.util import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_INTERFACE_DIM
+from ndsl.util.constants import N_HALO_DEFAULT, PI, RADIUS
+from ndsl.util.grid import eta
 
 from .geometry import (
     calc_unit_vector_south,

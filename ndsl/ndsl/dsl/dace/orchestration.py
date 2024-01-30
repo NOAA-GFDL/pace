@@ -30,8 +30,8 @@ from ndsl.dsl.dace.utils import (
     memory_static_analysis,
     report_memory_static_analysis,
 )
-from pace.util import pace_log
-from pace.util.mpi import MPI
+from ndsl.util import pace_log
+from ndsl.util.mpi import MPI
 
 
 try:

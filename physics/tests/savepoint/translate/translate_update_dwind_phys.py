@@ -1,11 +1,11 @@
 import numpy as np
 
-import pace.util
+import ndsl.util
 from physics.tests.savepoint.translate.translate_physics import (
     TranslatePhysicsFortranData2Py,
 )
 from pace.physics.update.update_dwind_phys import AGrid2DGridPhysics
-from pace.util.utils import safe_assign_array
+from ndsl.util.utils import safe_assign_array
 
 
 class TranslateUpdateDWindsPhys(TranslatePhysicsFortranData2Py):
@@ -26,7 +26,7 @@ class TranslateUpdateDWindsPhys(TranslatePhysicsFortranData2Py):
 
     def compute(self, inputs):
         self.make_storage_data_input_vars(inputs)
-        partitioner = pace.util.TilePartitioner(self.namelist.layout)
+        partitioner = ndsl.util.TilePartitioner(self.namelist.layout)
         self.compute_func = AGrid2DGridPhysics(
             self.stencil_factory,
             self.grid.quantity_factory,

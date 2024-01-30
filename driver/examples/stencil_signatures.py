@@ -6,7 +6,7 @@ import yaml
 
 import pace.driver
 import ndsl.dsl
-import pace.util
+import ndsl.util
 
 
 def has_stencils(object):

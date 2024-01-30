@@ -1,9 +1,9 @@
 from enum import Enum
 
-import pace.util as fv3util
+import ndsl.util as fv3util
 from pace.fv3core.dycore_state import DycoreState
-from pace.util import MetaEnumStr
-from pace.util.grid import GridData
+from ndsl.util import MetaEnumStr
+from ndsl.util.grid import GridData
 
 
 class Cases(Enum, metaclass=MetaEnumStr):

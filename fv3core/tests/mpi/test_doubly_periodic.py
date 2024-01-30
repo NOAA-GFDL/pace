@@ -6,8 +6,8 @@ import pace.fv3core
 import pace.fv3core._config
 import pace.fv3core.initialization.baroclinic as baroclinic_init
 import ndsl.stencils.testing
-import pace.util
-from pace.util.grid import DampingCoefficients, GridData, MetricTerms
+import ndsl.util
+from ndsl.util.grid import DampingCoefficients, GridData, MetricTerms
 
 
 def setup_dycore() -> Tuple[pace.fv3core.DynamicalCore, List[Any]]:
@@ -57,16 +57,16 @@ def setup_dycore() -> Tuple[pace.fv3core.DynamicalCore, List[Any]]:
         z_tracer=True,
         do_qa=True,
     )
-    mpi_comm = pace.util.MPIComm()
-    partitioner = pace.util.TilePartitioner(config.layout)
+    mpi_comm = ndsl.util.MPIComm()
+    partitioner = ndsl.util.TilePartitioner(config.layout)
     # TODO: cleanup typing of tile vs cubed sphere communicators,
     # currently both have a .tile attribute that reference a TileCommunicator
     # instead both should have the methods specific to a TileCommunicator
     # (to be put on the Communicator abstract base class) and
     # the CubedSphere implementation should defer to the tile.
     communicator = cast(
-        pace.util.CubedSphereCommunicator,
-        pace.util.TileCommunicator(mpi_comm, partitioner),
+        ndsl.util.CubedSphereCommunicator,
+        ndsl.util.TileCommunicator(mpi_comm, partitioner),
     )
     stencil_config = ndsl.dsl.stencil.StencilConfig(
         compilation_config=ndsl.dsl.stencil.CompilationConfig(
@@ -76,7 +76,7 @@ def setup_dycore() -> Tuple[pace.fv3core.DynamicalCore, List[Any]]:
             validate_args=True,
         )
     )
-    sizer = pace.util.SubtileGridSizer.from_tile_params(
+    sizer = ndsl.util.SubtileGridSizer.from_tile_params(
         nx_tile=config.npx - 1,
         ny_tile=config.npy - 1,
         nz=config.npz,
@@ -89,7 +89,7 @@ def setup_dycore() -> Tuple[pace.fv3core.DynamicalCore, List[Any]]:
     grid_indexing = ndsl.dsl.stencil.GridIndexing.from_sizer_and_communicator(
         sizer=sizer, comm=communicator
     )
-    quantity_factory = pace.util.QuantityFactory.from_backend(
+    quantity_factory = ndsl.util.QuantityFactory.from_backend(
         sizer=sizer, backend=backend
     )
     metric_terms = MetricTerms(

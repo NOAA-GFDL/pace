@@ -1,7 +1,7 @@
 import copy
 from typing import Any, Mapping
 
-from pace.util.comm import Comm, Request
+from ndsl.util.comm import Comm, Request
 
 
 class NullAsyncResult(Request):

@@ -10,14 +10,14 @@ import yaml
 from timing import collect_data_and_write_to_file
 
 import ndsl.dsl
-import pace.util as util
+import ndsl.util as util
 from ndsl.dsl.dace.orchestration import DaceConfig
 from ndsl.dsl.stencil import CompilationConfig
 from pace.fv3core._config import DynamicalCoreConfig
 from pace.fv3core.stencils.dyn_core import AcousticDynamics
 from pace.fv3core.testing import TranslateDynCore
 from ndsl.stencils.testing.grid import Grid
-from pace.util.null_comm import NullComm
+from ndsl.util.null_comm import NullComm
 
 
 try:

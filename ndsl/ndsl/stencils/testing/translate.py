@@ -4,7 +4,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import numpy as np
 
 import ndsl.dsl.gt4py_utils as utils
-import pace.util
+import ndsl.util
 from ndsl.dsl.stencil import StencilFactory
 from ndsl.dsl.typing import Field  # noqa: F401
 from ndsl.stencils.testing.grid import Grid  # type: ignore
@@ -32,10 +32,10 @@ def pad_field_in_j(field, nj: int, backend: str):
 
 
 def as_numpy(
-    value: Union[Dict[str, Any], pace.util.Quantity, np.ndarray]
+    value: Union[Dict[str, Any], ndsl.util.Quantity, np.ndarray]
 ) -> Union[np.ndarray, Dict[str, np.ndarray]]:
-    def _convert(value: Union[pace.util.Quantity, np.ndarray]) -> np.ndarray:
-        if isinstance(value, pace.util.Quantity):
+    def _convert(value: Union[ndsl.util.Quantity, np.ndarray]) -> np.ndarray:
+        if isinstance(value, ndsl.util.Quantity):
             return value.data
         elif cp is not None and isinstance(value, cp.ndarray):
             return cp.asnumpy(value)

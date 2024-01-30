@@ -12,13 +12,13 @@ from gt4py.cartesian.gtscript import (
 )
 
 import pace.physics.functions.microphysics_funcs as functions
-import pace.util
-import pace.util.constants as constants
+import ndsl.util
+import ndsl.util.constants as constants
 from ndsl.dsl.dace.orchestration import orchestrate
 from ndsl.dsl.stencil import StencilFactory
 from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ, Int
-from pace.util import X_DIM, Y_DIM, Z_DIM
-from pace.util.grid import GridData
+from ndsl.util import X_DIM, Y_DIM, Z_DIM
+from ndsl.util.grid import GridData
 
 from .._config import PhysicsConfig
 
@@ -1571,24 +1571,24 @@ class MicrophysicsState:
 
     def __init__(
         self,
-        pt: pace.util.Quantity,
-        qvapor: pace.util.Quantity,
-        qliquid: pace.util.Quantity,
-        qrain: pace.util.Quantity,
-        qice: pace.util.Quantity,
-        qsnow: pace.util.Quantity,
-        qgraupel: pace.util.Quantity,
-        qcld: pace.util.Quantity,
-        ua: pace.util.Quantity,
-        va: pace.util.Quantity,
-        delp: pace.util.Quantity,
-        delz: pace.util.Quantity,
-        omga: pace.util.Quantity,
-        delprsi: pace.util.Quantity,
-        wmp: pace.util.Quantity,
-        dz: pace.util.Quantity,
-        tendency: pace.util.Quantity,
-        land: pace.util.Quantity,
+        pt: ndsl.util.Quantity,
+        qvapor: ndsl.util.Quantity,
+        qliquid: ndsl.util.Quantity,
+        qrain: ndsl.util.Quantity,
+        qice: ndsl.util.Quantity,
+        qsnow: ndsl.util.Quantity,
+        qgraupel: ndsl.util.Quantity,
+        qcld: ndsl.util.Quantity,
+        ua: ndsl.util.Quantity,
+        va: ndsl.util.Quantity,
+        delp: ndsl.util.Quantity,
+        delz: ndsl.util.Quantity,
+        omga: ndsl.util.Quantity,
+        delprsi: ndsl.util.Quantity,
+        wmp: ndsl.util.Quantity,
+        dz: ndsl.util.Quantity,
+        tendency: ndsl.util.Quantity,
+        land: ndsl.util.Quantity,
     ):
         self.pt = pt
         self.qvapor = qvapor
@@ -1623,7 +1623,7 @@ class Microphysics:
     def __init__(
         self,
         stencil_factory: StencilFactory,
-        quantity_factory: pace.util.QuantityFactory,
+        quantity_factory: ndsl.util.QuantityFactory,
         grid_data: GridData,
         namelist: PhysicsConfig,
     ):

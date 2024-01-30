@@ -5,7 +5,7 @@ from typing import Any, Dict, List
 import numpy as np
 import pytest
 
-import pace.util as fv3util
+import ndsl.util as fv3util
 from ndsl.dsl import gt4py_utils as utils
 
 from .translate import TranslateFortranData2Py, read_serialized_data

@@ -11,7 +11,7 @@ from gt4py.cartesian.gtscript import (
     log,
 )
 
-import pace.util.constants as constants
+import ndsl.util.constants as constants
 from ndsl.dsl.stencil import StencilFactory
 from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ
 from pace.fv3core._config import SatAdjustConfig

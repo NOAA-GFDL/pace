@@ -6,7 +6,7 @@ from gt4py.cartesian import gtscript
 
 import ndsl.dsl.stencil
 from ndsl.dsl.typing import Index3D
-from pace.util import (
+from ndsl.util import (
     X_DIM,
     X_INTERFACE_DIM,
     Y_DIM,

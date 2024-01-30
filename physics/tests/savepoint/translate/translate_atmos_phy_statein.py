@@ -5,7 +5,7 @@ from pace.physics.stencils.physics import atmos_phys_driver_statein
 from physics.tests.savepoint.translate.translate_physics import (
     TranslatePhysicsFortranData2Py,
 )
-from pace.util.constants import KAPPA
+from ndsl.util.constants import KAPPA
 
 
 class TranslateAtmosPhysDriverStatein(TranslatePhysicsFortranData2Py):

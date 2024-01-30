@@ -1,9 +1,9 @@
 from typing import Dict, Tuple
 
 import ndsl.dsl
-import pace.util
+import ndsl.util
 from pace.fv3core.stencils.map_single import MapSingle
-from pace.util import X_INTERFACE_DIM, Y_INTERFACE_DIM, Z_DIM
+from ndsl.util import X_INTERFACE_DIM, Y_INTERFACE_DIM, Z_DIM
 
 
 class MapSingleFactory:
@@ -13,7 +13,7 @@ class MapSingleFactory:
     def __init__(
         self,
         stencil_factory: ndsl.dsl.StencilFactory,
-        quantity_factory: pace.util.QuantityFactory,
+        quantity_factory: ndsl.util.QuantityFactory,
     ):
         self.stencil_factory = stencil_factory
         self.quantity_factory = quantity_factory

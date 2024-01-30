@@ -4,7 +4,7 @@ from typing import Tuple
 import numpy as np
 import pytest
 
-from pace.util import (
+from ndsl.util import (
     EAST,
     NORTH,
     NORTHEAST,
@@ -22,10 +22,10 @@ from pace.util import (
     Quantity,
     _boundary_utils,
 )
-from pace.util.buffer import Buffer
-from pace.util.halo_data_transformer import HaloDataTransformer, HaloExchangeSpec
-from pace.util.quantity import QuantityHaloSpec
-from pace.util.rotate import rotate_scalar_data, rotate_vector_data
+from ndsl.util.buffer import Buffer
+from ndsl.util.halo_data_transformer import HaloDataTransformer, HaloExchangeSpec
+from ndsl.util.quantity import QuantityHaloSpec
+from ndsl.util.rotate import rotate_scalar_data, rotate_vector_data
 
 
 @pytest.fixture

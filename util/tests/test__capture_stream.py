@@ -4,7 +4,7 @@ import sys
 
 import pytest
 
-from pace.util import capture_stream
+from ndsl.util import capture_stream
 
 
 def get_libc():

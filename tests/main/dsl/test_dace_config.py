@@ -6,7 +6,7 @@ from ndsl.dsl.dace.orchestration import (
     orchestrate,
     orchestrate_function,
 )
-from pace.util.communicator import CubedSpherePartitioner, TilePartitioner
+from ndsl.util.communicator import CubedSpherePartitioner, TilePartitioner
 
 
 """

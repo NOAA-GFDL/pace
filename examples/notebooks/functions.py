@@ -16,7 +16,7 @@ from ndsl.dsl.stencil_config import CompilationConfig, RunMode
 from pace.fv3core.stencils.fvtp2d import FiniteVolumeTransport
 from pace.fv3core.stencils.fxadv import FiniteVolumeFluxPrep
 from pace.fv3core.stencils.tracer_2d_1l import TracerAdvection
-from pace.util import (
+from ndsl.util import (
     CubedSphereCommunicator,
     CubedSpherePartitioner,
     Quantity,
@@ -24,8 +24,8 @@ from pace.util import (
     SubtileGridSizer,
     TilePartitioner,
 )
-from pace.util.constants import RADIUS
-from pace.util.grid import (
+from ndsl.util.constants import RADIUS
+from ndsl.util.grid import (
     AngleGridData,
     ContravariantGridData,
     DampingCoefficients,
@@ -34,7 +34,7 @@ from pace.util.grid import (
     MetricTerms,
     VerticalGridData,
 )
-from pace.util.grid.gnomonic import great_circle_distance_lon_lat
+from ndsl.util.grid.gnomonic import great_circle_distance_lon_lat
 
 
 class GridType(enum.Enum):

@@ -1,5 +1,5 @@
 from ndsl.dsl.caches.codepath import FV3CodePath
-from pace.util import Partitioner
+from ndsl.util import Partitioner
 
 
 def identify_code_path(

@@ -1,5 +1,5 @@
 import ndsl.dsl
-import pace.util
+import ndsl.util
 from pace.driver.run import Driver, DriverConfig
 from pace.driver.state import TendencyState
 from pace.fv3core._config import DynamicalCoreConfig
@@ -9,7 +9,7 @@ from pace.fv3core._config import DynamicalCoreConfig
 from pace.fv3core.testing.translate_fvdynamics import TranslateFVDynamics
 from pace.fv3core.testing.validation import enable_selective_validation
 from pace.physics import PHYSICS_PACKAGES, PhysicsConfig, PhysicsState
-from pace.util.namelist import Namelist
+from ndsl.util.namelist import Namelist
 
 
 enable_selective_validation()
@@ -28,18 +28,18 @@ class TranslateDriver(TranslateFVDynamics):
 
     def compute_parallel(self, inputs, communicator):
         dycore_state = self.state_from_inputs(inputs)
-        sizer = pace.util.SubtileGridSizer.from_tile_params(
+        sizer = ndsl.util.SubtileGridSizer.from_tile_params(
             nx_tile=self.namelist.npx - 1,
             ny_tile=self.namelist.npy - 1,
             nz=self.namelist.npz,
-            n_halo=pace.util.N_HALO_DEFAULT,
+            n_halo=ndsl.util.N_HALO_DEFAULT,
             extra_dim_lengths={},
             layout=self.namelist.layout,
             tile_partitioner=communicator.partitioner.tile,
             tile_rank=communicator.tile.rank,
         )
 
-        quantity_factory = pace.util.QuantityFactory.from_backend(
+        quantity_factory = ndsl.util.QuantityFactory.from_backend(
             sizer, backend=self.stencil_config.compilation_config.backend
         )
         physics_state = PhysicsState.init_zeros(

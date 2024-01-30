@@ -1,5 +1,5 @@
-import pace.util
-from pace.util.null_comm import NullComm
+import ndsl.util
+from ndsl.util.null_comm import NullComm
 
 
 def test_can_create_cube_communicator():
@@ -7,6 +7,6 @@ def test_can_create_cube_communicator():
     total_ranks = 24
     mpi_comm = NullComm(rank, total_ranks)
     layout = (2, 2)
-    partitioner = pace.util.CubedSpherePartitioner(pace.util.TilePartitioner(layout))
-    communicator = pace.util.CubedSphereCommunicator(mpi_comm, partitioner)
+    partitioner = ndsl.util.CubedSpherePartitioner(ndsl.util.TilePartitioner(layout))
+    communicator = ndsl.util.CubedSphereCommunicator(mpi_comm, partitioner)
     communicator.tile.partitioner

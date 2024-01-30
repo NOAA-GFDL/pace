@@ -1,8 +1,8 @@
 import gt4py.cartesian.gtscript as gtscript
 from gt4py.cartesian.gtscript import FORWARD, PARALLEL, computation, exp, interval, log
 
-import pace.util
-import pace.util.constants as constants
+import ndsl.util
+import ndsl.util.constants as constants
 from pace import fv3core
 from ndsl.dsl.dace.orchestration import orchestrate
 from ndsl.dsl.dace.wrapped_halo_exchange import WrappedHaloUpdater
@@ -10,8 +10,8 @@ from ndsl.dsl.stencil import StencilFactory
 from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ
 from ndsl.stencils.c2l_ord import CubedToLatLon
 from pace.physics.update.update_dwind_phys import AGrid2DGridPhysics
-from pace.util import X_DIM, Y_DIM
-from pace.util.grid import DriverGridData, GridData
+from ndsl.util import X_DIM, Y_DIM
+from ndsl.util.grid import DriverGridData, GridData
 
 
 # TODO: This is the same as moist_cv.py in fv3core, should move to integration dir
@@ -83,14 +83,14 @@ class ApplyPhysicsToDycore:
     def __init__(
         self,
         stencil_factory: StencilFactory,
-        quantity_factory: pace.util.QuantityFactory,
+        quantity_factory: ndsl.util.QuantityFactory,
         grid_data: GridData,
         namelist,
-        comm: pace.util.Communicator,
+        comm: ndsl.util.Communicator,
         grid_info: DriverGridData,
         state: fv3core.DycoreState,
-        u_dt: pace.util.Quantity,
-        v_dt: pace.util.Quantity,
+        u_dt: ndsl.util.Quantity,
+        v_dt: ndsl.util.Quantity,
     ):
         self._grid_type = grid_info.grid_type
         orchestrate(
@@ -130,7 +130,7 @@ class ApplyPhysicsToDycore:
         origin = grid_indexing.origin_compute()
         shape = grid_indexing.max_shape
         full_3Dfield_1pts_halo_spec = quantity_factory.get_quantity_halo_spec(
-            dims=[pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM],
+            dims=[ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
             n_halo=1,
         )
         self._udt_halo_updater = WrappedHaloUpdater(

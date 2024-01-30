@@ -5,8 +5,8 @@ import gt4py
 import numpy as np
 
 from ndsl.dsl.typing import DTypes, Field, Float
-from pace.util.logging import pace_log
-from pace.util.constants import N_HALO_DEFAULT
+from ndsl.util.logging import pace_log
+from ndsl.util.constants import N_HALO_DEFAULT
 
 
 try:

@@ -6,7 +6,7 @@ from typing import List, Protocol
 
 import numpy as np
 
-import pace.util
+import ndsl.util
 from pace.driver.performance.report import (
     Report,
     TimeReport,
@@ -15,15 +15,15 @@ from pace.driver.performance.report import (
     get_experiment_info,
     write_to_timestamped_json,
 )
-from pace.util._optional_imports import cupy as cp
-from pace.util.utils import GPU_AVAILABLE
+from ndsl.util._optional_imports import cupy as cp
+from ndsl.util.utils import GPU_AVAILABLE
 
 from .report import collect_data_and_write_to_file
 
 
 class AbstractPerformanceCollector(Protocol):
-    total_timer: pace.util.Timer
-    timestep_timer: pace.util.Timer
+    total_timer: ndsl.util.Timer
+    timestep_timer: ndsl.util.Timer
 
     def collect_performance(self):
         ...
@@ -58,11 +58,11 @@ class AbstractPerformanceCollector(Protocol):
 
 
 class PerformanceCollector(AbstractPerformanceCollector):
-    def __init__(self, experiment_name: str, comm: pace.util.Comm):
+    def __init__(self, experiment_name: str, comm: ndsl.util.Comm):
         self.times_per_step: List[Mapping[str, float]] = []
         self.hits_per_step: List[Mapping[str, int]] = []
-        self.timestep_timer = pace.util.Timer()
-        self.total_timer = pace.util.Timer()
+        self.timestep_timer = ndsl.util.Timer()
+        self.total_timer = ndsl.util.Timer()
         self.experiment_name = experiment_name
         self.comm = comm
 
@@ -157,8 +157,8 @@ class PerformanceCollector(AbstractPerformanceCollector):
 
 class NullPerformanceCollector(AbstractPerformanceCollector):
     def __init__(self):
-        self.total_timer = pace.util.NullTimer()
-        self.timestep_timer = pace.util.NullTimer()
+        self.total_timer = ndsl.util.NullTimer()
+        self.timestep_timer = ndsl.util.NullTimer()
 
     def collect_performance(self):
         pass

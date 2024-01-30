@@ -3,7 +3,7 @@ from typing import List
 
 import numpy as np
 
-import pace.util
+import ndsl.util
 
 
 def copy_temporaries(obj, max_depth: int) -> dict:
@@ -14,7 +14,7 @@ def copy_temporaries(obj, max_depth: int) -> dict:
             attr = getattr(obj, attr_name)
         except AttributeError:
             attr = None
-        if isinstance(attr, pace.util.Quantity):
+        if isinstance(attr, ndsl.util.Quantity):
             temporaries[attr_name] = copy.deepcopy(np.asarray(attr.data))
         elif attr.__class__.__module__.split(".")[0] in (  # type: ignore
             "fv3core",

@@ -10,24 +10,24 @@ from gt4py.cartesian.gtscript import (
     region,
 )
 
-import pace.util
+import ndsl.util
 from ndsl.dsl.dace.orchestration import orchestrate
 from ndsl.dsl.stencil import StencilFactory, get_stencils_with_varied_bounds
 from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ, FloatFieldK
-from pace.util import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_DIM
-from pace.util.grid import DampingCoefficients
+from ndsl.util import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_DIM
+from ndsl.util.grid import DampingCoefficients
 
 
 def calc_damp(
-    damp_c: pace.util.Quantity, da_min: Float, nord: pace.util.Quantity
-) -> pace.util.Quantity:
+    damp_c: ndsl.util.Quantity, da_min: Float, nord: ndsl.util.Quantity
+) -> ndsl.util.Quantity:
     if damp_c.dims != nord.dims or damp_c.data.shape != nord.data.shape:
         raise NotImplementedError(
             "current implementation requires damp_c and nord to have "
             "identical data shape and dims"
         )
     data = (damp_c.data * da_min) ** (nord.data + 1)
-    return pace.util.Quantity(
+    return ndsl.util.Quantity(
         data=data,
         dims=damp_c.dims,
         # TODO: find and document units
@@ -953,11 +953,11 @@ class DelnFlux:
     def __init__(
         self,
         stencil_factory: StencilFactory,
-        quantity_factory: pace.util.QuantityFactory,
+        quantity_factory: ndsl.util.QuantityFactory,
         damping_coefficients: DampingCoefficients,
-        rarea: pace.util.Quantity,
-        nord_col: pace.util.Quantity,
-        damp_c: pace.util.Quantity,
+        rarea: ndsl.util.Quantity,
+        nord_col: ndsl.util.Quantity,
+        damp_c: ndsl.util.Quantity,
     ):
         """
         nord sets the order of damping to apply:
@@ -1074,8 +1074,8 @@ class DelnFluxNoSG:
         self,
         stencil_factory: StencilFactory,
         damping_coefficients: DampingCoefficients,
-        rarea: pace.util.Quantity,
-        nord: pace.util.Quantity,
+        rarea: ndsl.util.Quantity,
+        nord: ndsl.util.Quantity,
         nk: Optional[int] = None,
     ):
         """

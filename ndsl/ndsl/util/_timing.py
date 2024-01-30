@@ -57,7 +57,7 @@ class Timer:
             following would time a time.sleep operation::
 
                 >>> import time
-                >>> from pace.util import Timer
+                >>> from ndsl.util import Timer
                 >>> timer = Timer()
                 >>> with timer.clock("sleep"):
                 ...     time.sleep(1)
@@ -65,6 +65,7 @@ class Timer:
                 >>> timer.times
                 {'sleep': 1.0032463260000029}
         """
+
         # [DaCe] Because the contextlib is a "one-shot" object
         # which self-destroys itself when called, we can't orchestrate
         # it easily in DaCe. Waiting for a fix DaCe side to this Python

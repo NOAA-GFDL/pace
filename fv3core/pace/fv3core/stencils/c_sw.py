@@ -7,14 +7,14 @@ from gt4py.cartesian.gtscript import (  # noqa
     region,
 )
 
-import pace.util
+import ndsl.util
 from ndsl.dsl.dace.orchestration import orchestrate
 from ndsl.dsl.stencil import StencilFactory
 from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ
 from pace.fv3core.stencils.d2a2c_vect import DGrid2AGrid2CGridVectors
 from ndsl.stencils import corners
-from pace.util import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_DIM
-from pace.util.grid import GridData
+from ndsl.util import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_DIM
+from ndsl.util.grid import GridData
 
 
 def zero_delpc_ptc(delpc: FloatField, ptc: FloatField):
@@ -507,7 +507,7 @@ class CGridShallowWaterDynamics:
     def __init__(
         self,
         stencil_factory: StencilFactory,
-        quantity_factory: pace.util.QuantityFactory,
+        quantity_factory: ndsl.util.QuantityFactory,
         grid_data: GridData,
         nested: bool,
         grid_type: int,
@@ -552,7 +552,7 @@ class CGridShallowWaterDynamics:
             dord4=self._dord4,
         )
 
-        def make_quantity() -> pace.util.Quantity:
+        def make_quantity() -> ndsl.util.Quantity:
             return quantity_factory.zeros(
                 [X_DIM, Y_DIM, Z_DIM],
                 units="unknown",

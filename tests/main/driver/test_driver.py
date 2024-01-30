@@ -13,7 +13,7 @@ from pace.driver.performance.report import (
     gather_timing_data,
     get_sypd,
 )
-from pace.util.null_comm import NullComm
+from ndsl.util.null_comm import NullComm
 
 
 def get_driver_config(

@@ -8,11 +8,11 @@ import xarray as xr
 import yaml
 
 import ndsl.dsl
-import pace.util
+import ndsl.util
 from ndsl.dsl.dace.dace_config import DaceConfig
 from ndsl.stencils.testing import ParallelTranslate, TranslateGrid
 from ndsl.stencils.testing.savepoint import SavepointCase, dataset_to_dict
-from pace.util.mpi import MPI
+from ndsl.util.mpi import MPI
 
 
 @pytest.fixture()
@@ -114,10 +114,10 @@ def get_ranks(metafunc, layout):
 
 
 def get_namelist(namelist_filename):
-    return pace.util.Namelist.from_f90nml(f90nml.read(namelist_filename))
+    return ndsl.util.Namelist.from_f90nml(f90nml.read(namelist_filename))
 
 
-def get_config(backend: str, communicator: Optional[pace.util.Communicator]):
+def get_config(backend: str, communicator: Optional[ndsl.util.Communicator]):
     stencil_config = ndsl.dsl.stencil.StencilConfig(
         compilation_config=ndsl.dsl.stencil.CompilationConfig(
             backend=backend, rebuild=False, validate_args=True
@@ -271,13 +271,13 @@ def generate_parallel_stencil_tests(metafunc, *, backend: str):
 
 def get_communicator(comm, layout, dperiodic):
     if (MPI.COMM_WORLD.Get_size() > 1) and (not dperiodic):
-        partitioner = pace.util.CubedSpherePartitioner(
-            pace.util.TilePartitioner(layout)
+        partitioner = ndsl.util.CubedSpherePartitioner(
+            ndsl.util.TilePartitioner(layout)
         )
-        communicator = pace.util.CubedSphereCommunicator(comm, partitioner)
+        communicator = ndsl.util.CubedSphereCommunicator(comm, partitioner)
     else:
-        partitioner = pace.util.TilePartitioner(layout)
-        communicator = pace.util.TileCommunicator(comm, partitioner)
+        partitioner = ndsl.util.TilePartitioner(layout)
+        communicator = ndsl.util.TileCommunicator(comm, partitioner)
     return communicator
 
 

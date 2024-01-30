@@ -20,9 +20,9 @@ import pace.fv3core.stencils.ray_fast as ray_fast
 import pace.fv3core.stencils.temperature_adjust as temperature_adjust
 import pace.fv3core.stencils.updatedzc as updatedzc
 import pace.fv3core.stencils.updatedzd as updatedzd
-import pace.util
-import pace.util as fv3util
-import pace.util.constants as constants
+import ndsl.util
+import ndsl.util as fv3util
+import ndsl.util.constants as constants
 from ndsl.dsl.dace.orchestration import dace_inhibitor, orchestrate
 from ndsl.dsl.dace.wrapped_halo_exchange import WrappedHaloUpdater
 from ndsl.dsl.stencil import GridIndexing, StencilFactory
@@ -34,7 +34,7 @@ from pace.fv3core.stencils.del2cubed import HyperdiffusionDamping
 from pace.fv3core.stencils.pk3_halo import PK3Halo
 from pace.fv3core.stencils.riem_solver3 import NonhydrostaticVerticalSolver
 from pace.fv3core.stencils.riem_solver_c import NonhydrostaticVerticalSolverCGrid
-from pace.util import (
+from ndsl.util import (
     X_DIM,
     X_INTERFACE_DIM,
     Y_DIM,
@@ -42,7 +42,7 @@ from pace.util import (
     Z_DIM,
     Z_INTERFACE_DIM,
 )
-from pace.util.grid import DampingCoefficients, GridData
+from ndsl.util.grid import DampingCoefficients, GridData
 
 
 HUGE_R = 1.0e40
@@ -190,9 +190,9 @@ def get_nk_heat_dissipation(
 
 
 def dyncore_temporaries(
-    quantity_factory: pace.util.QuantityFactory,
-) -> Mapping[str, pace.util.Quantity]:
-    temporaries: Dict[str, pace.util.Quantity] = {}
+    quantity_factory: ndsl.util.QuantityFactory,
+) -> Mapping[str, ndsl.util.Quantity]:
+    temporaries: Dict[str, ndsl.util.Quantity] = {}
     for name in ["ut", "vt", "gz", "zh", "pem", "pkc", "pk3", "heat_source", "cappa"]:
         # TODO: the dimensions of ut and vt may not be correct,
         #       because they are not used. double-check and correct as needed.
@@ -243,16 +243,16 @@ class AcousticDynamics:
 
         def __init__(
             self,
-            comm: pace.util.Communicator,
+            comm: ndsl.util.Communicator,
             grid_indexing: GridIndexing,
-            quantity_factory: pace.util.QuantityFactory,
+            quantity_factory: ndsl.util.QuantityFactory,
             state: DycoreState,
-            cappa: pace.util.Quantity,
-            gz: pace.util.Quantity,
-            zh: pace.util.Quantity,
-            divgd: pace.util.Quantity,
-            heat_source: pace.util.Quantity,
-            pkc: pace.util.Quantity,
+            cappa: ndsl.util.Quantity,
+            gz: ndsl.util.Quantity,
+            zh: ndsl.util.Quantity,
+            divgd: ndsl.util.Quantity,
+            heat_source: ndsl.util.Quantity,
+            pkc: ndsl.util.Quantity,
         ):
             # Define the memory specification required
             # Those can be re-used as they are read-only descriptors
@@ -364,9 +364,9 @@ class AcousticDynamics:
 
     def __init__(
         self,
-        comm: pace.util.Communicator,
+        comm: ndsl.util.Communicator,
         stencil_factory: StencilFactory,
-        quantity_factory: pace.util.QuantityFactory,
+        quantity_factory: ndsl.util.QuantityFactory,
         grid_data: GridData,
         damping_coefficients: DampingCoefficients,
         grid_type,
@@ -376,7 +376,7 @@ class AcousticDynamics:
         phis: FloatFieldIJ,
         wsd: FloatFieldIJ,
         state,  # [DaCe] hack to get around quantity as parameters for halo updates
-        checkpointer: Optional[pace.util.Checkpointer] = None,
+        checkpointer: Optional[ndsl.util.Checkpointer] = None,
     ):
         """
         Args:
@@ -424,7 +424,7 @@ class AcousticDynamics:
 
         self.call_checkpointer = checkpointer is not None
         if checkpointer is None:
-            self.checkpointer: pace.util.Checkpointer = pace.util.NullCheckpointer()
+            self.checkpointer: ndsl.util.Checkpointer = ndsl.util.NullCheckpointer()
         else:
             self.checkpointer = checkpointer
         grid_indexing = stencil_factory.grid_indexing

@@ -7,20 +7,20 @@ from typing import Tuple
 import ndsl.dsl.stencil
 import pace.fv3core.initialization.analytic_init as ai
 import ndsl.stencils.testing
-import pace.util
+import ndsl.util
 from pace import fv3core
 from ndsl.dsl.dace.dace_config import DaceConfig
 from pace.fv3core.dycore_state import DycoreState
 from ndsl.stencils.testing import assert_same_temporaries, copy_temporaries
-from pace.util.grid import DampingCoefficients, GridData, MetricTerms
-from pace.util.null_comm import NullComm
+from ndsl.util.grid import DampingCoefficients, GridData, MetricTerms
+from ndsl.util.null_comm import NullComm
 
 
 DIR = os.path.abspath(os.path.dirname(__file__))
 
 
 def setup_dycore() -> (
-    Tuple[fv3core.DynamicalCore, fv3core.DycoreState, pace.util.Timer]
+    Tuple[fv3core.DynamicalCore, fv3core.DycoreState, ndsl.util.Timer]
 ):
     backend = "numpy"
     config = fv3core.DynamicalCoreConfig(
@@ -70,10 +70,10 @@ def setup_dycore() -> (
     mpi_comm = NullComm(
         rank=0, total_ranks=6 * config.layout[0] * config.layout[1], fill_value=0.0
     )
-    partitioner = pace.util.CubedSpherePartitioner(
-        pace.util.TilePartitioner(config.layout)
+    partitioner = ndsl.util.CubedSpherePartitioner(
+        ndsl.util.TilePartitioner(config.layout)
     )
-    communicator = pace.util.CubedSphereCommunicator(mpi_comm, partitioner)
+    communicator = ndsl.util.CubedSphereCommunicator(mpi_comm, partitioner)
     dace_config = DaceConfig(communicator=communicator, backend=backend)
     stencil_config = ndsl.dsl.stencil.StencilConfig(
         compilation_config=ndsl.dsl.stencil.CompilationConfig(
@@ -81,7 +81,7 @@ def setup_dycore() -> (
         ),
         dace_config=dace_config,
     )
-    sizer = pace.util.SubtileGridSizer.from_tile_params(
+    sizer = ndsl.util.SubtileGridSizer.from_tile_params(
         nx_tile=config.npx - 1,
         ny_tile=config.npy - 1,
         nz=config.npz,
@@ -94,7 +94,7 @@ def setup_dycore() -> (
     grid_indexing = ndsl.dsl.stencil.GridIndexing.from_sizer_and_communicator(
         sizer=sizer, comm=communicator
     )
-    quantity_factory = pace.util.QuantityFactory.from_backend(
+    quantity_factory = ndsl.util.QuantityFactory.from_backend(
         sizer=sizer, backend=backend
     )
     eta_file = "tests/main/input/eta79.nc"
@@ -133,16 +133,16 @@ def setup_dycore() -> (
         state=state,
     )
 
-    return dycore, state, pace.util.NullTimer()
+    return dycore, state, ndsl.util.NullTimer()
 
 
 def copy_state(state1: DycoreState, state2: DycoreState):
     # copy all attributes of state1 to state2
     for attr_name in dir(state1):
         for _field in fields(type(state1)):
-            if issubclass(_field.type, pace.util.Quantity):
+            if issubclass(_field.type, ndsl.util.Quantity):
                 attr = getattr(state1, attr_name)
-                if isinstance(attr, pace.util.Quantity):
+                if isinstance(attr, ndsl.util.Quantity):
                     getattr(state2, attr_name).data[:] = attr.data
 
 

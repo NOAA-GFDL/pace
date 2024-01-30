@@ -5,7 +5,7 @@ from gt4py.cartesian.gtscript import PARALLEL, computation, horizontal, interval
 
 from ndsl.dsl.stencil import GridIndexing, StencilFactory
 from ndsl.dsl.typing import FloatField
-from pace.util.constants import (
+from ndsl.util.constants import (
     X_DIM,
     X_INTERFACE_DIM,
     Y_DIM,

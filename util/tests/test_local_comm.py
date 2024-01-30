@@ -1,7 +1,7 @@
 import numpy
 import pytest
 
-from pace.util import LocalComm
+from ndsl.util import LocalComm
 
 
 @pytest.fixture

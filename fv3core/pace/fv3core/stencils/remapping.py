@@ -14,7 +14,7 @@ from gt4py.cartesian.gtscript import (
 )
 
 import pace.fv3core.stencils.moist_cv as moist_cv
-import pace.util
+import ndsl.util
 from ndsl.dsl.dace.orchestration import orchestrate
 from ndsl.dsl.stencil import StencilFactory
 from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ, FloatFieldK
@@ -24,7 +24,7 @@ from pace.fv3core.stencils.map_single import MapSingle
 from pace.fv3core.stencils.mapn_tracer import MapNTracer
 from pace.fv3core.stencils.moist_cv import moist_pt_func, moist_pt_last_step
 from pace.fv3core.stencils.saturation_adjustment import SatAdjust3d
-from pace.util import (
+from ndsl.util import (
     X_DIM,
     X_INTERFACE_DIM,
     Y_DIM,
@@ -291,13 +291,13 @@ class LagrangianToEulerian:
     def __init__(
         self,
         stencil_factory: StencilFactory,
-        quantity_factory: pace.util.QuantityFactory,
+        quantity_factory: ndsl.util.QuantityFactory,
         config: RemappingConfig,
         area_64,
         nq,
         pfull,
         tracers: Dict[str, Quantity],
-        checkpointer: Optional[pace.util.Checkpointer] = None,
+        checkpointer: Optional[ndsl.util.Checkpointer] = None,
     ):
         orchestrate(
             obj=self,

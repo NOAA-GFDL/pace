@@ -4,13 +4,13 @@ import tempfile
 import numpy as np
 import pytest
 
-from pace.util._optional_imports import xarray as xr
-from pace.util.checkpointer import (
+from ndsl.util._optional_imports import xarray as xr
+from ndsl.util.checkpointer import (
     SavepointThresholds,
     Threshold,
     ValidationCheckpointer,
 )
-from pace.util.checkpointer.validation import _clip_pace_array_to_target
+from ndsl.util.checkpointer.validation import _clip_pace_array_to_target
 
 
 requires_xarray = pytest.mark.skipif(xr is None, reason="xarray is not installed")

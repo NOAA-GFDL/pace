@@ -2,7 +2,7 @@ from typing import List, Optional, Tuple
 
 from dace.sdfg import SDFG
 
-import pace.util
+import ndsl.util
 from ndsl.dsl.caches.cache_location import get_cache_directory, get_cache_fullpath
 from ndsl.dsl.dace.dace_config import DaceConfig, DaCeOrchestration
 
@@ -135,7 +135,7 @@ def set_distributed_caches(config: "DaceConfig"):
         verb = "reading"
 
     gt_config.cache_settings["dir_name"] = get_cache_directory(config.code_path)
-    pace.util.pace_log.info(
+    ndsl.util.pace_log.info(
         f"[{orchestration_mode}] Rank {config.my_rank} "
         f"{verb} cache {gt_config.cache_settings['dir_name']}"
     )

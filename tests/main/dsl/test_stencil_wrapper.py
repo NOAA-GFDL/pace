@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 from gt4py.cartesian.gtscript import PARALLEL, computation, interval
 
-import pace.util
+import ndsl.util
 from ndsl.dsl.dace.dace_config import DaceConfig, DaCeOrchestration
 from ndsl.dsl.gt4py_utils import make_storage_from_shape
 from ndsl.dsl.stencil import FrozenStencil, _convert_quantities_to_storage
@@ -299,7 +299,7 @@ def test_backend_options(
 
 
 def get_mock_quantity():
-    return unittest.mock.MagicMock(spec=pace.util.Quantity)
+    return unittest.mock.MagicMock(spec=ndsl.util.Quantity)
 
 
 def test_convert_quantities_to_storage_no_args():

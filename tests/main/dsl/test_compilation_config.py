@@ -4,8 +4,8 @@ from math import sqrt
 import pytest
 
 from ndsl.dsl.stencil import CompilationConfig, RunMode
-from pace.util.communicator import CubedSphereCommunicator
-from pace.util.partitioner import CubedSpherePartitioner, TilePartitioner
+from ndsl.util.communicator import CubedSphereCommunicator
+from ndsl.util.partitioner import CubedSpherePartitioner, TilePartitioner
 
 
 def test_safety_checks():

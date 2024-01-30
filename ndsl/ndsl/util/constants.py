@@ -1,7 +1,7 @@
 import os
 from enum import Enum
 
-from pace.util.logging import pace_log
+from ndsl.util.logging import pace_log
 
 
 # The FV3GFS model ships with two sets of constants, one used in the GFS physics

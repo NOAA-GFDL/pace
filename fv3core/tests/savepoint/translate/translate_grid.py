@@ -5,10 +5,10 @@ import pytest
 
 import ndsl.dsl
 import ndsl.dsl.gt4py_utils as utils
-import pace.util
+import ndsl.util
 from ndsl.stencils.testing.parallel_translate import ParallelTranslateGrid
-from pace.util.grid import MetricTerms, set_hybrid_pressure_coefficients
-from pace.util.grid.global_setup import global_mirror_grid, gnomonic_grid
+from ndsl.util.grid import MetricTerms, set_hybrid_pressure_coefficients
+from ndsl.util.grid.global_setup import global_mirror_grid, gnomonic_grid
 
 
 class TranslateGnomonicGrids(ParallelTranslateGrid):
@@ -17,13 +17,13 @@ class TranslateGnomonicGrids(ParallelTranslateGrid):
     inputs = {
         "lon": {
             "name": "longitude_on_cell_corners",
-            "dims": [pace.util.X_INTERFACE_DIM, pace.util.Y_INTERFACE_DIM],
+            "dims": [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_INTERFACE_DIM],
             "units": "radians",
             "n_halo": 0,
         },
         "lat": {
             "name": "latitude_on_cell_corners",
-            "dims": [pace.util.X_INTERFACE_DIM, pace.util.Y_INTERFACE_DIM],
+            "dims": [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_INTERFACE_DIM],
             "units": "radians",
             "n_halo": 0,
         },
@@ -31,13 +31,13 @@ class TranslateGnomonicGrids(ParallelTranslateGrid):
     outputs = {
         "lon": {
             "name": "longitude_on_cell_corners",
-            "dims": [pace.util.X_INTERFACE_DIM, pace.util.Y_INTERFACE_DIM],
+            "dims": [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_INTERFACE_DIM],
             "units": "radians",
             "n_halo": 0,
         },
         "lat": {
             "name": "latitude_on_cell_corners",
-            "dims": [pace.util.X_INTERFACE_DIM, pace.util.Y_INTERFACE_DIM],
+            "dims": [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_INTERFACE_DIM],
             "units": "radians",
             "n_halo": 0,
         },
@@ -68,8 +68,8 @@ class TranslateMirrorGrid(ParallelTranslateGrid):
         "master_grid_global": {
             "name": "grid_global",
             "dims": [
-                pace.util.X_INTERFACE_DIM,
-                pace.util.Y_INTERFACE_DIM,
+                ndsl.util.X_INTERFACE_DIM,
+                ndsl.util.Y_INTERFACE_DIM,
                 MetricTerms.LON_OR_LAT_DIM,
                 MetricTerms.TILE_DIM,
             ],
@@ -84,8 +84,8 @@ class TranslateMirrorGrid(ParallelTranslateGrid):
         "master_grid_global": {
             "name": "grid_global",
             "dims": [
-                pace.util.X_INTERFACE_DIM,
-                pace.util.Y_INTERFACE_DIM,
+                ndsl.util.X_INTERFACE_DIM,
+                ndsl.util.Y_INTERFACE_DIM,
                 MetricTerms.LON_OR_LAT_DIM,
                 MetricTerms.TILE_DIM,
             ],
@@ -120,7 +120,7 @@ class TranslateGridAreas(ParallelTranslateGrid):
     def __init__(
         self,
         rank_grids,
-        namelist: pace.util.Namelist,
+        namelist: ndsl.util.Namelist,
         stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(rank_grids, namelist, stencil_factory)
@@ -134,77 +134,77 @@ class TranslateGridAreas(ParallelTranslateGrid):
         "grid": {
             "name": "grid",
             "dims": [
-                pace.util.X_INTERFACE_DIM,
-                pace.util.Y_INTERFACE_DIM,
+                ndsl.util.X_INTERFACE_DIM,
+                ndsl.util.Y_INTERFACE_DIM,
                 MetricTerms.LON_OR_LAT_DIM,
             ],
             "units": "radians",
         },
         "agrid": {
             "name": "agrid",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM, MetricTerms.LON_OR_LAT_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, MetricTerms.LON_OR_LAT_DIM],
             "units": "radians",
         },
         "area": {
             "name": "area",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "m^2",
         },
         "area_c": {
             "name": "area_cgrid",
-            "dims": [pace.util.X_INTERFACE_DIM, pace.util.Y_INTERFACE_DIM],
+            "dims": [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_INTERFACE_DIM],
             "units": "m^2",
         },
         "dxa": {
             "name": "dx_agrid",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "m",
         },
         "dya": {
             "name": "dy_agrid",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "m",
         },
         "dxc": {
             "name": "dx_cgrid",
-            "dims": [pace.util.X_INTERFACE_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_DIM],
             "units": "m",
         },
         "dyc": {
             "name": "dy_cgrid",
-            "dims": [pace.util.X_DIM, pace.util.Y_INTERFACE_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_INTERFACE_DIM],
             "units": "m",
         },
     }
     outputs = {
         "area": {
             "name": "area",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "m^2",
         },
         "area_c": {
             "name": "area_cgrid",
-            "dims": [pace.util.X_INTERFACE_DIM, pace.util.Y_INTERFACE_DIM],
+            "dims": [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_INTERFACE_DIM],
             "units": "m^2",
         },
         "dxa": {
             "name": "dx_agrid",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "m",
         },
         "dya": {
             "name": "dy_agrid",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "m",
         },
         "dxc": {
             "name": "dx_cgrid",
-            "dims": [pace.util.X_INTERFACE_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_DIM],
             "units": "m",
         },
         "dyc": {
             "name": "dy_cgrid",
-            "dims": [pace.util.X_DIM, pace.util.Y_INTERFACE_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_INTERFACE_DIM],
             "units": "m",
         },
     }
@@ -234,8 +234,8 @@ class TranslateGridGrid(ParallelTranslateGrid):
         "grid_global": {
             "name": "grid",
             "dims": [
-                pace.util.X_INTERFACE_DIM,
-                pace.util.Y_INTERFACE_DIM,
+                ndsl.util.X_INTERFACE_DIM,
+                ndsl.util.Y_INTERFACE_DIM,
                 MetricTerms.LON_OR_LAT_DIM,
                 MetricTerms.TILE_DIM,
             ],
@@ -246,8 +246,8 @@ class TranslateGridGrid(ParallelTranslateGrid):
         "grid": {
             "name": "grid",
             "dims": [
-                pace.util.X_INTERFACE_DIM,
-                pace.util.Y_INTERFACE_DIM,
+                ndsl.util.X_INTERFACE_DIM,
+                ndsl.util.Y_INTERFACE_DIM,
                 MetricTerms.LON_OR_LAT_DIM,
             ],
             "units": "radians",
@@ -257,7 +257,7 @@ class TranslateGridGrid(ParallelTranslateGrid):
     def __init__(
         self,
         grids,
-        namelist: pace.util.Namelist,
+        namelist: ndsl.util.Namelist,
         stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(grids, namelist, stencil_factory)
@@ -287,7 +287,7 @@ class TranslateDxDy(ParallelTranslateGrid):
     def __init__(
         self,
         rank_grids,
-        namelist: pace.util.Namelist,
+        namelist: ndsl.util.Namelist,
         stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(rank_grids, namelist, stencil_factory)
@@ -299,8 +299,8 @@ class TranslateDxDy(ParallelTranslateGrid):
         "grid": {
             "name": "grid",
             "dims": [
-                pace.util.X_INTERFACE_DIM,
-                pace.util.Y_INTERFACE_DIM,
+                ndsl.util.X_INTERFACE_DIM,
+                ndsl.util.Y_INTERFACE_DIM,
                 MetricTerms.LON_OR_LAT_DIM,
             ],
             "units": "radians",
@@ -309,12 +309,12 @@ class TranslateDxDy(ParallelTranslateGrid):
     outputs = {
         "dx": {
             "name": "dx",
-            "dims": [pace.util.X_DIM, pace.util.Y_INTERFACE_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_INTERFACE_DIM],
             "units": "m",
         },
         "dy": {
             "name": "dy",
-            "dims": [pace.util.X_INTERFACE_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_DIM],
             "units": "m",
         },
     }
@@ -341,7 +341,7 @@ class TranslateAGrid(ParallelTranslateGrid):
     def __init__(
         self,
         rank_grids,
-        namelist: pace.util.Namelist,
+        namelist: ndsl.util.Namelist,
         stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(rank_grids, namelist, stencil_factory)
@@ -352,14 +352,14 @@ class TranslateAGrid(ParallelTranslateGrid):
     inputs = {
         "agrid": {
             "name": "agrid",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM, MetricTerms.LON_OR_LAT_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, MetricTerms.LON_OR_LAT_DIM],
             "units": "radians",
         },
         "grid": {
             "name": "grid",
             "dims": [
-                pace.util.X_INTERFACE_DIM,
-                pace.util.Y_INTERFACE_DIM,
+                ndsl.util.X_INTERFACE_DIM,
+                ndsl.util.Y_INTERFACE_DIM,
                 MetricTerms.LON_OR_LAT_DIM,
             ],
             "units": "radians",
@@ -368,14 +368,14 @@ class TranslateAGrid(ParallelTranslateGrid):
     outputs = {
         "agrid": {
             "name": "agrid",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM, MetricTerms.LON_OR_LAT_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, MetricTerms.LON_OR_LAT_DIM],
             "units": "radians",
         },
         "grid": {
             "name": "grid",
             "dims": [
-                pace.util.X_INTERFACE_DIM,
-                pace.util.Y_INTERFACE_DIM,
+                ndsl.util.X_INTERFACE_DIM,
+                ndsl.util.Y_INTERFACE_DIM,
                 MetricTerms.LON_OR_LAT_DIM,
             ],
             "units": "radians",
@@ -433,55 +433,55 @@ class TranslateInitGrid(ParallelTranslateGrid):
         "gridvar": {
             "name": "grid",
             "dims": [
-                pace.util.X_INTERFACE_DIM,
-                pace.util.Y_INTERFACE_DIM,
+                ndsl.util.X_INTERFACE_DIM,
+                ndsl.util.Y_INTERFACE_DIM,
                 MetricTerms.LON_OR_LAT_DIM,
             ],
             "units": "radians",
         },
         "agrid": {
             "name": "agrid",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM, MetricTerms.LON_OR_LAT_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, MetricTerms.LON_OR_LAT_DIM],
             "units": "radians",
         },
         "area": {
             "name": "area",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "m^2",
         },
         "area_c": {
             "name": "area_cgrid",
-            "dims": [pace.util.X_INTERFACE_DIM, pace.util.Y_INTERFACE_DIM],
+            "dims": [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_INTERFACE_DIM],
             "units": "m^2",
         },
         "dx": {
             "name": "dx",
-            "dims": [pace.util.X_DIM, pace.util.Y_INTERFACE_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_INTERFACE_DIM],
             "units": "m",
         },
         "dy": {
             "name": "dy",
-            "dims": [pace.util.X_INTERFACE_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_DIM],
             "units": "m",
         },
         "dxc": {
             "name": "dx_cgrid",
-            "dims": [pace.util.X_INTERFACE_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_DIM],
             "units": "m",
         },
         "dyc": {
             "name": "dy_cgrid",
-            "dims": [pace.util.X_DIM, pace.util.Y_INTERFACE_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_INTERFACE_DIM],
             "units": "m",
         },
         "dxa": {
             "name": "dx_agrid",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "m",
         },
         "dya": {
             "name": "dy_agrid",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "m",
         },
     }
@@ -489,7 +489,7 @@ class TranslateInitGrid(ParallelTranslateGrid):
     def __init__(
         self,
         grids,
-        namelist: pace.util.Namelist,
+        namelist: ndsl.util.Namelist,
         stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(grids, namelist, stencil_factory)
@@ -532,12 +532,12 @@ class TranslateSetEta(ParallelTranslateGrid):
         },
         "ak": {
             "name": "ak",
-            "dims": [pace.util.Z_INTERFACE_DIM],
+            "dims": [ndsl.util.Z_INTERFACE_DIM],
             "units": "mb",
         },
         "bk": {
             "name": "bk",
-            "dims": [pace.util.Z_INTERFACE_DIM],
+            "dims": [ndsl.util.Z_INTERFACE_DIM],
             "units": "",
         },
     }
@@ -549,12 +549,12 @@ class TranslateSetEta(ParallelTranslateGrid):
         },
         "ak": {
             "name": "ak",
-            "dims": [pace.util.Z_INTERFACE_DIM],
+            "dims": [ndsl.util.Z_INTERFACE_DIM],
             "units": "mb",
         },
         "bk": {
             "name": "bk",
-            "dims": [pace.util.Z_INTERFACE_DIM],
+            "dims": [ndsl.util.Z_INTERFACE_DIM],
             "units": "",
         },
     }
@@ -586,7 +586,7 @@ class TranslateUtilVectors(ParallelTranslateGrid):
     def __init__(
         self,
         grids,
-        namelist: pace.util.Namelist,
+        namelist: ndsl.util.Namelist,
         stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(grids, namelist, stencil_factory)
@@ -633,33 +633,33 @@ class TranslateUtilVectors(ParallelTranslateGrid):
         "grid": {
             "name": "grid",
             "dims": [
-                pace.util.X_INTERFACE_DIM,
-                pace.util.Y_INTERFACE_DIM,
+                ndsl.util.X_INTERFACE_DIM,
+                ndsl.util.Y_INTERFACE_DIM,
                 MetricTerms.LON_OR_LAT_DIM,
             ],
             "units": "radians",
         },
         "agrid": {
             "name": "agrid",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM, MetricTerms.LON_OR_LAT_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, MetricTerms.LON_OR_LAT_DIM],
             "units": "radians",
         },
         "ec1": {
             "name": "ec1",
-            "dims": [MetricTerms.CARTESIAN_DIM, pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [MetricTerms.CARTESIAN_DIM, ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "ec2": {
             "name": "ec2",
-            "dims": [MetricTerms.CARTESIAN_DIM, pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [MetricTerms.CARTESIAN_DIM, ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "ew1": {
             "name": "ew1",
             "dims": [
                 MetricTerms.CARTESIAN_DIM,
-                pace.util.X_INTERFACE_DIM,
-                pace.util.Y_DIM,
+                ndsl.util.X_INTERFACE_DIM,
+                ndsl.util.Y_DIM,
             ],
             "units": "",
         },
@@ -667,8 +667,8 @@ class TranslateUtilVectors(ParallelTranslateGrid):
             "name": "ew2",
             "dims": [
                 MetricTerms.CARTESIAN_DIM,
-                pace.util.X_INTERFACE_DIM,
-                pace.util.Y_DIM,
+                ndsl.util.X_INTERFACE_DIM,
+                ndsl.util.Y_DIM,
             ],
             "units": "",
         },
@@ -676,8 +676,8 @@ class TranslateUtilVectors(ParallelTranslateGrid):
             "name": "es1",
             "dims": [
                 MetricTerms.CARTESIAN_DIM,
-                pace.util.X_DIM,
-                pace.util.Y_INTERFACE_DIM,
+                ndsl.util.X_DIM,
+                ndsl.util.Y_INTERFACE_DIM,
             ],
             "units": "",
         },
@@ -685,8 +685,8 @@ class TranslateUtilVectors(ParallelTranslateGrid):
             "name": "es2",
             "dims": [
                 MetricTerms.CARTESIAN_DIM,
-                pace.util.X_DIM,
-                pace.util.Y_INTERFACE_DIM,
+                ndsl.util.X_DIM,
+                ndsl.util.Y_INTERFACE_DIM,
             ],
             "units": "",
         },
@@ -694,20 +694,20 @@ class TranslateUtilVectors(ParallelTranslateGrid):
     outputs: Dict[str, Any] = {
         "ec1": {
             "name": "ec1",
-            "dims": [MetricTerms.CARTESIAN_DIM, pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [MetricTerms.CARTESIAN_DIM, ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "ec2": {
             "name": "ec2",
-            "dims": [MetricTerms.CARTESIAN_DIM, pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [MetricTerms.CARTESIAN_DIM, ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "ew1": {
             "name": "ew1",
             "dims": [
                 MetricTerms.CARTESIAN_DIM,
-                pace.util.X_INTERFACE_DIM,
-                pace.util.Y_DIM,
+                ndsl.util.X_INTERFACE_DIM,
+                ndsl.util.Y_DIM,
             ],
             "units": "",
         },
@@ -715,8 +715,8 @@ class TranslateUtilVectors(ParallelTranslateGrid):
             "name": "ew2",
             "dims": [
                 MetricTerms.CARTESIAN_DIM,
-                pace.util.X_INTERFACE_DIM,
-                pace.util.Y_DIM,
+                ndsl.util.X_INTERFACE_DIM,
+                ndsl.util.Y_DIM,
             ],
             "units": "",
         },
@@ -724,8 +724,8 @@ class TranslateUtilVectors(ParallelTranslateGrid):
             "name": "es1",
             "dims": [
                 MetricTerms.CARTESIAN_DIM,
-                pace.util.X_DIM,
-                pace.util.Y_INTERFACE_DIM,
+                ndsl.util.X_DIM,
+                ndsl.util.Y_INTERFACE_DIM,
             ],
             "units": "",
         },
@@ -733,8 +733,8 @@ class TranslateUtilVectors(ParallelTranslateGrid):
             "name": "es2",
             "dims": [
                 MetricTerms.CARTESIAN_DIM,
-                pace.util.X_DIM,
-                pace.util.Y_INTERFACE_DIM,
+                ndsl.util.X_DIM,
+                ndsl.util.Y_INTERFACE_DIM,
             ],
             "units": "",
         },
@@ -763,7 +763,7 @@ class TranslateTrigSg(ParallelTranslateGrid):
     def __init__(
         self,
         grids,
-        namelist: pace.util.Namelist,
+        namelist: ndsl.util.Namelist,
         stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(grids, namelist, stencil_factory)
@@ -801,207 +801,207 @@ class TranslateTrigSg(ParallelTranslateGrid):
         "grid": {
             "name": "grid",
             "dims": [
-                pace.util.X_INTERFACE_DIM,
-                pace.util.Y_INTERFACE_DIM,
+                ndsl.util.X_INTERFACE_DIM,
+                ndsl.util.Y_INTERFACE_DIM,
                 MetricTerms.LON_OR_LAT_DIM,
             ],
             "units": "",
         },
         "agrid": {
             "name": "agrid",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM, MetricTerms.LON_OR_LAT_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, MetricTerms.LON_OR_LAT_DIM],
             "units": "radians",
         },
         "cos_sg1": {
             "name": "cos_sg1",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "sin_sg1": {
             "name": "sin_sg1",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "cos_sg2": {
             "name": "cos_sg2",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "sin_sg2": {
             "name": "sin_sg2",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "cos_sg3": {
             "name": "cos_sg3",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "sin_sg3": {
             "name": "sin_sg3",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "cos_sg4": {
             "name": "cos_sg4",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "sin_sg4": {
             "name": "sin_sg4",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "cos_sg5": {
             "name": "cos_sg5",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "sin_sg5": {
             "name": "sin_sg5",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "cos_sg6": {
             "name": "cos_sg6",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "sin_sg6": {
             "name": "sin_sg6",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "cos_sg7": {
             "name": "cos_sg7",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "sin_sg7": {
             "name": "sin_sg7",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "cos_sg8": {
             "name": "cos_sg8",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "sin_sg8": {
             "name": "sin_sg8",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "cos_sg9": {
             "name": "cos_sg9",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "sin_sg9": {
             "name": "sin_sg9",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "ec1": {
             "name": "ec1",
-            "dims": [MetricTerms.CARTESIAN_DIM, pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [MetricTerms.CARTESIAN_DIM, ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "ec2": {
             "name": "ec2",
-            "dims": [MetricTerms.CARTESIAN_DIM, pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [MetricTerms.CARTESIAN_DIM, ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
     }
     outputs: Dict[str, Any] = {
         "cos_sg1": {
             "name": "cos_sg1",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "sin_sg1": {
             "name": "sin_sg1",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "cos_sg2": {
             "name": "cos_sg2",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "sin_sg2": {
             "name": "sin_sg2",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "cos_sg3": {
             "name": "cos_sg3",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "sin_sg3": {
             "name": "sin_sg3",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "cos_sg4": {
             "name": "cos_sg4",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "sin_sg4": {
             "name": "sin_sg4",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "cos_sg5": {
             "name": "cos_sg5",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "sin_sg5": {
             "name": "sin_sg5",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "cos_sg6": {
             "name": "cos_sg6",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "sin_sg6": {
             "name": "sin_sg6",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "cos_sg7": {
             "name": "cos_sg7",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "sin_sg7": {
             "name": "sin_sg7",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "cos_sg8": {
             "name": "cos_sg8",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "sin_sg8": {
             "name": "sin_sg8",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "cos_sg9": {
             "name": "cos_sg9",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "sin_sg9": {
             "name": "sin_sg9",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
     }
@@ -1035,7 +1035,7 @@ class TranslateAAMCorrection(ParallelTranslateGrid):
     def __init__(
         self,
         rank_grids,
-        namelist: pace.util.Namelist,
+        namelist: ndsl.util.Namelist,
         stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(rank_grids, namelist, stencil_factory)
@@ -1049,21 +1049,21 @@ class TranslateAAMCorrection(ParallelTranslateGrid):
         "grid": {
             "name": "grid",
             "dims": [
-                pace.util.X_INTERFACE_DIM,
-                pace.util.Y_INTERFACE_DIM,
+                ndsl.util.X_INTERFACE_DIM,
+                ndsl.util.Y_INTERFACE_DIM,
                 MetricTerms.LON_OR_LAT_DIM,
             ],
             "units": "radians",
         },
         "l2c_v": {
             "name": "l2c_v",
-            "dims": [pace.util.X_INTERFACE_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_DIM],
             "units": "",
             "n_halo": 0,
         },
         "l2c_u": {
             "name": "l2c_u",
-            "dims": [pace.util.X_DIM, pace.util.Y_INTERFACE_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_INTERFACE_DIM],
             "units": "",
             "n_halo": 0,
         },
@@ -1071,13 +1071,13 @@ class TranslateAAMCorrection(ParallelTranslateGrid):
     outputs: Dict[str, Any] = {
         "l2c_v": {
             "name": "l2c_v",
-            "dims": [pace.util.X_INTERFACE_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_DIM],
             "units": "",
             "n_halo": 0,
         },
         "l2c_u": {
             "name": "l2c_u",
-            "dims": [pace.util.X_DIM, pace.util.Y_INTERFACE_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_INTERFACE_DIM],
             "units": "",
             "n_halo": 0,
         },
@@ -1105,7 +1105,7 @@ class TranslateDerivedTrig(ParallelTranslateGrid):
     def __init__(
         self,
         grids,
-        namelist: pace.util.Namelist,
+        namelist: ndsl.util.Namelist,
         stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(grids, namelist, stencil_factory)
@@ -1129,108 +1129,108 @@ class TranslateDerivedTrig(ParallelTranslateGrid):
         "grid": {
             "name": "grid",
             "dims": [
-                pace.util.X_INTERFACE_DIM,
-                pace.util.Y_INTERFACE_DIM,
+                ndsl.util.X_INTERFACE_DIM,
+                ndsl.util.Y_INTERFACE_DIM,
                 MetricTerms.LON_OR_LAT_DIM,
             ],
             "units": "radians",
         },
         "cos_sg1": {
             "name": "cos_sg1",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "sin_sg1": {
             "name": "sin_sg1",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "cos_sg2": {
             "name": "cos_sg2",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "sin_sg2": {
             "name": "sin_sg2",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "cos_sg3": {
             "name": "cos_sg3",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "sin_sg3": {
             "name": "sin_sg3",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "cos_sg4": {
             "name": "cos_sg4",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "sin_sg4": {
             "name": "sin_sg4",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "cos_sg5": {
             "name": "cos_sg5",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "sin_sg5": {
             "name": "sin_sg5",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "cos_sg6": {
             "name": "cos_sg6",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "sin_sg6": {
             "name": "sin_sg6",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "cos_sg7": {
             "name": "cos_sg7",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "sin_sg7": {
             "name": "sin_sg7",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "cos_sg8": {
             "name": "cos_sg8",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "sin_sg8": {
             "name": "sin_sg8",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "cos_sg9": {
             "name": "cos_sg9",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "sin_sg9": {
             "name": "sin_sg9",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "ee1": {
             "name": "ee1",
             "dims": [
                 MetricTerms.CARTESIAN_DIM,
-                pace.util.X_INTERFACE_DIM,
-                pace.util.Y_INTERFACE_DIM,
+                ndsl.util.X_INTERFACE_DIM,
+                ndsl.util.Y_INTERFACE_DIM,
             ],
             "units": "",
         },
@@ -1238,65 +1238,65 @@ class TranslateDerivedTrig(ParallelTranslateGrid):
             "name": "ee2",
             "dims": [
                 MetricTerms.CARTESIAN_DIM,
-                pace.util.X_INTERFACE_DIM,
-                pace.util.Y_INTERFACE_DIM,
+                ndsl.util.X_INTERFACE_DIM,
+                ndsl.util.Y_INTERFACE_DIM,
             ],
             "units": "",
         },
         "cosa_u": {
             "name": "cosa_u",
-            "dims": [pace.util.X_INTERFACE_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "cosa_v": {
             "name": "cosa_v",
-            "dims": [pace.util.X_DIM, pace.util.Y_INTERFACE_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_INTERFACE_DIM],
             "units": "",
         },
         "cosa_s": {
             "name": "cosa_s",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "sina_u": {
             "name": "sina_u",
-            "dims": [pace.util.X_INTERFACE_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "sina_v": {
             "name": "sina_v",
-            "dims": [pace.util.X_DIM, pace.util.Y_INTERFACE_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_INTERFACE_DIM],
             "units": "",
         },
         "rsin_u": {
             "name": "rsin_u",
-            "dims": [pace.util.X_INTERFACE_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "rsin_v": {
             "name": "rsin_v",
-            "dims": [pace.util.X_DIM, pace.util.Y_INTERFACE_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_INTERFACE_DIM],
             "units": "",
         },
         "rsina": {
             "name": "rsina",
-            "dims": [pace.util.X_INTERFACE_DIM, pace.util.Y_INTERFACE_DIM],
+            "dims": [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_INTERFACE_DIM],
             "units": "",
             "n_halo": 0,
         },
         "rsin2": {
             "name": "rsin2",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "cosa": {
             "name": "cosa",
-            "dims": [pace.util.X_INTERFACE_DIM, pace.util.Y_INTERFACE_DIM],
+            "dims": [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_INTERFACE_DIM],
             "units": "",
         },
         "sina": {
             "name": "sina",
-            "dims": [pace.util.X_INTERFACE_DIM, pace.util.Y_INTERFACE_DIM],
+            "dims": [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_INTERFACE_DIM],
             "units": "",
         },
     }
@@ -1305,8 +1305,8 @@ class TranslateDerivedTrig(ParallelTranslateGrid):
             "name": "ee1",
             "dims": [
                 MetricTerms.CARTESIAN_DIM,
-                pace.util.X_INTERFACE_DIM,
-                pace.util.Y_INTERFACE_DIM,
+                ndsl.util.X_INTERFACE_DIM,
+                ndsl.util.Y_INTERFACE_DIM,
             ],
             "units": "",
         },
@@ -1314,65 +1314,65 @@ class TranslateDerivedTrig(ParallelTranslateGrid):
             "name": "ee2",
             "dims": [
                 MetricTerms.CARTESIAN_DIM,
-                pace.util.X_INTERFACE_DIM,
-                pace.util.Y_INTERFACE_DIM,
+                ndsl.util.X_INTERFACE_DIM,
+                ndsl.util.Y_INTERFACE_DIM,
             ],
             "units": "",
         },
         "cosa_u": {
             "name": "cosa_u",
-            "dims": [pace.util.X_INTERFACE_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "cosa_v": {
             "name": "cosa_v",
-            "dims": [pace.util.X_DIM, pace.util.Y_INTERFACE_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_INTERFACE_DIM],
             "units": "",
         },
         "cosa_s": {
             "name": "cosa_s",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "sina_u": {
             "name": "sina_u",
-            "dims": [pace.util.X_INTERFACE_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "sina_v": {
             "name": "sina_v",
-            "dims": [pace.util.X_DIM, pace.util.Y_INTERFACE_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_INTERFACE_DIM],
             "units": "",
         },
         "rsin_u": {
             "name": "rsin_u",
-            "dims": [pace.util.X_INTERFACE_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "rsin_v": {
             "name": "rsin_v",
-            "dims": [pace.util.X_DIM, pace.util.Y_INTERFACE_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_INTERFACE_DIM],
             "units": "",
         },
         "rsina": {
             "name": "rsina",
-            "dims": [pace.util.X_INTERFACE_DIM, pace.util.Y_INTERFACE_DIM],
+            "dims": [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_INTERFACE_DIM],
             "units": "",
             "n_halo": 0,
         },
         "rsin2": {
             "name": "rsin2",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "cosa": {
             "name": "cosa",
-            "dims": [pace.util.X_INTERFACE_DIM, pace.util.Y_INTERFACE_DIM],
+            "dims": [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_INTERFACE_DIM],
             "units": "",
         },
         "sina": {
             "name": "sina",
-            "dims": [pace.util.X_INTERFACE_DIM, pace.util.Y_INTERFACE_DIM],
+            "dims": [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_INTERFACE_DIM],
             "units": "",
         },
     }
@@ -1418,7 +1418,7 @@ class TranslateDivgDel6(ParallelTranslateGrid):
     def __init__(
         self,
         rank_grids,
-        namelist: pace.util.Namelist,
+        namelist: ndsl.util.Namelist,
         stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(rank_grids, namelist, stencil_factory)
@@ -1429,94 +1429,94 @@ class TranslateDivgDel6(ParallelTranslateGrid):
     inputs: Dict[str, Any] = {
         "sin_sg1": {
             "name": "sin_sg1",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "sin_sg2": {
             "name": "sin_sg2",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "sin_sg3": {
             "name": "sin_sg3",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "sin_sg4": {
             "name": "sin_sg4",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "sina_u": {
             "name": "sina_u",
-            "dims": [pace.util.X_INTERFACE_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "sina_v": {
             "name": "sina_v",
-            "dims": [pace.util.X_DIM, pace.util.Y_INTERFACE_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_INTERFACE_DIM],
             "units": "",
         },
         "dx": {
             "name": "dx",
-            "dims": [pace.util.X_DIM, pace.util.Y_INTERFACE_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_INTERFACE_DIM],
             "units": "m",
         },
         "dy": {
             "name": "dy",
-            "dims": [pace.util.X_INTERFACE_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_DIM],
             "units": "m",
         },
         "dxc": {
             "name": "dx_cgrid",
-            "dims": [pace.util.X_INTERFACE_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_DIM],
             "units": "m",
         },
         "dyc": {
             "name": "dy_cgrid",
-            "dims": [pace.util.X_DIM, pace.util.Y_INTERFACE_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_INTERFACE_DIM],
             "units": "",
         },
         "divg_u": {
             "name": "divg_u",
-            "dims": [pace.util.X_DIM, pace.util.Y_INTERFACE_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_INTERFACE_DIM],
             "units": "",
         },
         "divg_v": {
             "name": "divg_v",
-            "dims": [pace.util.X_INTERFACE_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_DIM],
             "units": "m",
         },
         "del6_u": {
             "name": "del6_u",
-            "dims": [pace.util.X_DIM, pace.util.Y_INTERFACE_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_INTERFACE_DIM],
             "units": "",
         },
         "del6_v": {
             "name": "del6_v",
-            "dims": [pace.util.X_INTERFACE_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
     }
     outputs: Dict[str, Any] = {
         "divg_u": {
             "name": "divg_u",
-            "dims": [pace.util.X_DIM, pace.util.Y_INTERFACE_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_INTERFACE_DIM],
             "units": "",
         },
         "divg_v": {
             "name": "divg_v",
-            "dims": [pace.util.X_INTERFACE_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "del6_u": {
             "name": "del6_u",
-            "dims": [pace.util.X_DIM, pace.util.Y_INTERFACE_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_INTERFACE_DIM],
             "units": "",
         },
         "del6_v": {
             "name": "del6_v",
-            "dims": [pace.util.X_INTERFACE_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
     }
@@ -1553,7 +1553,7 @@ class TranslateInitCubedtoLatLon(ParallelTranslateGrid):
     def __init__(
         self,
         grids,
-        namelist: pace.util.Namelist,
+        namelist: ndsl.util.Namelist,
         stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(grids, namelist, stencil_factory)
@@ -1574,83 +1574,83 @@ class TranslateInitCubedtoLatLon(ParallelTranslateGrid):
     inputs: Dict[str, Any] = {
         "agrid": {
             "name": "agrid",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM, MetricTerms.LON_OR_LAT_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, MetricTerms.LON_OR_LAT_DIM],
             "units": "radians",
         },
         "ec1": {
             "name": "ec1",
-            "dims": [MetricTerms.CARTESIAN_DIM, pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [MetricTerms.CARTESIAN_DIM, ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "ec2": {
             "name": "ec2",
-            "dims": [MetricTerms.CARTESIAN_DIM, pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [MetricTerms.CARTESIAN_DIM, ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "sin_sg5": {
             "name": "sin_sg5",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
     }
     outputs: Dict[str, Any] = {
         "vlon": {
             "name": "vlon",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM, MetricTerms.CARTESIAN_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, MetricTerms.CARTESIAN_DIM],
             "units": "",
             "n_halo": 2,
         },
         "vlat": {
             "name": "vlat",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM, MetricTerms.CARTESIAN_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, MetricTerms.CARTESIAN_DIM],
             "units": "",
             "n_halo": 2,
         },
         "z11": {
             "name": "z11",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
             "n_halo": 1,
         },
         "z12": {
             "name": "z12",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
             "n_halo": 1,
         },
         "z21": {
             "name": "z21",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
             "n_halo": 1,
         },
         "z22": {
             "name": "z22",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
             "n_halo": 1,
         },
         "a11": {
             "name": "a11",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
             "n_halo": 1,
         },
         "a12": {
             "name": "a12",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
             "n_halo": 1,
         },
         "a21": {
             "name": "a21",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
             "n_halo": 1,
         },
         "a22": {
             "name": "a22",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
             "n_halo": 1,
         },
@@ -1681,7 +1681,7 @@ class TranslateEdgeFactors(ParallelTranslateGrid):
     def __init__(
         self,
         rank_grids,
-        namelist: pace.util.Namelist,
+        namelist: ndsl.util.Namelist,
         stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(rank_grids, namelist, stencil_factory)
@@ -1693,105 +1693,105 @@ class TranslateEdgeFactors(ParallelTranslateGrid):
         "grid": {
             "name": "grid",
             "dims": [
-                pace.util.X_INTERFACE_DIM,
-                pace.util.Y_INTERFACE_DIM,
+                ndsl.util.X_INTERFACE_DIM,
+                ndsl.util.Y_INTERFACE_DIM,
                 MetricTerms.LON_OR_LAT_DIM,
             ],
             "units": "radians",
         },
         "agrid": {
             "name": "agrid",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM, MetricTerms.LON_OR_LAT_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, MetricTerms.LON_OR_LAT_DIM],
             "units": "radians",
         },
         "edge_s": {
             "name": "edge_s",
-            "dims": [pace.util.X_INTERFACE_DIM],
+            "dims": [ndsl.util.X_INTERFACE_DIM],
             "units": "",
             "n_halo": 0,
         },
         "edge_n": {
             "name": "edge_n",
-            "dims": [pace.util.X_INTERFACE_DIM],
+            "dims": [ndsl.util.X_INTERFACE_DIM],
             "units": "",
             "n_halo": 0,
         },
         "edge_e": {
             "name": "edge_e",
-            "dims": [pace.util.Y_INTERFACE_DIM],
+            "dims": [ndsl.util.Y_INTERFACE_DIM],
             "units": "",
             "n_halo": 0,
         },
         "edge_w": {
             "name": "edge_w",
-            "dims": [pace.util.Y_INTERFACE_DIM],
+            "dims": [ndsl.util.Y_INTERFACE_DIM],
             "units": "",
             "n_halo": 0,
         },
         "edge_vect_s": {
             "name": "edge_vect_s",
-            "dims": [pace.util.X_DIM],
+            "dims": [ndsl.util.X_DIM],
             "units": "",
         },
         "edge_vect_n": {
             "name": "edge_vect_n",
-            "dims": [pace.util.X_DIM],
+            "dims": [ndsl.util.X_DIM],
             "units": "",
         },
         "edge_vect_e": {
             "name": "edge_vect_e",
-            "dims": [pace.util.Y_DIM],
+            "dims": [ndsl.util.Y_DIM],
             "units": "",
         },
         "edge_vect_w": {
             "name": "edge_vect_w",
-            "dims": [pace.util.Y_DIM],
+            "dims": [ndsl.util.Y_DIM],
             "units": "",
         },
     }
     outputs: Dict[str, Any] = {
         "edge_s": {
             "name": "edge_s",
-            "dims": [pace.util.X_INTERFACE_DIM],
+            "dims": [ndsl.util.X_INTERFACE_DIM],
             "units": "",
             "n_halo": 0,
         },
         "edge_n": {
             "name": "edge_n",
-            "dims": [pace.util.X_INTERFACE_DIM],
+            "dims": [ndsl.util.X_INTERFACE_DIM],
             "units": "",
             "n_halo": 0,
         },
         "edge_e": {
             "name": "edge_e",
-            "dims": [pace.util.Y_INTERFACE_DIM],
+            "dims": [ndsl.util.Y_INTERFACE_DIM],
             "units": "",
             "n_halo": 0,
         },
         "edge_w": {
             "name": "edge_w",
-            "dims": [pace.util.Y_INTERFACE_DIM],
+            "dims": [ndsl.util.Y_INTERFACE_DIM],
             "units": "",
             "n_halo": 0,
         },
         "edge_vect_s": {
             "name": "edge_vect_s",
-            "dims": [pace.util.X_DIM],
+            "dims": [ndsl.util.X_DIM],
             "units": "",
         },
         "edge_vect_n": {
             "name": "edge_vect_n",
-            "dims": [pace.util.X_DIM],
+            "dims": [ndsl.util.X_DIM],
             "units": "",
         },
         "edge_vect_e": {
             "name": "edge_vect_e",
-            "dims": [pace.util.Y_DIM],
+            "dims": [ndsl.util.Y_DIM],
             "units": "",
         },
         "edge_vect_w": {
             "name": "edge_vect_w",
-            "dims": [pace.util.Y_DIM],
+            "dims": [ndsl.util.Y_DIM],
             "units": "",
         },
     }
@@ -1820,7 +1820,7 @@ class TranslateInitGridUtils(ParallelTranslateGrid):
     def __init__(
         self,
         grids,
-        namelist: pace.util.Namelist,
+        namelist: ndsl.util.Namelist,
         stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(grids, namelist, stencil_factory)
@@ -1885,55 +1885,55 @@ class TranslateInitGridUtils(ParallelTranslateGrid):
         "gridvar": {
             "name": "grid",
             "dims": [
-                pace.util.X_INTERFACE_DIM,
-                pace.util.Y_INTERFACE_DIM,
+                ndsl.util.X_INTERFACE_DIM,
+                ndsl.util.Y_INTERFACE_DIM,
                 MetricTerms.LON_OR_LAT_DIM,
             ],
             "units": "radians",
         },
         "agrid": {
             "name": "agrid",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM, MetricTerms.LON_OR_LAT_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, MetricTerms.LON_OR_LAT_DIM],
             "units": "radians",
         },
         "area": {
             "name": "area",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "m^2",
         },
         "area_c": {
             "name": "area_cgrid",
-            "dims": [pace.util.X_INTERFACE_DIM, pace.util.Y_INTERFACE_DIM],
+            "dims": [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_INTERFACE_DIM],
             "units": "m^2",
         },
         "dx": {
             "name": "dx",
-            "dims": [pace.util.X_DIM, pace.util.Y_INTERFACE_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_INTERFACE_DIM],
             "units": "m",
         },
         "dy": {
             "name": "dy",
-            "dims": [pace.util.X_INTERFACE_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_DIM],
             "units": "m",
         },
         "dxc": {
             "name": "dx_cgrid",
-            "dims": [pace.util.X_INTERFACE_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_DIM],
             "units": "m",
         },
         "dyc": {
             "name": "dy_cgrid",
-            "dims": [pace.util.X_DIM, pace.util.Y_INTERFACE_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_INTERFACE_DIM],
             "units": "m",
         },
         "dxa": {
             "name": "dx_agrid",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "m",
         },
         "dya": {
             "name": "dy_agrid",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "m",
         },
         "npz": {
@@ -1955,30 +1955,30 @@ class TranslateInitGridUtils(ParallelTranslateGrid):
         },
         "ak": {
             "name": "ak",
-            "dims": [pace.util.Z_INTERFACE_DIM],
+            "dims": [ndsl.util.Z_INTERFACE_DIM],
             "units": "mb",
         },
         "bk": {
             "name": "bk",
-            "dims": [pace.util.Z_INTERFACE_DIM],
+            "dims": [ndsl.util.Z_INTERFACE_DIM],
             "units": "",
         },
         "ec1": {
             "name": "ec1",
-            "dims": [MetricTerms.CARTESIAN_DIM, pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [MetricTerms.CARTESIAN_DIM, ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "ec2": {
             "name": "ec2",
-            "dims": [MetricTerms.CARTESIAN_DIM, pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [MetricTerms.CARTESIAN_DIM, ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "ew1": {
             "name": "ew1",
             "dims": [
                 MetricTerms.CARTESIAN_DIM,
-                pace.util.X_INTERFACE_DIM,
-                pace.util.Y_DIM,
+                ndsl.util.X_INTERFACE_DIM,
+                ndsl.util.Y_DIM,
             ],
             "units": "",
         },
@@ -1986,8 +1986,8 @@ class TranslateInitGridUtils(ParallelTranslateGrid):
             "name": "ew2",
             "dims": [
                 MetricTerms.CARTESIAN_DIM,
-                pace.util.X_INTERFACE_DIM,
-                pace.util.Y_DIM,
+                ndsl.util.X_INTERFACE_DIM,
+                ndsl.util.Y_DIM,
             ],
             "units": "",
         },
@@ -1995,8 +1995,8 @@ class TranslateInitGridUtils(ParallelTranslateGrid):
             "name": "es1",
             "dims": [
                 MetricTerms.CARTESIAN_DIM,
-                pace.util.X_DIM,
-                pace.util.Y_INTERFACE_DIM,
+                ndsl.util.X_DIM,
+                ndsl.util.Y_INTERFACE_DIM,
             ],
             "units": "",
         },
@@ -2004,110 +2004,110 @@ class TranslateInitGridUtils(ParallelTranslateGrid):
             "name": "es2",
             "dims": [
                 MetricTerms.CARTESIAN_DIM,
-                pace.util.X_DIM,
-                pace.util.Y_INTERFACE_DIM,
+                ndsl.util.X_DIM,
+                ndsl.util.Y_INTERFACE_DIM,
             ],
             "units": "",
         },
         "cos_sg1": {
             "name": "cos_sg1",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "sin_sg1": {
             "name": "sin_sg1",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "cos_sg2": {
             "name": "cos_sg2",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "sin_sg2": {
             "name": "sin_sg2",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "cos_sg3": {
             "name": "cos_sg3",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "sin_sg3": {
             "name": "sin_sg3",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "cos_sg4": {
             "name": "cos_sg4",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "sin_sg4": {
             "name": "sin_sg4",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "cos_sg5": {
             "name": "cos_sg5",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "sin_sg5": {
             "name": "sin_sg5",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "cos_sg6": {
             "name": "cos_sg6",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "sin_sg6": {
             "name": "sin_sg6",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "cos_sg7": {
             "name": "cos_sg7",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "sin_sg7": {
             "name": "sin_sg7",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "cos_sg8": {
             "name": "cos_sg8",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "sin_sg8": {
             "name": "sin_sg8",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "cos_sg9": {
             "name": "cos_sg9",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "sin_sg9": {
             "name": "sin_sg9",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "l2c_v": {
             "name": "l2c_v",
-            "dims": [pace.util.X_INTERFACE_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_DIM],
             "units": "",
             "n_halo": 0,
         },
         "l2c_u": {
             "name": "l2c_u",
-            "dims": [pace.util.X_DIM, pace.util.Y_INTERFACE_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_INTERFACE_DIM],
             "units": "",
             "n_halo": 0,
         },
@@ -2115,8 +2115,8 @@ class TranslateInitGridUtils(ParallelTranslateGrid):
             "name": "ee1",
             "dims": [
                 MetricTerms.CARTESIAN_DIM,
-                pace.util.X_INTERFACE_DIM,
-                pace.util.Y_INTERFACE_DIM,
+                ndsl.util.X_INTERFACE_DIM,
+                ndsl.util.Y_INTERFACE_DIM,
             ],
             "units": "",
         },
@@ -2124,165 +2124,165 @@ class TranslateInitGridUtils(ParallelTranslateGrid):
             "name": "ee2",
             "dims": [
                 MetricTerms.CARTESIAN_DIM,
-                pace.util.X_INTERFACE_DIM,
-                pace.util.Y_INTERFACE_DIM,
+                ndsl.util.X_INTERFACE_DIM,
+                ndsl.util.Y_INTERFACE_DIM,
             ],
             "units": "",
         },
         "cosa_u": {
             "name": "cosa_u",
-            "dims": [pace.util.X_INTERFACE_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "cosa_v": {
             "name": "cosa_v",
-            "dims": [pace.util.X_DIM, pace.util.Y_INTERFACE_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_INTERFACE_DIM],
             "units": "",
         },
         "cosa_s": {
             "name": "cosa_s",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "sina_u": {
             "name": "sina_u",
-            "dims": [pace.util.X_INTERFACE_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "sina_v": {
             "name": "sina_v",
-            "dims": [pace.util.X_DIM, pace.util.Y_INTERFACE_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_INTERFACE_DIM],
             "units": "",
         },
         "rsin_u": {
             "name": "rsin_u",
-            "dims": [pace.util.X_INTERFACE_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "rsin_v": {
             "name": "rsin_v",
-            "dims": [pace.util.X_DIM, pace.util.Y_INTERFACE_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_INTERFACE_DIM],
             "units": "",
         },
         "rsina": {
             "name": "rsina",
-            "dims": [pace.util.X_INTERFACE_DIM, pace.util.Y_INTERFACE_DIM],
+            "dims": [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_INTERFACE_DIM],
             "units": "",
             "n_halo": 0,
         },
         "rsin2": {
             "name": "rsin2",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "cosa": {
             "name": "cosa",
-            "dims": [pace.util.X_INTERFACE_DIM, pace.util.Y_INTERFACE_DIM],
+            "dims": [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_INTERFACE_DIM],
             "units": "",
         },
         "sina": {
             "name": "sina",
-            "dims": [pace.util.X_INTERFACE_DIM, pace.util.Y_INTERFACE_DIM],
+            "dims": [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_INTERFACE_DIM],
             "units": "",
         },
         "divg_u": {
             "name": "divg_u",
-            "dims": [pace.util.X_DIM, pace.util.Y_INTERFACE_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_INTERFACE_DIM],
             "units": "",
         },
         "divg_v": {
             "name": "divg_v",
-            "dims": [pace.util.X_INTERFACE_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "del6_u": {
             "name": "del6_u",
-            "dims": [pace.util.X_DIM, pace.util.Y_INTERFACE_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_INTERFACE_DIM],
             "units": "",
         },
         "del6_v": {
             "name": "del6_v",
-            "dims": [pace.util.X_INTERFACE_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_DIM],
             "units": "",
         },
         "vlon": {
             "name": "vlon",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM, MetricTerms.CARTESIAN_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, MetricTerms.CARTESIAN_DIM],
             "units": "",
             "n_halo": 2,
         },
         "vlat": {
             "name": "vlat",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM, MetricTerms.CARTESIAN_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, MetricTerms.CARTESIAN_DIM],
             "units": "",
             "n_halo": 2,
         },
         "z11": {
             "name": "z11",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
             "n_halo": 1,
         },
         "z12": {
             "name": "z12",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
             "n_halo": 1,
         },
         "z21": {
             "name": "z21",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
             "n_halo": 1,
         },
         "z22": {
             "name": "z22",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
             "n_halo": 1,
         },
         "a11": {
             "name": "a11",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
             "n_halo": 1,
         },
         "a12": {
             "name": "a12",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
             "n_halo": 1,
         },
         "a21": {
             "name": "a21",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
             "n_halo": 1,
         },
         "a22": {
             "name": "a22",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM],
+            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
             "units": "",
             "n_halo": 1,
         },
         "edge_vect_s": {
             "name": "edge_vect_s",
-            "dims": [pace.util.X_DIM],
+            "dims": [ndsl.util.X_DIM],
             "units": "",
         },
         "edge_vect_n": {
             "name": "edge_vect_n",
-            "dims": [pace.util.X_DIM],
+            "dims": [ndsl.util.X_DIM],
             "units": "",
         },
         "edge_vect_e": {
             "name": "edge_vect_e",
-            "dims": [pace.util.Y_DIM],
+            "dims": [ndsl.util.Y_DIM],
             "units": "",
         },
         "edge_vect_w": {
             "name": "edge_vect_w",
-            "dims": [pace.util.Y_DIM],
+            "dims": [ndsl.util.Y_DIM],
             "units": "",
         },
         "da_min": {

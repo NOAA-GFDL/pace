@@ -22,13 +22,13 @@ import numpy as np
 from gt4py.cartesian import gtscript
 from gt4py.cartesian.gtc.passes.oir_pipeline import DefaultPipeline, OirPipeline
 
-import pace.util
+import ndsl.util
 from ndsl.dsl.dace.orchestration import SDFGConvertible
 from ndsl.dsl.stencil_config import CompilationConfig, RunMode, StencilConfig
 from ndsl.dsl.typing import Float, Index3D, cast_to_index3d
-from pace.util import testing
-from pace.util.decomposition import block_waiting_for_compilation, unblock_waiting_tiles
-from pace.util.mpi import MPI
+from ndsl.util import testing
+from ndsl.util.decomposition import block_waiting_for_compilation, unblock_waiting_tiles
+from ndsl.util.mpi import MPI
 
 
 try:
@@ -41,13 +41,13 @@ def report_difference(args, kwargs, args_copy, kwargs_copy, function_name, gt_id
     report_head = f"comparing against numpy for func {function_name}, gt_id {gt_id}:"
     report_segments = []
     for i, (arg, numpy_arg) in enumerate(zip(args, args_copy)):
-        if isinstance(arg, pace.util.Quantity):
+        if isinstance(arg, ndsl.util.Quantity):
             arg = arg.data
             numpy_arg = numpy_arg.data
         if isinstance(arg, np.ndarray):
             report_segments.append(report_diff(arg, numpy_arg, label=f"arg {i}"))
     for name in kwargs:
-        if isinstance(kwargs[name], pace.util.Quantity):
+        if isinstance(kwargs[name], ndsl.util.Quantity):
             kwarg = kwargs[name].data
             numpy_kwarg = kwargs_copy[name].data
         else:
@@ -178,7 +178,7 @@ class CompareToNumpyStencil:
         externals: Optional[Mapping[str, Any]] = None,
         skip_passes: Optional[Tuple[str, ...]] = None,
         timing_collector: Optional[TimingCollector] = None,
-        comm: Optional[pace.util.Comm] = None,
+        comm: Optional[ndsl.util.Comm] = None,
     ):
         self._actual = FrozenStencil(
             func=func,
@@ -247,13 +247,13 @@ def get_pair_rank(rank: int, size: int):
         return rank - dycore_ranks
 
 
-def compare_ranks(comm: pace.util.Comm, data) -> Mapping[str, int]:
+def compare_ranks(comm: ndsl.util.Comm, data) -> Mapping[str, int]:
     rank = comm.Get_rank()
     size = comm.Get_size()
     pair_rank = get_pair_rank(rank, size)
     differences = {}
     for name, maybe_array in sorted(data.items(), key=lambda x: x[0]):
-        if isinstance(maybe_array, pace.util.Quantity):
+        if isinstance(maybe_array, ndsl.util.Quantity):
             maybe_array = maybe_array.data
         if hasattr(maybe_array, "data") and isinstance(maybe_array.data, np.ndarray):
             array = maybe_array.data
@@ -284,7 +284,7 @@ class FrozenStencil(SDFGConvertible):
         externals: Optional[Mapping[str, Any]] = None,
         skip_passes: Tuple[str, ...] = (),
         timing_collector: Optional[TimingCollector] = None,
-        comm: Optional[pace.util.Comm] = None,
+        comm: Optional[ndsl.util.Comm] = None,
     ):
         """
         Args:
@@ -525,7 +525,7 @@ def _convert_quantities_to_storage(args, kwargs):
     for i, arg in enumerate(args):
         try:
             # Check that 'dims' is an attribute of arg. If so,
-            # this means it's a pace.util.Quantity, so we need
+            # this means it's a ndsl.util.Quantity, so we need
             # to pull off the ndarray.
             arg.dims
             args[i] = arg.data
@@ -534,7 +534,7 @@ def _convert_quantities_to_storage(args, kwargs):
     for name, arg in kwargs.items():
         try:
             # Check that 'dims' is an attribute of arg. If so,
-            # this means it's a pace.util.Quantity, so we need
+            # this means it's a ndsl.util.Quantity, so we need
             # to pull off the ndarray.
             arg.dims
             kwargs[name] = arg.data
@@ -585,7 +585,7 @@ class GridIndexing:
     @domain.setter
     def domain(self, domain):
         self._domain = domain
-        self._sizer = pace.util.SubtileGridSizer(
+        self._sizer = ndsl.util.SubtileGridSizer(
             nx=domain[0],
             ny=domain[1],
             nz=domain[2],
@@ -595,13 +595,13 @@ class GridIndexing:
 
     @classmethod
     def from_sizer_and_communicator(
-        cls, sizer: pace.util.GridSizer, comm: pace.util.Communicator
+        cls, sizer: ndsl.util.GridSizer, comm: ndsl.util.Communicator
     ) -> "GridIndexing":
         # TODO: if this class is refactored to split off the *_edge booleans,
         # this init routine can be refactored to require only a GridSizer
         domain = cast(
             Tuple[int, int, int],
-            sizer.get_extent([pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM]),
+            sizer.get_extent([ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM]),
         )
         south_edge = comm.tile.partitioner.on_tile_bottom(comm.rank)
         north_edge = comm.tile.partitioner.on_tile_top(comm.rank)
@@ -769,7 +769,7 @@ class GridIndexing:
         configuration (given by dims) and a certain number of halo points.
 
         Args:
-            dims: dimension names, using dimension constants from pace.util
+            dims: dimension names, using dimension constants from ndsl.util
             halos: number of halo points for each dimension, defaults to zero
 
         Returns:
@@ -786,11 +786,11 @@ class GridIndexing:
     def _origin_from_dims(self, dims: Iterable[str]) -> List[int]:
         return_origin = []
         for dim in dims:
-            if dim in pace.util.X_DIMS:
+            if dim in ndsl.util.X_DIMS:
                 return_origin.append(self.origin[0])
-            elif dim in pace.util.Y_DIMS:
+            elif dim in ndsl.util.Y_DIMS:
                 return_origin.append(self.origin[1])
-            elif dim in pace.util.Z_DIMS:
+            elif dim in ndsl.util.Z_DIMS:
                 return_origin.append(self.origin[2])
         return return_origin
 
@@ -802,7 +802,7 @@ class GridIndexing:
         which is accessed up to a given number of halo points.
 
         Args:
-            dims: dimension names, using dimension constants from pace.util
+            dims: dimension names, using dimension constants from ndsl.util
             halos: number of halo points for each dimension, defaults to zero
 
         Returns:
@@ -813,7 +813,7 @@ class GridIndexing:
         for i, d in enumerate(dims):
             # need n_halo points at the start of the domain, regardless of whether
             # they are read, so that data is aligned in memory
-            if d in (pace.util.X_DIMS + pace.util.Y_DIMS):
+            if d in (ndsl.util.X_DIMS + ndsl.util.Y_DIMS):
                 shape[i] += self.n_halo
         for i, n in enumerate(halos):
             shape[i] += n
@@ -865,7 +865,7 @@ class StencilFactory:
         self,
         config: StencilConfig,
         grid_indexing: GridIndexing,
-        comm: Optional[pace.util.Comm] = None,
+        comm: Optional[ndsl.util.Comm] = None,
     ):
         """
         Args:

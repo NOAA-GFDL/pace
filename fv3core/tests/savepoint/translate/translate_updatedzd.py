@@ -3,7 +3,7 @@ import numpy as np
 import ndsl.dsl
 import pace.fv3core
 import pace.fv3core.stencils.updatedzd
-import pace.util
+import ndsl.util
 from pace.fv3core.stencils import d_sw
 from pace.fv3core.testing import TranslateDycoreFortranData2Py
 from pace.fv3core.utils.functional_validation import get_subset_func
@@ -13,7 +13,7 @@ class TranslateUpdateDzD(TranslateDycoreFortranData2Py):
     def __init__(
         self,
         grid,
-        namelist: pace.util.Namelist,
+        namelist: ndsl.util.Namelist,
         stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
@@ -52,7 +52,7 @@ class TranslateUpdateDzD(TranslateDycoreFortranData2Py):
         self.namelist = pace.fv3core.DynamicalCoreConfig.from_namelist(namelist)
         self._subset = get_subset_func(
             self.grid.grid_indexing,
-            dims=[pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM],
+            dims=[ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
             n_halo=((0, 0), (0, 0)),
         )
         self.ignore_near_zero_errors = {"zh": True, "wsd": True}

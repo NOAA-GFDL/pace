@@ -3,11 +3,11 @@ from gt4py.cartesian.gtscript import PARALLEL, computation, interval
 import ndsl.dsl
 import pace.fv3core
 import pace.fv3core.stencils.ytp_v as ytp_v
-import pace.util
+import ndsl.util
 from ndsl.dsl.stencil import StencilFactory
 from ndsl.dsl.typing import FloatField, FloatFieldIJ
 from pace.fv3core.testing import TranslateDycoreFortranData2Py
-from pace.util.grid import GridData
+from ndsl.util.grid import GridData
 
 
 def ytp_v_stencil_defn(
@@ -74,7 +74,7 @@ class TranslateYTP_V(TranslateDycoreFortranData2Py):
     def __init__(
         self,
         grid,
-        namelist: pace.util.Namelist,
+        namelist: ndsl.util.Namelist,
         stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)

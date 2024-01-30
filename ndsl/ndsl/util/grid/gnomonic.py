@@ -1,6 +1,6 @@
 import math
 
-from pace.util.constants import PI
+from ndsl.util.constants import PI
 
 
 def _check_shapes(lon, lat):
@@ -39,7 +39,7 @@ def local_gnomonic_ed(
     _check_shapes(lon, lat)
     # tile_im, wedge_dict, corner_dict, global_is, global_js
     im = lon.shape[0] - 1
-    alpha = np.arcsin(3 ** -0.5)
+    alpha = np.arcsin(3**-0.5)
     tile_im = npx - 1
     dely = np.multiply(2.0, alpha / float(tile_im))
     halo = 3
@@ -96,10 +96,10 @@ def local_gnomonic_ed(
             lon_west_tile_edge[i, j], lat_west_tile_edge[i, j], np
         )
         pp_west_tile_edge[1, i, j] = (
-            -pp_west_tile_edge[1, i, j] * (3 ** -0.5) / pp_west_tile_edge[0, i, j]
+            -pp_west_tile_edge[1, i, j] * (3**-0.5) / pp_west_tile_edge[0, i, j]
         )
         pp_west_tile_edge[2, i, j] = (
-            -pp_west_tile_edge[2, i, j] * (3 ** -0.5) / pp_west_tile_edge[0, i, j]
+            -pp_west_tile_edge[2, i, j] * (3**-0.5) / pp_west_tile_edge[0, i, j]
         )
     if west_edge:
         pp[:, 0, :] = pp_west_tile_edge[:, 0, :]
@@ -110,10 +110,10 @@ def local_gnomonic_ed(
             lon_south_tile_edge[i, j], lat_south_tile_edge[i, j], np
         )
         pp_south_tile_edge[1, i, j] = (
-            -pp_south_tile_edge[1, i, j] * (3 ** -0.5) / pp_south_tile_edge[0, i, j]
+            -pp_south_tile_edge[1, i, j] * (3**-0.5) / pp_south_tile_edge[0, i, j]
         )
         pp_south_tile_edge[2, i, j] = (
-            -pp_south_tile_edge[2, i, j] * (3 ** -0.5) / pp_south_tile_edge[0, i, j]
+            -pp_south_tile_edge[2, i, j] * (3**-0.5) / pp_south_tile_edge[0, i, j]
         )
     if south_edge:
         pp[:, :, 0] = pp_south_tile_edge[:, :, 0]
@@ -138,7 +138,7 @@ def local_gnomonic_ed(
     if north_edge and east_edge:
         pp[:, im, im] = _latlon2xyz(lon_east, lat_north, np)
 
-    pp[0, :, :] = -(3 ** -0.5)
+    pp[0, :, :] = -(3**-0.5)
     for j in range(start_j, im + 1):
         # copy y-z face of the cube along j=0
         pp[1, start_i:, j] = pp_south_tile_edge[1, start_i:, 0]  # pp[1,:,0]
@@ -167,14 +167,14 @@ def _corner_to_center_mean(corner_array):
 def normalize_vector(np, *vector_components):
     scale = np.divide(
         1.0,
-        np.sum(np.asarray([item ** 2.0 for item in vector_components]), axis=0) ** 0.5,
+        np.sum(np.asarray([item**2.0 for item in vector_components]), axis=0) ** 0.5,
     )
     return np.asarray([item * scale for item in vector_components])
 
 
 def normalize_xyz(xyz):
     # double transpose to broadcast along last dimension instead of first
-    return (xyz.T / ((xyz ** 2).sum(axis=-1) ** 0.5).T).T
+    return (xyz.T / ((xyz**2).sum(axis=-1) ** 0.5).T).T
 
 
 def lon_lat_midpoint(lon1, lon2, lat1, lat2, np):
@@ -291,7 +291,6 @@ def _cart_to_latlon(im, q, xs, ys, np):
 
 
 def _mirror_latlon(lon1, lat1, lon2, lat2, lon0, lat0, np):
-
     p0 = _latlon2xyz(lon0, lat0, np)
     p1 = _latlon2xyz(lon1, lat1, np)
     p2 = _latlon2xyz(lon2, lat2, np)
@@ -607,7 +606,7 @@ def get_rectangle_area(p1, p2, p3, p4, radius, np):
     ) in ((p3, p2, p4), (p4, p3, p1), (p1, p4, p2)):
         total_angle += spherical_angle(q1, q2, q3, np)
 
-    return (total_angle - 2 * PI) * radius ** 2
+    return (total_angle - 2 * PI) * radius**2
 
 
 def get_triangle_area(p1, p2, p3, radius, np):
@@ -619,7 +618,7 @@ def get_triangle_area(p1, p2, p3, radius, np):
     total_angle = spherical_angle(p1, p2, p3, np)
     for q1, q2, q3 in ((p2, p3, p1), (p3, p1, p2)):
         total_angle += spherical_angle(q1, q2, q3, np)
-    return (total_angle - PI) * radius ** 2
+    return (total_angle - PI) * radius**2
 
 
 def fortran_vector_spherical_angle(e1, e2, e3):
@@ -680,7 +679,7 @@ def spherical_angle(p_center, p2, p3, np):
     q = np.cross(p_center, p3)
     angle = np.arccos(
         np.sum(p * q, axis=-1)
-        / np.sqrt(np.sum(p ** 2, axis=-1) * np.sum(q ** 2, axis=-1))
+        / np.sqrt(np.sum(p**2, axis=-1) * np.sum(q**2, axis=-1))
     )
     if not np.isscalar(angle):
         angle[np.isnan(angle)] = 0.0
@@ -697,7 +696,7 @@ def spherical_cos(p_center, p2, p3, np):
     p = np.cross(p_center, p2)
     q = np.cross(p_center, p3)
     return np.sum(p * q, axis=-1) / np.sqrt(
-        np.sum(p ** 2, axis=-1) * np.sum(q ** 2, axis=-1)
+        np.sum(p**2, axis=-1) * np.sum(q**2, axis=-1)
     )
 
 

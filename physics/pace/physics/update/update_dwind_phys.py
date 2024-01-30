@@ -1,11 +1,11 @@
 from gt4py.cartesian.gtscript import PARALLEL, computation, interval
 
-import pace.util
+import ndsl.util
 from ndsl.dsl.dace import orchestrate
 from ndsl.dsl.stencil import StencilFactory
 from ndsl.dsl.typing import FloatField, FloatFieldI, FloatFieldIJ
-from pace.util import X_DIM, Y_DIM, Z_DIM
-from pace.util.grid import DriverGridData
+from ndsl.util import X_DIM, Y_DIM, Z_DIM
+from ndsl.util.grid import DriverGridData
 
 
 def set_winds_zero(
@@ -170,8 +170,8 @@ class AGrid2DGridPhysics:
     def __init__(
         self,
         stencil_factory: StencilFactory,
-        quantity_factory: pace.util.QuantityFactory,
-        partitioner: pace.util.TilePartitioner,
+        quantity_factory: ndsl.util.QuantityFactory,
+        partitioner: ndsl.util.TilePartitioner,
         rank: int,
         namelist,
         grid_info: DriverGridData,

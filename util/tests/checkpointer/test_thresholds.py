@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-from pace.util.checkpointer import (
+from ndsl.util.checkpointer import (
     InsufficientTrialsError,
     Threshold,
     ThresholdCalibrationCheckpointer,

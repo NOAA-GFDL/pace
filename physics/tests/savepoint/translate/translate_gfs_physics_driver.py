@@ -1,7 +1,7 @@
 import copy
 
 import ndsl.dsl.gt4py_utils as utils
-import pace.util as util
+import ndsl.util as util
 from pace.physics import PHYSICS_PACKAGES
 from pace.physics.stencils.physics import Physics, PhysicsState
 from pace.physics.update import update_atmos_state

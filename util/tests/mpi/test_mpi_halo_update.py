@@ -3,7 +3,7 @@ import copy
 import pytest
 from mpi_comm import MPI
 
-import pace.util
+import ndsl.util
 
 
 @pytest.fixture
@@ -16,7 +16,7 @@ def layout():
     if MPI is not None:
         size = MPI.COMM_WORLD.Get_size()
         ranks_per_tile = size // 6
-        ranks_per_edge = int(ranks_per_tile ** 0.5)
+        ranks_per_edge = int(ranks_per_tile**0.5)
         return (ranks_per_edge, ranks_per_edge)
     else:
         return (1, 1)
@@ -57,26 +57,26 @@ def n_points_update(request, n_points):
 
 @pytest.fixture(
     params=[
-        pytest.param((pace.util.Y_DIM, pace.util.X_DIM), id="center"),
+        pytest.param((ndsl.util.Y_DIM, ndsl.util.X_DIM), id="center"),
         pytest.param(
-            (pace.util.Z_DIM, pace.util.Y_DIM, pace.util.X_DIM), id="center_3d"
+            (ndsl.util.Z_DIM, ndsl.util.Y_DIM, ndsl.util.X_DIM), id="center_3d"
         ),
         pytest.param(
-            (pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM),
+            (ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM),
             id="center_3d_reverse",
         ),
         pytest.param(
-            (pace.util.X_DIM, pace.util.Z_DIM, pace.util.Y_DIM),
+            (ndsl.util.X_DIM, ndsl.util.Z_DIM, ndsl.util.Y_DIM),
             id="center_3d_shuffle",
         ),
         pytest.param(
-            (pace.util.Y_INTERFACE_DIM, pace.util.X_INTERFACE_DIM), id="interface"
+            (ndsl.util.Y_INTERFACE_DIM, ndsl.util.X_INTERFACE_DIM), id="interface"
         ),
         pytest.param(
             (
-                pace.util.Z_INTERFACE_DIM,
-                pace.util.Y_INTERFACE_DIM,
-                pace.util.X_INTERFACE_DIM,
+                ndsl.util.Z_INTERFACE_DIM,
+                ndsl.util.Y_INTERFACE_DIM,
+                ndsl.util.X_INTERFACE_DIM,
             ),
             id="interface_3d",
         ),
@@ -110,12 +110,12 @@ def n_buffer(request):
 def shape(nz, ny, nx, dims, n_points, n_buffer):
     return_list = []
     length_dict = {
-        pace.util.X_DIM: 2 * n_points + nx + n_buffer,
-        pace.util.X_INTERFACE_DIM: 2 * n_points + nx + 1 + n_buffer,
-        pace.util.Y_DIM: 2 * n_points + ny + n_buffer,
-        pace.util.Y_INTERFACE_DIM: 2 * n_points + ny + 1 + n_buffer,
-        pace.util.Z_DIM: nz + n_buffer,
-        pace.util.Z_INTERFACE_DIM: nz + 1 + n_buffer,
+        ndsl.util.X_DIM: 2 * n_points + nx + n_buffer,
+        ndsl.util.X_INTERFACE_DIM: 2 * n_points + nx + 1 + n_buffer,
+        ndsl.util.Y_DIM: 2 * n_points + ny + n_buffer,
+        ndsl.util.Y_INTERFACE_DIM: 2 * n_points + ny + 1 + n_buffer,
+        ndsl.util.Z_DIM: nz + n_buffer,
+        ndsl.util.Z_INTERFACE_DIM: nz + 1 + n_buffer,
     }
     for dim in dims:
         return_list.append(length_dict[dim])
@@ -126,12 +126,12 @@ def shape(nz, ny, nx, dims, n_points, n_buffer):
 def origin(n_points, dims):
     return_list = []
     origin_dict = {
-        pace.util.X_DIM: n_points,
-        pace.util.X_INTERFACE_DIM: n_points,
-        pace.util.Y_DIM: n_points,
-        pace.util.Y_INTERFACE_DIM: n_points,
-        pace.util.Z_DIM: 0,
-        pace.util.Z_INTERFACE_DIM: 0,
+        ndsl.util.X_DIM: n_points,
+        ndsl.util.X_INTERFACE_DIM: n_points,
+        ndsl.util.Y_DIM: n_points,
+        ndsl.util.Y_INTERFACE_DIM: n_points,
+        ndsl.util.Z_DIM: 0,
+        ndsl.util.Z_INTERFACE_DIM: 0,
     }
     for dim in dims:
         return_list.append(origin_dict[dim])
@@ -142,12 +142,12 @@ def origin(n_points, dims):
 def extent(n_points, dims, nz, ny, nx):
     return_list = []
     extent_dict = {
-        pace.util.X_DIM: nx,
-        pace.util.X_INTERFACE_DIM: nx + 1,
-        pace.util.Y_DIM: ny,
-        pace.util.Y_INTERFACE_DIM: ny + 1,
-        pace.util.Z_DIM: nz,
-        pace.util.Z_INTERFACE_DIM: nz + 1,
+        ndsl.util.X_DIM: nx,
+        ndsl.util.X_INTERFACE_DIM: nx + 1,
+        ndsl.util.Y_DIM: ny,
+        ndsl.util.Y_INTERFACE_DIM: ny + 1,
+        ndsl.util.Z_DIM: nz,
+        ndsl.util.Z_INTERFACE_DIM: nz + 1,
     }
     for dim in dims:
         return_list.append(extent_dict[dim])
@@ -156,7 +156,7 @@ def extent(n_points, dims, nz, ny, nx):
 
 @pytest.fixture()
 def communicator(cube_partitioner):
-    return pace.util.CubedSphereCommunicator(
+    return ndsl.util.CubedSphereCommunicator(
         comm=MPI.COMM_WORLD,
         partitioner=cube_partitioner,
     )
@@ -169,12 +169,12 @@ def edge_interior_ratio(request):
 
 @pytest.fixture
 def tile_partitioner(layout, edge_interior_ratio: float):
-    return pace.util.TilePartitioner(layout, edge_interior_ratio=edge_interior_ratio)
+    return ndsl.util.TilePartitioner(layout, edge_interior_ratio=edge_interior_ratio)
 
 
 @pytest.fixture
 def cube_partitioner(tile_partitioner):
-    return pace.util.CubedSpherePartitioner(tile_partitioner)
+    return ndsl.util.CubedSpherePartitioner(tile_partitioner)
 
 
 @pytest.fixture
@@ -182,16 +182,16 @@ def updated_slice(ny, nx, dims, n_points, n_points_update):
     n_points_remain = n_points - n_points_update
     return_list = []
     length_dict = {
-        pace.util.X_DIM: slice(n_points_remain, n_points + nx + n_points_update),
-        pace.util.X_INTERFACE_DIM: slice(
+        ndsl.util.X_DIM: slice(n_points_remain, n_points + nx + n_points_update),
+        ndsl.util.X_INTERFACE_DIM: slice(
             n_points_remain, n_points + nx + 1 + n_points_update
         ),
-        pace.util.Y_DIM: slice(n_points_remain, n_points + ny + n_points_update),
-        pace.util.Y_INTERFACE_DIM: slice(
+        ndsl.util.Y_DIM: slice(n_points_remain, n_points + ny + n_points_update),
+        ndsl.util.Y_INTERFACE_DIM: slice(
             n_points_remain, n_points + ny + 1 + n_points_update
         ),
-        pace.util.Z_DIM: slice(None, None),
-        pace.util.Z_INTERFACE_DIM: slice(None, None),
+        ndsl.util.Z_DIM: slice(None, None),
+        ndsl.util.Z_INTERFACE_DIM: slice(None, None),
     }
     for dim in dims:
         return_list.append(length_dict[dim])
@@ -207,33 +207,33 @@ def remaining_ones(nz, ny, nx, n_points, n_points_update):
 @pytest.fixture
 def boundary_dict(ranks_per_tile):
     if ranks_per_tile == 1:
-        return {0: pace.util.EDGE_BOUNDARY_TYPES}
+        return {0: ndsl.util.EDGE_BOUNDARY_TYPES}
     elif ranks_per_tile == 4:
         return {
-            0: pace.util.EDGE_BOUNDARY_TYPES
-            + (pace.util.NORTHWEST, pace.util.NORTHEAST, pace.util.SOUTHEAST),
-            1: pace.util.EDGE_BOUNDARY_TYPES
-            + (pace.util.NORTHWEST, pace.util.NORTHEAST, pace.util.SOUTHWEST),
-            2: pace.util.EDGE_BOUNDARY_TYPES
-            + (pace.util.NORTHEAST, pace.util.SOUTHWEST, pace.util.SOUTHEAST),
-            3: pace.util.EDGE_BOUNDARY_TYPES
-            + (pace.util.NORTHWEST, pace.util.SOUTHWEST, pace.util.SOUTHEAST),
+            0: ndsl.util.EDGE_BOUNDARY_TYPES
+            + (ndsl.util.NORTHWEST, ndsl.util.NORTHEAST, ndsl.util.SOUTHEAST),
+            1: ndsl.util.EDGE_BOUNDARY_TYPES
+            + (ndsl.util.NORTHWEST, ndsl.util.NORTHEAST, ndsl.util.SOUTHWEST),
+            2: ndsl.util.EDGE_BOUNDARY_TYPES
+            + (ndsl.util.NORTHEAST, ndsl.util.SOUTHWEST, ndsl.util.SOUTHEAST),
+            3: ndsl.util.EDGE_BOUNDARY_TYPES
+            + (ndsl.util.NORTHWEST, ndsl.util.SOUTHWEST, ndsl.util.SOUTHEAST),
         }
     elif ranks_per_tile == 9:
         return {
-            0: pace.util.EDGE_BOUNDARY_TYPES
-            + (pace.util.NORTHWEST, pace.util.NORTHEAST, pace.util.SOUTHEAST),
-            1: pace.util.BOUNDARY_TYPES,
-            2: pace.util.EDGE_BOUNDARY_TYPES
-            + (pace.util.NORTHWEST, pace.util.NORTHEAST, pace.util.SOUTHWEST),
-            3: pace.util.BOUNDARY_TYPES,
-            4: pace.util.BOUNDARY_TYPES,
-            5: pace.util.BOUNDARY_TYPES,
-            6: pace.util.EDGE_BOUNDARY_TYPES
-            + (pace.util.NORTHEAST, pace.util.SOUTHWEST, pace.util.SOUTHEAST),
-            7: pace.util.BOUNDARY_TYPES,
-            8: pace.util.EDGE_BOUNDARY_TYPES
-            + (pace.util.NORTHWEST, pace.util.SOUTHWEST, pace.util.SOUTHEAST),
+            0: ndsl.util.EDGE_BOUNDARY_TYPES
+            + (ndsl.util.NORTHWEST, ndsl.util.NORTHEAST, ndsl.util.SOUTHEAST),
+            1: ndsl.util.BOUNDARY_TYPES,
+            2: ndsl.util.EDGE_BOUNDARY_TYPES
+            + (ndsl.util.NORTHWEST, ndsl.util.NORTHEAST, ndsl.util.SOUTHWEST),
+            3: ndsl.util.BOUNDARY_TYPES,
+            4: ndsl.util.BOUNDARY_TYPES,
+            5: ndsl.util.BOUNDARY_TYPES,
+            6: ndsl.util.EDGE_BOUNDARY_TYPES
+            + (ndsl.util.NORTHEAST, ndsl.util.SOUTHWEST, ndsl.util.SOUTHEAST),
+            7: ndsl.util.BOUNDARY_TYPES,
+            8: ndsl.util.EDGE_BOUNDARY_TYPES
+            + (ndsl.util.NORTHWEST, ndsl.util.SOUTHWEST, ndsl.util.SOUTHEAST),
         }
     else:
         raise NotImplementedError(ranks_per_tile)
@@ -249,7 +249,7 @@ def depth_quantity(
     data[:] = numpy.nan
     for n_inside in range(max(n_points, max(extent) // 2), -1, -1):
         for i, dim in enumerate(dims):
-            if (n_inside <= extent[i] // 2) and (dim in pace.util.HORIZONTAL_DIMS):
+            if (n_inside <= extent[i] // 2) and (dim in ndsl.util.HORIZONTAL_DIMS):
                 pos = [slice(None, None)] * len(dims)
                 pos[i] = origin[i] + n_inside
                 data[tuple(pos)] = n_inside
@@ -257,13 +257,13 @@ def depth_quantity(
                 data[tuple(pos)] = n_inside
     for n_outside in range(1, n_points + 1 + n_buffer):
         for i, dim in enumerate(dims):
-            if dim in pace.util.HORIZONTAL_DIMS:
+            if dim in ndsl.util.HORIZONTAL_DIMS:
                 pos = [slice(None, None)] * len(dims)
                 pos[i] = origin[i] - n_outside
                 data[tuple(pos)] = numpy.nan
                 pos[i] = origin[i] + extent[i] + n_outside - 1
                 data[tuple(pos)] = numpy.nan
-    quantity = pace.util.Quantity(
+    quantity = ndsl.util.Quantity(
         data,
         dims=dims,
         units=units,
@@ -313,7 +313,7 @@ def zeros_quantity(dims, units, origin, extent, shape, numpy, dtype):
     """A list of quantities whose values are 0 in the computational domain and 1
     outside of it."""
     data = numpy.ones(shape, dtype=dtype)
-    quantity = pace.util.Quantity(
+    quantity = ndsl.util.Quantity(
         data,
         dims=dims,
         units=units,
@@ -343,7 +343,7 @@ def test_zeros_halo_update(
         communicator.halo_update(quantity, n_points_update)
         boundaries = boundary_dict[communicator.rank % ranks_per_tile]
         for boundary in boundaries:
-            boundary_slice = pace.util._boundary_utils.get_boundary_slice(
+            boundary_slice = ndsl.util._boundary_utils.get_boundary_slice(
                 quantity.dims,
                 quantity.origin,
                 quantity.extent,
@@ -383,7 +383,7 @@ def test_zeros_vector_halo_update(
         communicator.vector_halo_update(y_quantity, x_quantity, n_points_update)
         boundaries = boundary_dict[communicator.rank % ranks_per_tile]
         for boundary in boundaries:
-            boundary_slice = pace.util._boundary_utils.get_boundary_slice(
+            boundary_slice = ndsl.util._boundary_utils.get_boundary_slice(
                 x_quantity.dims,
                 x_quantity.origin,
                 x_quantity.extent,
@@ -405,13 +405,13 @@ def test_zeros_vector_halo_update(
 
 
 def get_horizontal_dims(dims):
-    for dim in pace.util.X_DIMS:
+    for dim in ndsl.util.X_DIMS:
         if dim in dims:
             x_dim = dim
             break
     else:
         raise ValueError(f"no x dimension in {dims}")
-    for dim in pace.util.Y_DIMS:
+    for dim in ndsl.util.Y_DIMS:
         if dim in dims:
             y_dim = dim
             break

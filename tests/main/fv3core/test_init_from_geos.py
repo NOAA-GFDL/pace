@@ -3,7 +3,7 @@ import numpy as np
 import pytest  # noqa
 
 from pace import fv3core
-from pace.util.null_comm import NullComm
+from ndsl.util.null_comm import NullComm
 
 
 def test_geos_wrapper():

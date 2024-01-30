@@ -11,13 +11,13 @@ from gt4py.cartesian.gtscript import (
     sqrt,
 )
 
-import pace.util
+import ndsl.util
 from ndsl.dsl.dace.orchestration import orchestrate
 from ndsl.dsl.stencil import GridIndexing, StencilFactory
 from ndsl.dsl.typing import Float, FloatField, FloatFieldI, FloatFieldIJ
 from pace.fv3core.stencils.basic_operations import copy_defn
-from pace.util import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_DIM
-from pace.util.grid import GridData
+from ndsl.util import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_DIM
+from ndsl.util.grid import GridData
 
 
 # comact 4-pt cubic interpolation
@@ -534,7 +534,7 @@ class AGrid2BGridFourthOrder:
     def __init__(
         self,
         stencil_factory: StencilFactory,
-        quantity_factory: pace.util.QuantityFactory,
+        quantity_factory: ndsl.util.QuantityFactory,
         grid_data: GridData,
         grid_type: int,
         z_dim=Z_DIM,

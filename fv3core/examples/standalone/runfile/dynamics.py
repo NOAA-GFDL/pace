@@ -15,10 +15,10 @@ import yaml
 from mpi4py import MPI
 
 # NOTE: we need to import dsl.stencil prior to
-# pace.util, otherwise xarray precedes gt4py, causing
+# ndsl.util, otherwise xarray precedes gt4py, causing
 # very strange errors on some systems (e.g. daint)
 import ndsl.dsl.stencil
-import pace.util as util
+import ndsl.util as util
 from ndsl.dsl import StencilFactory
 from ndsl.dsl.dace.orchestration import DaceConfig
 from pace.fv3core import DynamicalCore, DynamicalCoreConfig
@@ -27,8 +27,8 @@ from pace.fv3core.initialization.baroclinic import init_baroclinic_state
 from pace.fv3core.testing import TranslateFVDynamics
 from ndsl.stencils.testing import dataset_to_dict
 from ndsl.stencils.testing.grid import Grid
-from pace.util.grid import DampingCoefficients, GridData, MetricTerms
-from pace.util.null_comm import NullComm
+from ndsl.util.grid import DampingCoefficients, GridData, MetricTerms
+from ndsl.util.null_comm import NullComm
 
 
 def parse_args() -> Namespace:

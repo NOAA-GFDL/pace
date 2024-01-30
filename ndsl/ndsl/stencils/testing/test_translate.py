@@ -8,12 +8,12 @@ import pytest
 
 import ndsl.dsl
 import ndsl.dsl.gt4py_utils as gt_utils
-import pace.util
+import ndsl.util
 from ndsl.dsl.dace.dace_config import DaceConfig
 from ndsl.dsl.stencil import CompilationConfig
 from ndsl.stencils.testing import SavepointCase, dataset_to_dict
-from pace.util.mpi import MPI
-from pace.util.testing import compare_scalar, perturb, success, success_array
+from ndsl.util.mpi import MPI
+from ndsl.util.testing import compare_scalar, perturb, success, success_array
 
 
 # this only matters for manually-added print statements
@@ -309,13 +309,13 @@ def test_sequential_savepoint(
 
 
 def state_from_savepoint(serializer, savepoint, name_to_std_name):
-    properties = pace.util.fortran_info.properties_by_std_name
+    properties = ndsl.util.fortran_info.properties_by_std_name
     origin = gt_utils.origin
     state = {}
     for name, std_name in name_to_std_name.items():
         array = serializer.read(name, savepoint)
         extent = tuple(np.asarray(array.shape) - 2 * np.asarray(origin))
-        state["air_temperature"] = pace.util.Quantity(
+        state["air_temperature"] = ndsl.util.Quantity(
             array,
             dims=reversed(properties["air_temperature"]["dims"]),
             units=properties["air_temperature"]["units"],
@@ -326,14 +326,14 @@ def state_from_savepoint(serializer, savepoint, name_to_std_name):
 
 
 def get_communicator(comm, layout):
-    partitioner = pace.util.CubedSpherePartitioner(pace.util.TilePartitioner(layout))
-    communicator = pace.util.CubedSphereCommunicator(comm, partitioner)
+    partitioner = ndsl.util.CubedSpherePartitioner(ndsl.util.TilePartitioner(layout))
+    communicator = ndsl.util.CubedSphereCommunicator(comm, partitioner)
     return communicator
 
 
 def get_tile_communicator(comm, layout):
-    partitioner = pace.util.TilePartitioner(layout)
-    communicator = pace.util.TileCommunicator(comm, partitioner)
+    partitioner = ndsl.util.TilePartitioner(layout)
+    communicator = ndsl.util.TileCommunicator(comm, partitioner)
     return communicator
 
 

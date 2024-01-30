@@ -1,7 +1,7 @@
 from gt4py.cartesian.gtscript import PARALLEL, computation, interval
 
 from ndsl.dsl.typing import FloatField
-from pace.util.constants import ZVIR
+from ndsl.util.constants import ZVIR
 
 
 def get_prs_fv3(

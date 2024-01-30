@@ -1,14 +1,14 @@
 import ndsl.dsl
-import pace.util
+import ndsl.util
 from pace.fv3core.stencils.c_sw import CGridShallowWaterDynamics
 from pace.fv3core.testing import TranslateDycoreFortranData2Py
 
 
 def get_c_sw_instance(
     grid,
-    namelist: pace.util.Namelist,
+    namelist: ndsl.util.Namelist,
     stencil_factory: ndsl.dsl.StencilFactory,
-    quantity_factory: pace.util.QuantityFactory,
+    quantity_factory: ndsl.util.QuantityFactory,
 ):
     return CGridShallowWaterDynamics(
         stencil_factory,
@@ -71,7 +71,7 @@ class TranslateC_SW(TranslateDycoreFortranData2Py):
     def __init__(
         self,
         grid,
-        namelist: pace.util.Namelist,
+        namelist: ndsl.util.Namelist,
         stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
@@ -117,7 +117,7 @@ class TranslateDivergenceCorner(TranslateDycoreFortranData2Py):
     def __init__(
         self,
         grid,
-        namelist: pace.util.Namelist,
+        namelist: ndsl.util.Namelist,
         stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
@@ -175,7 +175,7 @@ class TranslateCirculation_Cgrid(TranslateDycoreFortranData2Py):
     def __init__(
         self,
         grid,
-        namelist: pace.util.Namelist,
+        namelist: ndsl.util.Namelist,
         stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
@@ -217,7 +217,7 @@ class TranslateVorticityTransport_Cgrid(TranslateDycoreFortranData2Py):
     def __init__(
         self,
         grid,
-        namelist: pace.util.Namelist,
+        namelist: ndsl.util.Namelist,
         stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)

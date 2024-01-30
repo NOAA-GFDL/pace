@@ -1,9 +1,9 @@
 import ndsl.dsl
-import pace.util
-import pace.util as fv3util
+import ndsl.util
+import ndsl.util as fv3util
 from ndsl.dsl import gt4py_utils as utils
 from ndsl.stencils.testing import ParallelTranslate
-from pace.util.logging import pace_log
+from ndsl.util.logging import pace_log
 
 
 class TranslateHaloUpdate(ParallelTranslate):
@@ -12,7 +12,7 @@ class TranslateHaloUpdate(ParallelTranslate):
             "name": "air_temperature",
             "dims": [fv3util.X_DIM, fv3util.Y_DIM, fv3util.Z_DIM],
             "units": "degK",
-            "n_halo": pace.util.N_HALO_DEFAULT,
+            "n_halo": ndsl.util.N_HALO_DEFAULT,
         }
     }
 
@@ -21,7 +21,7 @@ class TranslateHaloUpdate(ParallelTranslate):
             "name": "air_temperature",
             "dims": [fv3util.X_DIM, fv3util.Y_DIM, fv3util.Z_DIM],
             "units": "degK",
-            "n_halo": pace.util.N_HALO_DEFAULT,
+            "n_halo": ndsl.util.N_HALO_DEFAULT,
         }
     }
     halo_update_varname = "air_temperature"
@@ -29,7 +29,7 @@ class TranslateHaloUpdate(ParallelTranslate):
     def __init__(
         self,
         grid,
-        namelist: pace.util.Namelist,
+        namelist: ndsl.util.Namelist,
         stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
@@ -136,7 +136,7 @@ class TranslateHaloVectorUpdate(ParallelTranslate):
     def __init__(
         self,
         grid,
-        namelist: pace.util.Namelist,
+        namelist: ndsl.util.Namelist,
         stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super(TranslateHaloVectorUpdate, self).__init__(grid, namelist, stencil_factory)
@@ -206,7 +206,7 @@ class TranslateMPPBoundaryAdjust(ParallelTranslate):
     def __init__(
         self,
         grid,
-        namelist: pace.util.Namelist,
+        namelist: ndsl.util.Namelist,
         stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super(TranslateMPPBoundaryAdjust, self).__init__(

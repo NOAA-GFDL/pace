@@ -4,8 +4,8 @@ import ndsl.dsl
 import ndsl.dsl.gt4py_utils as utils
 import pace.fv3core.stencils.fvtp2d
 import pace.fv3core.stencils.tracer_2d_1l
-import pace.util
-import pace.util as fv3util
+import ndsl.util
+import ndsl.util as fv3util
 from pace.fv3core.utils.functional_validation import get_subset_func
 from ndsl.stencils.testing import ParallelTranslate
 
@@ -21,7 +21,7 @@ class TranslateTracer2D1L(ParallelTranslate):
     def __init__(
         self,
         grid,
-        namelist: pace.util.Namelist,
+        namelist: ndsl.util.Namelist,
         stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)

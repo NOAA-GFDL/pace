@@ -8,7 +8,7 @@ import zarr
 from mpi4py import MPI
 
 import ndsl.dsl
-import pace.util
+import ndsl.util
 from pace.driver import DriverConfig
 from pace.driver.state import DriverState
 from pace.physics import PHYSICS_PACKAGES
@@ -52,11 +52,11 @@ def test_restart():
         with open("RESTART/restart.yaml", "r") as f:
             restart_config = DriverConfig.from_dict(yaml.safe_load(f))
 
-        mpi_comm = pace.util.NullComm(rank=0, total_ranks=6, fill_value=0.0)
-        partitioner = pace.util.CubedSpherePartitioner(
-            pace.util.TilePartitioner((1, 1))
+        mpi_comm = ndsl.util.NullComm(rank=0, total_ranks=6, fill_value=0.0)
+        partitioner = ndsl.util.CubedSpherePartitioner(
+            ndsl.util.TilePartitioner((1, 1))
         )
-        communicator = pace.util.CubedSphereCommunicator(mpi_comm, partitioner)
+        communicator = ndsl.util.CubedSphereCommunicator(mpi_comm, partitioner)
         (
             damping_coefficients,
             driver_grid_data,
@@ -79,7 +79,7 @@ def test_restart():
             f"RESTART/restart_dycore_state_{communicator.rank}.nc"
         )
         for var in driver_state.dycore_state.__dict__.keys():
-            if isinstance(driver_state.dycore_state.__dict__[var], pace.util.Quantity):
+            if isinstance(driver_state.dycore_state.__dict__[var], ndsl.util.Quantity):
                 np.testing.assert_allclose(
                     driver_state.dycore_state.__dict__[var].data,
                     restart_dycore[var].values,

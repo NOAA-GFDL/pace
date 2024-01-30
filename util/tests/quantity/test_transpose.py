@@ -1,6 +1,6 @@
 import pytest
 
-import pace.util
+import ndsl.util
 
 
 @pytest.fixture
@@ -71,7 +71,7 @@ def final_data(initial_data, transpose_order, numpy):
 
 @pytest.fixture
 def quantity(quantity_data_input, initial_dims, initial_origin, initial_extent):
-    return pace.util.Quantity(
+    return ndsl.util.Quantity(
         quantity_data_input,
         dims=initial_dims,
         units="unit_string",
@@ -98,56 +98,56 @@ def param_product(*param_lists):
     ),
     [
         pytest.param(
-            (pace.util.X_DIM, pace.util.Y_DIM),
+            (ndsl.util.X_DIM, ndsl.util.Y_DIM),
             (6, 7),
             (1, 2),
             (2, 3),
-            (pace.util.X_DIM, pace.util.Y_DIM),
+            (ndsl.util.X_DIM, ndsl.util.Y_DIM),
             (0, 1),
             id="2d_keep_order",
         ),
         pytest.param(
-            (pace.util.X_DIM, pace.util.Y_DIM),
+            (ndsl.util.X_DIM, ndsl.util.Y_DIM),
             (6, 7),
             (1, 2),
             (2, 3),
-            (pace.util.Y_DIM, pace.util.X_DIM),
+            (ndsl.util.Y_DIM, ndsl.util.X_DIM),
             (1, 0),
             id="2d_transpose",
         ),
         pytest.param(
-            (pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM),
+            (ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM),
             (6, 7, 8),
             (1, 2, 3),
             (2, 3, 4),
-            (pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM),
+            (ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM),
             (0, 1, 2),
             id="3d_keep_order",
         ),
         pytest.param(
-            (pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM),
+            (ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM),
             (6, 7, 8),
             (1, 2, 3),
             (2, 3, 4),
-            (pace.util.X_DIMS, pace.util.Y_DIMS, pace.util.Z_DIMS),
+            (ndsl.util.X_DIMS, ndsl.util.Y_DIMS, ndsl.util.Z_DIMS),
             (0, 1, 2),
             id="3d_keep_order_list_dims",
         ),
         pytest.param(
-            (pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM),
+            (ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM),
             (6, 7, 8),
             (1, 2, 3),
             (2, 3, 4),
-            (pace.util.Z_DIM, pace.util.Y_DIM, pace.util.X_DIM),
+            (ndsl.util.Z_DIM, ndsl.util.Y_DIM, ndsl.util.X_DIM),
             (2, 1, 0),
             id="3d_transpose",
         ),
         pytest.param(
-            (pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM),
+            (ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM),
             (6, 7, 8),
             (1, 2, 3),
             (2, 3, 4),
-            (pace.util.Z_DIMS, pace.util.Y_DIMS, pace.util.X_DIMS),
+            (ndsl.util.Z_DIMS, ndsl.util.Y_DIMS, ndsl.util.X_DIMS),
             (2, 1, 0),
             id="3d_transpose_list_dims",
         ),
@@ -174,23 +174,23 @@ def test_transpose(
     ),
     [
         pytest.param(
-            (pace.util.X_DIM,), (6,), (1,), (2,), (pace.util.Y_DIM,), (0,), id="1d"
+            (ndsl.util.X_DIM,), (6,), (1,), (2,), (ndsl.util.Y_DIM,), (0,), id="1d"
         ),
         pytest.param(
-            (pace.util.X_DIM, pace.util.Y_INTERFACE_DIM),
+            (ndsl.util.X_DIM, ndsl.util.Y_INTERFACE_DIM),
             (6, 7),
             (1, 2),
             (2, 3),
-            (pace.util.X_DIM, pace.util.Y_DIM),
+            (ndsl.util.X_DIM, ndsl.util.Y_DIM),
             (0, 1),
             id="2d_switch_stagger",
         ),
         pytest.param(
-            (pace.util.X_DIM, pace.util.Y_DIM),
+            (ndsl.util.X_DIM, ndsl.util.Y_DIM),
             (6, 7),
             (1, 2),
             (2, 3),
-            (pace.util.Y_DIM, pace.util.X_INTERFACE_DIM),
+            (ndsl.util.Y_DIM, ndsl.util.X_INTERFACE_DIM),
             (1, 0),
             id="2d_transpose_switch_stagger",
         ),
@@ -205,7 +205,7 @@ def test_transpose_invalid_cases(
 
 
 def test_transpose_retains_attrs(numpy):
-    quantity = pace.util.Quantity(
+    quantity = ndsl.util.Quantity(
         numpy.random.randn(3, 4), dims=["x", "y"], units="unit_string"
     )
     quantity._attrs = {"long_name": "500 mb height"}

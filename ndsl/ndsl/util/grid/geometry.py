@@ -1,4 +1,4 @@
-from pace.util import Quantity, TilePartitioner
+from ndsl.util import Quantity, TilePartitioner
 
 from .gnomonic import (
     get_lonlat_vect,
@@ -80,7 +80,6 @@ def calc_unit_vector_west(
     ew1 = np.zeros((xyz_dgrid.shape[0], xyz_agrid.shape[1], 3))
     ew2 = np.zeros((xyz_dgrid.shape[0], xyz_agrid.shape[1], 3))
     if grid_type < 3:
-
         pp = xyz_midpoint(xyz_dgrid[1:-1, :-1, :3], xyz_dgrid[1:-1, 1:, :3])
 
         p2 = np.cross(xyz_agrid[:-1, :, :3], xyz_agrid[1:, :, :3])
@@ -123,7 +122,6 @@ def calc_unit_vector_south(
     es1 = np.zeros((xyz_agrid.shape[0], xyz_dgrid.shape[1], 3))
     es2 = np.zeros((xyz_agrid.shape[0], xyz_dgrid.shape[1], 3))
     if grid_type < 3:
-
         pp = xyz_midpoint(xyz_dgrid[:-1, 1:-1, :3], xyz_dgrid[1:, 1:-1, :3])
         p2 = np.cross(xyz_agrid[:, :-1, :3], xyz_agrid[:, 1:, :3])
         if tile_partitioner.on_tile_bottom(rank):
@@ -208,7 +206,7 @@ def calculate_supergrid_cos_sin(
 
         cos_sg[abs(1.0 - cos_sg) < 1e-15] = 1.0
 
-        sin_sg_tmp = 1.0 - cos_sg ** 2
+        sin_sg_tmp = 1.0 - cos_sg**2
         sin_sg_tmp[sin_sg_tmp < 0] = 0.0
         sin_sg = np.sqrt(sin_sg_tmp)
         sin_sg[sin_sg > 1.0] = 1.0
@@ -509,7 +507,6 @@ def calculate_divg_del6(
     tile_partitioner: TilePartitioner,
     rank: int,
 ):
-
     divg_u = sina_v * dyc / dx
     del6_u = sina_v * dx / dyc
     divg_v = sina_u * dxc / dy

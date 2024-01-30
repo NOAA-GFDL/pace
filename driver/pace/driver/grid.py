@@ -9,25 +9,25 @@ import pace.driver
 import ndsl.dsl
 import pace.physics
 import ndsl.stencils
-import pace.util
-import pace.util.grid
+import ndsl.util
+import ndsl.util.grid
 from ndsl.stencils.testing import TranslateGrid
-from pace.util import Communicator, QuantityFactory
-from pace.util.grid import (
+from ndsl.util import Communicator, QuantityFactory
+from ndsl.util.grid import (
     DampingCoefficients,
     DriverGridData,
     GridData,
     MetricTerms,
     direct_transform,
 )
-from pace.util.grid.helper import (
+from ndsl.util.grid.helper import (
     AngleGridData,
     ContravariantGridData,
     HorizontalGridData,
     VerticalGridData,
 )
-from pace.util.logging import pace_log
-from pace.util.namelist import Namelist
+from ndsl.util.logging import pace_log
+from ndsl.util.namelist import Namelist
 
 from .registry import Registry
 
@@ -36,8 +36,8 @@ class GridInitializer(abc.ABC):
     @abc.abstractmethod
     def get_grid(
         self,
-        quantity_factory: pace.util.QuantityFactory,
-        communicator: pace.util.Communicator,
+        quantity_factory: ndsl.util.QuantityFactory,
+        communicator: ndsl.util.Communicator,
     ) -> Tuple[DampingCoefficients, DriverGridData, GridData]:
         ...
 
@@ -162,7 +162,7 @@ class SerialboxGridConfig(GridInitializer):
     def _namelist(self) -> Namelist:
         return Namelist.from_f90nml(self._f90_namelist)
 
-    def _serializer(self, communicator: pace.util.Communicator):
+    def _serializer(self, communicator: ndsl.util.Communicator):
         import serialbox
 
         serializer = serialbox.Serializer(
@@ -174,7 +174,7 @@ class SerialboxGridConfig(GridInitializer):
 
     def _get_serialized_grid(
         self,
-        communicator: pace.util.Communicator,
+        communicator: ndsl.util.Communicator,
         backend: str,
     ) -> ndsl.stencils.testing.grid.Grid:  # type: ignore
         ser = self._serializer(communicator)
@@ -189,7 +189,7 @@ class SerialboxGridConfig(GridInitializer):
         communicator: Communicator,
     ) -> Tuple[DampingCoefficients, DriverGridData, GridData]:
         backend = quantity_factory.zeros(
-            dims=[pace.util.X_DIM, pace.util.Y_DIM], units="unknown"
+            dims=[ndsl.util.X_DIM, ndsl.util.Y_DIM], units="unknown"
         ).gt4py_backend
 
         pace_log.info("Using serialized grid data")
@@ -242,7 +242,7 @@ class ExternalNetcdfGridConfig(GridInitializer):
         # ToDo: refactor when grid_type is an enum
         if self.grid_type <= 3:
             tile_num = (
-                pace.util.get_tile_index(
+                ndsl.util.get_tile_index(
                     communicator.rank, communicator.partitioner.total_ranks
                 )
                 + 1
@@ -259,7 +259,7 @@ class ExternalNetcdfGridConfig(GridInitializer):
 
         subtile_slice_grid = communicator.partitioner.tile.subtile_slice(
             rank=communicator.rank,
-            global_dims=[pace.util.Y_INTERFACE_DIM, pace.util.X_INTERFACE_DIM],
+            global_dims=[ndsl.util.Y_INTERFACE_DIM, ndsl.util.X_INTERFACE_DIM],
             global_extent=(npy, npx),
             overlap=True,
         )

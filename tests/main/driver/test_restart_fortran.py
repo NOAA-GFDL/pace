@@ -4,10 +4,10 @@ import numpy as np
 import xarray as xr
 
 import pace.driver
-import pace.util
+import ndsl.util
 from pace.driver.initialization import FortranRestartInit
 from pace.physics import PHYSICS_PACKAGES
-from pace.util import (
+from ndsl.util import (
     CubedSphereCommunicator,
     CubedSpherePartitioner,
     QuantityFactory,
@@ -25,8 +25,8 @@ def test_state_from_fortran_restart():
     partitioner = CubedSpherePartitioner(TilePartitioner(layout))
     # need a local communicator to mock "scatter" for the restart data,
     # but need null communicator to handle grid initialization
-    local_comm = pace.util.LocalComm(rank=0, total_ranks=6, buffer_dict={})
-    null_comm = pace.util.NullComm(rank=0, total_ranks=6)
+    local_comm = ndsl.util.LocalComm(rank=0, total_ranks=6, buffer_dict={})
+    null_comm = ndsl.util.NullComm(rank=0, total_ranks=6)
     local_communicator = CubedSphereCommunicator(local_comm, partitioner)
     null_communicator = CubedSphereCommunicator(null_comm, partitioner)
 

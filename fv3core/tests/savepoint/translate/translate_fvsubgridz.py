@@ -3,8 +3,8 @@ from types import SimpleNamespace
 import ndsl.dsl
 import ndsl.dsl.gt4py_utils as utils
 import pace.fv3core.stencils.fv_subgridz as fv_subgridz
-import pace.util
-import pace.util as fv3util
+import ndsl.util
+import ndsl.util as fv3util
 from ndsl.stencils.testing import ParallelTranslateBaseSlicing
 
 
@@ -126,7 +126,7 @@ class TranslateFVSubgridZ(ParallelTranslateBaseSlicing):
     def __init__(
         self,
         grid,
-        namelist: pace.util.Namelist,
+        namelist: ndsl.util.Namelist,
         stencil_factory: ndsl.dsl.StencilFactory,
         *args,
         **kwargs,

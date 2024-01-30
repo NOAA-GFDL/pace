@@ -3,11 +3,11 @@ from typing import Dict, Tuple
 
 import numpy as np
 
-import pace.util
+import ndsl.util
 from ndsl.dsl import gt4py_utils as utils
 from ndsl.dsl.stencil import GridIndexing
 from ndsl.dsl.typing import Float
-from pace.util.grid import (
+from ndsl.util.grid import (
     AngleGridData,
     ContravariantGridData,
     DampingCoefficients,
@@ -18,7 +18,7 @@ from pace.util.grid import (
     MetricTerms,
     VerticalGridData,
 )
-from pace.util.halo_data_transformer import QuantityHaloSpec
+from ndsl.util.halo_data_transformer import QuantityHaloSpec
 
 
 TRACER_DIM = "tracers"
@@ -47,13 +47,13 @@ class Grid:
         ny = int((npy - 1) / layout[1])
         indices = {
             "isd": 0,
-            "ied": nx + 2 * pace.util.N_HALO_DEFAULT - 1,
-            "is_": pace.util.N_HALO_DEFAULT,
-            "ie": nx + pace.util.N_HALO_DEFAULT - 1,
+            "ied": nx + 2 * ndsl.util.N_HALO_DEFAULT - 1,
+            "is_": ndsl.util.N_HALO_DEFAULT,
+            "ie": nx + ndsl.util.N_HALO_DEFAULT - 1,
             "jsd": 0,
-            "jed": ny + 2 * pace.util.N_HALO_DEFAULT - 1,
-            "js": pace.util.N_HALO_DEFAULT,
-            "je": ny + pace.util.N_HALO_DEFAULT - 1,
+            "jed": ny + 2 * ndsl.util.N_HALO_DEFAULT - 1,
+            "js": ndsl.util.N_HALO_DEFAULT,
+            "je": ny + ndsl.util.N_HALO_DEFAULT - 1,
         }
         return cls(indices, shape_params, rank, layout, backend, local_indices=True)
 
@@ -87,7 +87,7 @@ class Grid:
     ):
         self.rank = rank
         self.backend = backend
-        self.partitioner = pace.util.TilePartitioner(layout)
+        self.partitioner = ndsl.util.TilePartitioner(layout)
         self.subtile_index = self.partitioner.subtile_index(self.rank)
         self.layout = layout
         for s in self.shape_params:
@@ -104,7 +104,7 @@ class Grid:
         self.njd = int(self.jed - self.jsd + 1)
         self.nic = int(self.ie - self.is_ + 1)
         self.njc = int(self.je - self.js + 1)
-        self.halo = pace.util.N_HALO_DEFAULT
+        self.halo = ndsl.util.N_HALO_DEFAULT
         self.global_is, self.global_js = self.local_to_global_indices(self.is_, self.js)
         self.global_ie, self.global_je = self.local_to_global_indices(self.ie, self.je)
         self.global_isd, self.global_jsd = self.local_to_global_indices(
@@ -137,7 +137,7 @@ class Grid:
         if self._sizer is None:
             # in the future this should use from_namelist, when we have a non-flattened
             # namelist
-            self._sizer = pace.util.SubtileGridSizer.from_tile_params(
+            self._sizer = ndsl.util.SubtileGridSizer.from_tile_params(
                 nx_tile=self.npx - 1,
                 ny_tile=self.npy - 1,
                 nz=self.npz,
@@ -153,9 +153,9 @@ class Grid:
         return self._sizer
 
     @property
-    def quantity_factory(self) -> pace.util.QuantityFactory:
+    def quantity_factory(self) -> ndsl.util.QuantityFactory:
         if self._quantity_factory is None:
-            self._quantity_factory = pace.util.QuantityFactory.from_backend(
+            self._quantity_factory = ndsl.util.QuantityFactory.from_backend(
                 self.sizer, backend=self.backend
             )
         return self._quantity_factory
@@ -163,7 +163,7 @@ class Grid:
     def make_quantity(
         self,
         array,
-        dims=[pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM],
+        dims=[ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
         units="Unknown",
         origin=None,
         extent=None,
@@ -172,7 +172,7 @@ class Grid:
             origin = self.compute_origin()
         if extent is None:
             extent = self.domain_shape_compute()
-        return pace.util.Quantity(
+        return ndsl.util.Quantity(
             array, dims=dims, units=units, origin=origin, extent=extent
         )
 
@@ -180,7 +180,7 @@ class Grid:
         self,
         data_dict,
         varname,
-        dims=[pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM],
+        dims=[ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
         units="Unknown",
     ):
         data_dict[varname + "_quantity"] = self.quantity_wrap(
@@ -190,12 +190,12 @@ class Grid:
     def quantity_wrap(
         self,
         data,
-        dims=[pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM],
+        dims=[ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
         units="unknown",
     ):
         origin = self.sizer.get_origin(dims)
         extent = self.sizer.get_extent(dims)
-        return pace.util.Quantity(
+        return ndsl.util.Quantity(
             data, dims=dims, units=units, origin=origin, extent=extent
         )
 
@@ -441,7 +441,7 @@ class Grid:
         shape,
         origin,
         halo_points,
-        dims=[pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM],
+        dims=[ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
     ) -> QuantityHaloSpec:
         """Build memory specifications for the halo update."""
         return self.quantity_factory.get_quantity_halo_spec(
@@ -485,7 +485,7 @@ class Grid:
         # The translate code pads ndarray axes with zeros in certain cases,
         # in particular the vertical axis. Since we're deprecating those tests,
         # we simply "fix" those arrays here.
-        clipped_data: Dict[str, pace.util.Quantity] = {}
+        clipped_data: Dict[str, ndsl.util.Quantity] = {}
         for name in (
             "ee1",
             "ee2",

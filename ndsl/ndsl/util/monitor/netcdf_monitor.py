@@ -5,7 +5,7 @@ from typing import Any, Dict, List, Optional, Set
 import fsspec
 import numpy as np
 
-from pace.util.communicator import Communicator
+from ndsl.util.communicator import Communicator
 
 from .. import _xarray as xr
 from ..filesystem import get_fs

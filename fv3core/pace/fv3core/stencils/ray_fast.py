@@ -12,11 +12,11 @@ from gt4py.cartesian.gtscript import (
     sin,
 )
 
-import pace.util.constants as constants
+import ndsl.util.constants as constants
 from ndsl.dsl.dace.orchestration import orchestrate
 from ndsl.dsl.stencil import StencilFactory
 from ndsl.dsl.typing import Float, FloatField, FloatFieldK
-from pace.util import X_INTERFACE_DIM, Y_INTERFACE_DIM, Z_DIM
+from ndsl.util import X_INTERFACE_DIM, Y_INTERFACE_DIM, Z_DIM
 
 
 SDAY = 86400.0

@@ -1,4 +1,4 @@
-from pace.util.constants import PI, RADIUS
+from ndsl.util.constants import PI, RADIUS
 
 
 __all__ = ["mirror_grid"]
@@ -38,7 +38,6 @@ def mirror_grid(
     # first fix base region
     for j in range(jstart, jend + 1):
         for i in range(istart, iend + 1):
-
             iend_domain = iend - 1 + ng
             jend_domain = jend - 1 + ng
             x1 = np.multiply(
@@ -71,7 +70,6 @@ def mirror_grid(
                     mirror_data["north-south"][i, -(j + 1), 0] = 0
 
     if tile_index > 0:
-
         for j in range(jstart, jend + 1):
             x1 = mirror_data["local"][istart : iend + 1, j, 0]
             y1 = mirror_data["local"][istart : iend + 1, j, 1]
@@ -215,7 +213,6 @@ def mirror_grid(
 
 
 def _rot_3d(axis, p, angle, np, right_hand_grid, degrees=False, convert=False):
-
     if convert:
         p1 = _spherical_to_cartesian(p, np, right_hand_grid)
     else:

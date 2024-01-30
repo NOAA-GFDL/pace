@@ -3,7 +3,7 @@ import datetime
 
 import pytest
 
-import pace.util
+import ndsl.util
 
 
 try:
@@ -30,23 +30,23 @@ def n_tile_halo(request):
 @pytest.fixture(params=["x,y", "y,x", "xi,y", "x,y,z", "z,y,x", "y,z,x"])
 def dims(request, fast):
     if request.param == "x,y":
-        return [pace.util.X_DIM, pace.util.Y_DIM]
+        return [ndsl.util.X_DIM, ndsl.util.Y_DIM]
     elif request.param == "y,x":
         if fast:
             pytest.skip("running in fast mode")
         else:
-            return [pace.util.Y_DIM, pace.util.X_DIM]
+            return [ndsl.util.Y_DIM, ndsl.util.X_DIM]
     elif request.param == "xi,y":
-        return [pace.util.X_INTERFACE_DIM, pace.util.Y_DIM]
+        return [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_DIM]
     elif request.param == "x,y,z":
-        return [pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM]
+        return [ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM]
     elif request.param == "z,y,x":
         if fast:
             pytest.skip("running in fast mode")
         else:
-            return [pace.util.Z_DIM, pace.util.Y_DIM, pace.util.X_DIM]
+            return [ndsl.util.Z_DIM, ndsl.util.Y_DIM, ndsl.util.X_DIM]
     elif request.param == "y,z,x":
-        return [pace.util.Y_DIM, pace.util.Z_DIM, pace.util.X_DIM]
+        return [ndsl.util.Y_DIM, ndsl.util.Z_DIM, ndsl.util.X_DIM]
     else:
         raise NotImplementedError()
 
@@ -72,12 +72,12 @@ def assert_quantity_equals(result, reference):
 @pytest.fixture()
 def dim_lengths(layout):
     return {
-        pace.util.X_DIM: 2 * layout[1],
-        pace.util.X_INTERFACE_DIM: 2 * layout[1] + 1,
-        pace.util.Y_DIM: 2 * layout[0],
-        pace.util.Y_INTERFACE_DIM: 2 * layout[0] + 1,
-        pace.util.Z_DIM: 3,
-        pace.util.Z_INTERFACE_DIM: 4,
+        ndsl.util.X_DIM: 2 * layout[1],
+        ndsl.util.X_INTERFACE_DIM: 2 * layout[1] + 1,
+        ndsl.util.Y_DIM: 2 * layout[0],
+        ndsl.util.Y_INTERFACE_DIM: 2 * layout[0] + 1,
+        ndsl.util.Z_DIM: 3,
+        ndsl.util.Z_INTERFACE_DIM: 4,
     }
 
 
@@ -88,10 +88,10 @@ def communicator_list(layout):
     return_list = []
     for rank in range(total_ranks):
         return_list.append(
-            pace.util.CubedSphereCommunicator(
-                pace.util.testing.DummyComm(rank, total_ranks, shared_buffer),
-                pace.util.CubedSpherePartitioner(pace.util.TilePartitioner(layout)),
-                timer=pace.util.Timer(),
+            ndsl.util.CubedSphereCommunicator(
+                ndsl.util.testing.DummyComm(rank, total_ranks, shared_buffer),
+                ndsl.util.CubedSpherePartitioner(ndsl.util.TilePartitioner(layout)),
+                timer=ndsl.util.Timer(),
             )
         )
     return return_list
@@ -114,7 +114,7 @@ def cube_quantity(dims, units, dim_lengths, tile_extent, n_tile_halo, numpy):
 def scattered_quantities(cube_quantity, layout, n_rank_halo, numpy):
     tile_ranks = layout[0] * layout[1]
     return_list = []
-    partitioner = pace.util.TilePartitioner(layout)
+    partitioner = ndsl.util.TilePartitioner(layout)
     for i_tile in range(6):
         for rank in range(tile_ranks):
             # partitioner is tested in other tests, here we assume it works
@@ -139,7 +139,7 @@ def scattered_quantities(cube_quantity, layout, n_rank_halo, numpy):
 
 def get_cube_quantity(dims, units, dim_lengths, tile_extent, n_halo, numpy):
     extent = [6] + [dim_lengths[dim] for dim in dims]
-    dims = [pace.util.TILE_DIM] + dims
+    dims = [ndsl.util.TILE_DIM] + dims
     quantity = get_quantity(dims, units, extent, n_halo, numpy)
     quantity.view[:] = numpy.random.randn(*quantity.extent)
     return quantity
@@ -149,10 +149,10 @@ def get_quantity(dims, units, extent, n_halo, numpy):
     shape = list(copy.deepcopy(extent))
     origin = [0 for dim in dims]
     for i, dim in enumerate(dims):
-        if dim in pace.util.HORIZONTAL_DIMS:
+        if dim in ndsl.util.HORIZONTAL_DIMS:
             origin[i] += n_halo
             shape[i] += 2 * n_halo
-    return pace.util.Quantity(
+    return ndsl.util.Quantity(
         numpy.zeros(shape),
         dims,
         units,

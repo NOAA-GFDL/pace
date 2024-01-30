@@ -2,7 +2,7 @@ import time
 
 import pytest
 
-from pace.util import NullTimer, Timer
+from ndsl.util import NullTimer, Timer
 
 
 @pytest.fixture
