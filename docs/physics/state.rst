@@ -38,6 +38,6 @@ You can initialize a zero-filled PhysicsState and MicrophysicsState from other P
 
     >>> quantity_factory = QuantityFactory.from_backend(sizer=sizer, backend="numpy")
     >>> physics_state = PhysicsState.init_zeros(
-    ...  quantity_factory=quantity_factory, active_packages=["microphysics"]
+    ...  quantity_factory=quantity_factory, schemes=["GFS_microphysics"]
     ... )
     >>> microphysics_state = physics_state.microphysics
