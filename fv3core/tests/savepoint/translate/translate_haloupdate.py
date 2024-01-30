@@ -2,7 +2,7 @@ import ndsl.dsl
 import pace.util
 import pace.util as fv3util
 from ndsl.dsl import gt4py_utils as utils
-from pace.stencils.testing import ParallelTranslate
+from ndsl.stencils.testing import ParallelTranslate
 from pace.util.logging import pace_log
 
 

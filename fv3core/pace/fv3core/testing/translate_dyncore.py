@@ -3,7 +3,7 @@ import ndsl.dsl.gt4py_utils as utils
 import pace.fv3core.stencils.dyn_core as dyn_core
 import pace.util
 from pace.fv3core import DycoreState, DynamicalCoreConfig
-from pace.stencils.testing import ParallelTranslate2PyState
+from ndsl.stencils.testing import ParallelTranslate2PyState
 
 
 class TranslateDynCore(ParallelTranslate2PyState):

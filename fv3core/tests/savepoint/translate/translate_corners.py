@@ -4,7 +4,7 @@ import ndsl.dsl
 import ndsl.dsl.gt4py_utils as utils
 import pace.util
 from pace.fv3core.testing import TranslateDycoreFortranData2Py
-from pace.stencils import corners
+from ndsl.stencils import corners
 
 
 class TranslateFill4Corners(TranslateDycoreFortranData2Py):

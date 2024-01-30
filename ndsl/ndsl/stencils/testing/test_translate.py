@@ -11,7 +11,7 @@ import ndsl.dsl.gt4py_utils as gt_utils
 import pace.util
 from ndsl.dsl.dace.dace_config import DaceConfig
 from ndsl.dsl.stencil import CompilationConfig
-from pace.stencils.testing import SavepointCase, dataset_to_dict
+from ndsl.stencils.testing import SavepointCase, dataset_to_dict
 from pace.util.mpi import MPI
 from pace.util.testing import compare_scalar, perturb, success, success_array
 

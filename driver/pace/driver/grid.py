@@ -8,10 +8,10 @@ import xarray as xr
 import pace.driver
 import ndsl.dsl
 import pace.physics
-import pace.stencils
+import ndsl.stencils
 import pace.util
 import pace.util.grid
-from pace.stencils.testing import TranslateGrid
+from ndsl.stencils.testing import TranslateGrid
 from pace.util import Communicator, QuantityFactory
 from pace.util.grid import (
     DampingCoefficients,
@@ -176,7 +176,7 @@ class SerialboxGridConfig(GridInitializer):
         self,
         communicator: pace.util.Communicator,
         backend: str,
-    ) -> pace.stencils.testing.grid.Grid:  # type: ignore
+    ) -> ndsl.stencils.testing.grid.Grid:  # type: ignore
         ser = self._serializer(communicator)
         grid = TranslateGrid.new_from_serialized_data(
             ser, communicator.rank, self._namelist.layout, backend

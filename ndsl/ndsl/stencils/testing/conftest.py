@@ -10,8 +10,8 @@ import yaml
 import ndsl.dsl
 import pace.util
 from ndsl.dsl.dace.dace_config import DaceConfig
-from pace.stencils.testing import ParallelTranslate, TranslateGrid
-from pace.stencils.testing.savepoint import SavepointCase, dataset_to_dict
+from ndsl.stencils.testing import ParallelTranslate, TranslateGrid
+from ndsl.stencils.testing.savepoint import SavepointCase, dataset_to_dict
 from pace.util.mpi import MPI
 
 

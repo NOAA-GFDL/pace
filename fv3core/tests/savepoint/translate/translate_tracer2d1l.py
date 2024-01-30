@@ -7,7 +7,7 @@ import pace.fv3core.stencils.tracer_2d_1l
 import pace.util
 import pace.util as fv3util
 from pace.fv3core.utils.functional_validation import get_subset_func
-from pace.stencils.testing import ParallelTranslate
+from ndsl.stencils.testing import ParallelTranslate
 
 
 class TranslateTracer2D1L(ParallelTranslate):

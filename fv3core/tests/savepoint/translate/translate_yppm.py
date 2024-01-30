@@ -4,7 +4,7 @@ import pace.util
 from ndsl.dsl.typing import Float
 from pace.fv3core.stencils import yppm
 from pace.fv3core.testing import TranslateDycoreFortranData2Py
-from pace.stencils.testing import TranslateGrid
+from ndsl.stencils.testing import TranslateGrid
 
 
 class TranslateYPPM(TranslateDycoreFortranData2Py):

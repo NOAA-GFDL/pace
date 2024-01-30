@@ -6,12 +6,12 @@ from typing import Tuple
 
 import ndsl.dsl.stencil
 import pace.fv3core.initialization.analytic_init as ai
-import pace.stencils.testing
+import ndsl.stencils.testing
 import pace.util
 from pace import fv3core
 from ndsl.dsl.dace.dace_config import DaceConfig
 from pace.fv3core.dycore_state import DycoreState
-from pace.stencils.testing import assert_same_temporaries, copy_temporaries
+from ndsl.stencils.testing import assert_same_temporaries, copy_temporaries
 from pace.util.grid import DampingCoefficients, GridData, MetricTerms
 from pace.util.null_comm import NullComm
 

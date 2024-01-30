@@ -1,5 +1,5 @@
-from pace.stencils.testing.translate_physics import TranslatePhysicsFortranData2Py
-from pace.stencils.update_atmos_state import prepare_tendencies_and_update_tracers
+from ndsl.stencils.testing.translate_physics import TranslatePhysicsFortranData2Py
+from ndsl.stencils.update_atmos_state import prepare_tendencies_and_update_tracers
 
 
 class TranslatePhysUpdateTracers(TranslatePhysicsFortranData2Py):

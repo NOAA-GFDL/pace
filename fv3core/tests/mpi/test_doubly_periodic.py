@@ -5,7 +5,7 @@ import ndsl.dsl.stencil
 import pace.fv3core
 import pace.fv3core._config
 import pace.fv3core.initialization.baroclinic as baroclinic_init
-import pace.stencils.testing
+import ndsl.stencils.testing
 import pace.util
 from pace.util.grid import DampingCoefficients, GridData, MetricTerms
 

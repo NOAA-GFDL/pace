@@ -8,7 +8,7 @@ from ndsl.dsl.typing import Float
 from pace.physics import PHYSICS_PACKAGES
 from pace.physics.stencils.microphysics import Microphysics
 from pace.physics.stencils.physics import PhysicsState
-from pace.stencils.testing.translate_physics import TranslatePhysicsFortranData2Py
+from ndsl.stencils.testing.translate_physics import TranslatePhysicsFortranData2Py
 
 
 class TranslateMicroph(TranslatePhysicsFortranData2Py):

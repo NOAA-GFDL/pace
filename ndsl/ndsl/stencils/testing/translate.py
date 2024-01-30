@@ -7,7 +7,7 @@ import ndsl.dsl.gt4py_utils as utils
 import pace.util
 from ndsl.dsl.stencil import StencilFactory
 from ndsl.dsl.typing import Field  # noqa: F401
-from pace.stencils.testing.grid import Grid  # type: ignore
+from ndsl.stencils.testing.grid import Grid  # type: ignore
 
 
 try:

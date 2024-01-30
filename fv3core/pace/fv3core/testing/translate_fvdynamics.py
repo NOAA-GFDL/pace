@@ -10,8 +10,8 @@ import pace.fv3core.stencils.fv_dynamics as fv_dynamics
 import pace.util
 from pace.fv3core._config import DynamicalCoreConfig
 from pace.fv3core.dycore_state import DycoreState
-from pace.stencils.testing import ParallelTranslateBaseSlicing
-from pace.stencils.testing.translate import TranslateFortranData2Py
+from ndsl.stencils.testing import ParallelTranslateBaseSlicing
+from ndsl.stencils.testing.translate import TranslateFortranData2Py
 from pace.util.grid import GridData
 
 

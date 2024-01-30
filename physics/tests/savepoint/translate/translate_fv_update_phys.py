@@ -6,8 +6,8 @@ import ndsl.dsl
 import ndsl.dsl.gt4py_utils as utils
 import pace.util
 from ndsl.dsl.typing import FloatField, FloatFieldIJ
-from pace.stencils.fv_update_phys import ApplyPhysicsToDycore
-from pace.stencils.testing.translate_physics import (
+from ndsl.stencils.fv_update_phys import ApplyPhysicsToDycore
+from ndsl.stencils.testing.translate_physics import (
     ParallelPhysicsTranslate2Py,
     transform_dwind_serialized_data,
 )

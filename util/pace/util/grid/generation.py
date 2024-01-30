@@ -9,7 +9,7 @@ from pace import util
 from ndsl.dsl.gt4py_utils import asarray
 from ndsl.dsl.stencil import GridIndexing
 from ndsl.dsl.typing import Float
-from pace.stencils.corners import (
+from ndsl.stencils.corners import (
     fill_corners_2d,
     fill_corners_agrid,
     fill_corners_cgrid,

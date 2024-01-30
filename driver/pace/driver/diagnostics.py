@@ -6,7 +6,7 @@ from typing import List, Optional, Union
 
 import pace.driver
 import ndsl.dsl
-import pace.stencils
+import ndsl.stencils
 import pace.util
 import pace.util.grid
 from ndsl.dsl.dace.orchestration import dace_inhibitor

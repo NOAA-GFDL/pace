@@ -11,7 +11,7 @@ import pace.driver
 import ndsl.dsl
 import pace.fv3core.initialization.analytic_init as analytic_init
 import pace.physics
-import pace.stencils
+import ndsl.stencils
 import pace.util
 import pace.util.grid
 from pace import fv3core
@@ -19,7 +19,7 @@ from ndsl.dsl.dace.orchestration import DaceConfig
 from ndsl.dsl.stencil import StencilFactory
 from ndsl.dsl.stencil_config import CompilationConfig
 from pace.fv3core.testing import TranslateFVDynamics
-from pace.stencils.testing import TranslateGrid
+from ndsl.stencils.testing import TranslateGrid
 from pace.util.namelist import Namelist
 
 from .registry import Registry
@@ -256,7 +256,7 @@ class SerialboxInit(Initializer):
         self,
         communicator: pace.util.Communicator,
         backend: str,
-    ) -> pace.stencils.testing.grid.Grid:  # type: ignore
+    ) -> ndsl.stencils.testing.grid.Grid:  # type: ignore
         ser = self._serializer(communicator)
         grid = TranslateGrid.new_from_serialized_data(
             ser, communicator.rank, self._namelist.layout, backend

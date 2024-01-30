@@ -5,7 +5,7 @@ import pace.util
 import pace.util.constants as constants
 from ndsl.dsl.stencil import StencilFactory
 from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ, FloatFieldK
-from pace.stencils import corners
+from ndsl.stencils import corners
 from pace.util import X_DIM, Y_DIM, Z_DIM
 
 

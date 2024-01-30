@@ -8,7 +8,7 @@ import pace.physics
 import pace.util
 import pace.util.grid
 from ndsl.dsl.stencil_config import CompilationConfig
-from pace.stencils.testing import assert_same_temporaries, copy_temporaries
+from ndsl.stencils.testing import assert_same_temporaries, copy_temporaries
 
 
 try:

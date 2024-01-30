@@ -1,6 +1,6 @@
 from gt4py.cartesian.gtscript import PARALLEL, computation, horizontal, interval, region
 
-import pace.stencils.corners as corners
+import ndsl.stencils.corners as corners
 import pace.util
 from ndsl.dsl.dace.orchestration import orchestrate
 from ndsl.dsl.stencil import StencilFactory, get_stencils_with_varied_bounds

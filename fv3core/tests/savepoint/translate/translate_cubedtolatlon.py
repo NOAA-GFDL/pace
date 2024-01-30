@@ -1,7 +1,7 @@
 import ndsl.dsl
 import pace.util
-from pace.stencils.c2l_ord import CubedToLatLon
-from pace.stencils.testing import ParallelTranslate2Py
+from ndsl.stencils.c2l_ord import CubedToLatLon
+from ndsl.stencils.testing import ParallelTranslate2Py
 
 
 class TranslateCubedToLatLon(ParallelTranslate2Py):

@@ -11,8 +11,8 @@ import pace.fv3core.initialization.test_cases.initialize_baroclinic as baroclini
 import pace.util
 import pace.util as fv3util
 from pace.fv3core.testing import TranslateDycoreFortranData2Py
-from pace.stencils.testing import ParallelTranslateBaseSlicing
-from pace.stencils.testing.grid import TRACER_DIM  # type: ignore
+from ndsl.stencils.testing import ParallelTranslateBaseSlicing
+from ndsl.stencils.testing.grid import TRACER_DIM  # type: ignore
 from pace.util.grid import GridData, MetricTerms
 
 

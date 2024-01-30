@@ -6,7 +6,7 @@ import pytest
 import ndsl.dsl
 import ndsl.dsl.gt4py_utils as utils
 import pace.util
-from pace.stencils.testing.parallel_translate import ParallelTranslateGrid
+from ndsl.stencils.testing.parallel_translate import ParallelTranslateGrid
 from pace.util.grid import MetricTerms, set_hybrid_pressure_coefficients
 from pace.util.grid.global_setup import global_mirror_grid, gnomonic_grid
 

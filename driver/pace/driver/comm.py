@@ -4,7 +4,7 @@ import os
 from typing import Any, ClassVar, List
 
 import pace.driver
-import pace.stencils
+import ndsl.stencils
 import pace.util
 import pace.util.grid
 from pace.util.caching_comm import CachingCommReader, CachingCommWriter

@@ -8,7 +8,7 @@ from pace import fv3core
 from ndsl.dsl.dace.orchestration import orchestrate
 from ndsl.dsl.stencil import StencilFactory
 from ndsl.dsl.typing import Float, FloatField
-from pace.stencils.fv_update_phys import ApplyPhysicsToDycore
+from ndsl.stencils.fv_update_phys import ApplyPhysicsToDycore
 from pace.util.grid import DriverGridData, GridData
 
 

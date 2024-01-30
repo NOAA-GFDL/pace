@@ -5,7 +5,7 @@ import ndsl.dsl.gt4py_utils as utils
 import pace.fv3core.stencils.fillz as fillz
 import pace.util
 from pace.fv3core.testing import TranslateDycoreFortranData2Py
-from pace.stencils.testing import pad_field_in_j
+from ndsl.stencils.testing import pad_field_in_j
 from pace.util.utils import safe_assign_array
 
 

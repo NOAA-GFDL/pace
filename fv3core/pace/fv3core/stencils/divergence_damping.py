@@ -10,7 +10,7 @@ from gt4py.cartesian.gtscript import (
 )
 
 import pace.fv3core.stencils.basic_operations as basic
-import pace.stencils.corners as corners
+import ndsl.stencils.corners as corners
 import pace.util
 from ndsl.dsl.dace.orchestration import dace_inhibitor, orchestrate
 from ndsl.dsl.stencil import StencilFactory, get_stencils_with_varied_bounds

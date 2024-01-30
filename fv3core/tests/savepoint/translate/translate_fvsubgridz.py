@@ -5,7 +5,7 @@ import ndsl.dsl.gt4py_utils as utils
 import pace.fv3core.stencils.fv_subgridz as fv_subgridz
 import pace.util
 import pace.util as fv3util
-from pace.stencils.testing import ParallelTranslateBaseSlicing
+from ndsl.stencils.testing import ParallelTranslateBaseSlicing
 
 
 # NOTE, does no halo updates, does not need to be a Parallel test,

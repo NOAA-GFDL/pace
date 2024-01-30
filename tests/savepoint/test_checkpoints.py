@@ -13,8 +13,8 @@ import pace.util
 from pace import fv3core
 from pace.fv3core.initialization.dycore_state import DycoreState
 from pace.fv3core.testing.translate_fvdynamics import TranslateFVDynamics
-from pace.stencils.testing import TranslateGrid, dataset_to_dict
-from pace.stencils.testing.grid import Grid
+from ndsl.stencils.testing import TranslateGrid, dataset_to_dict
+from ndsl.stencils.testing.grid import Grid
 from pace.util.checkpointer.thresholds import SavepointThresholds
 from pace.util.grid import DampingCoefficients, GridData
 from pace.util.testing import perturb

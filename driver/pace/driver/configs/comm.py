@@ -7,7 +7,7 @@ import dacite
 
 import pace.driver
 import ndsl.dsl
-import pace.stencils
+import ndsl.stencils
 import pace.util
 import pace.util.grid
 from pace.util.caching_comm import CachingCommReader, CachingCommWriter

@@ -12,7 +12,7 @@ from ndsl.dsl.dace.orchestration import orchestrate
 from ndsl.dsl.stencil import StencilFactory
 from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ
 from pace.fv3core.stencils.d2a2c_vect import DGrid2AGrid2CGridVectors
-from pace.stencils import corners
+from ndsl.stencils import corners
 from pace.util import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_DIM
 from pace.util.grid import GridData
 

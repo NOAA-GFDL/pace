@@ -16,7 +16,7 @@ from ndsl.dsl.stencil import CompilationConfig
 from pace.fv3core._config import DynamicalCoreConfig
 from pace.fv3core.stencils.dyn_core import AcousticDynamics
 from pace.fv3core.testing import TranslateDynCore
-from pace.stencils.testing.grid import Grid
+from ndsl.stencils.testing.grid import Grid
 from pace.util.null_comm import NullComm
 
 

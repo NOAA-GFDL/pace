@@ -1,5 +1,5 @@
 from pace.physics.stencils.get_prs_fv3 import get_prs_fv3
-from pace.stencils.testing.translate_physics import TranslatePhysicsFortranData2Py
+from ndsl.stencils.testing.translate_physics import TranslatePhysicsFortranData2Py
 
 
 class TranslatePrsFV3(TranslatePhysicsFortranData2Py):
