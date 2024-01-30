@@ -77,10 +77,6 @@ def test_extgrid_equals_generated(config_file_path: str, ranks: int):
     side = int(math.sqrt(size // 6))
     cube_comm = get_cube_comm(layout=(side, side), comm=comm)
 
-    print("THIS")
-    print(TEST_CONFIGS_DIR)
-    print("THAT")
-
     with open(
         os.path.join(TEST_CONFIGS_DIR, config_file_path),
         "r",

@@ -230,6 +230,7 @@ class ExternalNetcdfGridConfig(GridInitializer):
 
     grid_type: Optional[int] = 0
     grid_file_path: str = "/input/tilefile"
+    eta_file: str = "None"
 
     def get_grid(
         self,
@@ -270,6 +271,7 @@ class ExternalNetcdfGridConfig(GridInitializer):
             quantity_factory=quantity_factory,
             communicator=communicator,
             grid_type=self.grid_type,
+            eta_file=self.eta_file,
         )
 
         horizontal_data = HorizontalGridData.new_from_metric_terms(metric_terms)
