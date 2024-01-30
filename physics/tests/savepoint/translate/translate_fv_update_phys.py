@@ -1,6 +1,10 @@
 import dataclasses
 
 import numpy as np
+from translate_physics import (
+    ParallelPhysicsTranslate2Py,
+    transform_dwind_serialized_data,
+)
 
 import ndsl.dsl
 import ndsl.dsl.gt4py_utils as utils
@@ -8,10 +12,6 @@ import ndsl.util
 from ndsl.dsl.typing import FloatField, FloatFieldIJ
 from ndsl.util.utils import safe_assign_array
 from pace.physics.update.fv_update_phys import ApplyPhysicsToDycore
-from physics.tests.savepoint.translate.translate_physics import (
-    ParallelPhysicsTranslate2Py,
-    transform_dwind_serialized_data,
-)
 
 
 try:

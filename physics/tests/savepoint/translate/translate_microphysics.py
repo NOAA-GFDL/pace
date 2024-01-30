@@ -1,6 +1,7 @@
 import copy
 
 import numpy as np
+from translate_physics import TranslatePhysicsFortranData2Py
 
 import ndsl.dsl.gt4py_utils as utils
 import ndsl.util
@@ -8,9 +9,6 @@ from ndsl.dsl.typing import Float
 from pace.physics import PHYSICS_PACKAGES
 from pace.physics.stencils.microphysics import Microphysics
 from pace.physics.stencils.physics import PhysicsState
-from physics.tests.savepoint.translate.translate_physics import (
-    TranslatePhysicsFortranData2Py,
-)
 
 
 class TranslateMicroph(TranslatePhysicsFortranData2Py):

@@ -1,7 +1,6 @@
+from translate_physics import TranslatePhysicsFortranData2Py
+
 from pace.physics.stencils.get_phi_fv3 import get_phi_fv3
-from physics.tests.savepoint.translate.translate_physics import (
-    TranslatePhysicsFortranData2Py,
-)
 
 
 class TranslatePhiFV3(TranslatePhysicsFortranData2Py):
