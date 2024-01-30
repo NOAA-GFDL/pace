@@ -14,9 +14,7 @@ cftime
 fv3config>=0.9.0
 f90nml>=1.1.0
 numpy>=1.15
--e stencils
--e ndsl
+-e external/ndsl
 -e physics
 -e fv3core
 -e driver
--e util

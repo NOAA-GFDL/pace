@@ -1,0 +1,3 @@
+[submodule "external/ndsl"]
+	path = external/ndsl
+	url = https://github.com/NOAA-GFDL/ndsl.git
