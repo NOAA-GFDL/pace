@@ -2,6 +2,7 @@ import unittest.mock
 
 import pytest
 
+import ndsl.util
 import pace.driver
 import pace.driver.diagnostics
 from pace.fv3core.dycore_state import DycoreState

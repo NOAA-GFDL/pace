@@ -9,8 +9,6 @@ import ndsl.dsl
 import ndsl.stencils
 import ndsl.util
 import ndsl.util.grid
-import pace.driver
-import pace.physics
 from ndsl.stencils.testing import TranslateGrid
 from ndsl.util import Communicator, QuantityFactory
 from ndsl.util.grid import (

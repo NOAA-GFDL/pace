@@ -1,7 +1,6 @@
 import ndsl.dsl
 import ndsl.util
 import ndsl.util as fv3util
-from ndsl.dsl import gt4py_utils as utils
 from ndsl.stencils.testing import ParallelTranslate
 from ndsl.util.logging import pace_log
 
