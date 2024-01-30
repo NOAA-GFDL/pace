@@ -14,7 +14,7 @@ requirements = [
     "numpy",
     "pace-util>=0.4.3",
     "pace-stencils",
-    "pace-dsl",
+    "ndsl",
     "xarray",
 ]
 
