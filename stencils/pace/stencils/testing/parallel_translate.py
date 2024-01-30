@@ -6,7 +6,7 @@ import numpy as np
 import pytest
 
 import pace.util as fv3util
-from pace.dsl import gt4py_utils as utils
+from ndsl.dsl import gt4py_utils as utils
 
 from .translate import TranslateFortranData2Py, read_serialized_data
 

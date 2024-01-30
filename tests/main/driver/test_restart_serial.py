@@ -6,7 +6,7 @@ import numpy as np
 import xarray as xr
 import yaml
 
-import pace.dsl
+import ndsl.dsl
 from pace.driver import CreatesComm, DriverConfig
 from pace.driver.driver import RestartConfig
 from pace.driver.initialization import AnalyticInit

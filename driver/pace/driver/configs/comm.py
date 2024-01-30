@@ -6,7 +6,7 @@ from typing import Any, ClassVar, List
 import dacite
 
 import pace.driver
-import pace.dsl
+import ndsl.dsl
 import pace.stencils
 import pace.util
 import pace.util.grid

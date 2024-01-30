@@ -1,13 +1,12 @@
-import pace.dsl
+import ndsl.dsl
 import pace.util
 import pace.util as fv3util
-from pace.dsl import gt4py_utils as utils
+from ndsl.dsl import gt4py_utils as utils
 from pace.stencils.testing import ParallelTranslate
 from pace.util.logging import pace_log
 
 
 class TranslateHaloUpdate(ParallelTranslate):
-
     inputs = {
         "array": {
             "name": "air_temperature",
@@ -31,7 +30,7 @@ class TranslateHaloUpdate(ParallelTranslate):
         self,
         grid,
         namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
 
@@ -60,7 +59,6 @@ class TranslateHaloUpdate(ParallelTranslate):
 
 
 class TranslateHaloUpdate_2(TranslateHaloUpdate):
-
     inputs = {
         "array2": {
             "name": "height_on_interface_levels",
@@ -83,7 +81,6 @@ class TranslateHaloUpdate_2(TranslateHaloUpdate):
 
 
 class TranslateMPPUpdateDomains(TranslateHaloUpdate):
-
     inputs = {
         "update_arr": {
             "name": "z_wind_as_tendency_of_pressure",
@@ -106,7 +103,6 @@ class TranslateMPPUpdateDomains(TranslateHaloUpdate):
 
 
 class TranslateHaloVectorUpdate(ParallelTranslate):
-
     inputs = {
         "array_u": {
             "name": "x_wind_on_c_grid",
@@ -141,7 +137,7 @@ class TranslateHaloVectorUpdate(ParallelTranslate):
         self,
         grid,
         namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super(TranslateHaloVectorUpdate, self).__init__(grid, namelist, stencil_factory)
 
@@ -175,7 +171,6 @@ class TranslateHaloVectorUpdate(ParallelTranslate):
 
 
 class TranslateMPPBoundaryAdjust(ParallelTranslate):
-
     inputs = {
         "u": {
             "name": "x_wind_on_d_grid",
@@ -210,7 +205,7 @@ class TranslateMPPBoundaryAdjust(ParallelTranslate):
         self,
         grid,
         namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super(TranslateMPPBoundaryAdjust, self).__init__(
             grid, namelist, stencil_factory

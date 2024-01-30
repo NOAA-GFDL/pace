@@ -1,7 +1,7 @@
 from datetime import timedelta
 from typing import Any, List, Tuple, cast
 
-import pace.dsl.stencil
+import ndsl.dsl.stencil
 import pace.fv3core
 import pace.fv3core._config
 import pace.fv3core.initialization.baroclinic as baroclinic_init
@@ -68,8 +68,8 @@ def setup_dycore() -> Tuple[pace.fv3core.DynamicalCore, List[Any]]:
         pace.util.CubedSphereCommunicator,
         pace.util.TileCommunicator(mpi_comm, partitioner),
     )
-    stencil_config = pace.dsl.stencil.StencilConfig(
-        compilation_config=pace.dsl.stencil.CompilationConfig(
+    stencil_config = ndsl.dsl.stencil.StencilConfig(
+        compilation_config=ndsl.dsl.stencil.CompilationConfig(
             communicator=communicator,
             backend=backend,
             rebuild=False,
@@ -86,7 +86,7 @@ def setup_dycore() -> Tuple[pace.fv3core.DynamicalCore, List[Any]]:
         tile_partitioner=partitioner,
         tile_rank=communicator.rank,
     )
-    grid_indexing = pace.dsl.stencil.GridIndexing.from_sizer_and_communicator(
+    grid_indexing = ndsl.dsl.stencil.GridIndexing.from_sizer_and_communicator(
         sizer=sizer, comm=communicator
     )
     quantity_factory = pace.util.QuantityFactory.from_backend(
@@ -108,7 +108,7 @@ def setup_dycore() -> Tuple[pace.fv3core.DynamicalCore, List[Any]]:
         moist_phys=config.moist_phys,
         comm=communicator,
     )
-    stencil_factory = pace.dsl.stencil.StencilFactory(
+    stencil_factory = ndsl.dsl.stencil.StencilFactory(
         config=stencil_config,
         grid_indexing=grid_indexing,
     )

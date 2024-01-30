@@ -9,10 +9,10 @@ import serialbox
 import yaml
 from timing import collect_data_and_write_to_file
 
-import pace.dsl
+import ndsl.dsl
 import pace.util as util
-from pace.dsl.dace.orchestration import DaceConfig
-from pace.dsl.stencil import CompilationConfig
+from ndsl.dsl.dace.orchestration import DaceConfig
+from ndsl.dsl.stencil import CompilationConfig
 from pace.fv3core._config import DynamicalCoreConfig
 from pace.fv3core.stencils.dyn_core import AcousticDynamics
 from pace.fv3core.testing import TranslateDynCore
@@ -48,7 +48,7 @@ def initialize_serializer(data_directory: str, rank: int = 0) -> serialbox.Seria
 def read_input_data(
     grid: Grid,
     namelist: DynamicalCoreConfig,
-    stencil_factory: pace.dsl.stencil.StencilFactory,
+    stencil_factory: ndsl.dsl.stencil.StencilFactory,
     serializer: serialbox.Serializer,
 ) -> Dict[str, Any]:
     """Uses the serializer to read the input data from disk"""
@@ -150,13 +150,13 @@ def driver(
             tile_nx=dycore_config.npx,
             tile_nz=dycore_config.npz,
         )
-        stencil_config = pace.dsl.stencil.StencilConfig(
+        stencil_config = ndsl.dsl.stencil.StencilConfig(
             compilation_config=CompilationConfig(
                 backend=backend, rebuild=False, validate_args=True
             ),
             dace_config=dace_config,
         )
-        stencil_factory = pace.dsl.stencil.StencilFactory(
+        stencil_factory = ndsl.dsl.stencil.StencilFactory(
             config=stencil_config,
             grid_indexing=grid.grid_indexing,
         )

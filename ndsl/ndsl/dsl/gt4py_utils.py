@@ -4,7 +4,7 @@ from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union
 import gt4py
 import numpy as np
 
-from pace.dsl.typing import DTypes, Field, Float
+from ndsl.dsl.typing import DTypes, Field, Float
 from pace.util.logging import pace_log
 
 

@@ -8,9 +8,9 @@ import numpy as np
 from dace.transformation.helpers import get_parent_map
 from gt4py.cartesian.gtscript import PARALLEL, computation, interval
 
-from pace.dsl.dace.dace_config import DaceConfig
-from pace.dsl.stencil import CompilationConfig, FrozenStencil, StencilConfig
-from pace.dsl.typing import Float, FloatField
+from ndsl.dsl.dace.dace_config import DaceConfig
+from ndsl.dsl.stencil import CompilationConfig, FrozenStencil, StencilConfig
+from ndsl.dsl.typing import Float, FloatField
 from pace.util._optional_imports import cupy as cp
 from pace.util.logging import pace_log
 
@@ -192,7 +192,7 @@ def copy_defn(q_in: FloatField, q_out: FloatField):
 
 class MaxBandwithBenchmarkProgram:
     def __init__(self, size, backend) -> None:
-        from pace.dsl.dace.orchestration import DaCeOrchestration, orchestrate
+        from ndsl.dsl.dace.orchestration import DaCeOrchestration, orchestrate
 
         dconfig = DaceConfig(None, backend, orchestration=DaCeOrchestration.BuildAndRun)
         c = CompilationConfig(backend=backend)

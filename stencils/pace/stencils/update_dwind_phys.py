@@ -1,9 +1,9 @@
 from gt4py.cartesian.gtscript import PARALLEL, computation, interval
 
 import pace.util
-from pace.dsl.dace import orchestrate
-from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import FloatField, FloatFieldI, FloatFieldIJ
+from ndsl.dsl.dace import orchestrate
+from ndsl.dsl.stencil import StencilFactory
+from ndsl.dsl.typing import FloatField, FloatFieldI, FloatFieldIJ
 from pace.util import X_DIM, Y_DIM, Z_DIM
 from pace.util.grid import DriverGridData
 

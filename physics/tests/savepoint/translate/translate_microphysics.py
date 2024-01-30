@@ -2,9 +2,9 @@ import copy
 
 import numpy as np
 
-import pace.dsl.gt4py_utils as utils
+import ndsl.dsl.gt4py_utils as utils
 import pace.util
-from pace.dsl.typing import Float
+from ndsl.dsl.typing import Float
 from pace.physics import PHYSICS_PACKAGES
 from pace.physics.stencils.microphysics import Microphysics
 from pace.physics.stencils.physics import PhysicsState

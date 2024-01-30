@@ -7,9 +7,9 @@ import pytest
 import xarray as xr
 import yaml
 
-import pace.dsl
+import ndsl.dsl
 import pace.util
-from pace.dsl.dace.dace_config import DaceConfig
+from ndsl.dsl.dace.dace_config import DaceConfig
 from pace.stencils.testing import ParallelTranslate, TranslateGrid
 from pace.stencils.testing.savepoint import SavepointCase, dataset_to_dict
 from pace.util.mpi import MPI
@@ -118,8 +118,8 @@ def get_namelist(namelist_filename):
 
 
 def get_config(backend: str, communicator: Optional[pace.util.Communicator]):
-    stencil_config = pace.dsl.stencil.StencilConfig(
-        compilation_config=pace.dsl.stencil.CompilationConfig(
+    stencil_config = ndsl.dsl.stencil.StencilConfig(
+        compilation_config=ndsl.dsl.stencil.CompilationConfig(
             backend=backend, rebuild=False, validate_args=True
         ),
         dace_config=DaceConfig(
@@ -172,7 +172,7 @@ def _savepoint_cases(
         ).python_grid()
         if compute_grid:
             compute_grid_data(grid, namelist, backend, namelist.layout, dperiodic)
-        stencil_factory = pace.dsl.stencil.StencilFactory(
+        stencil_factory = ndsl.dsl.stencil.StencilFactory(
             config=stencil_config,
             grid_indexing=grid.grid_indexing,
         )

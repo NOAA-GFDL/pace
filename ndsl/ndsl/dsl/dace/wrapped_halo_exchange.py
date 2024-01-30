@@ -1,7 +1,7 @@
 import dataclasses
 from typing import List, Optional
 
-from pace.dsl.dace.orchestration import dace_inhibitor
+from ndsl.dsl.dace.orchestration import dace_inhibitor
 from pace.util.communicator import Communicator
 from pace.util.halo_updater import HaloUpdater
 

@@ -7,9 +7,9 @@ import pace.util
 
 
 # TODO: if we can remove translate tests in favor of checkpointer tests,
-# we can remove this "disallowed" import (pace.util does not depend on pace.dsl)
+# we can remove this "disallowed" import (pace.util does not depend on ndsl.dsl)
 try:
-    from pace.dsl.gt4py_utils import split_cartesian_into_storages
+    from ndsl.dsl.gt4py_utils import split_cartesian_into_storages
 except ImportError:
     split_cartesian_into_storages = None
 from pace.util import Z_DIM, Z_INTERFACE_DIM, get_fs

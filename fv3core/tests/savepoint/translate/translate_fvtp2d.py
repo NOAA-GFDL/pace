@@ -1,7 +1,7 @@
-import pace.dsl
-import pace.dsl.gt4py_utils as utils
+import ndsl.dsl
+import ndsl.dsl.gt4py_utils as utils
 import pace.util
-from pace.dsl.typing import Float
+from ndsl.dsl.typing import Float
 from pace.fv3core.stencils.fvtp2d import FiniteVolumeTransport
 from pace.fv3core.testing import TranslateDycoreFortranData2Py
 
@@ -11,7 +11,7 @@ class TranslateFvTp2d(TranslateDycoreFortranData2Py):
         self,
         grid,
         namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
         self.in_vars["data_vars"] = {
@@ -81,7 +81,7 @@ class TranslateFvTp2d_2(TranslateFvTp2d):
         self,
         grid,
         namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
         del self.in_vars["data_vars"]["mass"]

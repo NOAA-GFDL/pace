@@ -2,10 +2,10 @@ import dataclasses
 
 import numpy as np
 
-import pace.dsl
-import pace.dsl.gt4py_utils as utils
+import ndsl.dsl
+import ndsl.dsl.gt4py_utils as utils
 import pace.util
-from pace.dsl.typing import FloatField, FloatFieldIJ
+from ndsl.dsl.typing import FloatField, FloatFieldIJ
 from pace.stencils.fv_update_phys import ApplyPhysicsToDycore
 from pace.stencils.testing.translate_physics import (
     ParallelPhysicsTranslate2Py,
@@ -54,7 +54,7 @@ class TranslateFVUpdatePhys(ParallelPhysicsTranslate2Py):
         self,
         grid,
         namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
         self.stencil_factory = stencil_factory

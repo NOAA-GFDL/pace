@@ -1,4 +1,4 @@
-import pace.dsl
+import ndsl.dsl
 import pace.util
 from pace.fv3core.stencils.c_sw import CGridShallowWaterDynamics
 from pace.fv3core.testing import TranslateDycoreFortranData2Py
@@ -7,7 +7,7 @@ from pace.fv3core.testing import TranslateDycoreFortranData2Py
 def get_c_sw_instance(
     grid,
     namelist: pace.util.Namelist,
-    stencil_factory: pace.dsl.StencilFactory,
+    stencil_factory: ndsl.dsl.StencilFactory,
     quantity_factory: pace.util.QuantityFactory,
 ):
     return CGridShallowWaterDynamics(
@@ -72,7 +72,7 @@ class TranslateC_SW(TranslateDycoreFortranData2Py):
         self,
         grid,
         namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
         cgrid_shallow_water_lagrangian_dynamics = get_c_sw_instance(
@@ -118,7 +118,7 @@ class TranslateDivergenceCorner(TranslateDycoreFortranData2Py):
         self,
         grid,
         namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
         self.max_error = 9e-10
@@ -176,7 +176,7 @@ class TranslateCirculation_Cgrid(TranslateDycoreFortranData2Py):
         self,
         grid,
         namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
         self.max_error = 5e-9
@@ -218,7 +218,7 @@ class TranslateVorticityTransport_Cgrid(TranslateDycoreFortranData2Py):
         self,
         grid,
         namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
         cgrid_sw_lagrangian_dynamics = get_c_sw_instance(

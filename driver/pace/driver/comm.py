@@ -4,7 +4,6 @@ import os
 from typing import Any, ClassVar, List
 
 import pace.driver
-import pace.dsl
 import pace.stencils
 import pace.util
 import pace.util.grid

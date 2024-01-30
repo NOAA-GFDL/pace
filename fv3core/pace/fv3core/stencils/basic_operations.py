@@ -1,7 +1,7 @@
 import gt4py.cartesian.gtscript as gtscript
 from gt4py.cartesian.gtscript import PARALLEL, computation, interval
 
-from pace.dsl.typing import Float, FloatField, FloatFieldIJ
+from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ
 
 
 def copy_defn(q_in: FloatField, q_out: FloatField):

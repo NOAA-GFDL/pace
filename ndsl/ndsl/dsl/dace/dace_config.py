@@ -6,9 +6,9 @@ import dace.config
 from dace.codegen.compiled_sdfg import CompiledSDFG
 from dace.frontend.python.parser import DaceProgram
 
-from pace.dsl.caches.cache_location import identify_code_path
-from pace.dsl.caches.codepath import FV3CodePath
-from pace.dsl.gt4py_utils import is_gpu_backend
+from ndsl.dsl.caches.cache_location import identify_code_path
+from ndsl.dsl.caches.codepath import FV3CodePath
+from ndsl.dsl.gt4py_utils import is_gpu_backend
 from pace.util._optional_imports import cupy as cp
 from pace.util.communicator import Communicator, Partitioner
 
@@ -271,7 +271,7 @@ class DaceConfig:
 
         self._backend = backend
         self.tile_resolution = [tile_nx, tile_nx, tile_nz]
-        from pace.dsl.dace.build import set_distributed_caches
+        from ndsl.dsl.dace.build import set_distributed_caches
 
         # Distributed build required info
         if communicator:

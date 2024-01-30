@@ -4,12 +4,12 @@ from typing import Dict
 import gt4py.cartesian.gtscript as gtscript
 from gt4py.cartesian.gtscript import PARALLEL, computation, horizontal, interval, region
 
-import pace.dsl.gt4py_utils as utils
+import ndsl.dsl.gt4py_utils as utils
 import pace.util
-from pace.dsl.dace.orchestration import orchestrate
-from pace.dsl.dace.wrapped_halo_exchange import WrappedHaloUpdater
-from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import Float, FloatField, FloatFieldIJ
+from ndsl.dsl.dace.orchestration import orchestrate
+from ndsl.dsl.dace.wrapped_halo_exchange import WrappedHaloUpdater
+from ndsl.dsl.stencil import StencilFactory
+from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ
 from pace.fv3core.stencils.fvtp2d import FiniteVolumeTransport
 from pace.util import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_DIM
 

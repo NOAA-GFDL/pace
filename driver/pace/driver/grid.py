@@ -6,7 +6,7 @@ import f90nml
 import xarray as xr
 
 import pace.driver
-import pace.dsl
+import ndsl.dsl
 import pace.physics
 import pace.stencils
 import pace.util
@@ -237,7 +237,6 @@ class ExternalNetcdfGridConfig(GridInitializer):
         quantity_factory: QuantityFactory,
         communicator: Communicator,
     ) -> Tuple[DampingCoefficients, DriverGridData, GridData]:
-
         pace_log.info("Using external grid data")
 
         # ToDo: refactor when grid_type is an enum

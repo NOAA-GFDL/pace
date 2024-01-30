@@ -15,9 +15,9 @@ from gt4py.cartesian.gtscript import (
 
 import pace.fv3core.stencils.moist_cv as moist_cv
 import pace.util
-from pace.dsl.dace.orchestration import orchestrate
-from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import Float, FloatField, FloatFieldIJ, FloatFieldK
+from ndsl.dsl.dace.orchestration import orchestrate
+from ndsl.dsl.stencil import StencilFactory
+from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ, FloatFieldK
 from pace.fv3core._config import RemappingConfig
 from pace.fv3core.stencils.basic_operations import adjust_divide_stencil
 from pace.fv3core.stencils.map_single import MapSingle
@@ -709,7 +709,6 @@ class LagrangianToEulerian:
             )
 
         if last_step:
-
             # on the last step, we need the regular temperature to send
             # to the physics, but if we're staying in dynamics we need
             # to keep it as the virtual potential temperature

@@ -297,7 +297,7 @@ class Quantity:
         """
         # ToDo: [Florian 01/23] Kill the abomination.
         # See https://github.com/NOAA-GFDL/pace/issues/3
-        from pace.dsl.typing import Float
+        from ndsl.dsl.typing import Float
 
         if (
             not allow_mismatch_float_precision

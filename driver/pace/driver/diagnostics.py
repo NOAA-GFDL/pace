@@ -5,11 +5,11 @@ from datetime import datetime, timedelta
 from typing import List, Optional, Union
 
 import pace.driver
-import pace.dsl
+import ndsl.dsl
 import pace.stencils
 import pace.util
 import pace.util.grid
-from pace.dsl.dace.orchestration import dace_inhibitor
+from ndsl.dsl.dace.orchestration import dace_inhibitor
 from pace.fv3core.dycore_state import DycoreState
 from pace.util.constants import RGRAV
 

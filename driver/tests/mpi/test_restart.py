@@ -7,7 +7,7 @@ import yaml
 import zarr
 from mpi4py import MPI
 
-import pace.dsl
+import ndsl.dsl
 import pace.util
 from pace.driver import DriverConfig
 from pace.driver.state import DriverState
@@ -57,7 +57,11 @@ def test_restart():
             pace.util.TilePartitioner((1, 1))
         )
         communicator = pace.util.CubedSphereCommunicator(mpi_comm, partitioner)
-        (damping_coefficients, driver_grid_data, grid_data,) = restart_config.get_grid(
+        (
+            damping_coefficients,
+            driver_grid_data,
+            grid_data,
+        ) = restart_config.get_grid(
             communicator=communicator,
         )
 

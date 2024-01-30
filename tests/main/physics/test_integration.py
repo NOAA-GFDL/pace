@@ -3,11 +3,11 @@ from datetime import timedelta
 
 import numpy as np
 
-import pace.dsl
+import ndsl.dsl
 import pace.physics
 import pace.util
 import pace.util.grid
-from pace.dsl.stencil_config import CompilationConfig
+from ndsl.dsl.stencil_config import CompilationConfig
 from pace.stencils.testing import assert_same_temporaries, copy_temporaries
 
 
@@ -38,18 +38,18 @@ def setup_physics():
         tile_partitioner=partitioner.tile,
         tile_rank=communicator.tile.rank,
     )
-    grid_indexing = pace.dsl.stencil.GridIndexing.from_sizer_and_communicator(
+    grid_indexing = ndsl.dsl.stencil.GridIndexing.from_sizer_and_communicator(
         sizer=sizer, comm=communicator
     )
     quantity_factory = pace.util.QuantityFactory.from_backend(
         sizer=sizer, backend=backend
     )
-    dace_config = pace.dsl.DaceConfig(
+    dace_config = ndsl.dsl.DaceConfig(
         communicator=communicator,
         backend=backend,
-        orchestration=pace.dsl.DaCeOrchestration.Python,
+        orchestration=ndsl.dsl.DaCeOrchestration.Python,
     )
-    stencil_config = pace.dsl.stencil.StencilConfig(
+    stencil_config = ndsl.dsl.stencil.StencilConfig(
         compilation_config=CompilationConfig(
             backend=backend,
             rebuild=False,
@@ -57,7 +57,7 @@ def setup_physics():
         ),
         dace_config=dace_config,
     )
-    stencil_factory = pace.dsl.stencil.StencilFactory(
+    stencil_factory = ndsl.dsl.stencil.StencilFactory(
         config=stencil_config,
         grid_indexing=grid_indexing,
     )

@@ -1,6 +1,6 @@
 import numpy as np
 
-import pace.dsl
+import ndsl.dsl
 import pace.fv3core.stencils.updatedzc as updatedzc
 import pace.util
 from pace.fv3core.testing import TranslateDycoreFortranData2Py
@@ -12,7 +12,7 @@ class TranslateUpdateDzC(TranslateDycoreFortranData2Py):
         self,
         grid,
         namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
         self.stencil_factory = stencil_factory

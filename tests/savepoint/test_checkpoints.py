@@ -8,7 +8,7 @@ import f90nml
 import xarray as xr
 import yaml
 
-import pace.dsl
+import ndsl.dsl
 import pace.util
 from pace import fv3core
 from pace.fv3core.initialization.dycore_state import DycoreState
@@ -62,15 +62,15 @@ def test_fv_dynamics(
             tile=pace.util.TilePartitioner(layout=namelist.layout)
         ),
     )
-    stencil_factory = pace.dsl.StencilFactory(
-        config=pace.dsl.StencilConfig(
-            compilation_config=pace.dsl.CompilationConfig(
+    stencil_factory = ndsl.dsl.StencilFactory(
+        config=ndsl.dsl.StencilConfig(
+            compilation_config=ndsl.dsl.CompilationConfig(
                 backend=backend,
                 communicator=communicator,
                 rebuild=False,
             )
         ),
-        grid_indexing=pace.dsl.GridIndexing.from_sizer_and_communicator(
+        grid_indexing=ndsl.dsl.GridIndexing.from_sizer_and_communicator(
             sizer=pace.util.SubtileGridSizer.from_tile_params(
                 nx_tile=namelist.npx - 1,
                 ny_tile=namelist.npy - 1,
@@ -147,7 +147,7 @@ def test_fv_dynamics(
 def _calibrate_thresholds(
     initializer: StateInitializer,
     communicator: pace.util.CubedSphereCommunicator,
-    stencil_factory: pace.dsl.StencilFactory,
+    stencil_factory: ndsl.dsl.StencilFactory,
     quantity_factory: pace.util.QuantityFactory,
     damping_coefficients: DampingCoefficients,
     dycore_config: fv3core.DynamicalCoreConfig,

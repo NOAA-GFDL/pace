@@ -1,6 +1,6 @@
 from typing import Dict, Tuple
 
-import pace.dsl
+import ndsl.dsl
 import pace.util
 from pace.fv3core.stencils.map_single import MapSingle
 from pace.util import X_INTERFACE_DIM, Y_INTERFACE_DIM, Z_DIM
@@ -12,7 +12,7 @@ class MapSingleFactory:
 
     def __init__(
         self,
-        stencil_factory: pace.dsl.StencilFactory,
+        stencil_factory: ndsl.dsl.StencilFactory,
         quantity_factory: pace.util.QuantityFactory,
     ):
         self.stencil_factory = stencil_factory

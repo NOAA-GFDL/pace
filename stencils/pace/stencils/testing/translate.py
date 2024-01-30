@@ -3,10 +3,10 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 
 import numpy as np
 
-import pace.dsl.gt4py_utils as utils
+import ndsl.dsl.gt4py_utils as utils
 import pace.util
-from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import Field  # noqa: F401
+from ndsl.dsl.stencil import StencilFactory
+from ndsl.dsl.typing import Field  # noqa: F401
 from pace.stencils.testing.grid import Grid  # type: ignore
 
 
@@ -313,7 +313,6 @@ class TranslateGrid:
         self.data = inputs
 
     def _make_composite_var_storage(self, varname, data3d, shape, count):
-
         for s in range(count):
             self.data[varname + str(s + 1)] = utils.make_storage_data(
                 np.squeeze(data3d[:, :, s]),

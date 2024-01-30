@@ -1,6 +1,6 @@
 from typing import Optional
 
-import pace.dsl
+import ndsl.dsl
 import pace.util
 from pace.fv3core.stencils.divergence_damping import DivergenceDamping
 from pace.fv3core.testing import TranslateDycoreFortranData2Py
@@ -11,7 +11,7 @@ class TranslateDivergenceDamping(TranslateDycoreFortranData2Py):
         self,
         grid,
         namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
         self.in_vars["data_vars"] = {

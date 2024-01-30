@@ -1,10 +1,10 @@
 from typing import Dict
 
-import pace.dsl.gt4py_utils as utils
+import ndsl.dsl.gt4py_utils as utils
 import pace.util
-from pace.dsl.dace.orchestration import orchestrate
-from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import Float, FloatField
+from ndsl.dsl.dace.orchestration import orchestrate
+from ndsl.dsl.stencil import StencilFactory
+from ndsl.dsl.typing import Float, FloatField
 from pace.fv3core.stencils.fillz import FillNegativeTracerValues
 from pace.fv3core.stencils.map_single import MapSingle
 from pace.util import X_DIM, Y_DIM, Z_DIM

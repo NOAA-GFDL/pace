@@ -2,16 +2,16 @@ import pytest
 from gt4py.cartesian.gtscript import PARALLEL, Field, computation, interval
 from gt4py.storage import empty, ones
 
-import pace.dsl
-from pace.dsl.dace import orchestrate
-from pace.dsl.dace.dace_config import DaceConfig, DaCeOrchestration
-from pace.dsl.stencil import CompilationConfig, GridIndexing
+import ndsl.dsl
+from ndsl.dsl.dace import orchestrate
+from ndsl.dsl.dace.dace_config import DaceConfig, DaCeOrchestration
+from ndsl.dsl.stencil import CompilationConfig, GridIndexing
 
 
 def _make_storage(
     func,
     grid_indexing,
-    stencil_config: pace.dsl.StencilConfig,
+    stencil_config: ndsl.dsl.StencilConfig,
     *,
     dtype=float,
     aligned_index=(0, 0, 0),
@@ -40,12 +40,12 @@ def _build_stencil(backend, orchestrated: DaCeOrchestration):
         east_edge=True,
     )
 
-    stencil_config = pace.dsl.StencilConfig(
+    stencil_config = ndsl.dsl.StencilConfig(
         compilation_config=CompilationConfig(backend=backend, rebuild=True),
         dace_config=DaceConfig(None, backend, 5, 5, orchestrated),
     )
 
-    stencil_factory = pace.dsl.StencilFactory(stencil_config, grid_indexing)
+    stencil_factory = ndsl.dsl.StencilFactory(stencil_config, grid_indexing)
 
     built_stencil = stencil_factory.from_origin_domain(
         _stencil, (0, 0, 0), domain=grid_indexing.domain

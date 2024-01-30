@@ -11,9 +11,9 @@ from gt4py.cartesian.gtscript import (
 
 import pace.util
 import pace.util.constants as constants
-from pace.dsl.dace.orchestration import orchestrate
-from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import Float, FloatField
+from ndsl.dsl.dace.orchestration import orchestrate
+from ndsl.dsl.stencil import StencilFactory
+from ndsl.dsl.typing import Float, FloatField
 from pace.physics.physics_state import PhysicsState
 from pace.physics.stencils.get_phi_fv3 import get_phi_fv3
 from pace.physics.stencils.get_prs_fv3 import get_prs_fv3
@@ -275,7 +275,6 @@ class Physics:
         self._p00 = 1.0e5
 
     def __call__(self, physics_state: PhysicsState, timestep: float):
-
         self._atmos_phys_driver_statein(
             self._prsik,
             physics_state.phii,

@@ -23,10 +23,10 @@ import pace.fv3core.stencils.updatedzd as updatedzd
 import pace.util
 import pace.util as fv3util
 import pace.util.constants as constants
-from pace.dsl.dace.orchestration import dace_inhibitor, orchestrate
-from pace.dsl.dace.wrapped_halo_exchange import WrappedHaloUpdater
-from pace.dsl.stencil import GridIndexing, StencilFactory
-from pace.dsl.typing import Float, FloatField, FloatFieldIJ
+from ndsl.dsl.dace.orchestration import dace_inhibitor, orchestrate
+from ndsl.dsl.dace.wrapped_halo_exchange import WrappedHaloUpdater
+from ndsl.dsl.stencil import GridIndexing, StencilFactory
+from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ
 from pace.fv3core._config import AcousticDynamicsConfig
 from pace.fv3core.dycore_state import DycoreState
 from pace.fv3core.stencils.c_sw import CGridShallowWaterDynamics

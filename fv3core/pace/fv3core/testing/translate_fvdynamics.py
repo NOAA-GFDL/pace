@@ -4,8 +4,8 @@ from typing import Any, Dict, Optional, Tuple
 
 import pytest
 
-import pace.dsl
-import pace.dsl.gt4py_utils as utils
+import ndsl.dsl
+import ndsl.dsl.gt4py_utils as utils
 import pace.fv3core.stencils.fv_dynamics as fv_dynamics
 import pace.util
 from pace.fv3core._config import DynamicalCoreConfig
@@ -20,7 +20,7 @@ class TranslateDycoreFortranData2Py(TranslateFortranData2Py):
         self,
         grid,
         namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(grid, stencil_factory)
         self.namelist = DynamicalCoreConfig.from_namelist(namelist)
@@ -220,7 +220,7 @@ class TranslateFVDynamics(ParallelTranslateBaseSlicing):
         self,
         grid,
         namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        stencil_factory: ndsl.dsl.StencilFactory,
         *args,
         **kwargs,
     ):

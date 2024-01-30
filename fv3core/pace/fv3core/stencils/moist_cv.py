@@ -9,7 +9,7 @@ from gt4py.cartesian.gtscript import (
 )
 
 import pace.util.constants as constants
-from pace.dsl.typing import Float, FloatField
+from ndsl.dsl.typing import Float, FloatField
 
 
 @gtscript.function

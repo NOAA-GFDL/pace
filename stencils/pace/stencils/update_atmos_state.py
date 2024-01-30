@@ -5,9 +5,9 @@ from gt4py.cartesian.gtscript import BACKWARD, FORWARD, PARALLEL, computation, i
 import pace.fv3core.stencils.fv_subgridz as fv_subgridz
 import pace.util
 from pace import fv3core
-from pace.dsl.dace.orchestration import orchestrate
-from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import Float, FloatField
+from ndsl.dsl.dace.orchestration import orchestrate
+from ndsl.dsl.stencil import StencilFactory
+from ndsl.dsl.typing import Float, FloatField
 from pace.stencils.fv_update_phys import ApplyPhysicsToDycore
 from pace.util.grid import DriverGridData, GridData
 
@@ -17,9 +17,7 @@ from pace.util.grid import DriverGridData, GridData
 
 
 def fill_gfs_delp(delp: FloatField, q: FloatField, q_min: Float):
-
     with computation(BACKWARD):
-
         with interval(0, -2):
             if q[0, 0, 1] < q_min:
                 q = q[0, 0, 0] + (q[0, 0, 1] - q_min) * delp[0, 0, 1] / delp[0, 0, 0]

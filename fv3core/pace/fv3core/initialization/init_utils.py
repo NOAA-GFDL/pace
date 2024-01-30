@@ -6,7 +6,7 @@ import numpy as np
 
 import pace.util as fv3util
 import pace.util.constants as constants
-from pace.dsl.typing import Float
+from ndsl.dsl.typing import Float
 from pace.fv3core.dycore_state import DycoreState
 from pace.util.grid import lon_lat_midpoint
 from pace.util.grid.gnomonic import get_lonlat_vect, get_unit_vector_direction
@@ -128,7 +128,6 @@ def empty_numpy_dycore_state(shape):
 
 
 def _find_midpoint_unit_vectors(p1, p2):
-
     midpoint = np.array(
         lon_lat_midpoint(p1[:, :, 0], p2[:, :, 0], p1[:, :, 1], p2[:, :, 1], np)
     ).transpose([1, 2, 0])
@@ -218,7 +217,7 @@ def initialize_kappa_pressures(pe, peln, ptop):
     """
     pk = np.zeros(pe.shape)
     pkz = np.zeros(pe.shape)
-    pk[:, :, 0] = ptop ** constants.KAPPA
+    pk[:, :, 0] = ptop**constants.KAPPA
     pk[:, :, 1:] = np.exp(constants.KAPPA * np.log(pe[:, :, 1:]))
     pkz[:, :, :-1] = (pk[:, :, 1:] - pk[:, :, :-1]) / (
         constants.KAPPA * (peln[:, :, 1:] - peln[:, :, :-1])

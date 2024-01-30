@@ -3,9 +3,9 @@ from typing import Optional, Sequence
 from gt4py.cartesian.gtscript import FORWARD, PARALLEL, computation, interval
 
 import pace.util
-from pace.dsl.dace import orchestrate
-from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import Float, FloatField, FloatFieldIJ, IntFieldIJ  # noqa: F401
+from ndsl.dsl.dace import orchestrate
+from ndsl.dsl.stencil import StencilFactory
+from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ, IntFieldIJ  # noqa: F401
 from pace.fv3core.stencils.basic_operations import copy_defn
 from pace.fv3core.stencils.remap_profile import RemapProfile
 from pace.util import X_DIM, Y_DIM, Z_DIM

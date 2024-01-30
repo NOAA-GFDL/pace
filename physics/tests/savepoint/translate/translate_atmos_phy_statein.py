@@ -1,6 +1,6 @@
 import numpy as np
 
-import pace.dsl.gt4py_utils as utils
+import ndsl.dsl.gt4py_utils as utils
 from pace.physics.stencils.physics import atmos_phys_driver_statein
 from pace.stencils.testing.translate_physics import TranslatePhysicsFortranData2Py
 from pace.util.constants import KAPPA

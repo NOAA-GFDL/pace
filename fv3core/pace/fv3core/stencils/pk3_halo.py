@@ -1,8 +1,8 @@
 from gt4py.cartesian.gtscript import FORWARD, computation, horizontal, interval, region
 
 import pace.util
-from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import Float, FloatField, FloatFieldIJ
+from ndsl.dsl.stencil import StencilFactory
+from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ
 from pace.util import X_DIM, Y_DIM
 
 
@@ -30,7 +30,7 @@ def edge_pe_update(
                 region[local_is - 2 : local_ie + 3, local_je + 1 : local_je + 3],
             ):
                 pe = pe + delp[0, 0, -1]
-                pk3 = pe ** akap
+                pk3 = pe**akap
 
 
 class PK3Halo:

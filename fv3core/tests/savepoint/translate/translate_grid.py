@@ -3,8 +3,8 @@ from typing import Any, Dict
 import numpy as np
 import pytest
 
-import pace.dsl
-import pace.dsl.gt4py_utils as utils
+import ndsl.dsl
+import ndsl.dsl.gt4py_utils as utils
 import pace.util
 from pace.stencils.testing.parallel_translate import ParallelTranslateGrid
 from pace.util.grid import MetricTerms, set_hybrid_pressure_coefficients
@@ -12,7 +12,6 @@ from pace.util.grid.global_setup import global_mirror_grid, gnomonic_grid
 
 
 class TranslateGnomonicGrids(ParallelTranslateGrid):
-
     max_error = 2e-14
 
     inputs = {
@@ -65,7 +64,6 @@ class TranslateGnomonicGrids(ParallelTranslateGrid):
 
 
 class TranslateMirrorGrid(ParallelTranslateGrid):
-
     inputs = {
         "master_grid_global": {
             "name": "grid_global",
@@ -123,7 +121,7 @@ class TranslateGridAreas(ParallelTranslateGrid):
         self,
         rank_grids,
         namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(rank_grids, namelist, stencil_factory)
         self.max_error = 1e-10
@@ -231,7 +229,6 @@ class TranslateGridAreas(ParallelTranslateGrid):
 
 
 class TranslateGridGrid(ParallelTranslateGrid):
-
     max_error = 1e-14
     inputs: Dict[str, Any] = {
         "grid_global": {
@@ -261,7 +258,7 @@ class TranslateGridGrid(ParallelTranslateGrid):
         self,
         grids,
         namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(grids, namelist, stencil_factory)
         self.max_error = 1.0e-13
@@ -291,7 +288,7 @@ class TranslateDxDy(ParallelTranslateGrid):
         self,
         rank_grids,
         namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(rank_grids, namelist, stencil_factory)
         self.max_error = 3e-14
@@ -345,7 +342,7 @@ class TranslateAGrid(ParallelTranslateGrid):
         self,
         rank_grids,
         namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(rank_grids, namelist, stencil_factory)
         self.max_error = 1e-13
@@ -493,7 +490,7 @@ class TranslateInitGrid(ParallelTranslateGrid):
         self,
         grids,
         namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(grids, namelist, stencil_factory)
         self.max_error = 3e-12
@@ -590,7 +587,7 @@ class TranslateUtilVectors(ParallelTranslateGrid):
         self,
         grids,
         namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(grids, namelist, stencil_factory)
         self.max_error = 3e-12
@@ -767,7 +764,7 @@ class TranslateTrigSg(ParallelTranslateGrid):
         self,
         grids,
         namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(grids, namelist, stencil_factory)
         self.max_error = 2.5e-10
@@ -1039,7 +1036,7 @@ class TranslateAAMCorrection(ParallelTranslateGrid):
         self,
         rank_grids,
         namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(rank_grids, namelist, stencil_factory)
         self.max_error = 1e-14
@@ -1109,7 +1106,7 @@ class TranslateDerivedTrig(ParallelTranslateGrid):
         self,
         grids,
         namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(grids, namelist, stencil_factory)
         self.max_error = 8.5e-14
@@ -1422,7 +1419,7 @@ class TranslateDivgDel6(ParallelTranslateGrid):
         self,
         rank_grids,
         namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(rank_grids, namelist, stencil_factory)
         self.max_error = 4e-14
@@ -1557,7 +1554,7 @@ class TranslateInitCubedtoLatLon(ParallelTranslateGrid):
         self,
         grids,
         namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(grids, namelist, stencil_factory)
         self.max_error = 3.0e-14
@@ -1685,7 +1682,7 @@ class TranslateEdgeFactors(ParallelTranslateGrid):
         self,
         rank_grids,
         namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(rank_grids, namelist, stencil_factory)
         self.max_error = 3e-13
@@ -1824,7 +1821,7 @@ class TranslateInitGridUtils(ParallelTranslateGrid):
         self,
         grids,
         namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(grids, namelist, stencil_factory)
         self.max_error = 2.5e-10

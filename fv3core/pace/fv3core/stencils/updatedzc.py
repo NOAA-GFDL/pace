@@ -3,8 +3,8 @@ from gt4py.cartesian.gtscript import BACKWARD, FORWARD, PARALLEL, computation, i
 
 import pace.util
 import pace.util.constants as constants
-from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import Float, FloatField, FloatFieldIJ, FloatFieldK
+from ndsl.dsl.stencil import StencilFactory
+from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ, FloatFieldK
 from pace.stencils import corners
 from pace.util import X_DIM, Y_DIM, Z_DIM
 

@@ -7,7 +7,7 @@ from gt4py.cartesian import config as gt_config
 
 
 if TYPE_CHECKING:
-    from pace.dsl.stencil_config import CompilationConfig
+    from ndsl.dsl.stencil_config import CompilationConfig
 
 
 def determine_rank_is_compiling(rank: int, size: int) -> bool:
@@ -81,7 +81,7 @@ def set_distributed_caches(config: CompilationConfig):
 
     # Check that we have all the file we need to early out in case
     # of issues.
-    from pace.dsl.stencil_config import RunMode
+    from ndsl.dsl.stencil_config import RunMode
 
     if config.run_mode == RunMode.Run:
         cache_filepath, target_rank_str = build_cache_path(config)

@@ -1,9 +1,9 @@
 from typing import Any, Dict
 
-import pace.dsl
+import ndsl.dsl
 import pace.util
-from pace.dsl.dace.orchestration import orchestrate
-from pace.dsl.stencil import StencilFactory
+from ndsl.dsl.dace.orchestration import orchestrate
+from ndsl.dsl.stencil import StencilFactory
 from pace.fv3core.stencils.divergence_damping import DivergenceDamping
 from pace.fv3core.testing import TranslateDycoreFortranData2Py
 
@@ -50,7 +50,7 @@ class TranslateA2B_Ord4(TranslateDycoreFortranData2Py):
         self,
         grid,
         namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
         assert namelist.grid_type < 3

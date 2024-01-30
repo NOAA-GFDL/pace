@@ -1,4 +1,4 @@
-import pace.dsl
+import ndsl.dsl
 import pace.fv3core
 import pace.util
 from pace.fv3core.stencils import temperature_adjust
@@ -13,7 +13,7 @@ class TranslatePressureAdjustedTemperature_NonHydrostatic(
         self,
         grid,
         namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
         dycore_config = pace.fv3core.DynamicalCoreConfig.from_namelist(namelist)

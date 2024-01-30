@@ -5,7 +5,7 @@ from typing import Literal, Tuple
 import pytest
 
 import pace.driver
-import pace.dsl
+import ndsl.dsl
 from pace.driver import CreatesCommSelector, DriverConfig, NullCommConfig
 from pace.driver.performance.report import (
     TimeReport,
@@ -35,7 +35,7 @@ def get_driver_config(
     else:
         initialization_config.start_time = datetime(2000, 1, 1)
     return DriverConfig(
-        stencil_config=pace.dsl.StencilConfig(),
+        stencil_config=ndsl.dsl.StencilConfig(),
         nx_tile=nx_tile,
         nz=nz,
         dt_atmos=dt_atmos,

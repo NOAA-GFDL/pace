@@ -1,9 +1,9 @@
 from gt4py.cartesian.gtscript import PARALLEL, computation, interval
 
 import pace.util
-from pace.dsl.dace import orchestrate
-from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import Float, FloatField, FloatFieldIJ
+from ndsl.dsl.dace import orchestrate
+from ndsl.dsl.stencil import StencilFactory
+from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ
 from pace.fv3core.stencils.a2b_ord4 import AGrid2BGridFourthOrder
 from pace.util import X_DIM, Y_DIM, Z_INTERFACE_DIM
 from pace.util.grid import GridData
@@ -228,7 +228,7 @@ class NonHydrostaticPressureGradient:
         # Fortran names:
         # u=u v=v pp=pkc gz=gz pk3=pk3 delp=delp dt=dt
 
-        ptk = ptop ** akap
+        ptk = ptop**akap
         top_value = ptk  # = peln1 if spec.namelist.use_logp else ptk
 
         # TODO: make it clearer that each of these a2b outputs is updated

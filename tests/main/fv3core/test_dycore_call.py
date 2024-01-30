@@ -4,12 +4,12 @@ from dataclasses import fields
 from datetime import timedelta
 from typing import Tuple
 
-import pace.dsl.stencil
+import ndsl.dsl.stencil
 import pace.fv3core.initialization.analytic_init as ai
 import pace.stencils.testing
 import pace.util
 from pace import fv3core
-from pace.dsl.dace.dace_config import DaceConfig
+from ndsl.dsl.dace.dace_config import DaceConfig
 from pace.fv3core.dycore_state import DycoreState
 from pace.stencils.testing import assert_same_temporaries, copy_temporaries
 from pace.util.grid import DampingCoefficients, GridData, MetricTerms
@@ -75,8 +75,8 @@ def setup_dycore() -> (
     )
     communicator = pace.util.CubedSphereCommunicator(mpi_comm, partitioner)
     dace_config = DaceConfig(communicator=communicator, backend=backend)
-    stencil_config = pace.dsl.stencil.StencilConfig(
-        compilation_config=pace.dsl.stencil.CompilationConfig(
+    stencil_config = ndsl.dsl.stencil.StencilConfig(
+        compilation_config=ndsl.dsl.stencil.CompilationConfig(
             backend=backend, rebuild=False, validate_args=True
         ),
         dace_config=dace_config,
@@ -91,7 +91,7 @@ def setup_dycore() -> (
         tile_partitioner=partitioner.tile,
         tile_rank=communicator.tile.rank,
     )
-    grid_indexing = pace.dsl.stencil.GridIndexing.from_sizer_and_communicator(
+    grid_indexing = ndsl.dsl.stencil.GridIndexing.from_sizer_and_communicator(
         sizer=sizer, comm=communicator
     )
     quantity_factory = pace.util.QuantityFactory.from_backend(
@@ -116,7 +116,7 @@ def setup_dycore() -> (
         moist_phys=config.moist_phys,
         comm=communicator,
     )
-    stencil_factory = pace.dsl.stencil.StencilFactory(
+    stencil_factory = ndsl.dsl.stencil.StencilFactory(
         config=stencil_config,
         grid_indexing=grid_indexing,
     )

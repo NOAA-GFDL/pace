@@ -3,7 +3,7 @@ from math import sqrt
 
 import pytest
 
-from pace.dsl.stencil import CompilationConfig, RunMode
+from ndsl.dsl.stencil import CompilationConfig, RunMode
 from pace.util.communicator import CubedSphereCommunicator
 from pace.util.partitioner import CubedSpherePartitioner, TilePartitioner
 

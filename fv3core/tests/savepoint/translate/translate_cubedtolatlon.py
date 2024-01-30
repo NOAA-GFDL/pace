@@ -1,4 +1,4 @@
-import pace.dsl
+import ndsl.dsl
 import pace.util
 from pace.stencils.c2l_ord import CubedToLatLon
 from pace.stencils.testing import ParallelTranslate2Py
@@ -20,7 +20,7 @@ class TranslateCubedToLatLon(ParallelTranslate2Py):
         self,
         grid,
         namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
         self._base.in_vars["data_vars"] = {"u": {}, "v": {}, "ua": {}, "va": {}}

@@ -1,4 +1,4 @@
-import pace.dsl
+import ndsl.dsl
 import pace.util
 from pace.driver.run import Driver, DriverConfig
 from pace.driver.state import TendencyState

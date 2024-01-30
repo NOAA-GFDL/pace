@@ -4,12 +4,12 @@ from typing import List
 
 import xarray as xr
 
-import pace.dsl.gt4py_utils as gt_utils
+import ndsl.dsl.gt4py_utils as gt_utils
 import pace.physics
 import pace.util
 import pace.util.grid
 from pace import fv3core
-from pace.dsl.typing import Float
+from ndsl.dsl.typing import Float
 
 
 @dataclasses.dataclass()

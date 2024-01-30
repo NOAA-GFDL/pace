@@ -3,8 +3,8 @@ from typing import List, Optional, Tuple
 from dace.sdfg import SDFG
 
 import pace.util
-from pace.dsl.caches.cache_location import get_cache_directory, get_cache_fullpath
-from pace.dsl.dace.dace_config import DaceConfig, DaCeOrchestration
+from ndsl.dsl.caches.cache_location import get_cache_directory, get_cache_fullpath
+from ndsl.dsl.dace.dace_config import DaceConfig, DaCeOrchestration
 
 
 ################################################

@@ -5,8 +5,8 @@ from typing import Any, Callable, Dict, Hashable, Iterable, Optional, Sequence, 
 
 from gt4py.cartesian.gtc.passes.oir_pipeline import DefaultPipeline, OirPipeline
 
-from pace.dsl.dace.dace_config import DaceConfig, DaCeOrchestration
-from pace.dsl.gt4py_utils import is_gpu_backend
+from ndsl.dsl.dace.dace_config import DaceConfig, DaCeOrchestration
+from ndsl.dsl.gt4py_utils import is_gpu_backend
 from pace.util.communicator import Communicator
 from pace.util.decomposition import determine_rank_is_compiling, set_distributed_caches
 from pace.util.partitioner import Partitioner

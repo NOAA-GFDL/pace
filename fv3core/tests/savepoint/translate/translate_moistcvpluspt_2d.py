@@ -1,8 +1,8 @@
 from gt4py.cartesian.gtscript import PARALLEL, computation, interval
 
 import pace.fv3core.stencils.moist_cv as moist_cv
-from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import FloatField
+from ndsl.dsl.stencil import StencilFactory
+from ndsl.dsl.typing import FloatField
 from pace.stencils.testing import TranslateFortranData2Py, pad_field_in_j
 
 

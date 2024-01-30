@@ -10,17 +10,17 @@ import dacite
 import yaml
 
 import pace.driver
-import pace.dsl
+import ndsl.dsl
 import pace.physics
 import pace.stencils
 import pace.util
 import pace.util.grid
 from pace import fv3core
 from pace.driver.safety_checks import SafetyChecker
-from pace.dsl.dace.dace_config import DaceConfig
-from pace.dsl.dace.orchestration import dace_inhibitor, orchestrate
-from pace.dsl.stencil_config import CompilationConfig, RunMode
-from pace.dsl.typing import Float
+from ndsl.dsl.dace.dace_config import DaceConfig
+from ndsl.dsl.dace.orchestration import dace_inhibitor, orchestrate
+from ndsl.dsl.stencil_config import CompilationConfig, RunMode
+from ndsl.dsl.typing import Float
 
 # TODO: move update_atmos_state into pace.driver
 from pace.stencils import update_atmos_state
@@ -88,7 +88,7 @@ class DriverConfig:
             defaults to every timestep
     """
 
-    stencil_config: pace.dsl.StencilConfig
+    stencil_config: ndsl.dsl.StencilConfig
     initialization: InitializerSelector
     nx_tile: int
     nz: int
@@ -197,7 +197,7 @@ class DriverConfig:
         driver_grid_data: pace.util.grid.DriverGridData,
         grid_data: pace.util.grid.GridData,
         quantity_factory: Optional[pace.util.QuantityFactory] = None,
-        stencil_factory: Optional[pace.dsl.StencilFactory] = None,
+        stencil_factory: Optional[ndsl.dsl.StencilFactory] = None,
     ) -> DriverState:
         """Load the initial state of the driver."""
         if quantity_factory is None or stencil_factory is None:
@@ -217,11 +217,11 @@ class DriverConfig:
                 )
             if stencil_factory is None:
                 grid_indexing = (
-                    pace.dsl.stencil.GridIndexing.from_sizer_and_communicator(
+                    ndsl.dsl.stencil.GridIndexing.from_sizer_and_communicator(
                         sizer=sizer, comm=communicator
                     )
                 )
-                stencil_factory = pace.dsl.StencilFactory(
+                stencil_factory = ndsl.dsl.StencilFactory(
                     config=self.stencil_config, grid_indexing=grid_indexing
                 )
 
@@ -475,7 +475,11 @@ class Driver:
                 stencil_compare_comm=stencil_compare_comm,
             )
             pace_log.info("setting up grid started")
-            (damping_coefficients, driver_grid_data, grid_data,) = self.config.get_grid(
+            (
+                damping_coefficients,
+                driver_grid_data,
+                grid_data,
+            ) = self.config.get_grid(
                 quantity_factory=self.quantity_factory,
                 communicator=communicator,
             )
@@ -728,7 +732,7 @@ def _setup_factories(
     config: DriverConfig,
     communicator: pace.util.Communicator,
     stencil_compare_comm,
-) -> Tuple[pace.util.QuantityFactory, pace.dsl.StencilFactory]:
+) -> Tuple[pace.util.QuantityFactory, ndsl.dsl.StencilFactory]:
     """
     Args:
         config: configuration of driver
@@ -753,13 +757,13 @@ def _setup_factories(
         tile_rank=communicator.tile.rank,
     )
 
-    grid_indexing = pace.dsl.stencil.GridIndexing.from_sizer_and_communicator(
+    grid_indexing = ndsl.dsl.stencil.GridIndexing.from_sizer_and_communicator(
         sizer=sizer, comm=communicator
     )
     quantity_factory = pace.util.QuantityFactory.from_backend(
         sizer, backend=config.stencil_config.compilation_config.backend
     )
-    stencil_factory = pace.dsl.StencilFactory(
+    stencil_factory = ndsl.dsl.StencilFactory(
         config=config.stencil_config,
         grid_indexing=grid_indexing,
         comm=stencil_compare_comm,

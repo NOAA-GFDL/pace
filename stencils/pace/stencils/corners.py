@@ -3,8 +3,8 @@ from typing import Optional, Sequence, Tuple
 from gt4py.cartesian import gtscript
 from gt4py.cartesian.gtscript import PARALLEL, computation, horizontal, interval, region
 
-from pace.dsl.stencil import GridIndexing, StencilFactory
-from pace.dsl.typing import FloatField
+from ndsl.dsl.stencil import GridIndexing, StencilFactory
+from ndsl.dsl.typing import FloatField
 from pace.util.constants import (
     X_DIM,
     X_INTERFACE_DIM,
@@ -555,7 +555,6 @@ class FillCornersBGrid:
         origin=None,
         domain=None,
     ) -> None:
-
         n_halo = stencil_factory.grid_indexing.n_halo
         (
             default_origin,
@@ -715,6 +714,7 @@ def fill_corners_bgrid_y_defn(q_in: FloatField, q_out: FloatField):
 
 # TODO these fill corner 2d, agrid, bgrid routines need to be tested and integrated;
 # they've just been copied from an older version of the code
+
 
 # TODO these can definitely be consolidated/made simpler
 def fill_sw_corner_2d_bgrid(q, i, j, direction, grid_indexer):

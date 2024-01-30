@@ -1,7 +1,7 @@
 import numpy as np
 
-import pace.dsl
-import pace.dsl.gt4py_utils as utils
+import ndsl.dsl
+import ndsl.dsl.gt4py_utils as utils
 import pace.fv3core.stencils.fillz as fillz
 import pace.util
 from pace.fv3core.testing import TranslateDycoreFortranData2Py
@@ -14,7 +14,7 @@ class TranslateFillz(TranslateDycoreFortranData2Py):
         self,
         grid,
         namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
         self.in_vars["data_vars"] = {

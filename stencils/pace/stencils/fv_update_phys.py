@@ -4,10 +4,10 @@ from gt4py.cartesian.gtscript import FORWARD, PARALLEL, computation, exp, interv
 import pace.util
 import pace.util.constants as constants
 from pace import fv3core
-from pace.dsl.dace.orchestration import orchestrate
-from pace.dsl.dace.wrapped_halo_exchange import WrappedHaloUpdater
-from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import Float, FloatField, FloatFieldIJ
+from ndsl.dsl.dace.orchestration import orchestrate
+from ndsl.dsl.dace.wrapped_halo_exchange import WrappedHaloUpdater
+from ndsl.dsl.stencil import StencilFactory
+from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ
 from pace.stencils.c2l_ord import CubedToLatLon
 from pace.stencils.update_dwind_phys import AGrid2DGridPhysics
 from pace.util import X_DIM, Y_DIM
@@ -61,7 +61,6 @@ def update_pressure_and_surface_winds(
     u_srf: FloatFieldIJ,
     v_srf: FloatFieldIJ,
 ):
-
     with computation(FORWARD), interval(1, None):
         pe = pe[0, 0, -1] + delp[0, 0, -1]
     with computation(PARALLEL), interval(1, None):

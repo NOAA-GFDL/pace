@@ -12,11 +12,11 @@ from mpi4py import MPI
 import pace.util
 from pace import fv3core
 from pace.driver.performance.collector import PerformanceCollector
-from pace.dsl.dace import orchestrate
-from pace.dsl.dace.build import set_distributed_caches
-from pace.dsl.dace.dace_config import DaceConfig, DaCeOrchestration
-from pace.dsl.gt4py_utils import is_gpu_backend
-from pace.dsl.typing import floating_point_precision
+from ndsl.dsl.dace import orchestrate
+from ndsl.dsl.dace.build import set_distributed_caches
+from ndsl.dsl.dace.dace_config import DaceConfig, DaCeOrchestration
+from ndsl.dsl.gt4py_utils import is_gpu_backend
+from ndsl.dsl.typing import floating_point_precision
 from pace.util._optional_imports import cupy as cp
 from pace.util.logging import pace_log
 
@@ -130,8 +130,8 @@ class GeosDycoreWrapper:
         )
         grid_data = pace.util.grid.GridData.new_from_metric_terms(metric_terms)
 
-        stencil_config = pace.dsl.stencil.StencilConfig(
-            compilation_config=pace.dsl.stencil.CompilationConfig(
+        stencil_config = ndsl.dsl.stencil.StencilConfig(
+            compilation_config=ndsl.dsl.stencil.CompilationConfig(
                 backend=backend, rebuild=False, validate_args=False
             ),
         )
@@ -154,10 +154,10 @@ class GeosDycoreWrapper:
             method_to_orchestrate="_critical_path",
         )
 
-        self._grid_indexing = pace.dsl.stencil.GridIndexing.from_sizer_and_communicator(
+        self._grid_indexing = ndsl.dsl.stencil.GridIndexing.from_sizer_and_communicator(
             sizer=sizer, comm=self.communicator
         )
-        stencil_factory = pace.dsl.StencilFactory(
+        stencil_factory = ndsl.dsl.StencilFactory(
             config=stencil_config, grid_indexing=self._grid_indexing
         )
 

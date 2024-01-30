@@ -12,20 +12,20 @@ from dace.transformation.auto.auto_optimize import make_transients_persistent
 from dace.transformation.helpers import get_parent_map
 from dace.transformation.passes.simplify import SimplifyPass
 
-from pace.dsl.dace.build import get_sdfg_path, write_build_info
-from pace.dsl.dace.dace_config import (
+from ndsl.dsl.dace.build import get_sdfg_path, write_build_info
+from ndsl.dsl.dace.dace_config import (
     DEACTIVATE_DISTRIBUTED_DACE_COMPILE,
     DaceConfig,
     DaCeOrchestration,
     FrozenCompiledSDFG,
 )
-from pace.dsl.dace.sdfg_debug_passes import (
+from ndsl.dsl.dace.sdfg_debug_passes import (
     negative_delp_checker,
     negative_qtracers_checker,
     sdfg_nan_checker,
 )
-from pace.dsl.dace.sdfg_opt_passes import splittable_region_expansion
-from pace.dsl.dace.utils import (
+from ndsl.dsl.dace.sdfg_opt_passes import splittable_region_expansion
+from ndsl.dsl.dace.utils import (
     DaCeProgress,
     memory_static_analysis,
     report_memory_static_analysis,

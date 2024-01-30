@@ -12,9 +12,9 @@ from gt4py.cartesian.gtscript import (
 import pace.fv3core.stencils.basic_operations as basic
 import pace.stencils.corners as corners
 import pace.util
-from pace.dsl.dace.orchestration import dace_inhibitor, orchestrate
-from pace.dsl.stencil import StencilFactory, get_stencils_with_varied_bounds
-from pace.dsl.typing import Float, FloatField, FloatFieldIJ, FloatFieldK
+from ndsl.dsl.dace.orchestration import dace_inhibitor, orchestrate
+from ndsl.dsl.stencil import StencilFactory, get_stencils_with_varied_bounds
+from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ, FloatFieldK
 from pace.fv3core.stencils.a2b_ord4 import (
     AGrid2BGridFourthOrder,
     doubly_periodic_a2b_ord4,
@@ -252,7 +252,7 @@ def smagorinsky_diffusion_approx(delpc: FloatField, vort: FloatField, absdt: Flo
         absdt (in): abs(dt)
     """
     with computation(PARALLEL), interval(...):
-        vort = absdt * (delpc ** 2.0 + vort ** 2.0) ** 0.5
+        vort = absdt * (delpc**2.0 + vort**2.0) ** 0.5
 
 
 def smag_corner(
@@ -296,7 +296,7 @@ def smag_corner(
         wk = rarea * (vt2 - vt2[0, 1, 0] + ut2 - ut2[1, 0, 0])
 
         shear = doubly_periodic_a2b_ord4(wk)
-        smag_c = dt * sqrt(shear ** 2 + smag_c_t ** 2)
+        smag_c = dt * sqrt(shear**2 + smag_c_t**2)
 
 
 class DivergenceDamping:

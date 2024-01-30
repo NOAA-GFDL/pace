@@ -1,6 +1,6 @@
 from gt4py.cartesian.gtscript import PARALLEL, computation, interval
 
-from pace.dsl.typing import FloatField
+from ndsl.dsl.typing import FloatField
 from pace.util.constants import ZVIR
 
 

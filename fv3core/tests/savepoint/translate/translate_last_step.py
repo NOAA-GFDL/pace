@@ -1,4 +1,4 @@
-import pace.dsl
+import ndsl.dsl
 import pace.fv3core.stencils.moist_cv as moist_cv
 import pace.util
 from pace.fv3core.testing import TranslateDycoreFortranData2Py
@@ -9,7 +9,7 @@ class TranslateLastStep(TranslateDycoreFortranData2Py):
         self,
         grid,
         namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
         self.compute_func = stencil_factory.from_origin_domain(  # type: ignore

@@ -3,9 +3,9 @@ from typing import Any, Dict, Mapping, Union
 
 import xarray as xr
 
-import pace.dsl.gt4py_utils as gt_utils
+import ndsl.dsl.gt4py_utils as gt_utils
 import pace.util
-from pace.dsl.typing import Float
+from ndsl.dsl.typing import Float
 from pace.util.quantity import Quantity
 
 

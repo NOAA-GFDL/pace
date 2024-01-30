@@ -6,9 +6,9 @@ from typing import Tuple
 import numpy as np
 
 from pace import util
-from pace.dsl.gt4py_utils import asarray
-from pace.dsl.stencil import GridIndexing
-from pace.dsl.typing import Float
+from ndsl.dsl.gt4py_utils import asarray
+from ndsl.dsl.stencil import GridIndexing
+from ndsl.dsl.typing import Float
 from pace.stencils.corners import (
     fill_corners_2d,
     fill_corners_agrid,
@@ -1605,7 +1605,6 @@ class MetricTerms:
         )
 
     def _init_cartesian(self):
-
         domain_rad = PI / 16.0
         lat_rad = self._deglat * PI / 180.0
         lon_rad = 0.0
@@ -2621,7 +2620,6 @@ class MetricTerms:
         self._sina = quantity_cast_to_model_float(self.quantity_factory, sina_64)
 
     def _init_cell_trigonometry_cartesian(self):
-
         cosa_u_64 = self.quantity_factory.zeros(
             [util.X_INTERFACE_DIM, util.Y_DIM],
             "",

@@ -14,9 +14,9 @@ from gt4py.cartesian.gtscript import (
 
 import pace.util
 import pace.util.constants as constants
-from pace.dsl.dace import orchestrate
-from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import Float, FloatField, FloatFieldIJ
+from ndsl.dsl.dace import orchestrate
+from ndsl.dsl.stencil import StencilFactory
+from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ
 from pace.fv3core._config import RiemannConfig
 from pace.fv3core.stencils.sim1_solver import Sim1Solver
 from pace.util import X_DIM, Y_DIM, Z_DIM, Z_INTERFACE_DIM
