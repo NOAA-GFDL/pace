@@ -42,7 +42,7 @@ def test_state_from_fortran_restart():
     )
 
     quantity_factory = QuantityFactory.from_backend(sizer=sizer, backend="numpy")
-    restart_dir = os.path.join(PACE_DIR, "/tests/data/c12_restart")
+    restart_dir = os.path.join(PACE_DIR, "/tests/main/data/c12_restart")
 
     (
         damping_coefficients,
