@@ -4,8 +4,9 @@ from typing import Literal, Tuple
 
 import pytest
 
-import pace.driver
 import ndsl.dsl
+import pace.driver
+from ndsl.util.null_comm import NullComm
 from pace.driver import CreatesCommSelector, DriverConfig, NullCommConfig
 from pace.driver.performance.report import (
     TimeReport,
@@ -13,7 +14,6 @@ from pace.driver.performance.report import (
     gather_timing_data,
     get_sypd,
 )
-from ndsl.util.null_comm import NullComm
 
 
 def get_driver_config(

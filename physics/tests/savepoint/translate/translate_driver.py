@@ -1,5 +1,6 @@
 import ndsl.dsl
 import ndsl.util
+from ndsl.util.namelist import Namelist
 from pace.driver.run import Driver, DriverConfig
 from pace.driver.state import TendencyState
 from pace.fv3core._config import DynamicalCoreConfig
@@ -9,7 +10,6 @@ from pace.fv3core._config import DynamicalCoreConfig
 from pace.fv3core.testing.translate_fvdynamics import TranslateFVDynamics
 from pace.fv3core.testing.validation import enable_selective_validation
 from pace.physics import PHYSICS_PACKAGES, PhysicsConfig, PhysicsState
-from ndsl.util.namelist import Namelist
 
 
 enable_selective_validation()

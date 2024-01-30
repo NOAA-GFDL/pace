@@ -176,7 +176,7 @@ def test_compute_view_edit_all_domain(quantity, n_halo, n_dims, extent_1d):
         pytest.skip("cannot edit an empty domain")
     quantity.data[:] = 0.0
     quantity.view[:] = 1
-    assert quantity.np.sum(quantity.data) == extent_1d**n_dims
+    assert quantity.np.sum(quantity.data) == extent_1d ** n_dims
     if n_dims > 1:
         quantity.np.testing.assert_array_equal(quantity.data[:n_halo, :], 0.0)
         quantity.np.testing.assert_array_equal(

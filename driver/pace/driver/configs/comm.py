@@ -5,11 +5,11 @@ from typing import Any, ClassVar, List
 
 import dacite
 
-import pace.driver
 import ndsl.dsl
 import ndsl.stencils
 import ndsl.util
 import ndsl.util.grid
+import pace.driver
 from ndsl.util.caching_comm import CachingCommReader, CachingCommWriter
 
 

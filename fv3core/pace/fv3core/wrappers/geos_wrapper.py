@@ -10,8 +10,6 @@ from gt4py.cartesian.config import build_settings as gt_build_settings
 from mpi4py import MPI
 
 import ndsl.util
-from pace import fv3core
-from pace.driver.performance.collector import PerformanceCollector
 from ndsl.dsl.dace import orchestrate
 from ndsl.dsl.dace.build import set_distributed_caches
 from ndsl.dsl.dace.dace_config import DaceConfig, DaCeOrchestration
@@ -19,6 +17,8 @@ from ndsl.dsl.gt4py_utils import is_gpu_backend
 from ndsl.dsl.typing import floating_point_precision
 from ndsl.util._optional_imports import cupy as cp
 from ndsl.util.logging import pace_log
+from pace import fv3core
+from pace.driver.performance.collector import PerformanceCollector
 
 
 class StencilBackendCompilerOverride:

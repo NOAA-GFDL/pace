@@ -2,12 +2,12 @@ import pytest
 
 import ndsl.dsl
 import ndsl.dsl.gt4py_utils as utils
-import pace.fv3core.stencils.fvtp2d
-import pace.fv3core.stencils.tracer_2d_1l
 import ndsl.util
 import ndsl.util as fv3util
-from pace.fv3core.utils.functional_validation import get_subset_func
+import pace.fv3core.stencils.fvtp2d
+import pace.fv3core.stencils.tracer_2d_1l
 from ndsl.stencils.testing import ParallelTranslate
+from pace.fv3core.utils.functional_validation import get_subset_func
 
 
 class TranslateTracer2D1L(ParallelTranslate):

@@ -9,12 +9,12 @@ from gt4py.cartesian.gtscript import (
 
 import ndsl.dsl.gt4py_utils as utils
 import ndsl.util
-from pace import fv3core
 from ndsl.dsl.dace.wrapped_halo_exchange import WrappedHaloUpdater
 from ndsl.dsl.stencil import StencilFactory
 from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ
 from ndsl.util.constants import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_DIM
 from ndsl.util.grid import GridData
+from pace import fv3core
 
 
 A1 = 0.5625

@@ -2,11 +2,11 @@ import numpy as np
 
 import ndsl.dsl
 import ndsl.dsl.gt4py_utils as utils
-import pace.fv3core.stencils.fillz as fillz
 import ndsl.util
-from pace.fv3core.testing import TranslateDycoreFortranData2Py
+import pace.fv3core.stencils.fillz as fillz
 from ndsl.stencils.testing import pad_field_in_j
 from ndsl.util.utils import safe_assign_array
+from pace.fv3core.testing import TranslateDycoreFortranData2Py
 
 
 class TranslateFillz(TranslateDycoreFortranData2Py):

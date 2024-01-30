@@ -1,9 +1,9 @@
 import numpy as np
 
 import ndsl.dsl
+import ndsl.util
 import pace.fv3core
 import pace.fv3core.stencils.updatedzd
-import ndsl.util
 from pace.fv3core.stencils import d_sw
 from pace.fv3core.testing import TranslateDycoreFortranData2Py
 from pace.fv3core.utils.functional_validation import get_subset_func

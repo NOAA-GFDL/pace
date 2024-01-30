@@ -7,6 +7,8 @@ from typing import List, Protocol
 import numpy as np
 
 import ndsl.util
+from ndsl.util._optional_imports import cupy as cp
+from ndsl.util.utils import GPU_AVAILABLE
 from pace.driver.performance.report import (
     Report,
     TimeReport,
@@ -15,8 +17,6 @@ from pace.driver.performance.report import (
     get_experiment_info,
     write_to_timestamped_json,
 )
-from ndsl.util._optional_imports import cupy as cp
-from ndsl.util.utils import GPU_AVAILABLE
 
 from .report import collect_data_and_write_to_file
 

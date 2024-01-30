@@ -3,8 +3,8 @@ import os
 import xarray as xr
 import yaml
 
-import pace.driver
 import ndsl.dsl
+import pace.driver
 from pace.driver.run import main
 
 

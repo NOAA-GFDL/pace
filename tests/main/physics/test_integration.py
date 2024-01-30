@@ -4,9 +4,9 @@ from datetime import timedelta
 import numpy as np
 
 import ndsl.dsl
-import pace.physics
 import ndsl.util
 import ndsl.util.grid
+import pace.physics
 from ndsl.dsl.stencil_config import CompilationConfig
 from ndsl.stencils.testing import assert_same_temporaries, copy_temporaries
 

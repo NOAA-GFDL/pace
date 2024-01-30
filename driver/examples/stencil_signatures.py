@@ -4,9 +4,9 @@ from typing import Optional, TextIO
 
 import yaml
 
-import pace.driver
 import ndsl.dsl
 import ndsl.util
+import pace.driver
 
 
 def has_stencils(object):

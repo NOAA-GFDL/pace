@@ -3,10 +3,8 @@ import os
 import numpy as np
 import xarray as xr
 
-import pace.driver
 import ndsl.util
-from pace.driver.initialization import FortranRestartInit
-from pace.physics import PHYSICS_PACKAGES
+import pace.driver
 from ndsl.util import (
     CubedSphereCommunicator,
     CubedSpherePartitioner,
@@ -14,6 +12,8 @@ from ndsl.util import (
     SubtileGridSizer,
     TilePartitioner,
 )
+from pace.driver.initialization import FortranRestartInit
+from pace.physics import PHYSICS_PACKAGES
 
 
 DIR = os.path.dirname(os.path.abspath(__file__))

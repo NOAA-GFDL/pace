@@ -3,8 +3,8 @@ from typing import Any, Dict
 import ndsl.dsl
 import ndsl.dsl.gt4py_utils as utils
 import ndsl.util
-from pace.fv3core.testing import TranslateDycoreFortranData2Py
 from ndsl.stencils import corners
+from pace.fv3core.testing import TranslateDycoreFortranData2Py
 
 
 class TranslateFill4Corners(TranslateDycoreFortranData2Py):

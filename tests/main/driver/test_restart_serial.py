@@ -7,11 +7,11 @@ import xarray as xr
 import yaml
 
 import ndsl.dsl
+from ndsl.util.null_comm import NullComm
 from pace.driver import CreatesComm, DriverConfig
 from pace.driver.driver import RestartConfig
 from pace.driver.initialization import AnalyticInit
 from pace.physics import PHYSICS_PACKAGES
-from ndsl.util.null_comm import NullComm
 
 
 DIR = os.path.dirname(os.path.abspath(__file__))

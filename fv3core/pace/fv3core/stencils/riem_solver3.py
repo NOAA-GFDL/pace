@@ -17,9 +17,9 @@ import ndsl.util.constants as constants
 from ndsl.dsl.dace import orchestrate
 from ndsl.dsl.stencil import StencilFactory
 from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ
+from ndsl.util import X_DIM, Y_DIM, Z_DIM, Z_INTERFACE_DIM
 from pace.fv3core._config import RiemannConfig
 from pace.fv3core.stencils.sim1_solver import Sim1Solver
-from ndsl.util import X_DIM, Y_DIM, Z_DIM, Z_INTERFACE_DIM
 
 
 @typing.no_type_check

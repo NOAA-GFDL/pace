@@ -2,8 +2,8 @@ import numpy as np
 
 import ndsl.dsl
 import ndsl.dsl.gt4py_utils as utils
-import pace.fv3core.stencils.saturation_adjustment as satadjust
 import ndsl.util
+import pace.fv3core.stencils.saturation_adjustment as satadjust
 from pace.fv3core.testing import TranslateDycoreFortranData2Py
 
 

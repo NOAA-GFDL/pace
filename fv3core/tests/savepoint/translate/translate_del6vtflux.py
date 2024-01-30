@@ -1,6 +1,6 @@
 import ndsl.dsl
-import pace.fv3core.stencils.delnflux as delnflux
 import ndsl.util
+import pace.fv3core.stencils.delnflux as delnflux
 from pace.fv3core.testing import TranslateDycoreFortranData2Py
 
 

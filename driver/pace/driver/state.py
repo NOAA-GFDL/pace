@@ -5,11 +5,11 @@ from typing import List
 import xarray as xr
 
 import ndsl.dsl.gt4py_utils as gt_utils
-import pace.physics
 import ndsl.util
 import ndsl.util.grid
-from pace import fv3core
+import pace.physics
 from ndsl.dsl.typing import Float
+from pace import fv3core
 
 
 @dataclasses.dataclass()

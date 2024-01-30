@@ -1,11 +1,11 @@
 import numpy as np
 
 import ndsl.util
+from ndsl.util.utils import safe_assign_array
+from pace.physics.update.update_dwind_phys import AGrid2DGridPhysics
 from physics.tests.savepoint.translate.translate_physics import (
     TranslatePhysicsFortranData2Py,
 )
-from pace.physics.update.update_dwind_phys import AGrid2DGridPhysics
-from ndsl.util.utils import safe_assign_array
 
 
 class TranslateUpdateDWindsPhys(TranslatePhysicsFortranData2Py):

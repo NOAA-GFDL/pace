@@ -1,11 +1,11 @@
 import numpy as np
 
 import ndsl.dsl.gt4py_utils as utils
+from ndsl.util.constants import KAPPA
 from pace.physics.stencils.physics import atmos_phys_driver_statein
 from physics.tests.savepoint.translate.translate_physics import (
     TranslatePhysicsFortranData2Py,
 )
-from ndsl.util.constants import KAPPA
 
 
 class TranslateAtmosPhysDriverStatein(TranslatePhysicsFortranData2Py):

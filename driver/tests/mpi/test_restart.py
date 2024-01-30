@@ -57,11 +57,7 @@ def test_restart():
             ndsl.util.TilePartitioner((1, 1))
         )
         communicator = ndsl.util.CubedSphereCommunicator(mpi_comm, partitioner)
-        (
-            damping_coefficients,
-            driver_grid_data,
-            grid_data,
-        ) = restart_config.get_grid(
+        (damping_coefficients, driver_grid_data, grid_data,) = restart_config.get_grid(
             communicator=communicator,
         )
 

@@ -2,11 +2,11 @@ from datetime import timedelta
 from typing import Any, List, Tuple, cast
 
 import ndsl.dsl.stencil
+import ndsl.stencils.testing
+import ndsl.util
 import pace.fv3core
 import pace.fv3core._config
 import pace.fv3core.initialization.baroclinic as baroclinic_init
-import ndsl.stencils.testing
-import ndsl.util
 from ndsl.util.grid import DampingCoefficients, GridData, MetricTerms
 
 

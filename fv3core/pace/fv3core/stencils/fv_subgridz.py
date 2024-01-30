@@ -14,8 +14,6 @@ import ndsl.dsl.gt4py_utils as utils
 import ndsl.util
 from ndsl.dsl.stencil import StencilFactory
 from ndsl.dsl.typing import Float, FloatField
-from pace.fv3core.dycore_state import DycoreState
-from pace.fv3core.stencils.basic_operations import dim
 from ndsl.util import X_DIM, Y_DIM, Z_DIM
 from ndsl.util.constants import (
     C_ICE,
@@ -28,6 +26,8 @@ from ndsl.util.constants import (
     RDGAS,
     ZVIR,
 )
+from pace.fv3core.dycore_state import DycoreState
+from pace.fv3core.stencils.basic_operations import dim
 
 
 RK = CP_AIR / RDGAS + 1.0
@@ -62,7 +62,7 @@ def standard_cm(cpm, cvm, q0_vapor, q0_liquid, q0_rain, q0_ice, q0_snow, q0_grau
 
 @gtscript.function
 def tvol(gz, u0, v0, w0):
-    return gz + 0.5 * (u0**2 + v0**2 + w0**2)
+    return gz + 0.5 * (u0 ** 2 + v0 ** 2 + w0 ** 2)
 
 
 def init(

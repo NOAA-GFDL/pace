@@ -5,15 +5,15 @@ import pytest
 
 import ndsl.dsl
 import ndsl.dsl.gt4py_utils as utils
+import ndsl.util
+import ndsl.util as fv3util
 import pace.fv3core.initialization.analytic_init as analytic_init
 import pace.fv3core.initialization.init_utils as init_utils
 import pace.fv3core.initialization.test_cases.initialize_baroclinic as baroclinic_init
-import ndsl.util
-import ndsl.util as fv3util
-from pace.fv3core.testing import TranslateDycoreFortranData2Py
 from ndsl.stencils.testing import ParallelTranslateBaseSlicing
 from ndsl.stencils.testing.grid import TRACER_DIM  # type: ignore
 from ndsl.util.grid import GridData, MetricTerms
+from pace.fv3core.testing import TranslateDycoreFortranData2Py
 
 
 class TranslateInitCase(ParallelTranslateBaseSlicing):

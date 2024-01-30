@@ -22,7 +22,7 @@ s15 = 3.0 / 14.0
 def pert_ppm_standard_constraint_fcn(a0: FloatField, al: FloatField, ar: FloatField):
     if al * ar < 0.0:
         da1 = al - ar
-        da2 = da1**2
+        da2 = da1 ** 2
         a6da = 3.0 * (al + ar) * da1
         if a6da < -da2:
             ar = -2.0 * al
@@ -46,7 +46,7 @@ def pert_ppm_positive_definite_constraint_fcn(
         a4 = -3.0 * (ar + al)
         da1 = ar - al
         if abs(da1) < -a4:
-            fmin = a0 + 0.25 / a4 * da1**2 + a4 * (1.0 / 12.0)
+            fmin = a0 + 0.25 / a4 * da1 ** 2 + a4 * (1.0 / 12.0)
             if fmin < 0.0:
                 if ar > 0.0 and al > 0.0:
                     ar = 0.0

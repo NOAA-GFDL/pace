@@ -10,11 +10,13 @@ from gt4py.cartesian.gtscript import (
     region,
 )
 
-import pace.fv3core.stencils.delnflux as delnflux
 import ndsl.util
+import pace.fv3core.stencils.delnflux as delnflux
 from ndsl.dsl.dace.orchestration import orchestrate
 from ndsl.dsl.stencil import StencilFactory
 from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ, FloatFieldK
+from ndsl.util import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_DIM
+from ndsl.util.grid import DampingCoefficients, GridData
 from pace.fv3core._config import DGridShallowWaterLagrangianDynamicsConfig
 from pace.fv3core.stencils.d2a2c_vect import contravariant
 from pace.fv3core.stencils.delnflux import DelnFluxNoSG
@@ -23,8 +25,6 @@ from pace.fv3core.stencils.fvtp2d import FiniteVolumeTransport
 from pace.fv3core.stencils.fxadv import FiniteVolumeFluxPrep
 from pace.fv3core.stencils.xtp_u import advect_u_along_x
 from pace.fv3core.stencils.ytp_v import advect_v_along_y
-from ndsl.util import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_DIM
-from ndsl.util.grid import DampingCoefficients, GridData
 
 
 dcon_threshold = 1e-5

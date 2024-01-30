@@ -16,7 +16,7 @@ def layout():
     if MPI is not None:
         size = MPI.COMM_WORLD.Get_size()
         ranks_per_tile = size // 6
-        ranks_per_edge = int(ranks_per_tile**0.5)
+        ranks_per_edge = int(ranks_per_tile ** 0.5)
         return (ranks_per_edge, ranks_per_edge)
     else:
         return (1, 1)

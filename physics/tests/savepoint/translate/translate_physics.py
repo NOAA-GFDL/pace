@@ -2,9 +2,9 @@ import numpy as np
 
 import ndsl.dsl.gt4py_utils as utils
 from ndsl.dsl.stencil import GridIndexing
-from pace.physics import PhysicsConfig
 from ndsl.stencils.testing.parallel_translate import ParallelTranslate2Py
 from ndsl.stencils.testing.translate import TranslateFortranData2Py, as_numpy
+from pace.physics import PhysicsConfig
 
 
 def transform_dwind_serialized_data(data, grid_indexing: GridIndexing, backend: str):

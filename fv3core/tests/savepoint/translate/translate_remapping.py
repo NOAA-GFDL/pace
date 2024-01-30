@@ -1,10 +1,10 @@
 import ndsl.dsl
 import ndsl.dsl.gt4py_utils as utils
 import ndsl.util
+from ndsl.util import Z_DIM
 from pace.fv3core import DynamicalCoreConfig
 from pace.fv3core.stencils.remapping import LagrangianToEulerian
 from pace.fv3core.testing import TranslateDycoreFortranData2Py
-from ndsl.util import Z_DIM
 
 
 class TranslateRemapping(TranslateDycoreFortranData2Py):

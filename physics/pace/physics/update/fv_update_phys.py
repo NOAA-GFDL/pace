@@ -3,15 +3,15 @@ from gt4py.cartesian.gtscript import FORWARD, PARALLEL, computation, exp, interv
 
 import ndsl.util
 import ndsl.util.constants as constants
-from pace import fv3core
 from ndsl.dsl.dace.orchestration import orchestrate
 from ndsl.dsl.dace.wrapped_halo_exchange import WrappedHaloUpdater
 from ndsl.dsl.stencil import StencilFactory
 from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ
 from ndsl.stencils.c2l_ord import CubedToLatLon
-from pace.physics.update.update_dwind_phys import AGrid2DGridPhysics
 from ndsl.util import X_DIM, Y_DIM
 from ndsl.util.grid import DriverGridData, GridData
+from pace import fv3core
+from pace.physics.update.update_dwind_phys import AGrid2DGridPhysics
 
 
 # TODO: This is the same as moist_cv.py in fv3core, should move to integration dir

@@ -2,8 +2,8 @@ from typing import Dict, Tuple
 
 import ndsl.dsl
 import ndsl.util
-from pace.fv3core.stencils.map_single import MapSingle
 from ndsl.util import X_INTERFACE_DIM, Y_INTERFACE_DIM, Z_DIM
+from pace.fv3core.stencils.map_single import MapSingle
 
 
 class MapSingleFactory:

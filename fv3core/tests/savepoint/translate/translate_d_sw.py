@@ -1,10 +1,10 @@
 from gt4py.cartesian.gtscript import PARALLEL, computation, interval
 
 import ndsl.dsl
-import pace.fv3core.stencils.d_sw as d_sw
 import ndsl.util
-from pace import fv3core
+import pace.fv3core.stencils.d_sw as d_sw
 from ndsl.dsl.typing import FloatField, FloatFieldIJ
+from pace import fv3core
 from pace.fv3core.testing import TranslateDycoreFortranData2Py
 
 

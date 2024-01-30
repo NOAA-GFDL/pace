@@ -2,9 +2,9 @@ import ndsl.dsl
 import ndsl.dsl.gt4py_utils as utils
 import ndsl.util
 from ndsl.dsl.typing import Float
+from ndsl.stencils.testing import TranslateGrid
 from pace.fv3core.stencils import yppm
 from pace.fv3core.testing import TranslateDycoreFortranData2Py
-from ndsl.stencils.testing import TranslateGrid
 
 
 class TranslateYPPM(TranslateDycoreFortranData2Py):

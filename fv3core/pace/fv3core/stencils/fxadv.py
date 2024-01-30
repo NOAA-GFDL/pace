@@ -10,8 +10,8 @@ from gt4py.cartesian.gtscript import (
 from ndsl.dsl.dace import orchestrate
 from ndsl.dsl.stencil import StencilFactory
 from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ
-from pace.fv3core.stencils.d2a2c_vect import contravariant
 from ndsl.util.grid import GridData
+from pace.fv3core.stencils.d2a2c_vect import contravariant
 
 
 def main_uc_vc_contra(

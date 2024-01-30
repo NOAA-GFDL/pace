@@ -9,27 +9,27 @@ import dace
 import dacite
 import yaml
 
-import pace.driver
 import ndsl.dsl
-import pace.physics
 import ndsl.stencils
 import ndsl.util
 import ndsl.util.grid
-from pace import fv3core
-from pace.driver.safety_checks import SafetyChecker
+import pace.driver
+import pace.physics
 from ndsl.dsl.dace.dace_config import DaceConfig
 from ndsl.dsl.dace.orchestration import dace_inhibitor, orchestrate
 from ndsl.dsl.stencil_config import CompilationConfig, RunMode
 from ndsl.dsl.typing import Float
-
-# TODO: move update_atmos_state into pace.driver
-from pace.physics.update import update_atmos_state
 from ndsl.util.communicator import (
     Communicator,
     CubedSphereCommunicator,
     TileCommunicator,
 )
 from ndsl.util.logging import pace_log
+from pace import fv3core
+from pace.driver.safety_checks import SafetyChecker
+
+# TODO: move update_atmos_state into pace.driver
+from pace.physics.update import update_atmos_state
 
 from . import diagnostics
 from .comm import CreatesCommSelector
@@ -475,11 +475,7 @@ class Driver:
                 stencil_compare_comm=stencil_compare_comm,
             )
             pace_log.info("setting up grid started")
-            (
-                damping_coefficients,
-                driver_grid_data,
-                grid_data,
-            ) = self.config.get_grid(
+            (damping_coefficients, driver_grid_data, grid_data,) = self.config.get_grid(
                 quantity_factory=self.quantity_factory,
                 communicator=communicator,
             )

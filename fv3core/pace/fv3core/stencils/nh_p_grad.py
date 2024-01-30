@@ -4,9 +4,9 @@ import ndsl.util
 from ndsl.dsl.dace import orchestrate
 from ndsl.dsl.stencil import StencilFactory
 from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ
-from pace.fv3core.stencils.a2b_ord4 import AGrid2BGridFourthOrder
 from ndsl.util import X_DIM, Y_DIM, Z_INTERFACE_DIM
 from ndsl.util.grid import GridData
+from pace.fv3core.stencils.a2b_ord4 import AGrid2BGridFourthOrder
 
 
 def set_k0_and_calc_wk(
@@ -228,7 +228,7 @@ class NonHydrostaticPressureGradient:
         # Fortran names:
         # u=u v=v pp=pkc gz=gz pk3=pk3 delp=delp dt=dt
 
-        ptk = ptop**akap
+        ptk = ptop ** akap
         top_value = ptk  # = peln1 if spec.namelist.use_logp else ptk
 
         # TODO: make it clearer that each of these a2b outputs is updated

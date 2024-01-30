@@ -5,12 +5,12 @@ from typing import ClassVar, Optional, Tuple
 import f90nml
 import xarray as xr
 
-import pace.driver
 import ndsl.dsl
-import pace.physics
 import ndsl.stencils
 import ndsl.util
 import ndsl.util.grid
+import pace.driver
+import pace.physics
 from ndsl.stencils.testing import TranslateGrid
 from ndsl.util import Communicator, QuantityFactory
 from ndsl.util.grid import (

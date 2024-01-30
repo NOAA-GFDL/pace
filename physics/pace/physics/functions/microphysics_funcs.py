@@ -166,7 +166,7 @@ def acr3d(v1, v2, q1, q2, c, cac_ik, cac_i1k, cac_i2k, rho):
 @gtscript.function
 def smlt(tc, dqs, qsrho, psacw, psacr, c_0, c_1, c_2, c_3, c_4, rho, rhofac):
     return (c_0 * tc / rho - c_1 * dqs) * (
-        c_2 * sqrt(qsrho) + c_3 * qsrho**0.65625 * sqrt(rhofac)
+        c_2 * sqrt(qsrho) + c_3 * qsrho ** 0.65625 * sqrt(rhofac)
     ) + c_4 * tc * (psacw + psacr)
 
 
@@ -175,7 +175,7 @@ def smlt(tc, dqs, qsrho, psacw, psacr, c_0, c_1, c_2, c_3, c_4, rho, rhofac):
 @gtscript.function
 def gmlt(tc, dqs, qgrho, pgacw, pgacr, c_0, c_1, c_2, c_3, c_4, rho):
     return (c_0 * tc / rho - c_1 * dqs) * (
-        c_2 * sqrt(qgrho) + c_3 * qgrho**0.6875 / rho**0.25
+        c_2 * sqrt(qgrho) + c_3 * qgrho ** 0.6875 / rho ** 0.25
     ) + c_4 * tc * (pgacw + pgacr)
 
 
@@ -630,7 +630,7 @@ def subgrid_z_proc(
                                 qsi
                                 * den
                                 * constants.LAT2
-                                / (0.0243 * constants.RVGAS * tz**2)
+                                / (0.0243 * constants.RVGAS * tz ** 2)
                                 + 4.42478e4
                             )
                         )

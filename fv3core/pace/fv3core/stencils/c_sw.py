@@ -11,10 +11,10 @@ import ndsl.util
 from ndsl.dsl.dace.orchestration import orchestrate
 from ndsl.dsl.stencil import StencilFactory
 from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ
-from pace.fv3core.stencils.d2a2c_vect import DGrid2AGrid2CGridVectors
 from ndsl.stencils import corners
 from ndsl.util import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_DIM
 from ndsl.util.grid import GridData
+from pace.fv3core.stencils.d2a2c_vect import DGrid2AGrid2CGridVectors
 
 
 def zero_delpc_ptc(delpc: FloatField, ptc: FloatField):

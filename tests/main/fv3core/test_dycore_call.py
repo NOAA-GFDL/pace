@@ -5,15 +5,15 @@ from datetime import timedelta
 from typing import Tuple
 
 import ndsl.dsl.stencil
-import pace.fv3core.initialization.analytic_init as ai
 import ndsl.stencils.testing
 import ndsl.util
-from pace import fv3core
+import pace.fv3core.initialization.analytic_init as ai
 from ndsl.dsl.dace.dace_config import DaceConfig
-from pace.fv3core.dycore_state import DycoreState
 from ndsl.stencils.testing import assert_same_temporaries, copy_temporaries
 from ndsl.util.grid import DampingCoefficients, GridData, MetricTerms
 from ndsl.util.null_comm import NullComm
+from pace import fv3core
+from pace.fv3core.dycore_state import DycoreState
 
 
 DIR = os.path.abspath(os.path.dirname(__file__))

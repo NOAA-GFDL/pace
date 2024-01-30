@@ -9,8 +9,8 @@ import f90nml
 import gt4py.cartesian.config
 
 import ndsl.dsl.stencil  # noqa: F401
-from pace.fv3core._config import DynamicalCoreConfig
 from ndsl.util.null_comm import NullComm
+from pace.fv3core._config import DynamicalCoreConfig
 
 
 try:

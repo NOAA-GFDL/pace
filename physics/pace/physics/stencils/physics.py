@@ -14,12 +14,12 @@ import ndsl.util.constants as constants
 from ndsl.dsl.dace.orchestration import orchestrate
 from ndsl.dsl.stencil import StencilFactory
 from ndsl.dsl.typing import Float, FloatField
+from ndsl.util import X_DIM, Y_DIM, Z_DIM
+from ndsl.util.grid import GridData
 from pace.physics.physics_state import PhysicsState
 from pace.physics.stencils.get_phi_fv3 import get_phi_fv3
 from pace.physics.stencils.get_prs_fv3 import get_prs_fv3
 from pace.physics.stencils.microphysics import Microphysics
-from ndsl.util import X_DIM, Y_DIM, Z_DIM
-from ndsl.util.grid import GridData
 
 from .._config import PHYSICS_PACKAGES, PhysicsConfig
 

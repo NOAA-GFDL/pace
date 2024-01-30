@@ -6,9 +6,9 @@ import ndsl.util
 from ndsl.dsl.dace import orchestrate
 from ndsl.dsl.stencil import StencilFactory
 from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ, IntFieldIJ  # noqa: F401
+from ndsl.util import X_DIM, Y_DIM, Z_DIM
 from pace.fv3core.stencils.basic_operations import copy_defn
 from pace.fv3core.stencils.remap_profile import RemapProfile
-from ndsl.util import X_DIM, Y_DIM, Z_DIM
 
 
 def set_dp(dp1: FloatField, pe1: FloatField, lev: IntFieldIJ):

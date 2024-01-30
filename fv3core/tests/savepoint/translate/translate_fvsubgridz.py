@@ -2,9 +2,9 @@ from types import SimpleNamespace
 
 import ndsl.dsl
 import ndsl.dsl.gt4py_utils as utils
-import pace.fv3core.stencils.fv_subgridz as fv_subgridz
 import ndsl.util
 import ndsl.util as fv3util
+import pace.fv3core.stencils.fv_subgridz as fv_subgridz
 from ndsl.stencils.testing import ParallelTranslateBaseSlicing
 
 

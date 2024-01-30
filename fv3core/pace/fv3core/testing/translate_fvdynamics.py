@@ -6,13 +6,13 @@ import pytest
 
 import ndsl.dsl
 import ndsl.dsl.gt4py_utils as utils
-import pace.fv3core.stencils.fv_dynamics as fv_dynamics
 import ndsl.util
-from pace.fv3core._config import DynamicalCoreConfig
-from pace.fv3core.dycore_state import DycoreState
+import pace.fv3core.stencils.fv_dynamics as fv_dynamics
 from ndsl.stencils.testing import ParallelTranslateBaseSlicing
 from ndsl.stencils.testing.translate import TranslateFortranData2Py
 from ndsl.util.grid import GridData
+from pace.fv3core._config import DynamicalCoreConfig
+from pace.fv3core.dycore_state import DycoreState
 
 
 class TranslateDycoreFortranData2Py(TranslateFortranData2Py):

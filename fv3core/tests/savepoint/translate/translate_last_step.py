@@ -1,6 +1,6 @@
 import ndsl.dsl
-import pace.fv3core.stencils.moist_cv as moist_cv
 import ndsl.util
+import pace.fv3core.stencils.moist_cv as moist_cv
 from pace.fv3core.testing import TranslateDycoreFortranData2Py
 
 

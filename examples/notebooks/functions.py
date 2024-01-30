@@ -13,9 +13,6 @@ from units_config import units
 from ndsl.dsl.dace.dace_config import DaceConfig, DaCeOrchestration
 from ndsl.dsl.stencil import GridIndexing, StencilConfig, StencilFactory
 from ndsl.dsl.stencil_config import CompilationConfig, RunMode
-from pace.fv3core.stencils.fvtp2d import FiniteVolumeTransport
-from pace.fv3core.stencils.fxadv import FiniteVolumeFluxPrep
-from pace.fv3core.stencils.tracer_2d_1l import TracerAdvection
 from ndsl.util import (
     CubedSphereCommunicator,
     CubedSpherePartitioner,
@@ -35,6 +32,9 @@ from ndsl.util.grid import (
     VerticalGridData,
 )
 from ndsl.util.grid.gnomonic import great_circle_distance_lon_lat
+from pace.fv3core.stencils.fvtp2d import FiniteVolumeTransport
+from pace.fv3core.stencils.fxadv import FiniteVolumeFluxPrep
+from pace.fv3core.stencils.tracer_2d_1l import TracerAdvection
 
 
 class GridType(enum.Enum):

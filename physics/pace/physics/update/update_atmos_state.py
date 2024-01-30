@@ -2,14 +2,14 @@ from typing import Optional
 
 from gt4py.cartesian.gtscript import BACKWARD, FORWARD, PARALLEL, computation, interval
 
-import pace.fv3core.stencils.fv_subgridz as fv_subgridz
 import ndsl.util
-from pace import fv3core
+import pace.fv3core.stencils.fv_subgridz as fv_subgridz
 from ndsl.dsl.dace.orchestration import orchestrate
 from ndsl.dsl.stencil import StencilFactory
 from ndsl.dsl.typing import Float, FloatField
-from pace.physics.update.fv_update_phys import ApplyPhysicsToDycore
 from ndsl.util.grid import DriverGridData, GridData
+from pace import fv3core
+from pace.physics.update.fv_update_phys import ApplyPhysicsToDycore
 
 
 # TODO: when this file is not importable from physics or fv3core, import

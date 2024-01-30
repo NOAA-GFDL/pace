@@ -15,9 +15,9 @@ import ndsl.util
 from ndsl.dsl.dace.orchestration import orchestrate
 from ndsl.dsl.stencil import GridIndexing, StencilFactory
 from ndsl.dsl.typing import Float, FloatField, FloatFieldI, FloatFieldIJ
-from pace.fv3core.stencils.basic_operations import copy_defn
 from ndsl.util import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_DIM
 from ndsl.util.grid import GridData
+from pace.fv3core.stencils.basic_operations import copy_defn
 
 
 # comact 4-pt cubic interpolation

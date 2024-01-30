@@ -5,9 +5,9 @@ import ndsl.util
 from ndsl.dsl.dace.orchestration import orchestrate
 from ndsl.dsl.stencil import StencilFactory
 from ndsl.dsl.typing import Float, FloatField
+from ndsl.util import X_DIM, Y_DIM, Z_DIM
 from pace.fv3core.stencils.fillz import FillNegativeTracerValues
 from pace.fv3core.stencils.map_single import MapSingle
-from ndsl.util import X_DIM, Y_DIM, Z_DIM
 
 
 class MapNTracer:

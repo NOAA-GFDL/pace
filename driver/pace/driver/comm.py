@@ -3,10 +3,10 @@ import dataclasses
 import os
 from typing import Any, ClassVar, List
 
-import pace.driver
 import ndsl.stencils
 import ndsl.util
 import ndsl.util.grid
+import pace.driver
 from ndsl.util.caching_comm import CachingCommReader, CachingCommWriter
 from ndsl.util.comm import Comm
 

@@ -8,11 +8,11 @@ import ndsl.util
 from ndsl.dsl.dace.orchestration import orchestrate
 from ndsl.dsl.stencil import StencilFactory
 from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ
+from ndsl.util import X_DIM, Y_DIM, Z_DIM
+from ndsl.util.grid import DampingCoefficients, GridData
 from pace.fv3core.stencils.delnflux import DelnFlux
 from pace.fv3core.stencils.xppm import XPiecewiseParabolic
 from pace.fv3core.stencils.yppm import YPiecewiseParabolic
-from ndsl.util import X_DIM, Y_DIM, Z_DIM
-from ndsl.util.grid import DampingCoefficients, GridData
 
 
 @gtscript.function

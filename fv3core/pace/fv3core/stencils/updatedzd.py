@@ -8,8 +8,6 @@ import ndsl.util.constants as constants
 from ndsl.dsl.dace.orchestration import orchestrate
 from ndsl.dsl.stencil import StencilFactory
 from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ, FloatFieldK
-from pace.fv3core.stencils.delnflux import DelnFluxNoSG
-from pace.fv3core.stencils.fvtp2d import FiniteVolumeTransport
 from ndsl.util import (
     X_DIM,
     X_INTERFACE_DIM,
@@ -19,6 +17,8 @@ from ndsl.util import (
     Z_INTERFACE_DIM,
 )
 from ndsl.util.grid import DampingCoefficients, GridData
+from pace.fv3core.stencils.delnflux import DelnFluxNoSG
+from pace.fv3core.stencils.fvtp2d import FiniteVolumeTransport
 
 
 DZ_MIN = constants.DZ_MIN
