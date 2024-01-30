@@ -7,6 +7,7 @@ First, make sure you have followed the instruction in the top level [README](../
 The unit and regression tests of pace require data generated from the Fortran reference implementation which has to be downloaded from a Google Cloud Platform storage bucket. Since the bucket is setup as "requester pays", you need a valid GCP account to download the test data.
 
 First, make sure you have configured the authentication with user credientials and configured Docker with the following commands:
+
 ```shell
 gcloud auth login
 gcloud auth configure-docker
@@ -74,3 +75,12 @@ DEV=y make savepoint_tests_mpi
 DEV=y make physics_savepoint_tests
 DEV=y make physics_savepoint_tests_mpi
 ```
+
+## Test failure
+
+Test are running for each gridpoint of the domain, unless the Translate class for the test specifically restricts it.
+Upon failure, the test will drop a `netCDF` faile in a `./.translate-errors` directory and named `translate-TestCase(-Rank).nc` containing input, computed output, reference and errors.
+
+## Environment variables
+
+- `PACE_TEST_N_THRESHOLD_SAMPLES`: Upon failure the system will try to pertub the output in an attempt to check for numerical instability. This means re-running the test for N samples. Default is `10`, `0` or less turns this feature off.

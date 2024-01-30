@@ -324,8 +324,8 @@ class DivergenceDamping:
             config=stencil_factory.config.dace_config,
         )
         self.grid_indexing = stencil_factory.grid_indexing
-        assert not nested, "nested not implemented"
-        # assert grid_type < 3, "Not implemented, grid_type>=3"
+        if nested:
+            raise NotImplementedError("Divergence Dampoing: nested not implemented.")
         # TODO: make dddmp a compile-time external, instead of runtime scalar
         self._dddmp = dddmp
         # TODO: make da_min_c a compile-time external, instead of runtime scalar

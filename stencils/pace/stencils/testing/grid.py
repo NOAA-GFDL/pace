@@ -6,6 +6,7 @@ import numpy as np
 import pace.util
 from pace.dsl import gt4py_utils as utils
 from pace.dsl.stencil import GridIndexing
+from pace.dsl.typing import Float
 from pace.util.grid import (
     AngleGridData,
     ContravariantGridData,
@@ -504,7 +505,7 @@ class Grid:
             data = getattr(self, name)
             assert data is not None
 
-            quantity = self.quantity_factory.zeros(dims=dims, units=units)
+            quantity = self.quantity_factory.zeros(dims=dims, units=units, dtype=Float)
             if len(quantity.shape) == 3:
                 quantity.data[:] = data[:, :, : quantity.shape[2]]
             elif len(quantity.shape) == 2:

@@ -32,18 +32,21 @@ def test_grid_init_not_decomposition_dependent(rank: int):
     mpi_54rank test suite. It tests only variables that are not dependent on
     halo updates for their values in the compute domain.
     """
-    nx_tile, ny_tile, nz = 48, 48, 5
+    nx_tile, ny_tile, nz = 48, 48, 79
+    eta_file = "tests/main/input/eta79.nc"
     metric_terms_1by1 = MetricTerms(
         quantity_factory=get_quantity_factory(
             layout=(1, 1), nx_tile=nx_tile, ny_tile=ny_tile, nz=nz
         ),
         communicator=get_cube_comm(rank=0, layout=(1, 1)),
+        eta_file=eta_file,
     )
     metric_terms_3by3 = MetricTerms(
         quantity_factory=get_quantity_factory(
             layout=(3, 3), nx_tile=nx_tile, ny_tile=ny_tile, nz=nz
         ),
         communicator=get_cube_comm(rank=rank, layout=(3, 3)),
+        eta_file=eta_file,
     )
     partitioner = pace.util.TilePartitioner(layout=(3, 3))
     assert allclose(metric_terms_1by1.grid, metric_terms_3by3.grid, partitioner, rank)

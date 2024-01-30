@@ -31,12 +31,12 @@ class DaCeProgress:
         return f"[{config.get_orchestrate()}]"
 
     def __enter__(self):
-        pace_log.debug(self.prefix, f"{self.label}...")
+        pace_log.debug(f"{self.prefix} {self.label}...")
         self.start = time.time()
 
     def __exit__(self, _type, _val, _traceback):
         elapsed = time.time() - self.start
-        pace_log.debug(self.prefix, f"{self.label}...{elapsed}s.")
+        pace_log.debug(f"{self.prefix} {self.label}...{elapsed}s.")
 
 
 def _is_ref(sd: dace.sdfg.SDFG, aname: str):

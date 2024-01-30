@@ -124,7 +124,9 @@ class GeosDycoreWrapper:
 
         # set up the metric terms and grid data
         metric_terms = pace.util.grid.MetricTerms(
-            quantity_factory=quantity_factory, communicator=self.communicator
+            quantity_factory=quantity_factory,
+            communicator=self.communicator,
+            eta_file=namelist["grid_config"]["config"]["eta_file"],
         )
         grid_data = pace.util.grid.GridData.new_from_metric_terms(metric_terms)
 

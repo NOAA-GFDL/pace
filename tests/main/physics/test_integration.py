@@ -64,6 +64,7 @@ def setup_physics():
     metric_terms = pace.util.grid.MetricTerms(
         quantity_factory=quantity_factory,
         communicator=communicator,
+        eta_file="tests/main/input/eta79.nc",
     )
     grid_data = pace.util.grid.GridData.new_from_metric_terms(metric_terms)
     physics = pace.physics.Physics(
