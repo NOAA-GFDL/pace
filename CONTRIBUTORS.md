@@ -11,7 +11,9 @@ List format (alphabetical order):  Surname, Name. Employer/Affiliation
 * Fuhrer, Oliver. Allen Institute for AI.
 * George, Rhea. Allen Institute for AI.
 * Harris, Lucas. GFDL.
+* Lee, Mi Kyung. GFDL.
 * Kung, Chris. NASA.
+* Malatino, Frank. GFDL
 * McGibbon, Jeremy. Allen Institute for AI.
 * Niedermayr, Yannick. ETH.
 * Savarin, Ajda. University of Washington.

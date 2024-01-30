@@ -15,11 +15,10 @@ performance_config:
 nx_tile: 384
 nz: 79
 dt_atmos: 450
-minutes: 7
-seconds: 30
+days: 9
 layout:
-  - 1
-  - 1
+  - 16
+  - 16
 diagnostics_config:
   path: output
   output_format: netcdf
@@ -72,7 +71,7 @@ dycore_config:
   nwat: 6
   p_fac: 0.1
   rf_cutoff: 800.
-  rf_fast: false
+  rf_fast: true
   tau: 5.
   vtdm4: 0.06
   z_tracer: true

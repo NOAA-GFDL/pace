@@ -6,6 +6,7 @@ import xarray as xr
 import pace.driver
 import pace.util
 from pace.driver.initialization import FortranRestartInit
+from pace.physics import PHYSICS_PACKAGES
 from pace.util import (
     CubedSphereCommunicator,
     CubedSpherePartitioner,
@@ -47,7 +48,9 @@ def test_state_from_fortran_restart():
         damping_coefficients,
         driver_grid_data,
         grid_data,
-    ) = pace.driver.GeneratedGridConfig(restart_path=restart_dir).get_grid(
+    ) = pace.driver.GeneratedGridConfig(
+        restart_path=restart_dir, eta_file=restart_dir + "/fv_core.res.nc"
+    ).get_grid(
         quantity_factory, null_communicator
     )
 
@@ -58,6 +61,7 @@ def test_state_from_fortran_restart():
         damping_coefficients=damping_coefficients,
         driver_grid_data=driver_grid_data,
         grid_data=grid_data,
+        schemes=[PHYSICS_PACKAGES["GFS_microphysics"]],
     )
     ds = xr.open_dataset(os.path.join(restart_dir, "fv_core.res.tile1.nc"))
     np.testing.assert_array_equal(

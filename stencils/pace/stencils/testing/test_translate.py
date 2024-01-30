@@ -19,7 +19,7 @@ from pace.util.testing import compare_scalar, perturb, success, success_array
 # this only matters for manually-added print statements
 np.set_printoptions(threshold=4096)
 
-OUTDIR = os.path.join(os.path.dirname(os.path.realpath(__file__)), "output")
+OUTDIR = "./.translate-errors"
 GPU_MAX_ERR = 1e-10
 GPU_NEAR_ZERO = 1e-15
 
@@ -171,21 +171,23 @@ def process_override(threshold_overrides, testobj, test_name, backend):
             )
 
 
-N_THRESHOLD_SAMPLES = 10
+N_THRESHOLD_SAMPLES = int(os.getenv("PACE_TEST_N_THRESHOLD_SAMPLES", 10))
 
 
 def get_thresholds(testobj, input_data):
-    return _get_thresholds(testobj.compute, input_data)
+    _get_thresholds(testobj.compute, input_data)
 
 
 def get_thresholds_parallel(testobj, input_data, communicator):
     def compute(input):
         return testobj.compute_parallel(input, communicator)
 
-    return _get_thresholds(compute, input_data)
+    _get_thresholds(compute, input_data)
 
 
-def _get_thresholds(compute_function, input_data):
+def _get_thresholds(compute_function, input_data) -> None:
+    if N_THRESHOLD_SAMPLES <= 0:
+        return
     output_list = []
     for _ in range(N_THRESHOLD_SAMPLES):
         input = copy.deepcopy(input_data)
@@ -289,10 +291,14 @@ def test_sequential_savepoint(
         ref_data_out[varname] = [ref_data]
     if len(failing_names) > 0:
         get_thresholds(case.testobj, input_data=original_input_data)
-        out_filename = os.path.join(OUTDIR, f"{case.savepoint_name}.nc")
+        os.makedirs(OUTDIR, exist_ok=True)
+        out_filename = os.path.join(OUTDIR, f"translate-{case.savepoint_name}.nc")
+        input_data_on_host = {}
+        for key, _input in input_data.items():
+            input_data_on_host[key] = gt_utils.asarray(_input)
         save_netcdf(
             case.testobj,
-            [input_data],
+            [input_data_on_host],
             [output],
             ref_data_out,
             failing_names,
@@ -420,13 +426,17 @@ def test_parallel_savepoint(
             )
             passing_names.append(failing_names.pop())
     if len(failing_names) > 0:
+        os.makedirs(OUTDIR, exist_ok=True)
         out_filename = os.path.join(
-            OUTDIR, f"{case.savepoint_name}-{case.grid.rank}.nc"
+            OUTDIR, f"translate-{case.savepoint_name}-{case.grid.rank}.nc"
         )
         try:
+            input_data_on_host = {}
+            for key, _input in input_data.items():
+                input_data_on_host[key] = gt_utils.asarray(_input)
             save_netcdf(
                 case.testobj,
-                [input_data],
+                [input_data_on_host],
                 [output],
                 ref_data,
                 failing_names,

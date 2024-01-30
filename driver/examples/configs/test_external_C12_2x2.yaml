@@ -5,6 +5,12 @@ stencil_config:
     validate_args: true
     format_source: false
     device_sync: false
+grid_config:
+  type: external
+  config:
+    grid_type: 0
+    grid_file_path: "../../../test_input/C12.tile"
+    eta_file: '../../../tests/main/input/eta79.nc'
 initialization:
   type: analytic
   config:
@@ -17,8 +23,8 @@ nz: 79
 dt_atmos: 225
 minutes: 15
 layout:
-  - 1
-  - 1
+  - 2
+  - 2
 diagnostics_config:
   path: output
   output_format: netcdf
@@ -89,13 +95,9 @@ dycore_config:
   tau_v2l: 90.
   fv_sg_adj: 0
   n_sponge: 48
+  u_max: 355.0
 
 physics_config:
   hydrostatic: false
   nwat: 6
   do_qa: true
-
-grid_config:
-  type:  generated
-  config:
-    eta_file: 'tests/main/input/eta79.nc'

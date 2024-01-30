@@ -71,7 +71,7 @@ dycore_config:
   nwat: 6
   p_fac: 0.1
   rf_cutoff: 800.
-  rf_fast: false
+  rf_fast: true
   tau: 5.
   vtdm4: 0.06
   z_tracer: true

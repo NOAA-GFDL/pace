@@ -10,6 +10,7 @@ import pace.dsl
 from pace.driver import CreatesComm, DriverConfig
 from pace.driver.driver import RestartConfig
 from pace.driver.initialization import AnalyticInit
+from pace.physics import PHYSICS_PACKAGES
 from pace.util.null_comm import NullComm
 
 
@@ -66,11 +67,14 @@ def test_restart_save_to_disk():
             sizer=sizer, backend=backend
         )
 
+        eta_file = driver_config.grid_config.config.eta_file
         (
             damping_coefficients,
             driver_grid_data,
             grid_data,
-        ) = pace.driver.GeneratedGridConfig().get_grid(quantity_factory, communicator)
+        ) = pace.driver.GeneratedGridConfig(eta_file=eta_file).get_grid(
+            quantity_factory, communicator
+        )
         init = AnalyticInit()
         driver_state = init.get_driver_state(
             quantity_factory=quantity_factory,
@@ -78,6 +82,7 @@ def test_restart_save_to_disk():
             damping_coefficients=damping_coefficients,
             driver_grid_data=driver_grid_data,
             grid_data=grid_data,
+            schemes=[PHYSICS_PACKAGES["GFS_microphysics"]],
         )
         time = datetime(2016, 1, 1, 0, 0, 0)
 

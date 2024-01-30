@@ -49,7 +49,7 @@ ENV CFLAGS="-I/usr/include -DACCEPT_USE_OF_DEPRECATED_PROJ_API_H=1"
 RUN python3 -m pip install \
     numpy==1.21.2 \
     netCDF4==1.5.7 \
-    mpi4py==3.1.0 \
+    mpi4py==3.1.1 \
     matplotlib==3.5.2 \
     ipyparallel==8.4.1 \
     jupyterlab==3.4.4 \

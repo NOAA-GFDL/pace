@@ -94,8 +94,5 @@ physics_config:
   hydrostatic: false
   nwat: 6
   do_qa: true
-
-grid_config:
-  type:  generated
-  config:
-    eta_file: 'tests/main/input/eta79.nc'
+  schemes:
+    - GFS_microphysics

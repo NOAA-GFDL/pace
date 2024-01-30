@@ -74,6 +74,9 @@ def test_geos_wrapper():
             "fv_sg_adj": 0,
             "n_sponge": 48,
         },
+        "grid_config": {
+            "config": {"eta_file": "tests/main/input/eta91.nc"},
+        },
     }
 
     namelist = f90nml.namelist.Namelist(namelist_dict)

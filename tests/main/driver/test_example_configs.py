@@ -14,6 +14,7 @@ EXAMPLE_CONFIGS_DIR = os.path.join(dirname, "../../../driver/examples/configs/")
 TESTED_CONFIGS: List[str] = [
     "baroclinic_c12.yaml",
     "baroclinic_c12_dp.yaml",
+    "baroclinic_c12_explicit_physics.yaml",
     "baroclinic_c12_comm_read.yaml",
     "baroclinic_c12_comm_write.yaml",
     "baroclinic_c12_null_comm.yaml",
@@ -28,6 +29,12 @@ EXCLUDED_CONFIGS: List[str] = [
     "baroclinic_c12_orch_cpu.yaml",
     "tropical_read_restart_fortran.yml",
     "tropicalcyclone_c128.yaml",
+    "baroclinic_c384_cpu.yaml",
+    "baroclinic_c384_gpu.yaml",
+    "baroclinic_c3072_cpu.yaml",
+    "baroclinic_c3072_gpu.yaml",
+    "test_external_C12_1x1.yaml",
+    "test_external_C12_2x2.yaml",
 ]
 
 JENKINS_CONFIGS_DIR = os.path.join(dirname, "../../../.jenkins/driver_configs/")

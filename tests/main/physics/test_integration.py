@@ -64,6 +64,7 @@ def setup_physics():
     metric_terms = pace.util.grid.MetricTerms(
         quantity_factory=quantity_factory,
         communicator=communicator,
+        eta_file="tests/main/input/eta79.nc",
     )
     grid_data = pace.util.grid.GridData.new_from_metric_terms(metric_terms)
     physics = pace.physics.Physics(
@@ -71,10 +72,9 @@ def setup_physics():
         quantity_factory,
         grid_data,
         physics_config,
-        active_packages=["microphysics"],
     )
     physics_state = pace.physics.PhysicsState.init_zeros(
-        quantity_factory, active_packages=["microphysics"]
+        quantity_factory, schemes=[pace.physics.PHYSICS_PACKAGES["GFS_microphysics"]]
     )
     random = np.random.RandomState(0)
     for field in fields(pace.physics.PhysicsState):

@@ -9,6 +9,7 @@ from gt4py.cartesian.gtscript import (
     region,
 )
 
+from pace.dsl.dace.orchestration import orchestrate
 from pace.dsl.stencil import StencilFactory
 from pace.dsl.typing import FloatField, FloatFieldIJ, Index3D
 from pace.fv3core.stencils import ppm
@@ -295,7 +296,7 @@ def compute_y_flux(
 
 class YPiecewiseParabolic:
     """
-    Fortran name is xppm
+    Fortran name is yppm
     """
 
     def __init__(
@@ -307,10 +308,15 @@ class YPiecewiseParabolic:
         origin: Index3D,
         domain: Index3D,
     ):
+        orchestrate(obj=self, config=stencil_factory.config.dace_config)
         # Arguments come from:
         # namelist.grid_type
         # grid.dya
-        assert (grid_type < 3) or (grid_type == 4)
+        if grid_type == 3 or grid_type > 4:
+            raise NotImplementedError(
+                "Y Piecewise Parabolic (xppm): "
+                f" grid type {grid_type} not implemented. <3 or 4 available."
+            )
         self._dya = dya
         ax_offsets = stencil_factory.grid_indexing.axis_offsets(origin, domain)
         self._compute_flux_stencil = stencil_factory.from_origin_domain(
