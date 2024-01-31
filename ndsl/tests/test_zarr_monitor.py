@@ -14,8 +14,8 @@ import pytest
 
 import ndsl.util
 from ndsl.util import X_DIMS, Y_DIMS
-from ndsl.util._optional_imports import xarray as xr
 from ndsl.util.monitor.zarr_monitor import array_chunks, get_calendar
+from ndsl.util.optional_imports import xarray as xr
 from ndsl.util.testing import DummyComm
 
 

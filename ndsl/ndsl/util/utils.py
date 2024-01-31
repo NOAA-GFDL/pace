@@ -4,7 +4,7 @@ from typing import Iterable, Sequence, Tuple, TypeVar, Union
 import numpy as np
 
 from . import constants
-from ._optional_imports import cupy as cp
+from .optional_imports import cupy as cp
 from .types import Allocator
 
 

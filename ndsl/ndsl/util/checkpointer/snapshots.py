@@ -2,8 +2,8 @@ import collections
 
 import numpy as np
 
-from ndsl.util._optional_imports import cupy as cp
-from ndsl.util._optional_imports import xarray as xr
+from ndsl.util.optional_imports import cupy as cp
+from ndsl.util.optional_imports import xarray as xr
 
 from .base import Checkpointer
 

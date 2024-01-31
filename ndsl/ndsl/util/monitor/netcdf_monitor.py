@@ -5,8 +5,8 @@ from typing import Any, Dict, List, Optional, Set
 import fsspec
 import numpy as np
 
-from ndsl.util._optional_imports import xarray as xr
 from ndsl.util.comm.communicator import Communicator
+from ndsl.util.optional_imports import xarray as xr
 
 from ..filesystem import get_fs
 from ..logging import ndsl_log

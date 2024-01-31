@@ -16,7 +16,7 @@ from ndsl.performance.report import (
     write_to_timestamped_json,
 )
 from ndsl.performance.timer import NullTimer, Timer
-from ndsl.util._optional_imports import cupy as cp
+from ndsl.util.optional_imports import cupy as cp
 from ndsl.util.utils import GPU_AVAILABLE
 
 from .report import collect_data_and_write_to_file

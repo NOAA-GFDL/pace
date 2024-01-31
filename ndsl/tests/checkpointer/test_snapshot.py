@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 import ndsl.util
-from ndsl.util._optional_imports import xarray as xr
+from ndsl.util.optional_imports import xarray as xr
 
 
 requires_xarray = pytest.mark.skipif(xr is None, reason="xarray is not installed")

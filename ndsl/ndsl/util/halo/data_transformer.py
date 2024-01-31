@@ -6,7 +6,6 @@ from uuid import UUID, uuid1
 
 import numpy as np
 
-from ndsl.util._optional_imports import cupy as cp
 from ndsl.util.buffer import Buffer
 from ndsl.util.halo.cuda_kernels import (
     pack_scalar_f32_kernel,
@@ -19,6 +18,7 @@ from ndsl.util.halo.cuda_kernels import (
     unpack_vector_f64_kernel,
 )
 from ndsl.util.halo.rotate import rotate_scalar_data, rotate_vector_data
+from ndsl.util.optional_imports import cupy as cp
 from ndsl.util.quantity import Quantity, QuantityHaloSpec
 from ndsl.util.types import NumpyModule
 from ndsl.util.utils import device_synchronize

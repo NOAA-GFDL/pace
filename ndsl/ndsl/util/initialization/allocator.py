@@ -2,8 +2,8 @@ from typing import Callable, Optional, Sequence
 
 import numpy as np
 
-from .._optional_imports import gt4py
 from ..constants import SPATIAL_DIMS
+from ..optional_imports import gt4py
 from ..quantity import Quantity, QuantityHaloSpec
 from .sizer import GridSizer
 

@@ -3,10 +3,10 @@ import os
 from typing import BinaryIO, Generator, Iterable
 
 from ndsl.util import constants, filesystem, io
-from ndsl.util._optional_imports import xarray as xr
 from ndsl.util._properties import RESTART_PROPERTIES, RestartProperties
 from ndsl.util.comm.communicator import Communicator
 from ndsl.util.comm.partitioner import get_tile_index
+from ndsl.util.optional_imports import xarray as xr
 from ndsl.util.quantity import Quantity
 
 

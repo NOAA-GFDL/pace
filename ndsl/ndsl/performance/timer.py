@@ -2,7 +2,7 @@ import warnings
 from timeit import default_timer as time
 from typing import Mapping
 
-from ndsl.util._optional_imports import cupy as cp
+from ndsl.util.optional_imports import cupy as cp
 from ndsl.util.utils import GPU_AVAILABLE
 
 

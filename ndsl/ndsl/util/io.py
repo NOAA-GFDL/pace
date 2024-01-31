@@ -3,7 +3,7 @@ from typing import TextIO
 import cftime
 
 from ndsl.util import filesystem
-from ndsl.util._optional_imports import xarray as xr
+from ndsl.util.optional_imports import xarray as xr
 from ndsl.util.quantity import Quantity
 from ndsl.util.time import FMS_TO_CFTIME_TYPE
 

@@ -16,8 +16,8 @@ from ndsl.dsl.dace.dace_config import DaceConfig, DaCeOrchestration
 from ndsl.dsl.gt4py_utils import is_gpu_backend
 from ndsl.dsl.typing import floating_point_precision
 from ndsl.performance.collector import PerformanceCollector
-from ndsl.util._optional_imports import cupy as cp
 from ndsl.util.logging import ndsl_log
+from ndsl.util.optional_imports import cupy as cp
 from pace import fv3core
 
 

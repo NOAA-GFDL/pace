@@ -8,6 +8,8 @@ DEFAULT_INT = 0
 DEFAULT_STR = ""
 DEFAULT_FLOAT = 0.0
 DEFAULT_BOOL = False
+
+
 # Global set of namelist defaults, attached to class for namespacing and static typing
 class NamelistDefaults:
     layout = (1, 1)
@@ -135,9 +137,9 @@ class Namelist:
     # chksum_debug: bool
     """
     note: dycore_only may not be used in this model
-     the same way it is in the Fortran version, watch for
-     consequences of these inconsistencies, or more closely
-     parallel the Fortran structure
+        the same way it is in the Fortran version, watch for
+        consequences of these inconsistencies, or more closely
+        parallel the Fortran structure
     """
     dycore_only: bool = DEFAULT_BOOL
     # fdiag: float
