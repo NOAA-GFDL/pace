@@ -3,15 +3,19 @@ from typing import List, Mapping, Optional, Sequence, Tuple, Union, cast
 
 import numpy as np
 
-from . import constants
-from ._timing import NullTimer, Timer
-from .boundary import Boundary
-from .buffer import array_buffer, recv_buffer, send_buffer
-from .halo_updater import HaloUpdater, HaloUpdateRequest, VectorInterfaceHaloUpdater
-from .partitioner import CubedSpherePartitioner, Partitioner, TilePartitioner
-from .quantity import Quantity, QuantityHaloSpec, QuantityMetadata
-from .types import NumpyModule
-from .utils import device_synchronize
+from ndsl.util import constants
+from ndsl.util._timing import NullTimer, Timer
+from ndsl.util.boundary import Boundary
+from ndsl.util.buffer import array_buffer, recv_buffer, send_buffer
+from ndsl.util.halo.updater import (
+    HaloUpdater,
+    HaloUpdateRequest,
+    VectorInterfaceHaloUpdater,
+)
+from ndsl.util.partitioner import CubedSpherePartitioner, Partitioner, TilePartitioner
+from ndsl.util.quantity import Quantity, QuantityHaloSpec, QuantityMetadata
+from ndsl.util.types import NumpyModule
+from ndsl.util.utils import device_synchronize
 
 
 try:

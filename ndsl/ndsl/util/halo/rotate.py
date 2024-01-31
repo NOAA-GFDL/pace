@@ -1,4 +1,4 @@
-from . import constants
+from ndsl.util import constants
 
 
 def rotate_scalar_data(data, dims, numpy, n_clockwise_rotations):

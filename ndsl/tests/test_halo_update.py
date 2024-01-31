@@ -5,6 +5,7 @@ import pytest
 
 import ndsl.util
 from ndsl.util.buffer import BUFFER_CACHE
+from ndsl.util.halo.updater import HaloUpdater
 
 
 @pytest.fixture
@@ -864,7 +865,7 @@ def test_halo_updater_stability(
             quantity.np,
             quantity.metadata.dtype,
         )
-        halo_updater = ndsl.util.HaloUpdater.from_scalar_specifications(
+        halo_updater = HaloUpdater.from_scalar_specifications(
             comm=communicator,
             numpy_like_module=quantity.np,
             specifications=[specification],

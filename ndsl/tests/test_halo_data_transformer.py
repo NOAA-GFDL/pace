@@ -23,9 +23,9 @@ from ndsl.util import (
     _boundary_utils,
 )
 from ndsl.util.buffer import Buffer
-from ndsl.util.halo_data_transformer import HaloDataTransformer, HaloExchangeSpec
+from ndsl.util.halo.data_transformer import HaloDataTransformer, HaloExchangeSpec
+from ndsl.util.halo.rotate import rotate_scalar_data, rotate_vector_data
 from ndsl.util.quantity import QuantityHaloSpec
-from ndsl.util.rotate import rotate_scalar_data, rotate_vector_data
 
 
 @pytest.fixture

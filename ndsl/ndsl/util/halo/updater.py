@@ -3,19 +3,19 @@ from typing import TYPE_CHECKING, Dict, Iterable, List, Mapping, Optional, Tuple
 
 import numpy as np
 
-from . import constants
-from ._timing import NullTimer, Timer
-from .boundary import Boundary
-from .buffer import Buffer
-from .halo_data_transformer import HaloDataTransformer, HaloExchangeSpec
-from .quantity import Quantity, QuantityHaloSpec
-from .rotate import rotate_scalar_data
-from .types import AsyncRequest, NumpyModule
-from .utils import device_synchronize
+from ndsl.util import constants
+from ndsl.util._timing import NullTimer, Timer
+from ndsl.util.boundary import Boundary
+from ndsl.util.buffer import Buffer
+from ndsl.util.halo.data_transformer import HaloDataTransformer, HaloExchangeSpec
+from ndsl.util.quantity import Quantity, QuantityHaloSpec
+from ndsl.util.halo.rotate import rotate_scalar_data
+from ndsl.util.types import AsyncRequest, NumpyModule
+from ndsl.util.utils import device_synchronize
 
 
 if TYPE_CHECKING:
-    from .communicator import Communicator
+    from ndsl.util.communicator import Communicator
 
 _HaloSendTuple = Tuple[AsyncRequest, Buffer]
 _HaloRecvTuple = Tuple[AsyncRequest, Buffer, np.ndarray]

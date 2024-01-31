@@ -18,7 +18,7 @@ from ndsl.util.grid import (
     MetricTerms,
     VerticalGridData,
 )
-from ndsl.util.halo_data_transformer import QuantityHaloSpec
+from ndsl.util.halo.data_transformer import QuantityHaloSpec
 
 
 TRACER_DIM = "tracers"

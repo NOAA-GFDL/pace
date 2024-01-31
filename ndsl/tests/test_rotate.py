@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-import ndsl.util.rotate
+import ndsl.util.halo.rotate
 
 
 @pytest.fixture
@@ -112,7 +112,7 @@ def start_data(request, numpy):
 def test_rotate_scalar_data(
     start_data, n_clockwise_rotations, dims, numpy, target_data
 ):
-    result = ndsl.util.rotate.rotate_scalar_data(
+    result = ndsl.util.halo.rotate.rotate_scalar_data(
         start_data, dims, numpy, n_clockwise_rotations
     )
     numpy.testing.assert_array_equal(result, target_data)
@@ -171,7 +171,7 @@ def test_rotate_vector_data(
 ):
     x_data, y_data = start_data
     x_target, y_target = target_data
-    x_result, y_result = ndsl.util.rotate.rotate_vector_data(
+    x_result, y_result = ndsl.util.halo.rotate.rotate_vector_data(
         x_data, y_data, n_clockwise_rotations, dims, numpy
     )
     numpy.testing.assert_array_equal(x_result, x_target)

@@ -1,5 +1,5 @@
 # flake8: noqa
-from ._optional_imports import cupy as cp
+from ndsl.util._optional_imports import cupy as cp
 
 
 def pack_scalar_code(float_dtype: str):
