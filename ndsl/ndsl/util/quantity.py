@@ -7,8 +7,8 @@ import numpy as np
 from ndsl.util import constants
 from ndsl.util._optional_imports import xarray as xr
 
-from ._boundary_utils import bound_default_slice, shift_boundary_slice_tuple
 from ._optional_imports import cupy, dace, gt4py
+from .comm._boundary_utils import bound_default_slice, shift_boundary_slice_tuple
 from .types import NumpyModule
 
 

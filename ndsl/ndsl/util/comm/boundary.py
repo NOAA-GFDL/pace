@@ -2,7 +2,7 @@ import dataclasses
 from typing import Tuple
 
 from ._boundary_utils import get_boundary_slice
-from .quantity import Quantity, QuantityHaloSpec
+from ..quantity import Quantity, QuantityHaloSpec
 
 
 @dataclasses.dataclass

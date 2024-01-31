@@ -20,9 +20,9 @@ from ndsl.util import (
     Z_DIM,
     Z_INTERFACE_DIM,
     Quantity,
-    _boundary_utils,
 )
 from ndsl.util.buffer import Buffer
+from ndsl.util.comm import _boundary_utils
 from ndsl.util.halo.data_transformer import HaloDataTransformer, HaloExchangeSpec
 from ndsl.util.halo.rotate import rotate_scalar_data, rotate_vector_data
 from ndsl.util.quantity import QuantityHaloSpec

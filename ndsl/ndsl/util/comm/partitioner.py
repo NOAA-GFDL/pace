@@ -5,8 +5,8 @@ from typing import Callable, List, Optional, Sequence, Tuple, TypeVar, Union, ca
 
 import numpy as np
 
-from ndsl.util import boundary as bd
 from ndsl.util import constants, utils
+from ndsl.util.comm import boundary as bd
 from ndsl.util.constants import (
     EAST,
     NORTH,

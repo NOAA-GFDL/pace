@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 import ndsl.util
-from ndsl.util._boundary_utils import _shift_boundary_slice, get_boundary_slice
+from ndsl.util.comm._boundary_utils import _shift_boundary_slice, get_boundary_slice
 
 
 def boundary_data(quantity, boundary_type, n_points, interior=True):
