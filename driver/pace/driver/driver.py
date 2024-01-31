@@ -35,8 +35,8 @@ from . import diagnostics
 from .comm import CreatesCommSelector
 from .grid import GeneratedGridConfig, GridInitializerSelector
 from .initialization import InitializerSelector
-from .performance import PerformanceConfig
-from .performance.collector import PerformanceCollector
+from ndsl.performance import PerformanceConfig
+from ndsl.performance.collector import PerformanceCollector
 from .state import DriverState
 
 

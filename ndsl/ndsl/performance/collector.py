@@ -9,7 +9,7 @@ import numpy as np
 import ndsl.util
 from ndsl.util._optional_imports import cupy as cp
 from ndsl.util.utils import GPU_AVAILABLE
-from pace.driver.performance.report import (
+from ndsl.performance.report import (
     Report,
     TimeReport,
     collect_keys_from_data,
