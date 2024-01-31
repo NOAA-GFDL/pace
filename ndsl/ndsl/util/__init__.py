@@ -1,5 +1,4 @@
 from . import testing
-from ._corners import fill_scalar_corners
 from ._exceptions import InvalidQuantityError, OutOfBoundsError
 from ._legacy_restart import open_restart
 from ._profiler import NullProfiler, Profiler
