@@ -15,7 +15,7 @@ from ndsl.util.utils import device_synchronize
 
 
 if TYPE_CHECKING:
-    from ndsl.util.communicator import Communicator
+    from ndsl.util.comm.communicator import Communicator
 
 _HaloSendTuple = Tuple[AsyncRequest, Buffer]
 _HaloRecvTuple = Tuple[AsyncRequest, Buffer, np.ndarray]

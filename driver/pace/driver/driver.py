@@ -19,7 +19,7 @@ from ndsl.dsl.dace.dace_config import DaceConfig
 from ndsl.dsl.dace.orchestration import dace_inhibitor, orchestrate
 from ndsl.dsl.stencil_config import CompilationConfig, RunMode
 from ndsl.dsl.typing import Float
-from ndsl.util.communicator import (
+from ndsl.util.comm.communicator import (
     Communicator,
     CubedSphereCommunicator,
     TileCommunicator,

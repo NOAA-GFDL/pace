@@ -5,9 +5,9 @@ from typing import Callable, List, Optional, Sequence, Tuple, TypeVar, Union, ca
 
 import numpy as np
 
-from . import boundary as bd
-from . import constants, utils
-from .constants import (
+from ndsl.util import boundary as bd
+from ndsl.util import constants, utils
+from ndsl.util.constants import (
     EAST,
     NORTH,
     NORTHEAST,
@@ -17,7 +17,7 @@ from .constants import (
     SOUTHWEST,
     WEST,
 )
-from .quantity import Quantity, QuantityMetadata
+from ndsl.util.quantity import Quantity, QuantityMetadata
 
 
 # we're caching slice objects which are pretty small, and the number we

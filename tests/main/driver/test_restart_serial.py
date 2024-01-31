@@ -8,7 +8,7 @@ import yaml
 
 import ndsl.dsl
 import pace.driver
-from ndsl.util.null_comm import NullComm
+from ndsl.util.comm.null_comm import NullComm
 from pace.driver import CreatesComm, DriverConfig
 from pace.driver.driver import RestartConfig
 from pace.driver.initialization import AnalyticInit

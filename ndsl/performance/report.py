@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Mapping
 
 import numpy as np
 
-from ndsl.util.comm import Comm
+from ndsl.util.comm.comm_abc import Comm
 
 
 @dataclasses.dataclass

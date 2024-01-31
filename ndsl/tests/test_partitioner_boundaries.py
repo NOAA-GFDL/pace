@@ -1,7 +1,7 @@
 import pytest
 
 import ndsl.util
-import ndsl.util.partitioner
+import ndsl.util.comm.partitioner
 
 
 # the test examples for the 2x2 cube here were recorded by manually inspecting
@@ -120,7 +120,7 @@ def test_1_by_1_left_edge(
 )
 @pytest.mark.cpu_only
 def test_rotate_subtile_rank(rank, layout, n_clockwise_rotations, new_rank):
-    result = ndsl.util.partitioner.rotate_subtile_rank(
+    result = ndsl.util.comm.partitioner.rotate_subtile_rank(
         rank, layout, n_clockwise_rotations
     )
     assert result == new_rank

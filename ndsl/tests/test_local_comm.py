@@ -1,7 +1,7 @@
 import numpy
 import pytest
 
-from ndsl.util import LocalComm
+from ndsl.util.comm.local_comm import LocalComm
 
 
 @pytest.fixture

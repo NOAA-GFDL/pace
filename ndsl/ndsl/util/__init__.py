@@ -7,7 +7,6 @@ from ._profiler import NullProfiler, Profiler
 from ._timing import NullTimer, Timer
 from ._xarray import to_dataset
 from .buffer import Buffer, array_buffer, recv_buffer, send_buffer
-from .caching_comm import CachingCommData, CachingCommReader, CachingCommWriter
 from .checkpointer import (
     Checkpointer,
     NullCheckpointer,
@@ -17,8 +16,19 @@ from .checkpointer import (
     ThresholdCalibrationCheckpointer,
     ValidationCheckpointer,
 )
-from .comm import Comm, Request
-from .communicator import Communicator, CubedSphereCommunicator, TileCommunicator
+from .comm.caching_comm import CachingCommData, CachingCommReader, CachingCommWriter
+from .comm.comm_abc import Comm, Request
+from .comm.communicator import Communicator, CubedSphereCommunicator, TileCommunicator
+from .comm.local_comm import LocalComm
+from .comm.mpi import MPIComm
+from .comm.null_comm import NullComm
+from .comm.partitioner import (
+    CubedSpherePartitioner,
+    Partitioner,
+    TilePartitioner,
+    get_tile_index,
+    get_tile_number,
+)
 from .constants import (
     BOUNDARY_TYPES,
     CORNER_BOUNDARY_TYPES,
@@ -53,20 +63,10 @@ from .halo.data_transformer import QuantityHaloSpec
 from .halo.updater import HaloUpdater, HaloUpdateRequest
 from .initialization import GridSizer, QuantityFactory, SubtileGridSizer
 from .io import read_state, write_state
-from .local_comm import LocalComm
 from .logging import AVAILABLE_LOG_LEVELS, pace_log
 from .monitor import Monitor, NetCDFMonitor, ZarrMonitor
-from .mpi import MPIComm
 from .namelist import Namelist, NamelistDefaults
 from .nudging import apply_nudging, get_nudging_tendencies
-from .null_comm import NullComm
-from .partitioner import (
-    CubedSpherePartitioner,
-    Partitioner,
-    TilePartitioner,
-    get_tile_index,
-    get_tile_number,
-)
 from .quantity import Quantity, QuantityMetadata
 from .time import FMS_TO_CFTIME_TYPE, datetime64_to_datetime
 from .units import UnitsError, ensure_equal_units, units_are_equal

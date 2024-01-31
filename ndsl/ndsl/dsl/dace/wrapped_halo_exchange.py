@@ -2,7 +2,7 @@ import dataclasses
 from typing import List, Optional
 
 from ndsl.dsl.dace.orchestration import dace_inhibitor
-from ndsl.util.communicator import Communicator
+from ndsl.util.comm.communicator import Communicator
 from ndsl.util.halo.updater import HaloUpdater
 
 

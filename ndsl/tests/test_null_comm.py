@@ -1,5 +1,5 @@
 import ndsl.util
-from ndsl.util.null_comm import NullComm
+from ndsl.util.comm.null_comm import NullComm
 
 
 def test_can_create_cube_communicator():

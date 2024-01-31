@@ -5,8 +5,8 @@ from util.ndsl.util.grid.helper import GridData
 
 import ndsl.util
 import pace.fv3core
+from ndsl.util.comm.mpi import MPIComm
 from ndsl.util.grid import MetricTerms
-from ndsl.util.mpi import MPIComm
 from ndsl.util.quantity import Quantity
 from pace.fv3core.initialization.test_cases.initialize_baroclinic import (
     init_baroclinic_state,

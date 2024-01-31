@@ -27,8 +27,11 @@ from ndsl.dsl.dace.orchestration import SDFGConvertible
 from ndsl.dsl.stencil_config import CompilationConfig, RunMode, StencilConfig
 from ndsl.dsl.typing import Float, Index3D, cast_to_index3d
 from ndsl.util import testing
-from ndsl.util.decomposition import block_waiting_for_compilation, unblock_waiting_tiles
-from ndsl.util.mpi import MPI
+from ndsl.util.comm.decomposition import (
+    block_waiting_for_compilation,
+    unblock_waiting_tiles,
+)
+from ndsl.util.comm.mpi import MPI
 
 
 try:

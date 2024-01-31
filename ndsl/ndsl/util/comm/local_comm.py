@@ -1,9 +1,9 @@
 import copy
 from typing import Any
 
-from .comm import Comm
-from .logging import pace_log
-from .utils import ensure_contiguous, safe_assign_array
+from ndsl.util.comm.comm_abc import Comm
+from ndsl.util.logging import pace_log
+from ndsl.util.utils import ensure_contiguous, safe_assign_array
 
 
 class ConcurrencyError(Exception):

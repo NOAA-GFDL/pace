@@ -2,7 +2,7 @@ import f90nml
 import numpy as np
 import pytest  # noqa
 
-from ndsl.util.null_comm import NullComm
+from ndsl.util.comm.null_comm import NullComm
 from pace import fv3core
 
 

@@ -10,7 +10,7 @@ from ndsl.dsl.caches.cache_location import identify_code_path
 from ndsl.dsl.caches.codepath import FV3CodePath
 from ndsl.dsl.gt4py_utils import is_gpu_backend
 from ndsl.util._optional_imports import cupy as cp
-from ndsl.util.communicator import Communicator, Partitioner
+from ndsl.util.comm.communicator import Communicator, Partitioner
 
 
 # This can be turned on to revert compilation for orchestration
