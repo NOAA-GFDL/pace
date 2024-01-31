@@ -39,7 +39,7 @@ COPY . /pace
 # See https://github.com/ai2cm/pace/issues/419 for more details.
 RUN cd /pace && \
     pip3 install -r /pace/requirements_dev.txt -c /pace/constraints.txt && \
-    pip install ./driver ./dsl ./fv3core ./physics ./stencils ./util -c /pace/constraints.txt
+    pip install ./driver ./ndsl ./fv3core ./physics -c /pace/constraints.txt
 
 RUN cd / && \
     git clone https://github.com/ai2cm/fv3net
