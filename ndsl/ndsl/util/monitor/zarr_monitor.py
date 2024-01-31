@@ -3,9 +3,10 @@ from typing import List, Tuple, Union
 
 import cftime
 
-from ndsl.util import _xarray as xr
 from ndsl.util import constants, utils
-from ndsl.util._optional_imports import cupy, zarr
+from ndsl.util._optional_imports import cupy
+from ndsl.util._optional_imports import xarray as xr
+from ndsl.util._optional_imports import zarr
 from ndsl.util.comm.partitioner import Partitioner, subtile_slice
 from ndsl.util.logging import pace_log
 from ndsl.util.monitor.convert import to_numpy

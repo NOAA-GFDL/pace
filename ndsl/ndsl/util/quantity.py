@@ -4,7 +4,9 @@ from typing import Any, Dict, Iterable, Optional, Sequence, Tuple, Union, cast
 
 import numpy as np
 
-from . import _xarray, constants
+from ndsl.util import constants
+from ndsl.util._optional_imports import xarray as xr
+
 from ._boundary_utils import bound_default_slice, shift_boundary_slice_tuple
 from ._optional_imports import cupy, dace, gt4py
 from .types import NumpyModule
@@ -377,7 +379,7 @@ class Quantity:
     @classmethod
     def from_data_array(
         cls,
-        data_array: _xarray.DataArray,
+        data_array: xr.DataArray,
         origin: Sequence[int] = None,
         extent: Sequence[int] = None,
         gt4py_backend: Union[str, None] = None,
@@ -502,8 +504,8 @@ class Quantity:
         return self.metadata.extent
 
     @property
-    def data_array(self) -> _xarray.DataArray:
-        return _xarray.DataArray(self.view[:], dims=self.dims, attrs=self.attrs)
+    def data_array(self) -> xr.DataArray:
+        return xr.DataArray(self.view[:], dims=self.dims, attrs=self.attrs)
 
     @property
     def np(self) -> NumpyModule:
