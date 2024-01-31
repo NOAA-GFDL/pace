@@ -4,7 +4,6 @@ import xarray as xr
 import yaml
 
 import pace.driver
-import pace.dsl
 from pace.driver.run import main
 
 

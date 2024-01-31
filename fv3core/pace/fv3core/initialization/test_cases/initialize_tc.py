@@ -1,14 +1,13 @@
 import numpy as np
 
+import ndsl.util as fv3util
+import ndsl.util.constants as constants
 import pace.fv3core.initialization.init_utils as init_utils
-import pace.util as fv3util
-import pace.util.constants as constants
+from ndsl.util.grid import GridData, great_circle_distance_lon_lat
 from pace.fv3core.dycore_state import DycoreState
-from pace.util.grid import GridData, great_circle_distance_lon_lat
 
 
 def _calculate_distance_from_tc_center(pe_v, ps_v, muv, calc, tc_properties):
-
     d1 = np.sin(calc["p0"][1]) * np.cos(muv["midpoint"][:, :, 1]) - np.cos(
         calc["p0"][1]
     ) * np.sin(muv["midpoint"][:, :, 1]) * np.cos(
@@ -37,7 +36,6 @@ def _calculate_distance_from_tc_center(pe_v, ps_v, muv, calc, tc_properties):
 
 
 def _calculate_pt_height(height, qvapor, r, tc_properties, calc):
-
     aa = height / tc_properties["zp"]
     bb = np.exp(aa ** tc_properties["exppz"])
     cc = r / tc_properties["rp"]
@@ -54,7 +52,6 @@ def _calculate_pt_height(height, qvapor, r, tc_properties, calc):
 
 
 def _calculate_utmp(height, dist, calc, tc_properties):
-
     aa = height / tc_properties["zp"]  # (134, 135, 79)
     bb = dist["r"] / tc_properties["rp"]  # (134, 135)
     cc = aa ** tc_properties["exppz"]  # (134, 135, 79)
@@ -322,7 +319,6 @@ def _initialize_vortex_ps_phis(grid_data, shape, tc_properties, calc):
 
 
 def _initialize_qvapor_temperature(grid_data, pe, ps, tc_properties, calc, shape):
-
     qvapor = np.zeros(shape)
     pt = np.zeros(shape)
     height = np.zeros(shape)
@@ -407,7 +403,6 @@ def _initialize_wind_dgrid(
 
 
 def _interpolate_winds_dgrid_agrid(grid_data, ud, vd, tc_properties, shape):
-
     ua = np.zeros(shape)
     va = np.zeros(shape)
     if tc_properties["vort"] is True:
@@ -468,7 +463,6 @@ def _some_inital_calculations(tc_properties):
 
 
 def _initialize_delz_w(pe, ps, pt, qvapor, tc_properties, calc, shape):
-
     delz = np.zeros(shape)
     w = np.zeros(shape)
     delz[:, :, :-1] = (

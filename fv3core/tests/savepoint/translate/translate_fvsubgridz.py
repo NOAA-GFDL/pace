@@ -1,11 +1,11 @@
 from types import SimpleNamespace
 
-import pace.dsl
-import pace.dsl.gt4py_utils as utils
+import ndsl.dsl
+import ndsl.dsl.gt4py_utils as utils
+import ndsl.util
+import ndsl.util as fv3util
 import pace.fv3core.stencils.fv_subgridz as fv_subgridz
-import pace.util
-import pace.util as fv3util
-from pace.stencils.testing import ParallelTranslateBaseSlicing
+from ndsl.stencils.testing import ParallelTranslateBaseSlicing
 
 
 # NOTE, does no halo updates, does not need to be a Parallel test,
@@ -126,8 +126,8 @@ class TranslateFVSubgridZ(ParallelTranslateBaseSlicing):
     def __init__(
         self,
         grid,
-        namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        namelist: ndsl.util.Namelist,
+        stencil_factory: ndsl.dsl.StencilFactory,
         *args,
         **kwargs,
     ):

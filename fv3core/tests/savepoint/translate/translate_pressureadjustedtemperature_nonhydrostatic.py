@@ -1,6 +1,8 @@
-import pace.dsl
+from typing import Any, Dict
+
+import ndsl.dsl
+import ndsl.util
 import pace.fv3core
-import pace.util
 from pace.fv3core.stencils import temperature_adjust
 from pace.fv3core.stencils.dyn_core import get_nk_heat_dissipation
 from pace.fv3core.testing import TranslateDycoreFortranData2Py
@@ -12,8 +14,8 @@ class TranslatePressureAdjustedTemperature_NonHydrostatic(
     def __init__(
         self,
         grid,
-        namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        namelist: ndsl.util.Namelist,
+        stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
         dycore_config = pace.fv3core.DynamicalCoreConfig.from_namelist(namelist)
@@ -37,7 +39,7 @@ class TranslatePressureAdjustedTemperature_NonHydrostatic(
             "heat_source": {"serialname": "heat_source_dyn"},
         }
         self.in_vars["parameters"] = ["bdt"]
-        self.out_vars = {"pt": {}}
+        self.out_vars: Dict[str, Dict[Any, Any]] = {"pt": {}}
         self.stencil_factory = stencil_factory
 
     def compute_from_storage(self, inputs):

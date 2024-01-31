@@ -1,15 +1,15 @@
 import numpy as np
 import pytest
 
-import pace.util
-from pace.util.grid import MetricTerms
+import ndsl.util
+from ndsl.util.grid import MetricTerms
 
 
 def get_cube_comm(layout, rank: int):
-    return pace.util.CubedSphereCommunicator(
-        comm=pace.util.NullComm(rank=rank, total_ranks=6 * layout[0] * layout[1]),
-        partitioner=pace.util.CubedSpherePartitioner(
-            pace.util.TilePartitioner(layout=layout)
+    return ndsl.util.CubedSphereCommunicator(
+        comm=ndsl.util.NullComm(rank=rank, total_ranks=6 * layout[0] * layout[1]),
+        partitioner=ndsl.util.CubedSpherePartitioner(
+            ndsl.util.TilePartitioner(layout=layout)
         ),
     )
 
@@ -17,8 +17,8 @@ def get_cube_comm(layout, rank: int):
 def get_quantity_factory(layout, nx_tile, ny_tile, nz):
     nx = nx_tile // layout[0]
     ny = ny_tile // layout[1]
-    return pace.util.QuantityFactory(
-        sizer=pace.util.SubtileGridSizer(
+    return ndsl.util.QuantityFactory(
+        sizer=ndsl.util.SubtileGridSizer(
             nx=nx, ny=ny, nz=nz, n_halo=3, extra_dim_lengths={}
         ),
         numpy=np,
@@ -48,7 +48,7 @@ def test_grid_init_not_decomposition_dependent(rank: int):
         communicator=get_cube_comm(rank=rank, layout=(3, 3)),
         eta_file=eta_file,
     )
-    partitioner = pace.util.TilePartitioner(layout=(3, 3))
+    partitioner = ndsl.util.TilePartitioner(layout=(3, 3))
     assert allclose(metric_terms_1by1.grid, metric_terms_3by3.grid, partitioner, rank)
     assert allclose(metric_terms_1by1.agrid, metric_terms_3by3.agrid, partitioner, rank)
     assert allclose(metric_terms_1by1.area, metric_terms_3by3.area, partitioner, rank)
@@ -84,9 +84,9 @@ def test_grid_init_not_decomposition_dependent(rank: int):
 
 
 def allclose(
-    q_1by1: pace.util.Quantity,
-    q_3by3: pace.util.Quantity,
-    partitioner: pace.util.TilePartitioner,
+    q_1by1: ndsl.util.Quantity,
+    q_3by3: ndsl.util.Quantity,
+    partitioner: ndsl.util.TilePartitioner,
     rank: int,
 ):
     subtile_slice = partitioner.subtile_slice(

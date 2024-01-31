@@ -27,10 +27,6 @@ repos:
         fv3core/tests/conftest.py
         )$
     - id: mypy
-      name: mypy-util
-      args: [--config-file, setup.cfg]
-      files: ^util
-    - id: mypy
       name: mypy-stencils
       args: [--config-file, setup.cfg]
       files: stencils
@@ -53,10 +49,10 @@ repos:
     - id: mypy
       name: mypy-dsl
       args: [--config-file, setup.cfg]
-      files: dsl
+      files: ndsl
       exclude: |
         (?x)^(
-        dsl/pace/dsl/gt4py_utils.py |
+        ndsl/ndsl/gt4py_utils.py |
         )$
 -   repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v2.3.0

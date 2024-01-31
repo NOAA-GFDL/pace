@@ -2,8 +2,8 @@ from typing import ClassVar, Dict, Optional
 
 import numpy as np
 
+from ndsl.util.quantity import Quantity
 from pace.fv3core.dycore_state import DycoreState
-from pace.util.quantity import Quantity
 
 
 class VariableBounds:
@@ -79,7 +79,6 @@ class SafetyChecker:
             except AttributeError:
                 raise NotImplementedError("Variable is not in the state")
             if variable_bounds.compute_domain_only:
-
                 min_value = var.view[:].min()
                 max_value = var.view[:].max()
             else:

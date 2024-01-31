@@ -12,14 +12,15 @@ from gt4py.cartesian.gtscript import (
     sin,
 )
 
-import pace.util.constants as constants
-from pace.dsl.dace.orchestration import orchestrate
-from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import Float, FloatField, FloatFieldK
-from pace.util import X_INTERFACE_DIM, Y_INTERFACE_DIM, Z_DIM
+import ndsl.util.constants as constants
+from ndsl.dsl.dace.orchestration import orchestrate
+from ndsl.dsl.stencil import StencilFactory
+from ndsl.dsl.typing import Float, FloatField, FloatFieldK
+from ndsl.util import X_INTERFACE_DIM, Y_INTERFACE_DIM, Z_DIM
 
 
 SDAY = 86400.0
+
 
 # NOTE: The fortran version of this computes rf in the first timestep only. Then
 # rf_initialized let's you know you can skip it. Here we calculate it every
@@ -191,7 +192,6 @@ class RayleighDamping:
         dt: Float,
         ptop: Float,
     ):
-
         rf_cutoff_nudge = self._rf_cutoff + min(100.0, 10.0 * ptop)
 
         self._ray_fast_wind_compute(

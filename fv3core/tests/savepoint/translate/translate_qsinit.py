@@ -1,9 +1,9 @@
 import numpy as np
 
-import pace.dsl
-import pace.dsl.gt4py_utils as utils
+import ndsl.dsl
+import ndsl.dsl.gt4py_utils as utils
+import ndsl.util
 import pace.fv3core.stencils.saturation_adjustment as satadjust
-import pace.util
 from pace.fv3core.testing import TranslateDycoreFortranData2Py
 
 
@@ -11,8 +11,8 @@ class TranslateQSInit(TranslateDycoreFortranData2Py):
     def __init__(
         self,
         grid,
-        namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        namelist: ndsl.util.Namelist,
+        stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
         self.in_vars["data_vars"] = {

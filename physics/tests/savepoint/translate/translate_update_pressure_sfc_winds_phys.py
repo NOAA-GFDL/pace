@@ -1,6 +1,7 @@
-from pace.stencils.fv_update_phys import update_pressure_and_surface_winds
-from pace.stencils.testing.translate_physics import TranslatePhysicsFortranData2Py
-from pace.util.constants import KAPPA
+from translate_physics import TranslatePhysicsFortranData2Py
+
+from ndsl.util.constants import KAPPA
+from pace.physics.update.fv_update_phys import update_pressure_and_surface_winds
 
 
 class TranslatePhysUpdatePressureSurfaceWinds(TranslatePhysicsFortranData2Py):

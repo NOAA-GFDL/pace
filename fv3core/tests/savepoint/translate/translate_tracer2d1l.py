@@ -1,13 +1,13 @@
 import pytest
 
-import pace.dsl
-import pace.dsl.gt4py_utils as utils
+import ndsl.dsl
+import ndsl.dsl.gt4py_utils as utils
+import ndsl.util
+import ndsl.util as fv3util
 import pace.fv3core.stencils.fvtp2d
 import pace.fv3core.stencils.tracer_2d_1l
-import pace.util
-import pace.util as fv3util
+from ndsl.stencils.testing import ParallelTranslate
 from pace.fv3core.utils.functional_validation import get_subset_func
-from pace.stencils.testing import ParallelTranslate
 
 
 class TranslateTracer2D1L(ParallelTranslate):
@@ -21,8 +21,8 @@ class TranslateTracer2D1L(ParallelTranslate):
     def __init__(
         self,
         grid,
-        namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        namelist: ndsl.util.Namelist,
+        stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
         self._base.in_vars["data_vars"] = {
@@ -48,7 +48,6 @@ class TranslateTracer2D1L(ParallelTranslate):
         return input_data
 
     def compute_parallel(self, inputs, communicator):
-
         self._base.make_storage_data_input_vars(inputs)
         all_tracers = inputs["tracers"]
         inputs["tracers"] = self.get_advected_tracer_dict(

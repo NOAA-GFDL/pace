@@ -8,16 +8,16 @@ import f90nml
 import xarray as xr
 import yaml
 
-import pace.dsl
-import pace.util
+import ndsl.dsl
+import ndsl.util
+from ndsl.stencils.testing import TranslateGrid, dataset_to_dict
+from ndsl.stencils.testing.grid import Grid
+from ndsl.util.checkpointer.thresholds import SavepointThresholds
+from ndsl.util.grid import DampingCoefficients, GridData
+from ndsl.util.testing import perturb
 from pace import fv3core
 from pace.fv3core.initialization.dycore_state import DycoreState
 from pace.fv3core.testing.translate_fvdynamics import TranslateFVDynamics
-from pace.stencils.testing import TranslateGrid, dataset_to_dict
-from pace.stencils.testing.grid import Grid
-from pace.util.checkpointer.thresholds import SavepointThresholds
-from pace.util.grid import DampingCoefficients, GridData
-from pace.util.testing import perturb
 
 
 def get_grid(data_path: str, rank: int, layout: Tuple[int, int], backend: str) -> Grid:
@@ -52,26 +52,26 @@ def test_fv_dynamics(
     backend: str, data_path: str, calibrate_thresholds: bool, threshold_path: str
 ):
     print("start test call")
-    namelist = pace.util.Namelist.from_f90nml(
+    namelist = ndsl.util.Namelist.from_f90nml(
         f90nml.read(os.path.join(data_path, "input.nml"))
     )
     threshold_filename = os.path.join(threshold_path, "fv_dynamics.yaml")
-    communicator = pace.util.CubedSphereCommunicator(
-        comm=pace.util.MPIComm(),
-        partitioner=pace.util.CubedSpherePartitioner(
-            tile=pace.util.TilePartitioner(layout=namelist.layout)
+    communicator = ndsl.util.CubedSphereCommunicator(
+        comm=ndsl.util.MPIComm(),
+        partitioner=ndsl.util.CubedSpherePartitioner(
+            tile=ndsl.util.TilePartitioner(layout=namelist.layout)
         ),
     )
-    stencil_factory = pace.dsl.StencilFactory(
-        config=pace.dsl.StencilConfig(
-            compilation_config=pace.dsl.CompilationConfig(
+    stencil_factory = ndsl.dsl.StencilFactory(
+        config=ndsl.dsl.StencilConfig(
+            compilation_config=ndsl.dsl.CompilationConfig(
                 backend=backend,
                 communicator=communicator,
                 rebuild=False,
             )
         ),
-        grid_indexing=pace.dsl.GridIndexing.from_sizer_and_communicator(
-            sizer=pace.util.SubtileGridSizer.from_tile_params(
+        grid_indexing=ndsl.dsl.GridIndexing.from_sizer_and_communicator(
+            sizer=ndsl.util.SubtileGridSizer.from_tile_params(
                 nx_tile=namelist.npx - 1,
                 ny_tile=namelist.npy - 1,
                 nz=namelist.npz,
@@ -120,11 +120,11 @@ def test_fv_dynamics(
     with open(threshold_filename, "r") as f:
         data = yaml.safe_load(f)
         thresholds = dacite.from_dict(
-            data_class=pace.util.SavepointThresholds,
+            data_class=ndsl.util.SavepointThresholds,
             data=data,
             config=dacite.Config(strict=True),
         )
-    validation = pace.util.ValidationCheckpointer(
+    validation = ndsl.util.ValidationCheckpointer(
         savepoint_data_path=data_path, thresholds=thresholds, rank=communicator.rank
     )
     state, grid_data = initializer.new_state()
@@ -146,15 +146,15 @@ def test_fv_dynamics(
 
 def _calibrate_thresholds(
     initializer: StateInitializer,
-    communicator: pace.util.CubedSphereCommunicator,
-    stencil_factory: pace.dsl.StencilFactory,
-    quantity_factory: pace.util.QuantityFactory,
+    communicator: ndsl.util.CubedSphereCommunicator,
+    stencil_factory: ndsl.dsl.StencilFactory,
+    quantity_factory: ndsl.util.QuantityFactory,
     damping_coefficients: DampingCoefficients,
     dycore_config: fv3core.DynamicalCoreConfig,
     n_trials: int,
     factor: float,
 ):
-    calibration = pace.util.ThresholdCalibrationCheckpointer(factor=factor)
+    calibration = ndsl.util.ThresholdCalibrationCheckpointer(factor=factor)
     for i in range(n_trials):
         print(f"running calibration trial {i}")
         trial_state, grid_data = initializer.new_state()
@@ -185,10 +185,10 @@ def set_manual_thresholds(thresholds: SavepointThresholds):
     # all thresholds on the input data are 0 because no computation has happened yet
     for entry in thresholds.savepoints["FVDynamics-In"]:
         for name in entry:
-            entry[name] = pace.util.Threshold(relative=0.0, absolute=0.0)
+            entry[name] = ndsl.util.Threshold(relative=0.0, absolute=0.0)
 
 
-def merge_thresholds(all_thresholds: List[pace.util.SavepointThresholds]):
+def merge_thresholds(all_thresholds: List[ndsl.util.SavepointThresholds]):
     thresholds = all_thresholds[0]
     for other_thresholds in all_thresholds[1:]:
         for savepoint_name in thresholds.savepoints:
@@ -210,5 +210,5 @@ def dycore_state_to_dict(state: DycoreState):
     return {
         name: getattr(state, name).data
         for name in dir(state)
-        if isinstance(getattr(state, name), pace.util.Quantity)
+        if isinstance(getattr(state, name), ndsl.util.Quantity)
     }

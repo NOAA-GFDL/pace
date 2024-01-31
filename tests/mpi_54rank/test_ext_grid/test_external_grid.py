@@ -6,10 +6,10 @@ import pytest
 import xarray as xr
 import yaml
 
-import pace.util
+import ndsl.util
+from ndsl.util.constants import PI, RADIUS
+from ndsl.util.mpi import MPIComm
 from pace.driver import Driver, DriverConfig
-from pace.util.constants import PI, RADIUS
-from pace.util.mpi import MPIComm
 
 
 DIR = os.path.dirname(os.path.abspath(__file__))
@@ -25,16 +25,16 @@ TILE_FILE_BASE_NAME = "C12.tile"
 
 
 def get_cube_comm(layout, comm: MPIComm):
-    return pace.util.CubedSphereCommunicator(
+    return ndsl.util.CubedSphereCommunicator(
         comm=comm,
-        partitioner=pace.util.CubedSpherePartitioner(
-            pace.util.TilePartitioner(layout=layout)
+        partitioner=ndsl.util.CubedSpherePartitioner(
+            ndsl.util.TilePartitioner(layout=layout)
         ),
     )
 
 
 def get_tile_num(comm: MPIComm):
-    return pace.util.get_tile_number(comm.rank, comm.partitioner.total_ranks)
+    return ndsl.util.get_tile_number(comm.rank, comm.partitioner.total_ranks)
 
 
 # TODO: Location of test configurations and data will be changed
@@ -101,28 +101,28 @@ def test_extgrid_equals_generated(config_file_path: str, ranks: int):
 
     subtile_slice_grid = cube_comm.partitioner.tile.subtile_slice(
         rank=cube_comm.rank,
-        global_dims=[pace.util.Y_INTERFACE_DIM, pace.util.X_INTERFACE_DIM],
+        global_dims=[ndsl.util.Y_INTERFACE_DIM, ndsl.util.X_INTERFACE_DIM],
         global_extent=(npy, npx),
         overlap=True,
     )
 
     subtile_slice_dx = cube_comm.partitioner.tile.subtile_slice(
         rank=cube_comm.rank,
-        global_dims=[pace.util.Y_INTERFACE_DIM, pace.util.X_DIM],
+        global_dims=[ndsl.util.Y_INTERFACE_DIM, ndsl.util.X_DIM],
         global_extent=(npy, nx),
         overlap=True,
     )
 
     subtile_slice_dy = cube_comm.partitioner.tile.subtile_slice(
         rank=cube_comm.rank,
-        global_dims=[pace.util.Y_DIM, pace.util.X_INTERFACE_DIM],
+        global_dims=[ndsl.util.Y_DIM, ndsl.util.X_INTERFACE_DIM],
         global_extent=(ny, npx),
         overlap=True,
     )
 
     subtile_slice_area = cube_comm.partitioner.tile.subtile_slice(
         rank=cube_comm.rank,
-        global_dims=[pace.util.Y_DIM, pace.util.X_DIM],
+        global_dims=[ndsl.util.Y_DIM, ndsl.util.X_DIM],
         global_extent=(ny, nx),
         overlap=True,
     )

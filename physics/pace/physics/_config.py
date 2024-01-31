@@ -4,7 +4,7 @@ from typing import List, Optional, Tuple
 
 import f90nml
 
-from pace.util import MetaEnumStr, Namelist, NamelistDefaults
+from ndsl.util import MetaEnumStr, Namelist, NamelistDefaults
 
 
 DEFAULT_INT = 0

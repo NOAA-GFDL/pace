@@ -3,17 +3,17 @@ from typing import Any, Dict
 import numpy as np
 import pytest
 
-import pace.dsl
-import pace.dsl.gt4py_utils as utils
+import ndsl.dsl
+import ndsl.dsl.gt4py_utils as utils
+import ndsl.util
+import ndsl.util as fv3util
 import pace.fv3core.initialization.analytic_init as analytic_init
 import pace.fv3core.initialization.init_utils as init_utils
 import pace.fv3core.initialization.test_cases.initialize_baroclinic as baroclinic_init
-import pace.util
-import pace.util as fv3util
+from ndsl.stencils.testing import ParallelTranslateBaseSlicing
+from ndsl.stencils.testing.grid import TRACER_DIM  # type: ignore
+from ndsl.util.grid import GridData, MetricTerms
 from pace.fv3core.testing import TranslateDycoreFortranData2Py
-from pace.stencils.testing import ParallelTranslateBaseSlicing
-from pace.stencils.testing.grid import TRACER_DIM  # type: ignore
-from pace.util.grid import GridData, MetricTerms
 
 
 class TranslateInitCase(ParallelTranslateBaseSlicing):
@@ -112,8 +112,8 @@ class TranslateInitCase(ParallelTranslateBaseSlicing):
     def __init__(
         self,
         grid_list,
-        namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        namelist: ndsl.util.Namelist,
+        stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(grid_list, namelist, stencil_factory)
         grid = grid_list[0]
@@ -184,7 +184,7 @@ class TranslateInitCase(ParallelTranslateBaseSlicing):
         state = {}
         full_shape = (
             *self.grid.domain_shape_full(add=(1, 1, 1)),
-            pace.util.constants.NQ,
+            ndsl.util.constants.NQ,
         )
         for variable, properties in self.outputs.items():
             dims = properties["dims"]
@@ -205,18 +205,18 @@ class TranslateInitCase(ParallelTranslateBaseSlicing):
             backend=self.stencil_factory.backend,
         )
 
-        sizer = pace.util.SubtileGridSizer.from_tile_params(
+        sizer = ndsl.util.SubtileGridSizer.from_tile_params(
             nx_tile=self.namelist.nx_tile,
             ny_tile=self.namelist.nx_tile,
             nz=self.namelist.nz,
-            n_halo=pace.util.N_HALO_DEFAULT,
+            n_halo=ndsl.util.N_HALO_DEFAULT,
             extra_dim_lengths={},
             layout=self.namelist.layout,
             tile_partitioner=communicator.partitioner.tile,
             tile_rank=communicator.tile.rank,
         )
 
-        quantity_factory = pace.util.QuantityFactory.from_backend(
+        quantity_factory = ndsl.util.QuantityFactory.from_backend(
             sizer, backend=self.stencil_factory.backend
         )
 
@@ -257,8 +257,8 @@ class TranslateInitPreJab(TranslateDycoreFortranData2Py):
     def __init__(
         self,
         grid,
-        namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        namelist: ndsl.util.Namelist,
+        stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
         self.in_vars["data_vars"] = {"ak": {}, "bk": {}, "delp": {}}
@@ -316,8 +316,8 @@ class TranslateJablonowskiBaroclinic(TranslateDycoreFortranData2Py):
     def __init__(
         self,
         grid,
-        namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        namelist: ndsl.util.Namelist,
+        stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
         self.in_vars["data_vars"] = {
@@ -398,8 +398,8 @@ class TranslatePVarAuxiliaryPressureVars(TranslateDycoreFortranData2Py):
     def __init__(
         self,
         grid,
-        namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        namelist: ndsl.util.Namelist,
+        stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
         self.in_vars["data_vars"] = {

@@ -4,13 +4,18 @@ from typing import Mapping, Optional
 from dace.frontend.python.interface import nounroll as dace_no_unroll
 from gt4py.cartesian.gtscript import PARALLEL, computation, interval
 
-import pace.dsl.gt4py_utils as utils
+import ndsl.dsl.gt4py_utils as utils
+import ndsl.util
 import pace.fv3core.stencils.moist_cv as moist_cv
-import pace.util
-from pace.dsl.dace.orchestration import dace_inhibitor, orchestrate
-from pace.dsl.dace.wrapped_halo_exchange import WrappedHaloUpdater
-from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import Float, FloatField
+from ndsl.dsl.dace.orchestration import dace_inhibitor, orchestrate
+from ndsl.dsl.dace.wrapped_halo_exchange import WrappedHaloUpdater
+from ndsl.dsl.stencil import StencilFactory
+from ndsl.dsl.typing import Float, FloatField
+from ndsl.stencils.c2l_ord import CubedToLatLon
+from ndsl.util import X_DIM, Y_DIM, Z_INTERFACE_DIM, Timer, constants
+from ndsl.util.grid import DampingCoefficients, GridData
+from ndsl.util.logging import pace_log
+from ndsl.util.mpi import MPI
 from pace.fv3core._config import DynamicalCoreConfig
 from pace.fv3core.dycore_state import DycoreState
 from pace.fv3core.stencils import fvtp2d, tracer_2d_1l
@@ -19,11 +24,6 @@ from pace.fv3core.stencils.del2cubed import HyperdiffusionDamping
 from pace.fv3core.stencils.dyn_core import AcousticDynamics
 from pace.fv3core.stencils.neg_adj3 import AdjustNegativeTracerMixingRatio
 from pace.fv3core.stencils.remapping import LagrangianToEulerian
-from pace.stencils.c2l_ord import CubedToLatLon
-from pace.util import X_DIM, Y_DIM, Z_INTERFACE_DIM, Timer, constants
-from pace.util.grid import DampingCoefficients, GridData
-from pace.util.logging import pace_log
-from pace.util.mpi import MPI
 
 
 def pt_to_potential_density_pt(
@@ -55,19 +55,19 @@ def omega_from_w(delp: FloatField, delz: FloatField, w: FloatField, omega: Float
 
 
 def fvdyn_temporaries(
-    quantity_factory: pace.util.QuantityFactory,
-) -> Mapping[str, pace.util.Quantity]:
+    quantity_factory: ndsl.util.QuantityFactory,
+) -> Mapping[str, ndsl.util.Quantity]:
     tmps = {}
     for name in ["te_2d", "te0_2d", "wsd"]:
         quantity = quantity_factory.zeros(
-            dims=[pace.util.X_DIM, pace.util.Y_DIM],
+            dims=[ndsl.util.X_DIM, ndsl.util.Y_DIM],
             units="unknown",
             dtype=Float,
         )
         tmps[name] = quantity
     for name in ["dp1", "cvm"]:
         quantity = quantity_factory.zeros(
-            dims=[pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM],
+            dims=[ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
             units="unknown",
             dtype=Float,
         )
@@ -89,16 +89,16 @@ class DynamicalCore:
 
     def __init__(
         self,
-        comm: pace.util.Communicator,
+        comm: ndsl.util.Communicator,
         grid_data: GridData,
         stencil_factory: StencilFactory,
-        quantity_factory: pace.util.QuantityFactory,
+        quantity_factory: ndsl.util.QuantityFactory,
         damping_coefficients: DampingCoefficients,
         config: DynamicalCoreConfig,
-        phis: pace.util.Quantity,
+        phis: ndsl.util.Quantity,
         state: DycoreState,
         timestep: timedelta,
-        checkpointer: Optional[pace.util.Checkpointer] = None,
+        checkpointer: Optional[ndsl.util.Checkpointer] = None,
     ):
         """
         Args:
@@ -180,7 +180,7 @@ class DynamicalCore:
         # have not implemented, so they are hard-coded here.
         self.call_checkpointer = checkpointer is not None
         if checkpointer is None:
-            self.checkpointer: pace.util.Checkpointer = pace.util.NullCheckpointer()
+            self.checkpointer: ndsl.util.Checkpointer = ndsl.util.NullCheckpointer()
         else:
             self.checkpointer = checkpointer
         nested = False
@@ -318,7 +318,7 @@ class DynamicalCore:
         )
 
         full_xyz_spec = quantity_factory.get_quantity_halo_spec(
-            dims=[pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM],
+            dims=[ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
             n_halo=grid_indexing.n_halo,
             dtype=Float,
         )
@@ -441,7 +441,7 @@ class DynamicalCore:
     def step_dynamics(
         self,
         state: DycoreState,
-        timer: Timer = pace.util.NullTimer(),
+        timer: Timer = ndsl.util.NullTimer(),
     ):
         """
         Step the model state forward by one timestep.
@@ -506,7 +506,7 @@ class DynamicalCore:
     def __call__(self, *args, **kwargs):
         return self.step_dynamics(*args, **kwargs)
 
-    def _compute(self, state: DycoreState, timer: pace.util.Timer):
+    def _compute(self, state: DycoreState, timer: ndsl.util.Timer):
         last_step = False
         self.compute_preamble(
             state,

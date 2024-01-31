@@ -2,7 +2,7 @@ from typing import Optional
 
 import click
 
-from pace.dsl.dace.utils import (
+from ndsl.dsl.dace.utils import (
     kernel_theoretical_timing_from_path,
     memory_static_analysis_from_path,
 )

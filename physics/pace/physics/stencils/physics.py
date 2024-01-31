@@ -9,19 +9,18 @@ from gt4py.cartesian.gtscript import (
     log,
 )
 
-import pace.util
-import pace.util.constants as constants
-from pace.dsl.dace.orchestration import orchestrate
-from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import Float, FloatField
+import ndsl.util
+import ndsl.util.constants as constants
+from ndsl.dsl.dace.orchestration import orchestrate
+from ndsl.dsl.stencil import StencilFactory
+from ndsl.dsl.typing import Float, FloatField
+from ndsl.util import X_DIM, Y_DIM, Z_DIM
+from ndsl.util.grid import GridData
+from pace.physics import PHYSICS_PACKAGES, PhysicsConfig
 from pace.physics.physics_state import PhysicsState
 from pace.physics.stencils.get_phi_fv3 import get_phi_fv3
 from pace.physics.stencils.get_prs_fv3 import get_prs_fv3
 from pace.physics.stencils.microphysics import Microphysics
-from pace.util import X_DIM, Y_DIM, Z_DIM
-from pace.util.grid import GridData
-
-from .._config import PHYSICS_PACKAGES, PhysicsConfig
 
 
 def atmos_phys_driver_statein(
@@ -199,13 +198,13 @@ class Physics:
     def __init__(
         self,
         stencil_factory: StencilFactory,
-        quantity_factory: pace.util.QuantityFactory,
+        quantity_factory: ndsl.util.QuantityFactory,
         grid_data: GridData,
         namelist: PhysicsConfig,
     ):
         schemes = [scheme.value for scheme in namelist.schemes]
         for scheme in schemes:
-            if scheme not in PHYSICS_PACKAGES:
+            if scheme not in PHYSICS_PACKAGES:  # type: ignore
                 raise NotImplementedError(
                     f"{scheme} is not an implemented physics parameterization"
                 )
@@ -275,7 +274,6 @@ class Physics:
         self._p00 = 1.0e5
 
     def __call__(self, physics_state: PhysicsState, timestep: float):
-
         self._atmos_phys_driver_statein(
             self._prsik,
             physics_state.phii,

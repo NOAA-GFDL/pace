@@ -1,19 +1,17 @@
-import pace.dsl
-import pace.util
-import pace.util as fv3util
-from pace.dsl import gt4py_utils as utils
-from pace.stencils.testing import ParallelTranslate
-from pace.util.logging import pace_log
+import ndsl.dsl
+import ndsl.util
+import ndsl.util as fv3util
+from ndsl.stencils.testing import ParallelTranslate
+from ndsl.util.logging import pace_log
 
 
 class TranslateHaloUpdate(ParallelTranslate):
-
     inputs = {
         "array": {
             "name": "air_temperature",
             "dims": [fv3util.X_DIM, fv3util.Y_DIM, fv3util.Z_DIM],
             "units": "degK",
-            "n_halo": utils.halo,
+            "n_halo": ndsl.util.N_HALO_DEFAULT,
         }
     }
 
@@ -22,7 +20,7 @@ class TranslateHaloUpdate(ParallelTranslate):
             "name": "air_temperature",
             "dims": [fv3util.X_DIM, fv3util.Y_DIM, fv3util.Z_DIM],
             "units": "degK",
-            "n_halo": utils.halo,
+            "n_halo": ndsl.util.N_HALO_DEFAULT,
         }
     }
     halo_update_varname = "air_temperature"
@@ -30,15 +28,15 @@ class TranslateHaloUpdate(ParallelTranslate):
     def __init__(
         self,
         grid,
-        namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        namelist: ndsl.util.Namelist,
+        stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
 
     def compute_parallel(self, inputs, communicator):
         state = self.state_from_inputs(inputs)
         req = communicator.start_halo_update(
-            state[self.halo_update_varname], n_points=utils.halo
+            state[self.halo_update_varname], n_points=fv3util.N_HALO_DEFAULT
         )
         req.wait()
         return self.outputs_from_state(state)
@@ -50,7 +48,7 @@ class TranslateHaloUpdate(ParallelTranslate):
             pace_log.debug(f"starting on {communicator.rank}")
             req_list.append(
                 communicator.start_halo_update(
-                    state[self.halo_update_varname], n_points=utils.halo
+                    state[self.halo_update_varname], n_points=fv3util.N_HALO_DEFAULT
                 )
             )
         for communicator, req in zip(communicator_list, req_list):
@@ -60,13 +58,12 @@ class TranslateHaloUpdate(ParallelTranslate):
 
 
 class TranslateHaloUpdate_2(TranslateHaloUpdate):
-
     inputs = {
         "array2": {
             "name": "height_on_interface_levels",
             "dims": [fv3util.X_DIM, fv3util.Y_DIM, fv3util.Z_INTERFACE_DIM],
             "units": "m",
-            "n_halo": utils.halo,
+            "n_halo": fv3util.N_HALO_DEFAULT,
         }
     }
 
@@ -75,7 +72,7 @@ class TranslateHaloUpdate_2(TranslateHaloUpdate):
             "name": "height_on_interface_levels",
             "dims": [fv3util.X_DIM, fv3util.Y_DIM, fv3util.Z_INTERFACE_DIM],
             "units": "m",
-            "n_halo": utils.halo,
+            "n_halo": fv3util.N_HALO_DEFAULT,
         }
     }
 
@@ -83,13 +80,12 @@ class TranslateHaloUpdate_2(TranslateHaloUpdate):
 
 
 class TranslateMPPUpdateDomains(TranslateHaloUpdate):
-
     inputs = {
         "update_arr": {
             "name": "z_wind_as_tendency_of_pressure",
             "dims": [fv3util.X_DIM, fv3util.Y_DIM, fv3util.Z_DIM],
             "units": "Pa/s",
-            "n_halo": utils.halo,
+            "n_halo": fv3util.N_HALO_DEFAULT,
         }
     }
 
@@ -98,7 +94,7 @@ class TranslateMPPUpdateDomains(TranslateHaloUpdate):
             "name": "z_wind_as_tendency_of_pressure",
             "dims": [fv3util.X_DIM, fv3util.Y_DIM, fv3util.Z_DIM],
             "units": "Pa/s",
-            "n_halo": utils.halo,
+            "n_halo": fv3util.N_HALO_DEFAULT,
         }
     }
 
@@ -106,19 +102,18 @@ class TranslateMPPUpdateDomains(TranslateHaloUpdate):
 
 
 class TranslateHaloVectorUpdate(ParallelTranslate):
-
     inputs = {
         "array_u": {
             "name": "x_wind_on_c_grid",
             "dims": [fv3util.X_INTERFACE_DIM, fv3util.Y_DIM, fv3util.Z_DIM],
             "units": "m/s",
-            "n_halo": utils.halo,
+            "n_halo": fv3util.N_HALO_DEFAULT,
         },
         "array_v": {
             "name": "y_wind_on_c_grid",
             "dims": [fv3util.X_DIM, fv3util.Y_INTERFACE_DIM, fv3util.Z_DIM],
             "units": "m/s",
-            "n_halo": utils.halo,
+            "n_halo": fv3util.N_HALO_DEFAULT,
         },
     }
 
@@ -127,21 +122,21 @@ class TranslateHaloVectorUpdate(ParallelTranslate):
             "name": "x_wind_on_c_grid",
             "dims": [fv3util.X_INTERFACE_DIM, fv3util.Y_DIM, fv3util.Z_DIM],
             "units": "m/s",
-            "n_halo": utils.halo,
+            "n_halo": fv3util.N_HALO_DEFAULT,
         },
         "array_v": {
             "name": "y_wind_on_c_grid",
             "dims": [fv3util.X_DIM, fv3util.Y_INTERFACE_DIM, fv3util.Z_DIM],
             "units": "m/s",
-            "n_halo": utils.halo,
+            "n_halo": fv3util.N_HALO_DEFAULT,
         },
     }
 
     def __init__(
         self,
         grid,
-        namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        namelist: ndsl.util.Namelist,
+        stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super(TranslateHaloVectorUpdate, self).__init__(grid, namelist, stencil_factory)
 
@@ -149,7 +144,9 @@ class TranslateHaloVectorUpdate(ParallelTranslate):
         pace_log.debug(f"starting on {communicator.rank}")
         state = self.state_from_inputs(inputs)
         req = communicator.start_vector_halo_update(
-            state["x_wind_on_c_grid"], state["y_wind_on_c_grid"], n_points=utils.halo
+            state["x_wind_on_c_grid"],
+            state["y_wind_on_c_grid"],
+            n_points=fv3util.N_HALO_DEFAULT,
         )
 
         pace_log.debug(f"finishing on {communicator.rank}")
@@ -165,7 +162,7 @@ class TranslateHaloVectorUpdate(ParallelTranslate):
                 communicator.start_vector_halo_update(
                     state["x_wind_on_c_grid"],
                     state["y_wind_on_c_grid"],
-                    n_points=utils.halo,
+                    n_points=fv3util.N_HALO_DEFAULT,
                 )
             )
         for communicator, req in zip(communicator_list, req_list):
@@ -175,19 +172,18 @@ class TranslateHaloVectorUpdate(ParallelTranslate):
 
 
 class TranslateMPPBoundaryAdjust(ParallelTranslate):
-
     inputs = {
         "u": {
             "name": "x_wind_on_d_grid",
             "dims": [fv3util.X_DIM, fv3util.Y_INTERFACE_DIM, fv3util.Z_DIM],
             "units": "m/s",
-            "n_halo": utils.halo,
+            "n_halo": fv3util.N_HALO_DEFAULT,
         },
         "v": {
             "name": "y_wind_on_d_grid",
             "dims": [fv3util.X_INTERFACE_DIM, fv3util.Y_DIM, fv3util.Z_DIM],
             "units": "m/s",
-            "n_halo": utils.halo,
+            "n_halo": fv3util.N_HALO_DEFAULT,
         },
     }
 
@@ -196,21 +192,21 @@ class TranslateMPPBoundaryAdjust(ParallelTranslate):
             "name": "x_wind_on_d_grid",
             "dims": [fv3util.X_DIM, fv3util.Y_INTERFACE_DIM, fv3util.Z_DIM],
             "units": "m/s",
-            "n_halo": utils.halo,
+            "n_halo": fv3util.N_HALO_DEFAULT,
         },
         "v": {
             "name": "y_wind_on_d_grid",
             "dims": [fv3util.X_INTERFACE_DIM, fv3util.Y_DIM, fv3util.Z_DIM],
             "units": "m/s",
-            "n_halo": utils.halo,
+            "n_halo": fv3util.N_HALO_DEFAULT,
         },
     }
 
     def __init__(
         self,
         grid,
-        namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        namelist: ndsl.util.Namelist,
+        stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super(TranslateMPPBoundaryAdjust, self).__init__(
             grid, namelist, stencil_factory

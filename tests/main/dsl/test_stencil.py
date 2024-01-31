@@ -1,14 +1,14 @@
 from gt4py.cartesian.gtscript import PARALLEL, Field, computation, interval
 from gt4py.storage import empty, ones
 
-import pace.dsl
-from pace.dsl.stencil import CompilationConfig, GridIndexing
+import ndsl.dsl
+from ndsl.dsl.stencil import CompilationConfig, GridIndexing
 
 
 def _make_storage(
     func,
     grid_indexing,
-    stencil_config: pace.dsl.StencilConfig,
+    stencil_config: ndsl.dsl.StencilConfig,
     *,
     dtype=float,
     aligned_index=(0, 0, 0),
@@ -30,11 +30,11 @@ def test_timing_collector():
         west_edge=True,
         east_edge=True,
     )
-    stencil_config = pace.dsl.StencilConfig(
+    stencil_config = ndsl.dsl.StencilConfig(
         compilation_config=CompilationConfig(backend="numpy", rebuild=True)
     )
 
-    stencil_factory = pace.dsl.StencilFactory(stencil_config, grid_indexing)
+    stencil_factory = ndsl.dsl.StencilFactory(stencil_config, grid_indexing)
 
     def func(inp: Field[float], out: Field[float]):
         with computation(PARALLEL), interval(...):

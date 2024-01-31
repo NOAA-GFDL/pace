@@ -4,14 +4,13 @@ import warnings
 from datetime import datetime, timedelta
 from typing import List, Optional, Union
 
-import pace.driver
-import pace.dsl
-import pace.stencils
-import pace.util
-import pace.util.grid
-from pace.dsl.dace.orchestration import dace_inhibitor
+import ndsl.dsl
+import ndsl.stencils
+import ndsl.util
+import ndsl.util.grid
+from ndsl.dsl.dace.orchestration import dace_inhibitor
+from ndsl.util.constants import RGRAV
 from pace.fv3core.dycore_state import DycoreState
-from pace.util.constants import RGRAV
 
 from .state import DriverState
 
@@ -28,7 +27,7 @@ class Diagnostics(abc.ABC):
         ...
 
     @abc.abstractmethod
-    def store_grid(self, grid_data: pace.util.grid.GridData):
+    def store_grid(self, grid_data: ndsl.util.grid.GridData):
         ...
 
     @abc.abstractmethod
@@ -48,14 +47,14 @@ class ZSelect:
                 raise ValueError(f"Invalid state variable {name} for level select")
             assert len(getattr(state, name).dims) > 2
             if getattr(state, name).dims[2] != (
-                pace.util.Z_DIM or pace.util.Z_INTERFACE_DIM
+                ndsl.util.Z_DIM or ndsl.util.Z_INTERFACE_DIM
             ):
                 raise ValueError(
                     f"z_select only works for state variables with dimension (x, y, z). \
                         \n {name} has dimension {getattr(state, name).dims}"
                 )
             var_name = f"{name}_z{self.level}"
-            output[var_name] = pace.util.Quantity(
+            output[var_name] = ndsl.util.Quantity(
                 getattr(state, name).data[:, :, self.level],
                 dims=getattr(state, name).dims[0:2],
                 origin=getattr(state, name).origin[0:2],
@@ -100,7 +99,7 @@ class DiagnosticsConfig:
                 f"got {self.output_format}"
             )
 
-    def diagnostics_factory(self, communicator: pace.util.Communicator) -> Diagnostics:
+    def diagnostics_factory(self, communicator: ndsl.util.Communicator) -> Diagnostics:
         """
         Create a diagnostics object.
 
@@ -111,18 +110,18 @@ class DiagnosticsConfig:
         if self.path is None:
             diagnostics: Diagnostics = NullDiagnostics()
         else:
-            fs = pace.util.get_fs(self.path)
+            fs = ndsl.util.get_fs(self.path)
             if not fs.exists(self.path):
                 fs.makedirs(self.path, exist_ok=True)
             if self.output_format == "zarr":
                 store = zarr_storage.DirectoryStore(path=self.path)
-                monitor: pace.util.Monitor = pace.util.ZarrMonitor(
+                monitor: ndsl.util.Monitor = ndsl.util.ZarrMonitor(
                     store=store,
                     partitioner=communicator.partitioner,
                     mpi_comm=communicator.comm,
                 )
             elif self.output_format == "netcdf":
-                monitor = pace.util.NetCDFMonitor(
+                monitor = ndsl.util.NetCDFMonitor(
                     path=self.path,
                     communicator=communicator,
                     time_chunk_size=self.time_chunk_size,
@@ -146,7 +145,7 @@ class MonitorDiagnostics(Diagnostics):
 
     def __init__(
         self,
-        monitor: pace.util.Monitor,
+        monitor: ndsl.util.Monitor,
         names: List[str],
         derived_names: List[str],
         z_select: List[ZSelect],
@@ -198,7 +197,7 @@ class MonitorDiagnostics(Diagnostics):
             z_select_state.update(zselect.select_data(state))
         return z_select_state
 
-    def store_grid(self, grid_data: pace.util.grid.GridData):
+    def store_grid(self, grid_data: ndsl.util.grid.GridData):
         zarr_grid = {
             "lat": grid_data.lat,
             "lon": grid_data.lon,
@@ -218,7 +217,7 @@ class NullDiagnostics(Diagnostics):
     def store(self, time: Union[datetime, timedelta], state: DriverState):
         pass
 
-    def store_grid(self, grid_data: pace.util.grid.GridData):
+    def store_grid(self, grid_data: ndsl.util.grid.GridData):
         pass
 
     def cleanup(self):
@@ -226,7 +225,7 @@ class NullDiagnostics(Diagnostics):
 
 
 def _compute_column_integral(
-    name: str, q_in: pace.util.Quantity, delp: pace.util.Quantity
+    name: str, q_in: ndsl.util.Quantity, delp: ndsl.util.Quantity
 ):
     """
     Compute column integrated mixing ratio (e.g., total liquid water path)
@@ -237,12 +236,12 @@ def _compute_column_integral(
         delp: pressure thickness of atmospheric layer
     """
     assert len(q_in.dims) > 2
-    if q_in.dims[2] != pace.util.Z_DIM:
+    if q_in.dims[2] != ndsl.util.Z_DIM:
         raise NotImplementedError(
             "this function assumes the z-dimension is the third dimension"
         )
     k_slice = slice(q_in.origin[2], q_in.origin[2] + q_in.extent[2])
-    column_integral = pace.util.Quantity(
+    column_integral = ndsl.util.Quantity(
         RGRAV
         * q_in.np.sum(q_in.data[:, :, k_slice] * delp.data[:, :, k_slice], axis=2),
         dims=tuple(q_in.dims[:2]) + tuple(q_in.dims[3:]),

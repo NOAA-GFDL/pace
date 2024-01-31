@@ -3,14 +3,12 @@ from typing import Tuple
 import gt4py.cartesian.gtscript as gtscript
 from gt4py.cartesian.gtscript import BACKWARD, FORWARD, PARALLEL, computation, interval
 
-import pace.util
-import pace.util.constants as constants
-from pace.dsl.dace.orchestration import orchestrate
-from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import Float, FloatField, FloatFieldIJ, FloatFieldK
-from pace.fv3core.stencils.delnflux import DelnFluxNoSG
-from pace.fv3core.stencils.fvtp2d import FiniteVolumeTransport
-from pace.util import (
+import ndsl.util
+import ndsl.util.constants as constants
+from ndsl.dsl.dace.orchestration import orchestrate
+from ndsl.dsl.stencil import StencilFactory
+from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ, FloatFieldK
+from ndsl.util import (
     X_DIM,
     X_INTERFACE_DIM,
     Y_DIM,
@@ -18,7 +16,9 @@ from pace.util import (
     Z_DIM,
     Z_INTERFACE_DIM,
 )
-from pace.util.grid import DampingCoefficients, GridData
+from ndsl.util.grid import DampingCoefficients, GridData
+from pace.fv3core.stencils.delnflux import DelnFluxNoSG
+from pace.fv3core.stencils.fvtp2d import FiniteVolumeTransport
 
 
 DZ_MIN = constants.DZ_MIN
@@ -127,8 +127,8 @@ def apply_height_fluxes(
 
 
 def cubic_spline_interpolation_constants(
-    dp0: pace.util.Quantity, quantity_factory: pace.util.QuantityFactory
-) -> Tuple[pace.util.Quantity, pace.util.Quantity, pace.util.Quantity]:
+    dp0: ndsl.util.Quantity, quantity_factory: ndsl.util.QuantityFactory
+) -> Tuple[ndsl.util.Quantity, ndsl.util.Quantity, ndsl.util.Quantity]:
     """
     Computes constants used in cubic spline interpolation
     from cell center to interface levels.
@@ -216,7 +216,7 @@ class UpdateHeightOnDGrid:
     def __init__(
         self,
         stencil_factory: StencilFactory,
-        quantity_factory: pace.util.QuantityFactory,
+        quantity_factory: ndsl.util.QuantityFactory,
         damping_coefficients: DampingCoefficients,
         grid_data: GridData,
         grid_type: int,
@@ -265,7 +265,7 @@ class UpdateHeightOnDGrid:
             domain=grid_indexing.domain_compute(add=(0, 0, 1)),
         )
 
-    def _allocate_temporary_storages(self, quantity_factory: pace.util.QuantityFactory):
+    def _allocate_temporary_storages(self, quantity_factory: ndsl.util.QuantityFactory):
         self._crx_interface = quantity_factory.zeros(
             [X_INTERFACE_DIM, Y_DIM, Z_INTERFACE_DIM],
             "",

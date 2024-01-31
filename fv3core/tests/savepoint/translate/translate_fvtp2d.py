@@ -1,7 +1,7 @@
-import pace.dsl
-import pace.dsl.gt4py_utils as utils
-import pace.util
-from pace.dsl.typing import Float
+import ndsl.dsl
+import ndsl.dsl.gt4py_utils as utils
+import ndsl.util
+from ndsl.dsl.typing import Float
 from pace.fv3core.stencils.fvtp2d import FiniteVolumeTransport
 from pace.fv3core.testing import TranslateDycoreFortranData2Py
 
@@ -10,8 +10,8 @@ class TranslateFvTp2d(TranslateDycoreFortranData2Py):
     def __init__(
         self,
         grid,
-        namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        namelist: ndsl.util.Namelist,
+        stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
         self.in_vars["data_vars"] = {
@@ -52,11 +52,11 @@ class TranslateFvTp2d(TranslateDycoreFortranData2Py):
             backend=self.stencil_factory.backend,
         )
         nord_col = self.grid.quantity_factory.zeros(
-            dims=[pace.util.Z_DIM], units="unknown", dtype=Float
+            dims=[ndsl.util.Z_DIM], units="unknown", dtype=Float
         )
         nord_col.data[:] = nord_col.np.asarray(inputs.pop("nord"))
         damp_c = self.grid.quantity_factory.zeros(
-            dims=[pace.util.Z_DIM], units="unknown", dtype=Float
+            dims=[ndsl.util.Z_DIM], units="unknown", dtype=Float
         )
         damp_c.data[:] = damp_c.np.asarray(inputs.pop("damp_c"))
         for optional_arg in ["mass"]:
@@ -80,8 +80,8 @@ class TranslateFvTp2d_2(TranslateFvTp2d):
     def __init__(
         self,
         grid,
-        namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        namelist: ndsl.util.Namelist,
+        stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
         del self.in_vars["data_vars"]["mass"]

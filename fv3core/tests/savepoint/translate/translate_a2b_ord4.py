@@ -1,9 +1,9 @@
 from typing import Any, Dict
 
-import pace.dsl
-import pace.util
-from pace.dsl.dace.orchestration import orchestrate
-from pace.dsl.stencil import StencilFactory
+import ndsl.dsl
+import ndsl.util
+from ndsl.dsl.dace.orchestration import orchestrate
+from ndsl.dsl.stencil import StencilFactory
 from pace.fv3core.stencils.divergence_damping import DivergenceDamping
 from pace.fv3core.testing import TranslateDycoreFortranData2Py
 
@@ -49,8 +49,8 @@ class TranslateA2B_Ord4(TranslateDycoreFortranData2Py):
     def __init__(
         self,
         grid,
-        namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        namelist: ndsl.util.Namelist,
+        stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
         assert namelist.grid_type < 3
@@ -63,7 +63,7 @@ class TranslateA2B_Ord4(TranslateDycoreFortranData2Py):
 
     def compute_from_storage(self, inputs):
         nord_col = self.grid.quantity_factory.zeros(
-            dims=[pace.util.Z_DIM], units="unknown"
+            dims=[ndsl.util.Z_DIM], units="unknown"
         )
         nord_col.data[:] = nord_col.np.asarray(inputs.pop("nord_col"))
         divdamp = DivergenceDamping(

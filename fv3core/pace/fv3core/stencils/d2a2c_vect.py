@@ -1,14 +1,14 @@
 import gt4py.cartesian.gtscript as gtscript
 from gt4py.cartesian.gtscript import PARALLEL, computation, horizontal, interval, region
 
-import pace.util
-from pace.dsl.dace.orchestration import orchestrate
-from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import Float, FloatField, FloatFieldIJ
+import ndsl.util
+from ndsl.dsl.dace.orchestration import orchestrate
+from ndsl.dsl.stencil import StencilFactory
+from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ
+from ndsl.stencils import corners
+from ndsl.util import X_DIM, Y_DIM, Z_DIM
+from ndsl.util.grid import GridData
 from pace.fv3core.stencils.a2b_ord4 import a1, a2, lagrange_x_func, lagrange_y_func
-from pace.stencils import corners
-from pace.util import X_DIM, Y_DIM, Z_DIM
-from pace.util.grid import GridData
 
 
 c1 = -2.0 / 14.0
@@ -385,7 +385,7 @@ class DGrid2AGrid2CGridVectors:
     def __init__(
         self,
         stencil_factory: StencilFactory,
-        quantity_factory: pace.util.QuantityFactory,
+        quantity_factory: ndsl.util.QuantityFactory,
         grid_data: GridData,
         nested: bool,
         grid_type: int,

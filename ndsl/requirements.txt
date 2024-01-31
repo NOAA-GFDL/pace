@@ -1,0 +1,2 @@
+-e external/gt4py
+-e external/dace

@@ -1,16 +1,16 @@
 import unittest.mock
 
-from pace.dsl.dace.dace_config import DaceConfig, _determine_compiling_ranks
-from pace.dsl.dace.orchestration import (
+from ndsl.dsl.dace.dace_config import DaceConfig, _determine_compiling_ranks
+from ndsl.dsl.dace.orchestration import (
     DaCeOrchestration,
     orchestrate,
     orchestrate_function,
 )
-from pace.util.communicator import CubedSpherePartitioner, TilePartitioner
+from ndsl.util.communicator import CubedSpherePartitioner, TilePartitioner
 
 
 """
-Tests that the dace configuration pace.dsl.dace.dace_config
+Tests that the dace configuration ndsl.dsl.dace.dace_config
 which determines whether we use dace to run wrapped functions.
 """
 
@@ -26,7 +26,7 @@ def test_orchestrate_function_calls_dace():
     )
     wrapped = orchestrate_function(config=dace_config)(foo)
     with unittest.mock.patch(
-        "pace.dsl.dace.orchestration._call_sdfg"
+        "ndsl.dsl.dace.orchestration._call_sdfg"
     ) as mock_call_sdfg:
         wrapped()
     assert mock_call_sdfg.called
@@ -44,7 +44,7 @@ def test_orchestrate_function_does_not_call_dace():
     )
     wrapped = orchestrate_function(config=dace_config)(foo)
     with unittest.mock.patch(
-        "pace.dsl.dace.orchestration._call_sdfg"
+        "ndsl.dsl.dace.orchestration._call_sdfg"
     ) as mock_call_sdfg:
         wrapped()
     assert not mock_call_sdfg.called
@@ -65,7 +65,7 @@ def test_orchestrate_calls_dace():
             pass
 
     with unittest.mock.patch(
-        "pace.dsl.dace.orchestration._call_sdfg"
+        "ndsl.dsl.dace.orchestration._call_sdfg"
     ) as mock_call_sdfg:
         a = A()
         a.foo()
@@ -87,7 +87,7 @@ def test_orchestrate_does_not_call_dace():
             pass
 
     with unittest.mock.patch(
-        "pace.dsl.dace.orchestration._call_sdfg"
+        "ndsl.dsl.dace.orchestration._call_sdfg"
     ) as mock_call_sdfg:
         a = A()
         a.foo()

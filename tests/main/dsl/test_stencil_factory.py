@@ -2,18 +2,18 @@ import numpy as np
 import pytest
 from gt4py.cartesian.gtscript import PARALLEL, computation, horizontal, interval, region
 
-import pace.util
-from pace.dsl.dace.dace_config import DaceConfig
-from pace.dsl.gt4py_utils import make_storage_from_shape
-from pace.dsl.stencil import (
+import ndsl.util
+from ndsl.dsl.dace.dace_config import DaceConfig
+from ndsl.dsl.gt4py_utils import make_storage_from_shape
+from ndsl.dsl.stencil import (
     CompareToNumpyStencil,
     FrozenStencil,
     GridIndexing,
     StencilFactory,
     get_stencils_with_varied_bounds,
 )
-from pace.dsl.stencil_config import CompilationConfig, StencilConfig
-from pace.dsl.typing import FloatField
+from ndsl.dsl.stencil_config import CompilationConfig, StencilConfig
+from ndsl.dsl.typing import FloatField
 
 
 def copy_stencil(q_in: FloatField, q_out: FloatField):
@@ -133,7 +133,7 @@ def test_stencil_factory_numpy_comparison_from_dims_halo(enabled: bool):
     factory = StencilFactory(config=config, grid_indexing=indexing)
     stencil = factory.from_dims_halo(
         func=copy_stencil,
-        compute_dims=[pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM],
+        compute_dims=[ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
         compute_halos=(),
     )
     if enabled:

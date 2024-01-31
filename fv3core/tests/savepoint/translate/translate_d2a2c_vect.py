@@ -1,5 +1,5 @@
-import pace.dsl
-import pace.util
+import ndsl.dsl
+import ndsl.util
 from pace.fv3core.stencils.d2a2c_vect import DGrid2AGrid2CGridVectors
 from pace.fv3core.testing import TranslateDycoreFortranData2Py
 
@@ -8,8 +8,8 @@ class TranslateD2A2C_Vect(TranslateDycoreFortranData2Py):
     def __init__(
         self,
         grid,
-        namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        namelist: ndsl.util.Namelist,
+        stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
         dord4 = True

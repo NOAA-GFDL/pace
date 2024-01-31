@@ -1,7 +1,7 @@
 from gt4py.cartesian import gtscript
 from gt4py.cartesian.gtscript import __INLINED, compile_assert, horizontal, region
 
-from pace.dsl.typing import Float, FloatField, FloatFieldIJ
+from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ
 from pace.fv3core.stencils import ppm, yppm
 
 

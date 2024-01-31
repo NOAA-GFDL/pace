@@ -3,12 +3,12 @@ from datetime import timedelta
 
 import numpy as np
 
-import pace.dsl
+import ndsl.dsl
+import ndsl.util
+import ndsl.util.grid
 import pace.physics
-import pace.util
-import pace.util.grid
-from pace.dsl.stencil_config import CompilationConfig
-from pace.stencils.testing import assert_same_temporaries, copy_temporaries
+from ndsl.dsl.stencil_config import CompilationConfig
+from ndsl.stencils.testing import assert_same_temporaries, copy_temporaries
 
 
 try:
@@ -23,12 +23,12 @@ def setup_physics():
     physics_config = pace.physics.PhysicsConfig(
         dt_atmos=225, hydrostatic=False, npx=13, npy=13, npz=79, nwat=6, do_qa=True
     )
-    mpi_comm = pace.util.NullComm(
+    mpi_comm = ndsl.util.NullComm(
         rank=0, total_ranks=6 * layout[0] * layout[1], fill_value=0.0
     )
-    partitioner = pace.util.CubedSpherePartitioner(pace.util.TilePartitioner(layout))
-    communicator = pace.util.CubedSphereCommunicator(mpi_comm, partitioner)
-    sizer = pace.util.SubtileGridSizer.from_tile_params(
+    partitioner = ndsl.util.CubedSpherePartitioner(ndsl.util.TilePartitioner(layout))
+    communicator = ndsl.util.CubedSphereCommunicator(mpi_comm, partitioner)
+    sizer = ndsl.util.SubtileGridSizer.from_tile_params(
         nx_tile=physics_config.npx - 1,
         ny_tile=physics_config.npy - 1,
         nz=physics_config.npz,
@@ -38,18 +38,18 @@ def setup_physics():
         tile_partitioner=partitioner.tile,
         tile_rank=communicator.tile.rank,
     )
-    grid_indexing = pace.dsl.stencil.GridIndexing.from_sizer_and_communicator(
+    grid_indexing = ndsl.dsl.stencil.GridIndexing.from_sizer_and_communicator(
         sizer=sizer, comm=communicator
     )
-    quantity_factory = pace.util.QuantityFactory.from_backend(
+    quantity_factory = ndsl.util.QuantityFactory.from_backend(
         sizer=sizer, backend=backend
     )
-    dace_config = pace.dsl.DaceConfig(
+    dace_config = ndsl.dsl.DaceConfig(
         communicator=communicator,
         backend=backend,
-        orchestration=pace.dsl.DaCeOrchestration.Python,
+        orchestration=ndsl.dsl.DaCeOrchestration.Python,
     )
-    stencil_config = pace.dsl.stencil.StencilConfig(
+    stencil_config = ndsl.dsl.stencil.StencilConfig(
         compilation_config=CompilationConfig(
             backend=backend,
             rebuild=False,
@@ -57,16 +57,16 @@ def setup_physics():
         ),
         dace_config=dace_config,
     )
-    stencil_factory = pace.dsl.stencil.StencilFactory(
+    stencil_factory = ndsl.dsl.stencil.StencilFactory(
         config=stencil_config,
         grid_indexing=grid_indexing,
     )
-    metric_terms = pace.util.grid.MetricTerms(
+    metric_terms = ndsl.util.grid.MetricTerms(
         quantity_factory=quantity_factory,
         communicator=communicator,
         eta_file="tests/main/input/eta79.nc",
     )
-    grid_data = pace.util.grid.GridData.new_from_metric_terms(metric_terms)
+    grid_data = ndsl.util.grid.GridData.new_from_metric_terms(metric_terms)
     physics = pace.physics.Physics(
         stencil_factory,
         quantity_factory,

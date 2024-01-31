@@ -1,13 +1,13 @@
 from gt4py.cartesian.gtscript import PARALLEL, computation, horizontal, interval, region
 
-import pace.stencils.corners as corners
-import pace.util
-from pace.dsl.dace.orchestration import orchestrate
-from pace.dsl.stencil import StencilFactory, get_stencils_with_varied_bounds
-from pace.dsl.typing import Float, FloatField, FloatFieldIJ, cast_to_index3d
+import ndsl.stencils.corners as corners
+import ndsl.util
+from ndsl.dsl.dace.orchestration import orchestrate
+from ndsl.dsl.stencil import StencilFactory, get_stencils_with_varied_bounds
+from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ, cast_to_index3d
+from ndsl.util import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_DIM
+from ndsl.util.grid import DampingCoefficients
 from pace.fv3core.stencils.basic_operations import copy_defn
-from pace.util import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_DIM
-from pace.util.grid import DampingCoefficients
 
 
 #
@@ -83,7 +83,7 @@ class HyperdiffusionDamping:
     def __init__(
         self,
         stencil_factory: StencilFactory,
-        quantity_factory: pace.util.QuantityFactory,
+        quantity_factory: ndsl.util.QuantityFactory,
         damping_coefficients: DampingCoefficients,
         rarea,
         nmax: int,

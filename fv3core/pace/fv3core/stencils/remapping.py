@@ -13,18 +13,12 @@ from gt4py.cartesian.gtscript import (
     region,
 )
 
+import ndsl.util
 import pace.fv3core.stencils.moist_cv as moist_cv
-import pace.util
-from pace.dsl.dace.orchestration import orchestrate
-from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import Float, FloatField, FloatFieldIJ, FloatFieldK
-from pace.fv3core._config import RemappingConfig
-from pace.fv3core.stencils.basic_operations import adjust_divide_stencil
-from pace.fv3core.stencils.map_single import MapSingle
-from pace.fv3core.stencils.mapn_tracer import MapNTracer
-from pace.fv3core.stencils.moist_cv import moist_pt_func, moist_pt_last_step
-from pace.fv3core.stencils.saturation_adjustment import SatAdjust3d
-from pace.util import (
+from ndsl.dsl.dace.orchestration import orchestrate
+from ndsl.dsl.stencil import StencilFactory
+from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ, FloatFieldK
+from ndsl.util import (
     X_DIM,
     X_INTERFACE_DIM,
     Y_DIM,
@@ -33,6 +27,12 @@ from pace.util import (
     Z_INTERFACE_DIM,
     Quantity,
 )
+from pace.fv3core._config import RemappingConfig
+from pace.fv3core.stencils.basic_operations import adjust_divide_stencil
+from pace.fv3core.stencils.map_single import MapSingle
+from pace.fv3core.stencils.mapn_tracer import MapNTracer
+from pace.fv3core.stencils.moist_cv import moist_pt_func, moist_pt_last_step
+from pace.fv3core.stencils.saturation_adjustment import SatAdjust3d
 
 
 # TODO: Should this be set here or in global_constants?
@@ -291,13 +291,13 @@ class LagrangianToEulerian:
     def __init__(
         self,
         stencil_factory: StencilFactory,
-        quantity_factory: pace.util.QuantityFactory,
+        quantity_factory: ndsl.util.QuantityFactory,
         config: RemappingConfig,
         area_64,
         nq,
         pfull,
         tracers: Dict[str, Quantity],
-        checkpointer: Optional[pace.util.Checkpointer] = None,
+        checkpointer: Optional[ndsl.util.Checkpointer] = None,
     ):
         orchestrate(
             obj=self,
@@ -709,7 +709,6 @@ class LagrangianToEulerian:
             )
 
         if last_step:
-
             # on the last step, we need the regular temperature to send
             # to the physics, but if we're staying in dynamics we need
             # to keep it as the virtual potential temperature

@@ -1,7 +1,7 @@
 import numpy as np
 
-import pace.dsl
-import pace.util
+import ndsl.dsl
+import ndsl.util
 from pace.fv3core.stencils.fxadv import FiniteVolumeFluxPrep
 from pace.fv3core.testing import TranslateDycoreFortranData2Py
 from pace.fv3core.utils.functional_validation import get_subset_func
@@ -11,8 +11,8 @@ class TranslateFxAdv(TranslateDycoreFortranData2Py):
     def __init__(
         self,
         grid,
-        namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        namelist: ndsl.util.Namelist,
+        stencil_factory: ndsl.dsl.StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
         utinfo = grid.x3d_domain_dict()
@@ -51,7 +51,7 @@ class TranslateFxAdv(TranslateDycoreFortranData2Py):
 
         self._subset = get_subset_func(
             self.grid.grid_indexing,
-            dims=[pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM],
+            dims=[ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
             n_halo=((2, 2), (2, 2)),
         )
 

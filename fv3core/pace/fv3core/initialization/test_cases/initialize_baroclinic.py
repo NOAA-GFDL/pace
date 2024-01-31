@@ -2,12 +2,12 @@ import math
 
 import numpy as np
 
-import pace.dsl.gt4py_utils as utils
+import ndsl.dsl.gt4py_utils as utils
+import ndsl.util as fv3util
+import ndsl.util.constants as constants
 import pace.fv3core.initialization.init_utils as init_utils
-import pace.util as fv3util
-import pace.util.constants as constants
+from ndsl.util.grid import GridData, great_circle_distance_lon_lat, lon_lat_midpoint
 from pace.fv3core.dycore_state import DycoreState
-from pace.util.grid import GridData, great_circle_distance_lon_lat, lon_lat_midpoint
 
 
 # maximum windspeed amplitude - close to windspeed of zonal-mean time-mean
