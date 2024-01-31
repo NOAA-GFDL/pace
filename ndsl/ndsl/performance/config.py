@@ -1,7 +1,7 @@
 import dataclasses
 
 import ndsl.util
-from ndsl.util import NullProfiler, Profiler
+from ndsl.performance.profiler import NullProfiler, Profiler
 
 from .collector import (
     AbstractPerformanceCollector,
