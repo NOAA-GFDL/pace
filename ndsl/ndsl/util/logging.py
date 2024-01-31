@@ -18,7 +18,7 @@ AVAILABLE_LOG_LEVELS = {
 }
 
 
-def _pace_logger():
+def _ndsl_logger():
     name_log = logging.getLogger(__name__)
     name_log.setLevel(LOGLEVEL)
 
@@ -36,4 +36,4 @@ def _pace_logger():
     return name_log
 
 
-ndsl_log = _pace_logger()
+ndsl_log = _ndsl_logger()

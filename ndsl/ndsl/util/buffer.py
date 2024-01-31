@@ -4,9 +4,9 @@ from typing import Callable, Dict, Generator, Iterable, List, Optional, Tuple
 import numpy as np
 from numpy.lib.index_tricks import IndexExpression
 
-from ..performance.timer import NullTimer, Timer
-from .types import Allocator
-from .utils import (
+from ndsl.performance.timer import NullTimer, Timer
+from ndsl.util.types import Allocator
+from ndsl.util.utils import (
     device_synchronize,
     is_c_contiguous,
     safe_assign_array,
