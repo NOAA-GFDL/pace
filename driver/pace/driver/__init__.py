@@ -1,3 +1,5 @@
+from ndsl.performance import PerformanceConfig
+
 from .comm import (
     CreatesComm,
     CreatesCommSelector,
@@ -10,7 +12,6 @@ from .diagnostics import Diagnostics, DiagnosticsConfig
 from .driver import Driver, DriverConfig, RestartConfig
 from .grid import GeneratedGridConfig, SerialboxGridConfig
 from .initialization import AnalyticInit, PredefinedStateInit, RestartInit
-from ndsl.performance import PerformanceConfig
 from .registry import Registry
 from .state import DriverState, TendencyState
 

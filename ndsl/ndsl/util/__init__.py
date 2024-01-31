@@ -1,5 +1,4 @@
 from . import testing
-from ._capture_stream import capture_stream
 from ._corners import fill_scalar_corners
 from ._exceptions import InvalidQuantityError, OutOfBoundsError
 from ._legacy_restart import open_restart

@@ -19,6 +19,8 @@ from ndsl.dsl.dace.dace_config import DaceConfig
 from ndsl.dsl.dace.orchestration import dace_inhibitor, orchestrate
 from ndsl.dsl.stencil_config import CompilationConfig, RunMode
 from ndsl.dsl.typing import Float
+from ndsl.performance import PerformanceConfig
+from ndsl.performance.collector import PerformanceCollector
 from ndsl.util.comm.communicator import (
     Communicator,
     CubedSphereCommunicator,
@@ -35,8 +37,6 @@ from . import diagnostics
 from .comm import CreatesCommSelector
 from .grid import GeneratedGridConfig, GridInitializerSelector
 from .initialization import InitializerSelector
-from ndsl.performance import PerformanceConfig
-from ndsl.performance.collector import PerformanceCollector
 from .state import DriverState
 
 
