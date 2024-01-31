@@ -12,7 +12,11 @@ from ndsl.util.halo.updater import (
     HaloUpdateRequest,
     VectorInterfaceHaloUpdater,
 )
-from ndsl.util.partitioner import CubedSpherePartitioner, Partitioner, TilePartitioner
+from ndsl.util.comm.partitioner import (
+    CubedSpherePartitioner,
+    Partitioner,
+    TilePartitioner,
+)
 from ndsl.util.quantity import Quantity, QuantityHaloSpec, QuantityMetadata
 from ndsl.util.types import NumpyModule
 from ndsl.util.utils import device_synchronize

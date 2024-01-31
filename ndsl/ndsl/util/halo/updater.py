@@ -8,14 +8,14 @@ from ndsl.util._timing import NullTimer, Timer
 from ndsl.util.boundary import Boundary
 from ndsl.util.buffer import Buffer
 from ndsl.util.halo.data_transformer import HaloDataTransformer, HaloExchangeSpec
-from ndsl.util.quantity import Quantity, QuantityHaloSpec
 from ndsl.util.halo.rotate import rotate_scalar_data
+from ndsl.util.quantity import Quantity, QuantityHaloSpec
 from ndsl.util.types import AsyncRequest, NumpyModule
 from ndsl.util.utils import device_synchronize
 
 
 if TYPE_CHECKING:
-    from ndsl.util.communicator import Communicator
+    from ndsl.util.comm.communicator import Communicator
 
 _HaloSendTuple = Tuple[AsyncRequest, Buffer]
 _HaloRecvTuple = Tuple[AsyncRequest, Buffer, np.ndarray]

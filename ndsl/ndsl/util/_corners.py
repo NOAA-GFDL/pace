@@ -76,9 +76,9 @@ from typing import Sequence
 
 from typing_extensions import Literal
 
-from . import constants
-from .partitioner import TilePartitioner
-from .quantity import Quantity
+from ndsl.util import constants
+from ndsl.util.comm.partitioner import TilePartitioner
+from ndsl.util.quantity import Quantity
 
 
 def fill_scalar_corners(

@@ -4,15 +4,15 @@ from typing import Tuple
 
 import pytest
 
-from ndsl.util.decomposition import (
+from ndsl.util.comm.decomposition import (
     block_waiting_for_compilation,
     build_cache_path,
     check_cached_path_exists,
     determine_rank_is_compiling,
     unblock_waiting_tiles,
 )
-from ndsl.util.mpi import MPI
-from ndsl.util.partitioner import CubedSpherePartitioner, TilePartitioner
+from ndsl.util.comm.mpi import MPI
+from ndsl.util.comm.partitioner import CubedSpherePartitioner, TilePartitioner
 
 
 @pytest.mark.parametrize(

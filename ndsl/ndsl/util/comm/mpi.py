@@ -4,8 +4,8 @@ except ImportError:
     MPI = None
 from typing import List, Optional, TypeVar, cast
 
-from .comm import Comm, Request
-from .logging import pace_log
+from ndsl.util.comm.comm_abc import Comm, Request
+from ndsl.util.logging import pace_log
 
 
 T = TypeVar("T")

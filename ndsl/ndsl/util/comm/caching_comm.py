@@ -5,7 +5,7 @@ from typing import Any, BinaryIO, List, Optional, TypeVar
 
 import numpy as np
 
-from .comm import Comm, Request
+from ndsl.util.comm.comm_abc import Comm, Request
 
 
 T = TypeVar("T")

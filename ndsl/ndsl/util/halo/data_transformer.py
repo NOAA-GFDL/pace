@@ -18,8 +18,8 @@ from ndsl.util.halo.cuda_kernels import (
     unpack_vector_f32_kernel,
     unpack_vector_f64_kernel,
 )
-from ndsl.util.quantity import Quantity, QuantityHaloSpec
 from ndsl.util.halo.rotate import rotate_scalar_data, rotate_vector_data
+from ndsl.util.quantity import Quantity, QuantityHaloSpec
 from ndsl.util.types import NumpyModule
 from ndsl.util.utils import device_synchronize
 

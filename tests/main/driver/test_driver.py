@@ -5,7 +5,7 @@ from typing import Literal, Tuple
 import pytest
 
 import ndsl.dsl
-from ndsl.util.null_comm import NullComm
+from ndsl.util.comm.null_comm import NullComm
 from pace.driver import CreatesCommSelector, DriverConfig, NullCommConfig
 from pace.driver.performance.report import (
     TimeReport,

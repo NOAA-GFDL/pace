@@ -2,7 +2,7 @@ import numpy as np
 import pytest
 
 import ndsl.util
-import ndsl.util.partitioner
+import ndsl.util.comm.partitioner
 
 
 rank_list = []
@@ -102,7 +102,7 @@ def test_subtile_index(rank, layout, subtile_index):
 )
 @pytest.mark.cpu_only
 def test_tile_extent_from_rank_metadata(array_extent, array_dims, layout, tile_extent):
-    result = ndsl.util.partitioner.tile_extent_from_rank_metadata(
+    result = ndsl.util.comm.partitioner.tile_extent_from_rank_metadata(
         array_dims, array_extent, layout
     )
     assert result == tile_extent
@@ -854,11 +854,11 @@ def test_subtile_slice_odd_grid_even_layout_no_interface(
 def test_subtile_extents_from_tile_metadata(
     array_dims, tile_extent, layout, edge_interior_ratio, rank_extent
 ):
-    result = ndsl.util.partitioner._subtile_extents_from_tile_metadata(
+    result = ndsl.util.comm.partitioner._subtile_extents_from_tile_metadata(
         array_dims, tile_extent, layout, edge_interior_ratio
     )
     assert result == rank_extent
-    result = ndsl.util.partitioner._subtile_extents_from_tile_metadata(
+    result = ndsl.util.comm.partitioner._subtile_extents_from_tile_metadata(
         dims=array_dims,
         tile_extent=tile_extent,
         layout=layout,
@@ -908,12 +908,12 @@ def test_tile_extent_from_metadata(
         subtile_slice[0].stop - subtile_slice[0].start,
         subtile_slice[1].stop - subtile_slice[1].start,
     )
-    rank_extent = ndsl.util.partitioner.tile_extent_from_rank_metadata(
+    rank_extent = ndsl.util.comm.partitioner.tile_extent_from_rank_metadata(
         array_dims, slice_extent, layout, full_edge_interior_ratio
     )
     assert rank_extent == expected_extent
     with pytest.raises(NotImplementedError, match=expected_error_string):
-        ndsl.util.partitioner.tile_extent_from_rank_metadata(
+        ndsl.util.comm.partitioner.tile_extent_from_rank_metadata(
             array_dims, slice_extent, layout, half_edge_interior_ratio
         )
 

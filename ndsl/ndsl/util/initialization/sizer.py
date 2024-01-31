@@ -1,14 +1,13 @@
 import dataclasses
 from typing import Dict, Iterable, Sequence, Tuple
 
-from .. import constants
-from ..constants import N_HALO_DEFAULT
-from ..partitioner import TilePartitioner
+from ndsl.util import constants
+from ndsl.util.comm.partitioner import TilePartitioner
+from ndsl.util.constants import N_HALO_DEFAULT
 
 
 @dataclasses.dataclass
 class GridSizer:
-
     nx: int
     """length of the x compute dimension for produced arrays"""
     ny: int

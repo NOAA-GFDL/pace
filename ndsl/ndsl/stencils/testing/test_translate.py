@@ -12,7 +12,7 @@ import ndsl.util
 from ndsl.dsl.dace.dace_config import DaceConfig
 from ndsl.dsl.stencil import CompilationConfig
 from ndsl.stencils.testing import SavepointCase, dataset_to_dict
-from ndsl.util.mpi import MPI
+from ndsl.util.comm.mpi import MPI
 from ndsl.util.testing import compare_scalar, perturb, success, success_array
 
 

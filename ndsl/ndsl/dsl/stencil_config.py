@@ -7,9 +7,12 @@ from gt4py.cartesian.gtc.passes.oir_pipeline import DefaultPipeline, OirPipeline
 
 from ndsl.dsl.dace.dace_config import DaceConfig, DaCeOrchestration
 from ndsl.dsl.gt4py_utils import is_gpu_backend
-from ndsl.util.communicator import Communicator
-from ndsl.util.decomposition import determine_rank_is_compiling, set_distributed_caches
-from ndsl.util.partitioner import Partitioner
+from ndsl.util.comm.communicator import Communicator
+from ndsl.util.comm.decomposition import (
+    determine_rank_is_compiling,
+    set_distributed_caches,
+)
+from ndsl.util.comm.partitioner import Partitioner
 
 
 class RunMode(enum.Enum):

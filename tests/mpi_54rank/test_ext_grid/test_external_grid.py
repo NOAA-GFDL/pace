@@ -7,8 +7,8 @@ import xarray as xr
 import yaml
 
 import ndsl.util
+from ndsl.util.comm.mpi import MPIComm
 from ndsl.util.constants import PI, RADIUS
-from ndsl.util.mpi import MPIComm
 from pace.driver import Driver, DriverConfig
 
 

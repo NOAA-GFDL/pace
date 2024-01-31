@@ -12,7 +12,7 @@ import ndsl.util
 from ndsl.dsl.dace.dace_config import DaceConfig
 from ndsl.stencils.testing import ParallelTranslate, TranslateGrid
 from ndsl.stencils.testing.savepoint import SavepointCase, dataset_to_dict
-from ndsl.util.mpi import MPI
+from ndsl.util.comm.mpi import MPI
 
 
 @pytest.fixture()

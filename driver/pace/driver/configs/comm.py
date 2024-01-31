@@ -9,7 +9,7 @@ import ndsl.dsl
 import ndsl.stencils
 import ndsl.util
 import ndsl.util.grid
-from ndsl.util.caching_comm import CachingCommReader, CachingCommWriter
+from ndsl.util.comm.caching_comm import CachingCommReader, CachingCommWriter
 
 
 class CreatesComm(abc.ABC):

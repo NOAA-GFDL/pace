@@ -13,9 +13,9 @@ from ndsl.dsl.stencil import StencilFactory
 from ndsl.dsl.typing import Float, FloatField
 from ndsl.stencils.c2l_ord import CubedToLatLon
 from ndsl.util import X_DIM, Y_DIM, Z_INTERFACE_DIM, Timer, constants
+from ndsl.util.comm.mpi import MPI
 from ndsl.util.grid import DampingCoefficients, GridData
 from ndsl.util.logging import pace_log
-from ndsl.util.mpi import MPI
 from pace.fv3core._config import DynamicalCoreConfig
 from pace.fv3core.dycore_state import DycoreState
 from pace.fv3core.stencils import fvtp2d, tracer_2d_1l

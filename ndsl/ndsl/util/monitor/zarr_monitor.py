@@ -3,12 +3,12 @@ from typing import List, Tuple, Union
 
 import cftime
 
-from .. import _xarray as xr
-from .. import constants, utils
-from .._optional_imports import cupy, zarr
-from ..logging import pace_log
-from ..partitioner import Partitioner, subtile_slice
-from .convert import to_numpy
+from ndsl.util import _xarray as xr
+from ndsl.util import constants, utils
+from ndsl.util._optional_imports import cupy, zarr
+from ndsl.util.comm.partitioner import Partitioner, subtile_slice
+from ndsl.util.logging import pace_log
+from ndsl.util.monitor.convert import to_numpy
 
 
 __all__ = ["ZarrMonitor"]

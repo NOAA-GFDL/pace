@@ -14,7 +14,7 @@ import ndsl.util as util
 from ndsl.dsl.dace.orchestration import DaceConfig
 from ndsl.dsl.stencil import CompilationConfig
 from ndsl.stencils.testing.grid import Grid
-from ndsl.util.null_comm import NullComm
+from ndsl.util.comm.null_comm import NullComm
 from pace.fv3core._config import DynamicalCoreConfig
 from pace.fv3core.stencils.dyn_core import AcousticDynamics
 from pace.fv3core.testing import TranslateDynCore

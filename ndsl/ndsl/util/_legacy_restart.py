@@ -2,12 +2,12 @@ import copy
 import os
 from typing import BinaryIO, Generator, Iterable
 
-from . import _xarray as xr
-from . import constants, filesystem, io
-from ._properties import RESTART_PROPERTIES, RestartProperties
-from .communicator import Communicator
-from .partitioner import get_tile_index
-from .quantity import Quantity
+from ndsl.util import _xarray as xr
+from ndsl.util import constants, filesystem, io
+from ndsl.util._properties import RESTART_PROPERTIES, RestartProperties
+from ndsl.util.comm.communicator import Communicator
+from ndsl.util.comm.partitioner import get_tile_index
+from ndsl.util.quantity import Quantity
 
 
 __all__ = ["open_restart"]
