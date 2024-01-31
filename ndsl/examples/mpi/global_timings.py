@@ -3,7 +3,7 @@ import contextlib
 import numpy as np
 from mpi4py import MPI
 
-from ndsl.util import Timer
+from ndsl.performance.timer import Timer
 
 
 @contextlib.contextmanager

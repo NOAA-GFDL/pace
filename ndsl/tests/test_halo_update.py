@@ -4,6 +4,7 @@ from typing import Any, Dict
 import pytest
 
 import ndsl.util
+from ndsl.performance.timer import Timer
 from ndsl.util.buffer import BUFFER_CACHE
 from ndsl.util.halo.updater import HaloUpdater
 
@@ -185,7 +186,7 @@ def communicator_list(cube_partitioner: ndsl.util.CubedSpherePartitioner):
                     rank=rank, total_ranks=total_ranks, buffer_dict=shared_buffer
                 ),
                 partitioner=cube_partitioner,
-                timer=ndsl.util.Timer(),
+                timer=Timer(),
             )
         )
     return return_list
@@ -203,7 +204,7 @@ def tile_communicator_list(tile_partitioner):
                     rank=rank, total_ranks=total_ranks, buffer_dict=shared_buffer
                 ),
                 partitioner=tile_partitioner,
-                timer=ndsl.util.Timer(),
+                timer=Timer(),
             )
         )
     return return_list
@@ -389,7 +390,7 @@ def test_halo_update_timer(
     )
     for communicator in communicator_list:
         with subtests.test(rank=communicator.rank):
-            assert isinstance(communicator.timer, ndsl.util.Timer)
+            assert isinstance(communicator.timer, Timer)
             times = communicator.timer.times
             missing_keys = set(required_times_keys).difference(times.keys())
             assert len(missing_keys) == 0
@@ -805,7 +806,7 @@ def test_vector_halo_update_timer(
     )
     for communicator in communicator_list:
         with subtests.test(rank=communicator.rank):
-            assert isinstance(communicator.timer, ndsl.util.Timer)
+            assert isinstance(communicator.timer, Timer)
             times = communicator.timer.times
             missing_keys = set(required_times_keys).difference(times.keys())
             assert len(missing_keys) == 0

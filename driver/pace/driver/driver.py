@@ -21,6 +21,7 @@ from ndsl.dsl.stencil_config import CompilationConfig, RunMode
 from ndsl.dsl.typing import Float
 from ndsl.performance import PerformanceConfig
 from ndsl.performance.collector import PerformanceCollector
+from ndsl.performance.timer import Timer
 from ndsl.util.comm.communicator import (
     Communicator,
     CubedSphereCommunicator,
@@ -628,7 +629,7 @@ class Driver:
     def _critical_path_step_all(
         self,
         steps_count: int,
-        timer: ndsl.util.Timer,
+        timer: Timer,
         dt: Float,
     ):
         """Start of code path where performance is critical.

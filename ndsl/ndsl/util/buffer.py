@@ -4,7 +4,7 @@ from typing import Callable, Dict, Generator, Iterable, List, Optional, Tuple
 import numpy as np
 from numpy.lib.index_tricks import IndexExpression
 
-from ._timing import NullTimer, Timer
+from ..performance.timer import NullTimer, Timer
 from .types import Allocator
 from .utils import (
     device_synchronize,

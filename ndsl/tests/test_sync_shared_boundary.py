@@ -1,6 +1,7 @@
 import pytest
 
 import ndsl.util
+from ndsl.performance.timer import Timer
 
 
 @pytest.fixture
@@ -52,7 +53,7 @@ def communicator_list(cube_partitioner, total_ranks):
                     rank=rank, total_ranks=total_ranks, buffer_dict=shared_buffer
                 ),
                 partitioner=cube_partitioner,
-                timer=ndsl.util.Timer(),
+                timer=Timer(),
             )
         )
     return return_list

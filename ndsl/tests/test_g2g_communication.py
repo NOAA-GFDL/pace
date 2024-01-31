@@ -9,6 +9,7 @@ import numpy as np
 import pytest
 
 import ndsl.util
+from ndsl.performance.timer import Timer
 
 
 try:
@@ -57,7 +58,7 @@ def cpu_communicators(cube_partitioner):
                 ),
                 force_cpu=True,
                 partitioner=cube_partitioner,
-                timer=ndsl.util.Timer(),
+                timer=Timer(),
             )
         )
     return return_list
@@ -75,7 +76,7 @@ def gpu_communicators(cube_partitioner):
                 ),
                 partitioner=cube_partitioner,
                 force_cpu=False,
-                timer=ndsl.util.Timer(),
+                timer=Timer(),
             )
         )
     return return_list

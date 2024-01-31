@@ -4,6 +4,7 @@ import datetime
 import pytest
 
 import ndsl.util
+from ndsl.performance.timer import Timer
 
 
 try:
@@ -91,7 +92,7 @@ def communicator_list(layout):
             ndsl.util.CubedSphereCommunicator(
                 ndsl.util.testing.DummyComm(rank, total_ranks, shared_buffer),
                 ndsl.util.CubedSpherePartitioner(ndsl.util.TilePartitioner(layout)),
-                timer=ndsl.util.Timer(),
+                timer=Timer(),
             )
         )
     return return_list

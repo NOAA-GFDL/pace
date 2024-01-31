@@ -3,8 +3,8 @@ from typing import TYPE_CHECKING, Dict, Iterable, List, Mapping, Optional, Tuple
 
 import numpy as np
 
+from ndsl.performance.timer import NullTimer, Timer
 from ndsl.util import constants
-from ndsl.util._timing import NullTimer, Timer
 from ndsl.util.buffer import Buffer
 from ndsl.util.comm.boundary import Boundary
 from ndsl.util.halo.data_transformer import HaloDataTransformer, HaloExchangeSpec

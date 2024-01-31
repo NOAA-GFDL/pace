@@ -3,8 +3,8 @@ from typing import List, Mapping, Optional, Sequence, Tuple, Union, cast
 
 import numpy as np
 
+from ndsl.performance.timer import NullTimer, Timer
 from ndsl.util import constants
-from ndsl.util._timing import NullTimer, Timer
 from ndsl.util.buffer import array_buffer, recv_buffer, send_buffer
 from ndsl.util.comm.boundary import Boundary
 from ndsl.util.comm.partitioner import (

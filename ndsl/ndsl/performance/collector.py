@@ -15,6 +15,7 @@ from ndsl.performance.report import (
     get_experiment_info,
     write_to_timestamped_json,
 )
+from ndsl.performance.timer import NullTimer, Timer
 from ndsl.util._optional_imports import cupy as cp
 from ndsl.util.utils import GPU_AVAILABLE
 
@@ -22,8 +23,8 @@ from .report import collect_data_and_write_to_file
 
 
 class AbstractPerformanceCollector(Protocol):
-    total_timer: ndsl.util.Timer
-    timestep_timer: ndsl.util.Timer
+    total_timer: Timer
+    timestep_timer: Timer
 
     def collect_performance(self):
         ...
@@ -61,8 +62,8 @@ class PerformanceCollector(AbstractPerformanceCollector):
     def __init__(self, experiment_name: str, comm: ndsl.util.Comm):
         self.times_per_step: List[Mapping[str, float]] = []
         self.hits_per_step: List[Mapping[str, int]] = []
-        self.timestep_timer = ndsl.util.Timer()
-        self.total_timer = ndsl.util.Timer()
+        self.timestep_timer = Timer()
+        self.total_timer = Timer()
         self.experiment_name = experiment_name
         self.comm = comm
 
@@ -157,8 +158,8 @@ class PerformanceCollector(AbstractPerformanceCollector):
 
 class NullPerformanceCollector(AbstractPerformanceCollector):
     def __init__(self):
-        self.total_timer = ndsl.util.NullTimer()
-        self.timestep_timer = ndsl.util.NullTimer()
+        self.total_timer = NullTimer()
+        self.timestep_timer = NullTimer()
 
     def collect_performance(self):
         pass

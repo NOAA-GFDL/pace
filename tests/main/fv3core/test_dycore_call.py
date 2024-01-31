@@ -9,6 +9,7 @@ import ndsl.stencils.testing
 import ndsl.util
 import pace.fv3core.initialization.analytic_init as ai
 from ndsl.dsl.dace.dace_config import DaceConfig
+from ndsl.performance.timer import NullTimer, Timer
 from ndsl.stencils.testing import assert_same_temporaries, copy_temporaries
 from ndsl.util.comm.null_comm import NullComm
 from ndsl.util.grid import DampingCoefficients, GridData, MetricTerms
@@ -19,9 +20,7 @@ from pace.fv3core.dycore_state import DycoreState
 DIR = os.path.abspath(os.path.dirname(__file__))
 
 
-def setup_dycore() -> (
-    Tuple[fv3core.DynamicalCore, fv3core.DycoreState, ndsl.util.Timer]
-):
+def setup_dycore() -> Tuple[fv3core.DynamicalCore, fv3core.DycoreState, Timer]:
     backend = "numpy"
     config = fv3core.DynamicalCoreConfig(
         layout=(1, 1),
@@ -133,7 +132,7 @@ def setup_dycore() -> (
         state=state,
     )
 
-    return dycore, state, ndsl.util.NullTimer()
+    return dycore, state, NullTimer()
 
 
 def copy_state(state1: DycoreState, state2: DycoreState):

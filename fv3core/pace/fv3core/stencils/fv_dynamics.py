@@ -11,8 +11,9 @@ from ndsl.dsl.dace.orchestration import dace_inhibitor, orchestrate
 from ndsl.dsl.dace.wrapped_halo_exchange import WrappedHaloUpdater
 from ndsl.dsl.stencil import StencilFactory
 from ndsl.dsl.typing import Float, FloatField
+from ndsl.performance.timer import NullTimer, Timer
 from ndsl.stencils.c2l_ord import CubedToLatLon
-from ndsl.util import X_DIM, Y_DIM, Z_INTERFACE_DIM, Timer, constants
+from ndsl.util import X_DIM, Y_DIM, Z_INTERFACE_DIM, constants
 from ndsl.util.comm.mpi import MPI
 from ndsl.util.grid import DampingCoefficients, GridData
 from ndsl.util.logging import pace_log
@@ -441,7 +442,7 @@ class DynamicalCore:
     def step_dynamics(
         self,
         state: DycoreState,
-        timer: Timer = ndsl.util.NullTimer(),
+        timer: Timer = NullTimer(),
     ):
         """
         Step the model state forward by one timestep.
@@ -506,7 +507,7 @@ class DynamicalCore:
     def __call__(self, *args, **kwargs):
         return self.step_dynamics(*args, **kwargs)
 
-    def _compute(self, state: DycoreState, timer: ndsl.util.Timer):
+    def _compute(self, state: DycoreState, timer: Timer):
         last_step = False
         self.compute_preamble(
             state,
