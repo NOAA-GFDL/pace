@@ -2,10 +2,19 @@ from typing import TextIO
 
 import cftime
 
-from . import _xarray as xr
-from . import filesystem
-from .quantity import Quantity
-from .time import FMS_TO_CFTIME_TYPE
+from ndsl.util import filesystem
+from ndsl.util._optional_imports import xarray as xr
+from ndsl.util.quantity import Quantity
+from ndsl.util.time import FMS_TO_CFTIME_TYPE
+
+
+def to_xarray_dataset(state) -> xr.Dataset:
+    data_vars = {
+        name: value.data_array for name, value in state.items() if name != "time"
+    }
+    if "time" in state:
+        data_vars["time"] = state["time"]
+    return xr.Dataset(data_vars=data_vars)
 
 
 def write_state(state: dict, filename: str) -> None:
@@ -17,7 +26,7 @@ def write_state(state: dict, filename: str) -> None:
     """
     if "time" not in state:
         raise ValueError('state must include a value for "time"')
-    ds = xr.to_dataset(state)
+    ds = to_xarray_dataset(state)
     with filesystem.open(filename, "wb") as f:
         ds.to_netcdf(f)
 

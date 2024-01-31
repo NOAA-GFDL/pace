@@ -7,15 +7,15 @@ from ndsl.util import constants
 from ndsl.util._timing import NullTimer, Timer
 from ndsl.util.boundary import Boundary
 from ndsl.util.buffer import array_buffer, recv_buffer, send_buffer
-from ndsl.util.halo.updater import (
-    HaloUpdater,
-    HaloUpdateRequest,
-    VectorInterfaceHaloUpdater,
-)
 from ndsl.util.comm.partitioner import (
     CubedSpherePartitioner,
     Partitioner,
     TilePartitioner,
+)
+from ndsl.util.halo.updater import (
+    HaloUpdater,
+    HaloUpdateRequest,
+    VectorInterfaceHaloUpdater,
 )
 from ndsl.util.quantity import Quantity, QuantityHaloSpec, QuantityMetadata
 from ndsl.util.types import NumpyModule
