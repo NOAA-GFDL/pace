@@ -1,5 +1,4 @@
 from . import testing
-from ._exceptions import InvalidQuantityError, OutOfBoundsError
 from ._legacy_restart import open_restart
 from .buffer import Buffer, array_buffer, recv_buffer, send_buffer
 from .checkpointer import (
@@ -53,6 +52,7 @@ from .constants import (
     Z_INTERFACE_DIM,
     Z_SOIL_DIM,
 )
+from .exceptions import OutOfBoundsError
 from .filesystem import get_fs
 from .halo.data_transformer import QuantityHaloSpec
 from .halo.updater import HaloUpdater, HaloUpdateRequest

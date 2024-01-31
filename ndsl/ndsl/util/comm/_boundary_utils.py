@@ -2,7 +2,7 @@ import functools
 from typing import Union
 
 from .. import constants
-from .._exceptions import OutOfBoundsError
+from ..exceptions import OutOfBoundsError
 
 
 def shift_boundary_slice_tuple(dims, origin, extent, boundary_type, slice_tuple):
