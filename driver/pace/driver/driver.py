@@ -476,11 +476,7 @@ class Driver:
                 stencil_compare_comm=stencil_compare_comm,
             )
             ndsl_log.info("setting up grid started")
-            (
-                damping_coefficients,
-                driver_grid_data,
-                grid_data,
-            ) = self.config.get_grid(
+            (damping_coefficients, driver_grid_data, grid_data,) = self.config.get_grid(
                 quantity_factory=self.quantity_factory,
                 communicator=communicator,
             )

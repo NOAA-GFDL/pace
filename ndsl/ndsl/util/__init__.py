@@ -61,7 +61,6 @@ from .io import read_state, write_state
 from .logging import AVAILABLE_LOG_LEVELS, ndsl_log
 from .monitor import Monitor, NetCDFMonitor, ZarrMonitor
 from .namelist import Namelist, NamelistDefaults
-from .nudging import apply_nudging, get_nudging_tendencies
 from .quantity import Quantity, QuantityMetadata
 from .time import FMS_TO_CFTIME_TYPE, datetime64_to_datetime
 from .units import UnitsError, ensure_equal_units, units_are_equal
