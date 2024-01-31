@@ -1,5 +1,5 @@
 import copy
-import os.pathsdfg
+import os.path
 import subprocess
 from collections.abc import Mapping
 from typing import List, Protocol
