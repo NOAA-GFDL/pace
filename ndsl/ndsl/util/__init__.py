@@ -1,5 +1,4 @@
 from . import testing
-from ._legacy_restart import open_restart
 from .buffer import Buffer, array_buffer, recv_buffer, send_buffer
 from .checkpointer import (
     Checkpointer,
@@ -62,7 +61,7 @@ from .logging import AVAILABLE_LOG_LEVELS, ndsl_log
 from .monitor import Monitor, NetCDFMonitor, ZarrMonitor
 from .namelist import Namelist, NamelistDefaults
 from .quantity import Quantity, QuantityMetadata
-from .time import FMS_TO_CFTIME_TYPE, datetime64_to_datetime
+from .restart._legacy_restart import open_restart
 from .units import UnitsError, ensure_equal_units, units_are_equal
 from .utils import MetaEnumStr
 

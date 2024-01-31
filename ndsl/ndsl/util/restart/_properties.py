@@ -1,6 +1,6 @@
 from typing import Iterable, Mapping, Union
 
-from .constants import (
+from ..constants import (
     X_DIM,
     X_INTERFACE_DIM,
     Y_DIM,

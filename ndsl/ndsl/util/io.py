@@ -5,7 +5,19 @@ import cftime
 from ndsl.util import filesystem
 from ndsl.util.optional_imports import xarray as xr
 from ndsl.util.quantity import Quantity
-from ndsl.util.time import FMS_TO_CFTIME_TYPE
+
+
+# Calendar constant values copied from time_manager in FMS
+THIRTY_DAY_MONTHS = 1
+JULIAN = 2
+GREGORIAN = 3
+NOLEAP = 4
+FMS_TO_CFTIME_TYPE = {
+    THIRTY_DAY_MONTHS: cftime.Datetime360Day,
+    JULIAN: cftime.DatetimeJulian,
+    GREGORIAN: cftime.DatetimeGregorian,  # Not a valid calendar in FV3GFS
+    NOLEAP: cftime.DatetimeNoLeap,
+}
 
 
 def to_xarray_dataset(state) -> xr.Dataset:

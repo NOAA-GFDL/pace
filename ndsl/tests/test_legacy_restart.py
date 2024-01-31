@@ -12,7 +12,7 @@ import numpy as np
 import pytest
 
 import ndsl.util
-import ndsl.util._legacy_restart
+import ndsl.util.restart._legacy_restart
 from ndsl.util.testing import DummyComm
 
 
@@ -280,7 +280,7 @@ def result_dims(data_array, new_dims):
 @pytest.mark.cpu_only
 @requires_xarray
 def test_apply_dims(data_array, new_dims, result_dims):
-    result = ndsl.util._legacy_restart._apply_dims(data_array, new_dims)
+    result = ndsl.util.restart._legacy_restart._apply_dims(data_array, new_dims)
     np.testing.assert_array_equal(result.values, data_array.values)
     assert result.dims == result_dims
     assert result.attrs == data_array.attrs
@@ -323,7 +323,7 @@ def test_apply_dims(data_array, new_dims, result_dims):
 )
 @pytest.mark.cpu_only
 def test_map_keys(old_dict, key_mapping, new_dict):
-    result = ndsl.util._legacy_restart.map_keys(old_dict, key_mapping)
+    result = ndsl.util.restart._legacy_restart.map_keys(old_dict, key_mapping)
     assert result == new_dict
 
 
@@ -358,7 +358,7 @@ def test_map_keys(old_dict, key_mapping, new_dict):
 )
 @pytest.mark.cpu_only
 def test_get_rank_suffix(rank, total_ranks, suffix):
-    result = ndsl.util._legacy_restart.get_rank_suffix(rank, total_ranks)
+    result = ndsl.util.restart._legacy_restart.get_rank_suffix(rank, total_ranks)
     assert result == suffix
 
 
@@ -367,7 +367,7 @@ def test_get_rank_suffix(rank, total_ranks, suffix):
 def test_get_rank_suffix_invalid_total_ranks(invalid_total_ranks):
     with pytest.raises(ValueError):
         # total_ranks should be multiple of 6
-        ndsl.util._legacy_restart.get_rank_suffix(0, invalid_total_ranks)
+        ndsl.util.restart._legacy_restart.get_rank_suffix(0, invalid_total_ranks)
 
 
 @pytest.mark.cpu_only
