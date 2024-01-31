@@ -5,14 +5,14 @@ from typing import Literal, Tuple
 import pytest
 
 import ndsl.dsl
-from ndsl.util.null_comm import NullComm
-from pace.driver import CreatesCommSelector, DriverConfig, NullCommConfig
-from pace.driver.performance.report import (
+from ndsl.performance.report import (
     TimeReport,
     gather_hit_counts,
     gather_timing_data,
     get_sypd,
 )
+from ndsl.util.null_comm import NullComm
+from pace.driver import CreatesCommSelector, DriverConfig, NullCommConfig
 
 
 def get_driver_config(
