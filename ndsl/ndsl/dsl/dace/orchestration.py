@@ -30,7 +30,7 @@ from ndsl.dsl.dace.utils import (
     memory_static_analysis,
     report_memory_static_analysis,
 )
-from ndsl.util import pace_log
+from ndsl.util import ndsl_log
 from ndsl.util.comm.mpi import MPI
 
 
@@ -175,7 +175,7 @@ def _build_sdfg(
                     memory_pooled += arr.total_size * arr.dtype.bytes
                     arr.lifetime = dace.AllocationLifetime.Scope
             memory_pooled = float(memory_pooled) / (1024 * 1024)
-            pace_log.debug(
+            ndsl_log.debug(
                 f"{DaCeProgress.default_prefix(config)} Pooled {memory_pooled} mb",
             )
 
@@ -197,7 +197,7 @@ def _build_sdfg(
             report = report_memory_static_analysis(
                 sdfg, memory_static_analysis(sdfg), False
             )
-            pace_log.info(f"{DaCeProgress.default_prefix(config)} {report}")
+            ndsl_log.info(f"{DaCeProgress.default_prefix(config)} {report}")
 
     # Compilation done.
     # On Build: all ranks sync, then exit.
@@ -208,11 +208,11 @@ def _build_sdfg(
     # a true multi-machine sync, outside of our own communicator class.
     if config.get_orchestrate() == DaCeOrchestration.Build:
         MPI.COMM_WORLD.Barrier()  # Protect against early exist which kill SLURM jobs
-        pace_log.info(f"{DaCeProgress.default_prefix(config)} Build only, exiting.")
+        ndsl_log.info(f"{DaCeProgress.default_prefix(config)} Build only, exiting.")
         exit(0)
     elif config.get_orchestrate() == DaCeOrchestration.BuildAndRun:
         if not is_compiling:
-            pace_log.info(
+            ndsl_log.info(
                 f"{DaCeProgress.default_prefix(config)} Rank is not compiling."
                 "Waiting for compilation to end on all other ranks..."
             )
@@ -250,7 +250,7 @@ def _call_sdfg(
             config.get_orchestrate() == DaCeOrchestration.Build
             or config.get_orchestrate() == DaCeOrchestration.BuildAndRun
         ):
-            pace_log.info("Building DaCe orchestration")
+            ndsl_log.info("Building DaCe orchestration")
             res = _build_sdfg(daceprog, sdfg, config, args, kwargs)
         elif config.get_orchestrate() == DaCeOrchestration.Run:
             # We should never hit this, it should be caught by the

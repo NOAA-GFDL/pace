@@ -9,7 +9,7 @@ from dace.sdfg import graph as gr
 from dace.sdfg import utils as sdutil
 from dace.transformation.helpers import get_parent_map
 
-from ndsl.util.logging import pace_log
+from ndsl.util.logging import ndsl_log
 
 
 def _filter_all_maps(
@@ -201,7 +201,7 @@ def trace_all_outputs_at_index(sdfg: dace.SDFG, i: int, j: int, k: int):
             array_range=[(i, i, 1), (j, j, 1), (k, k, 1)],
         )
 
-    pace_log.info(f"Added {len(all_maps_filtered)} outputs trace at {i},{j},{k}")
+    ndsl_log.info(f"Added {len(all_maps_filtered)} outputs trace at {i},{j},{k}")
 
 
 def negative_delp_checker(sdfg: dace.SDFG) -> None:
@@ -227,7 +227,7 @@ def negative_delp_checker(sdfg: dace.SDFG) -> None:
             assert_out=True,
         )
 
-    pace_log.info(f"Added {len(all_maps_filtered)} delp* < 0 checks")
+    ndsl_log.info(f"Added {len(all_maps_filtered)} delp* < 0 checks")
 
 
 def negative_qtracers_checker(sdfg: dace.SDFG):
@@ -263,7 +263,7 @@ def negative_qtracers_checker(sdfg: dace.SDFG):
             assert_out=True,
         )
 
-    pace_log.info(f"Added {len(all_maps_filtered)} tracer < 0 checks")
+    ndsl_log.info(f"Added {len(all_maps_filtered)} tracer < 0 checks")
 
 
 def sdfg_nan_checker(
@@ -296,7 +296,7 @@ def sdfg_nan_checker(
             array_range=array_range,
         )
 
-    pace_log.info(f"Added {len(all_maps_filtered)} NaN checks")
+    ndsl_log.info(f"Added {len(all_maps_filtered)} NaN checks")
 
 
 def sdfg_execution_progress(sdfg: dace.SDFG):

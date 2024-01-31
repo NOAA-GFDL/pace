@@ -58,7 +58,7 @@ from .halo.data_transformer import QuantityHaloSpec
 from .halo.updater import HaloUpdater, HaloUpdateRequest
 from .initialization import GridSizer, QuantityFactory, SubtileGridSizer
 from .io import read_state, write_state
-from .logging import AVAILABLE_LOG_LEVELS, pace_log
+from .logging import AVAILABLE_LOG_LEVELS, ndsl_log
 from .monitor import Monitor, NetCDFMonitor, ZarrMonitor
 from .namelist import Namelist, NamelistDefaults
 from .nudging import apply_nudging, get_nudging_tendencies

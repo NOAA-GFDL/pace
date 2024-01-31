@@ -17,7 +17,7 @@ from ndsl.dsl.gt4py_utils import is_gpu_backend
 from ndsl.dsl.typing import floating_point_precision
 from ndsl.performance.collector import PerformanceCollector
 from ndsl.util._optional_imports import cupy as cp
-from ndsl.util.logging import pace_log
+from ndsl.util.logging import ndsl_log
 from pace import fv3core
 
 
@@ -48,7 +48,7 @@ class StencilBackendCompilerOverride:
 
         # We remove warnings from the stencils compiling when in critical and/or
         # error
-        if pace_log.level > logging.WARNING:
+        if ndsl_log.level > logging.WARNING:
             gt_build_settings["extra_compile_args"]["cxx"].append("-w")
             gt_build_settings["extra_compile_args"]["cuda"].append("-w")
 
@@ -56,18 +56,18 @@ class StencilBackendCompilerOverride:
         if self.no_op:
             return
         if self.config.do_compile:
-            pace_log.info(f"Stencil backend compiles on {self.comm.Get_rank()}")
+            ndsl_log.info(f"Stencil backend compiles on {self.comm.Get_rank()}")
         else:
-            pace_log.info(f"Stencil backend waits on {self.comm.Get_rank()}")
+            ndsl_log.info(f"Stencil backend waits on {self.comm.Get_rank()}")
             self.comm.Barrier()
 
     def __exit__(self, type, value, traceback):
         if self.no_op:
             return
         if not self.config.do_compile:
-            pace_log.info(f"Stencil backend read cache on {self.comm.Get_rank()}")
+            ndsl_log.info(f"Stencil backend read cache on {self.comm.Get_rank()}")
         else:
-            pace_log.info(f"Stencil backend compiled on {self.comm.Get_rank()}")
+            ndsl_log.info(f"Stencil backend compiled on {self.comm.Get_rank()}")
             self.comm.Barrier()
 
 
@@ -203,7 +203,7 @@ class GeosDycoreWrapper:
             and is_gpu_backend(backend)
             and os.path.exists(f"{MPS_pipe_directory}/log")
         )
-        pace_log.info(
+        ndsl_log.info(
             "Pace GEOS wrapper initialized: \n"
             f"             dt : {self.dycore_state.bdt}\n"
             f"         bridge : {self._fortran_mem_space} > {self._pace_mem_space}\n"

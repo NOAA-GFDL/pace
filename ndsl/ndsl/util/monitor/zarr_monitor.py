@@ -8,7 +8,7 @@ from ndsl.util._optional_imports import cupy
 from ndsl.util._optional_imports import xarray as xr
 from ndsl.util._optional_imports import zarr
 from ndsl.util.comm.partitioner import Partitioner, subtile_slice
-from ndsl.util.logging import pace_log
+from ndsl.util.logging import ndsl_log
 from ndsl.util.monitor.convert import to_numpy
 
 
@@ -237,7 +237,7 @@ class _ZarrVariableWriter:
         )
 
         from_slice = _get_from_slice(target_slice)
-        pace_log.debug(
+        ndsl_log.debug(
             f"assigning data from subtile slice {from_slice} to "
             f"target slice {target_slice}"
         )
@@ -309,7 +309,7 @@ class _ZarrConstantWriter(_ZarrVariableWriter):
         )
 
         from_slice = _get_from_slice(target_slice)
-        pace_log.debug(
+        ndsl_log.debug(
             f"assigning data from subtile slice {from_slice} to "
             f"target slice {target_slice}"
         )

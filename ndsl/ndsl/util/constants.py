@@ -1,7 +1,7 @@
 import os
 from enum import Enum
 
-from ndsl.util.logging import pace_log
+from ndsl.util.logging import ndsl_log
 
 
 # The FV3GFS model ships with two sets of constants, one used in the GFS physics
@@ -17,7 +17,7 @@ CONST_VERSION_AS_STR = os.environ.get("PACE_CONSTANTS", "GFS")
 
 try:
     CONST_VERSION = ConstantVersions[CONST_VERSION_AS_STR]
-    pace_log.info(f"Constant selected: {CONST_VERSION}")
+    ndsl_log.info(f"Constant selected: {CONST_VERSION}")
 except KeyError as e:
     raise RuntimeError(f"Constants {CONST_VERSION_AS_STR} is not implemented, abort.")
 

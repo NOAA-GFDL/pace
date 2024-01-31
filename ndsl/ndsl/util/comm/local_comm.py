@@ -2,7 +2,7 @@ import copy
 from typing import Any
 
 from ndsl.util.comm.comm_abc import Comm
-from ndsl.util.logging import pace_log
+from ndsl.util.logging import ndsl_log
 from ndsl.util.utils import ensure_contiguous, safe_assign_array
 
 
@@ -101,7 +101,7 @@ class LocalComm(Comm):
                 "the bcast source"
             )
         value = self._get_buffer("bcast", value)
-        pace_log.debug(f"bcast {value} to rank {self.rank}")
+        ndsl_log.debug(f"bcast {value} to rank {self.rank}")
         return value
 
     def Barrier(self):

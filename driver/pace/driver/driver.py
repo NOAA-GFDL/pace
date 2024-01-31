@@ -27,7 +27,7 @@ from ndsl.util.comm.communicator import (
     CubedSphereCommunicator,
     TileCommunicator,
 )
-from ndsl.util.logging import pace_log
+from ndsl.util.logging import ndsl_log
 from pace import fv3core
 from pace.driver.safety_checks import SafetyChecker
 
@@ -397,7 +397,7 @@ class Driver:
             config: driver configuration
             comm: communication object behaving like mpi4py.Comm
         """
-        pace_log.info("initializing driver")
+        ndsl_log.info("initializing driver")
         self.config: DriverConfig = config
         self.time = self.config.start_time
         self.comm_config = config.comm_config
@@ -475,13 +475,17 @@ class Driver:
                 communicator=communicator,
                 stencil_compare_comm=stencil_compare_comm,
             )
-            pace_log.info("setting up grid started")
-            (damping_coefficients, driver_grid_data, grid_data,) = self.config.get_grid(
+            ndsl_log.info("setting up grid started")
+            (
+                damping_coefficients,
+                driver_grid_data,
+                grid_data,
+            ) = self.config.get_grid(
                 quantity_factory=self.quantity_factory,
                 communicator=communicator,
             )
-            pace_log.info("setting up grid done")
-            pace_log.info("setting up state started")
+            ndsl_log.info("setting up grid done")
+            ndsl_log.info("setting up state started")
             self.state = self.config.get_driver_state(
                 quantity_factory=self.quantity_factory,
                 communicator=communicator,
@@ -489,10 +493,10 @@ class Driver:
                 driver_grid_data=driver_grid_data,
                 grid_data=grid_data,
             )
-            pace_log.info("setting up state done")
+            ndsl_log.info("setting up state done")
 
             self._start_time = self.config.initialization.start_time
-            pace_log.info("setting up dycore object started")
+            ndsl_log.info("setting up dycore object started")
             self.dycore = fv3core.DynamicalCore(
                 comm=communicator,
                 grid_data=self.state.grid_data,
@@ -504,9 +508,9 @@ class Driver:
                 phis=self.state.dycore_state.phis,
                 state=self.state.dycore_state,
             )
-            pace_log.info("setting up dycore object done")
+            ndsl_log.info("setting up dycore object done")
 
-            pace_log.info("setting up physics object started")
+            ndsl_log.info("setting up physics object started")
             if not config.dycore_only and not config.disable_step_physics:
                 self.physics = pace.physics.Physics(
                     stencil_factory=self.stencil_factory,
@@ -541,12 +545,12 @@ class Driver:
                 # Make sure those are set to None to raise any issues
                 self.dycore_to_physics = None
                 self.end_of_step_update = None
-            pace_log.info("setting up physics object done")
-            pace_log.info("setting up diagnostics factory started")
+            ndsl_log.info("setting up physics object done")
+            ndsl_log.info("setting up diagnostics factory started")
             self.diagnostics = config.diagnostics_config.diagnostics_factory(
                 communicator=communicator
             )
-            pace_log.info("setting up diagnostics factory done")
+            ndsl_log.info("setting up diagnostics factory done")
         log_subtile_location(
             partitioner=communicator.partitioner.tile, rank=communicator.rank
         )
@@ -554,14 +558,14 @@ class Driver:
             self.diagnostics.store(time=self.time, state=self.state)
 
         self._time_run = self.config.start_time
-        pace_log.info("setting up safety checkers started")
+        ndsl_log.info("setting up safety checkers started")
         self.safety_checker = SafetyChecker()
         SafetyChecker.register_variable("ua", -200, 200, compute_domain_only=True)
         SafetyChecker.register_variable("va", -200, 200, compute_domain_only=True)
         SafetyChecker.register_variable("delp", -1.0, 4000, compute_domain_only=True)
         SafetyChecker.register_variable("pt", 100, 380, compute_domain_only=True)
-        pace_log.info("setting up safety checkers done")
-        pace_log.info("initialization of the object done")
+        ndsl_log.info("setting up safety checkers done")
+        ndsl_log.info("initialization of the object done")
 
     def _update_driver_config_with_communicator(
         self, communicator: Communicator
@@ -598,11 +602,11 @@ class Driver:
         Using a method allows those actions to be removed from the orchestration path.
         """
         if __debug__:
-            pace_log.info(f"Finished stepping {step}")
+            ndsl_log.info(f"Finished stepping {step}")
         self.performance_collector.collect_performance()
         self.time += self.config.timestep
         if ((step + 1) % self.config.output_frequency) == 0:
-            pace_log.info(f"diagnostics for step {self.time} started")
+            ndsl_log.info(f"diagnostics for step {self.time} started")
             self.performance_collector.write_out_rank_0(
                 self.config.stencil_config.compilation_config.backend,
                 self.config.stencil_config.dace_config.is_dace_orchestrated(),
@@ -610,13 +614,13 @@ class Driver:
                 "Ongoing",
             )
             self.diagnostics.store(time=self.time, state=self.state)
-            pace_log.info(f"diagnostics for step {self.time} finished")
+            ndsl_log.info(f"diagnostics for step {self.time} finished")
         if (
             self.config.safety_check_frequency
             and ((step + 1) % self.config.safety_check_frequency) == 0
         ):
             self.safety_checker.check_state(self.state.dycore_state)
-            pace_log.info(f"checking state for for step {step+1} finished")
+            ndsl_log.info(f"checking state for for step {step+1} finished")
         self.config.restart_config.write_intermediate_if_enabled(
             state=self.state,
             step=step,
@@ -664,7 +668,7 @@ class Driver:
             self._end_of_step_actions(step)
 
     def step_all(self):
-        pace_log.info("integrating driver forward in time")
+        ndsl_log.info("integrating driver forward in time")
         with self.performance_collector.total_timer.clock("total"):
             self.profiler.enable()
             PerformanceCollector.mark_cuda_profiler("Begin integration")
@@ -689,7 +693,7 @@ class Driver:
 
     @dace_inhibitor
     def cleanup(self):
-        pace_log.info("cleaning up driver")
+        ndsl_log.info("cleaning up driver")
         self.performance_collector.write_out_rank_0(
             self.config.stencil_config.compilation_config.backend,
             self.config.stencil_config.dace_config.is_dace_orchestrated(),
@@ -722,7 +726,7 @@ def log_subtile_location(partitioner: ndsl.util.TilePartitioner, rank: int):
         "east": partitioner.on_tile_right(rank),
         "west": partitioner.on_tile_left(rank),
     }
-    pace_log.info(f"running on rank {rank} with subtile location {location_info}")
+    ndsl_log.info(f"running on rank {rank} with subtile location {location_info}")
 
 
 def _setup_factories(

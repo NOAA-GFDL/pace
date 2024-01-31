@@ -36,4 +36,4 @@ def _pace_logger():
     return name_log
 
 
-pace_log = _pace_logger()
+ndsl_log = _pace_logger()

@@ -2,7 +2,7 @@ import ndsl.dsl
 import ndsl.util
 import ndsl.util as fv3util
 from ndsl.stencils.testing import ParallelTranslate
-from ndsl.util.logging import pace_log
+from ndsl.util.logging import ndsl_log
 
 
 class TranslateHaloUpdate(ParallelTranslate):
@@ -45,14 +45,14 @@ class TranslateHaloUpdate(ParallelTranslate):
         state_list = self.state_list_from_inputs_list(inputs_list)
         req_list = []
         for state, communicator in zip(state_list, communicator_list):
-            pace_log.debug(f"starting on {communicator.rank}")
+            ndsl_log.debug(f"starting on {communicator.rank}")
             req_list.append(
                 communicator.start_halo_update(
                     state[self.halo_update_varname], n_points=fv3util.N_HALO_DEFAULT
                 )
             )
         for communicator, req in zip(communicator_list, req_list):
-            pace_log.debug(f"finishing on {communicator.rank}")
+            ndsl_log.debug(f"finishing on {communicator.rank}")
             req.wait()
         return self.outputs_list_from_state_list(state_list)
 
@@ -141,7 +141,7 @@ class TranslateHaloVectorUpdate(ParallelTranslate):
         super(TranslateHaloVectorUpdate, self).__init__(grid, namelist, stencil_factory)
 
     def compute_parallel(self, inputs, communicator):
-        pace_log.debug(f"starting on {communicator.rank}")
+        ndsl_log.debug(f"starting on {communicator.rank}")
         state = self.state_from_inputs(inputs)
         req = communicator.start_vector_halo_update(
             state["x_wind_on_c_grid"],
@@ -149,7 +149,7 @@ class TranslateHaloVectorUpdate(ParallelTranslate):
             n_points=fv3util.N_HALO_DEFAULT,
         )
 
-        pace_log.debug(f"finishing on {communicator.rank}")
+        ndsl_log.debug(f"finishing on {communicator.rank}")
         req.wait()
         return self.outputs_from_state(state)
 
@@ -157,7 +157,7 @@ class TranslateHaloVectorUpdate(ParallelTranslate):
         state_list = self.state_list_from_inputs_list(inputs_list)
         req_list = []
         for state, communicator in zip(state_list, communicator_list):
-            pace_log.debug(f"starting on {communicator.rank}")
+            ndsl_log.debug(f"starting on {communicator.rank}")
             req_list.append(
                 communicator.start_vector_halo_update(
                     state["x_wind_on_c_grid"],
@@ -166,7 +166,7 @@ class TranslateHaloVectorUpdate(ParallelTranslate):
                 )
             )
         for communicator, req in zip(communicator_list, req_list):
-            pace_log.debug(f"finishing on {communicator.rank}")
+            ndsl_log.debug(f"finishing on {communicator.rank}")
             req.wait()
         return self.outputs_list_from_state_list(state_list)
 
@@ -213,12 +213,12 @@ class TranslateMPPBoundaryAdjust(ParallelTranslate):
         )
 
     def compute_parallel(self, inputs, communicator):
-        pace_log.debug(f"starting on {communicator.rank}")
+        ndsl_log.debug(f"starting on {communicator.rank}")
         state = self.state_from_inputs(inputs)
         req = communicator.start_synchronize_vector_interfaces(
             state["x_wind_on_d_grid"], state["y_wind_on_d_grid"]
         )
-        pace_log.debug(f"finishing on {communicator.rank}")
+        ndsl_log.debug(f"finishing on {communicator.rank}")
         req.wait()
         return self.outputs_from_state(state)
 
@@ -232,6 +232,6 @@ class TranslateMPPBoundaryAdjust(ParallelTranslate):
                 )
             )
         for communicator, req in zip(communicator_list, req_list):
-            pace_log.debug(f"finishing on {communicator.rank}")
+            ndsl_log.debug(f"finishing on {communicator.rank}")
             req.wait()
         return self.outputs_list_from_state_list(state_list)

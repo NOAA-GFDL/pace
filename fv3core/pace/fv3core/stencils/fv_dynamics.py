@@ -16,7 +16,7 @@ from ndsl.stencils.c2l_ord import CubedToLatLon
 from ndsl.util import X_DIM, Y_DIM, Z_INTERFACE_DIM, constants
 from ndsl.util.comm.mpi import MPI
 from ndsl.util.grid import DampingCoefficients, GridData
-from ndsl.util.logging import pace_log
+from ndsl.util.logging import ndsl_log
 from pace.fv3core._config import DynamicalCoreConfig
 from pace.fv3core.dycore_state import DycoreState
 from pace.fv3core.stencils import fvtp2d, tracer_2d_1l
@@ -80,7 +80,7 @@ def fvdyn_temporaries(
 def log_on_rank_0(msg: str):
     """Print when rank is 0 - outside of DaCe critical path"""
     if not MPI or MPI.COMM_WORLD.Get_rank() == 0:
-        pace_log.info(msg)
+        ndsl_log.info(msg)
 
 
 class DynamicalCore:

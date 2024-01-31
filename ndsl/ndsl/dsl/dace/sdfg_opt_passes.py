@@ -1,6 +1,6 @@
 import dace
 
-from ndsl.util.logging import pace_log
+from ndsl.util.logging import ndsl_log
 
 
 def splittable_region_expansion(sdfg: dace.SDFG, verbose: bool = False):
@@ -21,4 +21,4 @@ def splittable_region_expansion(sdfg: dace.SDFG, verbose: bool = False):
                     "K",
                 ]
                 if verbose:
-                    pace_log.debug(f"Reordered schedule for {node.label}")
+                    ndsl_log.debug(f"Reordered schedule for {node.label}")

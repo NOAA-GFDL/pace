@@ -24,7 +24,7 @@ from ndsl.util.grid.helper import (
     HorizontalGridData,
     VerticalGridData,
 )
-from ndsl.util.logging import pace_log
+from ndsl.util.logging import ndsl_log
 from ndsl.util.namelist import Namelist
 
 from .registry import Registry
@@ -190,7 +190,7 @@ class SerialboxGridConfig(GridInitializer):
             dims=[ndsl.util.X_DIM, ndsl.util.Y_DIM], units="unknown"
         ).gt4py_backend
 
-        pace_log.info("Using serialized grid data")
+        ndsl_log.info("Using serialized grid data")
         grid = self._get_serialized_grid(communicator, backend)
         grid_data = grid.grid_data
         driver_grid_data = grid.driver_grid_data
@@ -235,7 +235,7 @@ class ExternalNetcdfGridConfig(GridInitializer):
         quantity_factory: QuantityFactory,
         communicator: Communicator,
     ) -> Tuple[DampingCoefficients, DriverGridData, GridData]:
-        pace_log.info("Using external grid data")
+        ndsl_log.info("Using external grid data")
 
         # ToDo: refactor when grid_type is an enum
         if self.grid_type <= 3:

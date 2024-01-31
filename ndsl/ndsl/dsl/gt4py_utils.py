@@ -6,7 +6,7 @@ import numpy as np
 
 from ndsl.dsl.typing import DTypes, Field, Float
 from ndsl.util.constants import N_HALO_DEFAULT
-from ndsl.util.logging import pace_log
+from ndsl.util.logging import ndsl_log
 
 
 try:
@@ -358,7 +358,7 @@ def k_split_run(func, data, k_indices, splitvars_values):
         data.update(splitvars)
         data["kstart"] = ki
         data["nk"] = nk
-        pace_log.debug(
+        ndsl_log.debug(
             "Running kstart: {}, num k:{}, variables:{}".format(ki, nk, splitvars)
         )
         func(**data)

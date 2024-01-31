@@ -12,7 +12,7 @@ from ndsl.dsl.dace.dace_config import DaceConfig
 from ndsl.dsl.stencil import CompilationConfig, FrozenStencil, StencilConfig
 from ndsl.dsl.typing import Float, FloatField
 from ndsl.util._optional_imports import cupy as cp
-from ndsl.util.logging import pace_log
+from ndsl.util.logging import ndsl_log
 
 
 # ----------------------------------------------------------
@@ -31,12 +31,12 @@ class DaCeProgress:
         return f"[{config.get_orchestrate()}]"
 
     def __enter__(self):
-        pace_log.debug(f"{self.prefix} {self.label}...")
+        ndsl_log.debug(f"{self.prefix} {self.label}...")
         self.start = time.time()
 
     def __exit__(self, _type, _val, _traceback):
         elapsed = time.time() - self.start
-        pace_log.debug(f"{self.prefix} {self.label}...{elapsed}s.")
+        ndsl_log.debug(f"{self.prefix} {self.label}...{elapsed}s.")
 
 
 def _is_ref(sd: dace.sdfg.SDFG, aname: str):
