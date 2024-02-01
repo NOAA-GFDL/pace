@@ -3,7 +3,7 @@ from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union
 
 import dace
 import gt4py.storage
-from Comm.mpi import MPI
+from ndsl.comm.mpi import MPI
 from dace import compiletime as DaceCompiletime
 from dace.dtypes import DeviceType as DaceDeviceType
 from dace.dtypes import StorageType as DaceStorageType
@@ -31,7 +31,7 @@ from ndsl.dsl.dace.utils import (
     memory_static_analysis,
     report_memory_static_analysis,
 )
-from ndsl.util import ndsl_log
+from ndsl.logging import ndsl_log
 
 
 try:

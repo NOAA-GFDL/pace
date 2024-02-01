@@ -3,8 +3,8 @@ from datetime import timedelta
 from typing import Any, Dict, Optional, Tuple
 
 import pytest
-from Namelist import Namelist
-from Quantity import Quantity
+from ndsl.namelist import Namelist
+from ndsl.quantity import Quantity
 
 import ndsl.dsl.gt4py_utils as utils
 import pace.fv3core.stencils.fv_dynamics as fv_dynamics

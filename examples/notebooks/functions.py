@@ -24,14 +24,11 @@ from ndsl.grid import (
     VerticalGridData,
 )
 from ndsl.grid.gnomonic import great_circle_distance_lon_lat
-from ndsl.util import (
-    CubedSphereCommunicator,
-    CubedSpherePartitioner,
-    Quantity,
-    QuantityFactory,
-    SubtileGridSizer,
-    TilePartitioner,
-)
+from ndsl.comm.communicator import CubedSphereCommunicator
+from ndsl.comm.partitioner import CubedSpherePartitioner, TilePartitioner
+from ndsl.quantity import Quantity
+from ndsl.initialization.allocator import QuantityFactory
+from ndsl.initialization.sizer import SubtileGridSizer
 from pace.fv3core.stencils.fvtp2d import FiniteVolumeTransport
 from pace.fv3core.stencils.fxadv import FiniteVolumeFluxPrep
 from pace.fv3core.stencils.tracer_2d_1l import TracerAdvection

@@ -6,9 +6,13 @@ import f90nml
 import pytest
 import xarray as xr
 import yaml
-from Comm.communicator import Communicator, CubedSphereCommunicator, TileCommunicator
-from Comm.mpi import MPI
-from Comm.partitioner import CubedSpherePartitioner, TilePartitioner
+from ndsl.comm.communicator import (
+    Communicator,
+    CubedSphereCommunicator,
+    TileCommunicator,
+)
+from ndsl.comm.mpi import MPI
+from ndsl.comm.partitioner import CubedSpherePartitioner, TilePartitioner
 
 import ndsl.dsl
 from ndsl.dsl.dace.dace_config import DaceConfig

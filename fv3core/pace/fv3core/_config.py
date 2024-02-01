@@ -3,7 +3,7 @@ from typing import Optional, Tuple
 
 import f90nml
 
-from ndsl.util import Namelist, NamelistDefaults
+from ndsl.namelist import Namelist, NamelistDefaults
 
 
 DEFAULT_INT = 0

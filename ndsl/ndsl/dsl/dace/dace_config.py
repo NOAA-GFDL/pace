@@ -3,7 +3,7 @@ import os
 from typing import Any, Dict, Optional, Tuple
 
 import dace.config
-from Comm.communicator import Communicator, Partitioner
+from ndsl.comm.communicator import Communicator, Partitioner
 from dace.codegen.compiled_sdfg import CompiledSDFG
 from dace.frontend.python.parser import DaceProgram
 

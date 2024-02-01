@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from Comm.partitioner import (
+from ndsl.comm.partitioner import (
     CubedSpherePartitioner,
     TilePartitioner,
     _subtile_extents_from_tile_metadata,
@@ -8,7 +8,7 @@ from Comm.partitioner import (
     get_tile_number,
     tile_extent_from_rank_metadata,
 )
-from Quantity import Quantity
+from ndsl.quantity import Quantity
 
 from ndsl.constants import (
     TILE_DIM,

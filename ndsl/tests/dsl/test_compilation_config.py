@@ -2,8 +2,8 @@ import unittest.mock
 from math import sqrt
 
 import pytest
-from Comm.communicator import CubedSphereCommunicator
-from Comm.partitioner import CubedSpherePartitioner, TilePartitioner
+from ndsl.comm.communicator import CubedSphereCommunicator
+from ndsl.comm.partitioner import CubedSpherePartitioner, TilePartitioner
 
 from ndsl.dsl.stencil import CompilationConfig, RunMode
 

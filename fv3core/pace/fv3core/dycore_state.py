@@ -2,8 +2,8 @@ from dataclasses import asdict, dataclass, field, fields
 from typing import Any, Dict, Mapping, Union
 
 import xarray as xr
-from Comm.communicator import Communicator
-from Quantity import Quantity
+from ndsl.comm.communicator import Communicator
+from ndsl.quantity import Quantity
 
 import ndsl.dsl.gt4py_utils as gt_utils
 from ndsl.constants import (

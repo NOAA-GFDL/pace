@@ -1,6 +1,6 @@
 import numpy as np
 import pytest
-from Quantity import Quantity
+from ndsl.quantity import Quantity
 
 from ndsl.constants import X_DIM, Y_DIM
 

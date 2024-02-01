@@ -19,13 +19,13 @@ from typing import (
 import dace
 import gt4py
 import numpy as np
-from Comm.comm_abc import Comm
-from Comm.communicator import Communicator
-from Comm.decomposition import block_waiting_for_compilation, unblock_waiting_tiles
-from Comm.mpi import MPI
+from ndsl.comm.comm_abc import Comm
+from ndsl.comm.communicator import Communicator
+from ndsl.comm.decomposition import block_waiting_for_compilation, unblock_waiting_tiles
+from ndsl.comm.mpi import MPI
 from gt4py.cartesian import gtscript
 from gt4py.cartesian.gtc.passes.oir_pipeline import DefaultPipeline, OirPipeline
-from Quantity import Quantity
+from ndsl.quantity import Quantity
 
 from ndsl import testing
 from ndsl.constants import X_DIM, X_DIMS, Y_DIM, Y_DIMS, Z_DIM, Z_DIMS
@@ -773,7 +773,7 @@ class GridIndexing:
         configuration (given by dims) and a certain number of halo points.
 
         Args:
-            dims: dimension names, using dimension constants from ndsl.util
+            dims: dimension names, using dimension constants from ndsl.constants
             halos: number of halo points for each dimension, defaults to zero
 
         Returns:
@@ -806,7 +806,7 @@ class GridIndexing:
         which is accessed up to a given number of halo points.
 
         Args:
-            dims: dimension names, using dimension constants from ndsl.util
+            dims: dimension names, using dimension constants from ndsl.constants
             halos: number of halo points for each dimension, defaults to zero
 
         Returns:

@@ -5,7 +5,7 @@ from typing import Optional
 import click
 import yaml
 
-from ndsl.util import AVAILABLE_LOG_LEVELS, ndsl_log
+from ndsl.logging import AVAILABLE_LOG_LEVELS, ndsl_log
 
 from .driver import Driver, DriverConfig
 

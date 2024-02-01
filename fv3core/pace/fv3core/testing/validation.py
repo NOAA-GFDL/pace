@@ -2,7 +2,7 @@ import inspect
 from typing import Callable, Mapping, Tuple
 
 import numpy as np
-from Quantity import Quantity
+from ndsl.quantity import Quantity
 
 import pace.fv3core.stencils.divergence_damping
 import pace.fv3core.stencils.updatedzd

@@ -1,6 +1,6 @@
 import pytest
 
-from ndsl.util import get_tile_number
+from ndsl.comm.partitioner import get_tile_number
 
 
 @pytest.mark.cpu_only

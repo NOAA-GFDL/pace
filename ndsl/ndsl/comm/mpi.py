@@ -4,7 +4,7 @@ except ImportError:
     MPI = None
 from typing import List, Optional, TypeVar, cast
 
-from Comm.comm_abc import Comm, Request
+from ndsl.comm.comm_abc import Comm, Request
 
 from ndsl.logging import ndsl_log
 

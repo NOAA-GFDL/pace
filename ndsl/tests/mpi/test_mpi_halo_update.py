@@ -1,11 +1,11 @@
 import copy
 
 import pytest
-from Comm._boundary_utils import get_boundary_slice
-from Comm.communicator import CubedSphereCommunicator
-from Comm.mpi import MPI
-from Comm.partitioner import CubedSpherePartitioner, TilePartitioner
-from Quantity import Quantity
+from ndsl.comm._boundary_utils import get_boundary_slice
+from ndsl.comm.communicator import CubedSphereCommunicator
+from ndsl.comm.mpi import MPI
+from ndsl.comm.partitioner import CubedSpherePartitioner, TilePartitioner
+from ndsl.quantity import Quantity
 
 from ndsl.constants import (
     BOUNDARY_TYPES,
@@ -36,7 +36,7 @@ def layout():
     if MPI is not None:
         size = MPI.COMM_WORLD.Get_size()
         ranks_per_tile = size // 6
-        ranks_per_edge = int(ranks_per_tile ** 0.5)
+        ranks_per_edge = int(ranks_per_tile**0.5)
         return (ranks_per_edge, ranks_per_edge)
     else:
         return (1, 1)

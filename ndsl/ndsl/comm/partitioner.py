@@ -4,8 +4,8 @@ import functools
 from typing import Callable, List, Optional, Sequence, Tuple, TypeVar, Union, cast
 
 import numpy as np
-from Comm import boundary as bd
-from Quantity import Quantity, QuantityMetadata
+from ndsl.comm import boundary as bd
+from ndsl.quantity import Quantity, QuantityMetadata
 
 from ndsl.constants import (
     EAST,
@@ -17,7 +17,8 @@ from ndsl.constants import (
     SOUTHWEST,
     WEST,
 )
-from ndsl.util import constants, utils
+import ndsl.constants as constants
+from ndsl.utils import list_by_dims
 
 
 # we're caching slice objects which are pretty small, and the number we
@@ -792,9 +793,7 @@ def tile_extent_from_rank_metadata(
             "Only equal sized subdomains are supported, was given "
             f"an edge_interior_ratio of {edge_interior_ratio}"
         )
-    layout_factors = np.asarray(
-        utils.list_by_dims(dims, layout, non_horizontal_value=1)
-    )
+    layout_factors = np.asarray(list_by_dims(dims, layout, non_horizontal_value=1))
     return extent_from_metadata(dims, rank_extent, layout_factors)
 
 
@@ -929,9 +928,7 @@ def _subtile_extents_from_tile_metadata(
                 factor = 1
         return valid_sizes
 
-    layout_factors = np.asarray(
-        utils.list_by_dims(dims, layout, non_horizontal_value=1)
-    )
+    layout_factors = np.asarray(list_by_dims(dims, layout, non_horizontal_value=1))
 
     return_extents = []
     edge_extents = []

@@ -2,14 +2,15 @@ from datetime import datetime, timedelta
 from typing import List, Tuple, Union
 
 import cftime
-from Comm.partitioner import Partitioner, subtile_slice
+from ndsl.comm.partitioner import Partitioner, subtile_slice
 
 from ndsl.logging import ndsl_log
 from ndsl.monitor.convert import to_numpy
 from ndsl.optional_imports import cupy
 from ndsl.optional_imports import xarray as xr
 from ndsl.optional_imports import zarr
-from ndsl.util import constants, utils
+import ndsl.constants as constants
+from ndsl.utils import list_by_dims
 
 
 __all__ = ["ZarrMonitor"]
@@ -267,7 +268,7 @@ def array_chunks(
     tile_array_shape: Tuple[int, ...],
     array_dims: Tuple[str, ...],
 ):
-    layout_by_dims = utils.list_by_dims(array_dims, layout, 1)
+    layout_by_dims = list_by_dims(array_dims, layout, 1)
     chunks_list = []
     for extent, dim, n_ranks in zip(tile_array_shape, array_dims, layout_by_dims):
         if dim in constants.INTERFACE_DIMS:

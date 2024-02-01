@@ -1,7 +1,6 @@
 import dataclasses
 
-from Comm.comm_abc import Comm
-
+from ndsl.comm.comm_abc import Comm
 from ndsl.performance.profiler import NullProfiler, Profiler
 
 from .collector import (

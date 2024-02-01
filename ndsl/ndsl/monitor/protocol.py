@@ -1,6 +1,6 @@
 from typing import Dict, Protocol
 
-from Quantity import Quantity
+from ndsl.quantity import Quantity
 
 
 class Monitor(Protocol):

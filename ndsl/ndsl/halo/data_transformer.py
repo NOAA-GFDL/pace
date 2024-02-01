@@ -5,7 +5,7 @@ from typing import Dict, List, Optional, Sequence, Tuple
 from uuid import UUID, uuid1
 
 import numpy as np
-from Quantity import Quantity, QuantityHaloSpec
+from ndsl.quantity import Quantity, QuantityHaloSpec
 
 from ndsl.buffer import Buffer
 from ndsl.halo.cuda_kernels import (

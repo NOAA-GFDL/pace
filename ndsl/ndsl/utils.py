@@ -5,7 +5,7 @@ import numpy as np
 
 from ndsl.optional_imports import cupy as cp
 from ndsl.types import Allocator
-from ndsl.util import constants
+import ndsl.constants as constants
 
 
 # Run a deviceSynchronize() to check

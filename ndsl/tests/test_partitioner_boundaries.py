@@ -1,5 +1,5 @@
 import pytest
-from Comm.partitioner import (
+from ndsl.comm.partitioner import (
     CubedSpherePartitioner,
     TilePartitioner,
     rotate_subtile_rank,

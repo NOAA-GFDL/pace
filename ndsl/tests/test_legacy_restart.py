@@ -11,9 +11,18 @@ except ModuleNotFoundError:
 import numpy as np
 import pytest
 
-import ndsl.util
-import ndsl.util.restart._legacy_restart
-from ndsl.util.testing import DummyComm
+from ndsl.testing import DummyComm
+from ndsl.comm.communicator import CubedSphereCommunicator
+from ndsl.comm.partitioner import TilePartitioner, CubedSpherePartitioner
+from ndsl.restart._legacy_restart import (
+    open_restart,
+    map_keys,
+    _apply_dims,
+    get_rank_suffix,
+)
+from ndsl.quantity import Quantity
+from ndsl.constants import X_DIM, Y_DIM, Z_DIM, X_INTERFACE_DIM, Y_INTERFACE_DIM
+import ndsl.io as io
 
 
 requires_xarray = pytest.mark.skipif(xr is None, reason="xarray is not installed")
@@ -33,15 +42,15 @@ def get_c12_restart_state_list(layout, only_names, tracer_properties):
     shared_buffer = {}
     communicator_list = []
     for rank in range(total_ranks):
-        communicator = ndsl.util.CubedSphereCommunicator(
+        communicator = CubedSphereCommunicator(
             DummyComm(rank, total_ranks, shared_buffer),
-            ndsl.util.CubedSpherePartitioner(ndsl.util.TilePartitioner(layout)),
+            CubedSpherePartitioner(TilePartitioner(layout)),
         )
         communicator_list.append(communicator)
     state_list = []
     for communicator in communicator_list:
         state_list.append(
-            ndsl.util.open_restart(
+            open_restart(
                 os.path.join(DATA_DIRECTORY, "c12_restart"),
                 communicator,
                 only_names=only_names,
@@ -70,16 +79,16 @@ def test_open_c12_restart(layout):
             if name == "time":
                 assert isinstance(value, cftime.DatetimeJulian)
             else:
-                assert isinstance(value, ndsl.util.Quantity)
+                assert isinstance(value, Quantity)
                 assert np.sum(np.isnan(value.view[:])) == 0
                 for dim, extent in zip(value.dims, value.extent):
-                    if dim == ndsl.util.X_DIM:
+                    if dim == X_DIM:
                         assert extent == nx
-                    elif dim == ndsl.util.X_INTERFACE_DIM:
+                    elif dim == X_INTERFACE_DIM:
                         assert extent == nx + 1
-                    elif dim == ndsl.util.Y_DIM:
+                    elif dim == Y_DIM:
                         assert extent == ny
-                    elif dim == ndsl.util.Y_INTERFACE_DIM:
+                    elif dim == Y_INTERFACE_DIM:
                         assert extent == ny + 1
 
 
@@ -88,33 +97,33 @@ def test_open_c12_restart(layout):
     [
         {
             "specific_humidity": {
-                "dims": [ndsl.util.Z_DIM, ndsl.util.Y_DIM, ndsl.util.X_DIM],
+                "dims": [Z_DIM, Y_DIM, X_DIM],
                 "units": "kg/kg",
                 "restart_name": "sphum",
             },
         },
         {
             "specific_humidity_by_another_name": {
-                "dims": [ndsl.util.Z_DIM, ndsl.util.Y_DIM, ndsl.util.X_DIM],
+                "dims": [Z_DIM, Y_DIM, X_DIM],
                 "units": "kg/kg",
                 "restart_name": "sphum",
             },
         },
         {
             "specific_humidity": {
-                "dims": [ndsl.util.Z_DIM, ndsl.util.Y_DIM, ndsl.util.X_DIM],
+                "dims": [Z_DIM, Y_DIM, X_DIM],
                 "units": "kg/kg",
                 "restart_name": "sphum",
             },
         },
         {
             "specific_humidity": {
-                "dims": [ndsl.util.Z_DIM, ndsl.util.Y_DIM, ndsl.util.X_DIM],
+                "dims": [Z_DIM, Y_DIM, X_DIM],
                 "units": "kg/kg",
                 "restart_name": "sphum",
             },
             "snow_water_mixing_ratio": {
-                "dims": [ndsl.util.Z_DIM, ndsl.util.Y_DIM, ndsl.util.X_DIM],
+                "dims": [Z_DIM, Y_DIM, X_DIM],
                 "units": "kg/kg",
                 "restart_name": "snowwat",
             },
@@ -146,15 +155,15 @@ def test_open_c12_restart_empty_to_state_without_crashing(layout):
     shared_buffer = {}
     communicator_list = []
     for rank in range(total_ranks):
-        communicator = ndsl.util.CubedSphereCommunicator(
+        communicator = CubedSphereCommunicator(
             DummyComm(rank, total_ranks, shared_buffer),
-            ndsl.util.CubedSpherePartitioner(ndsl.util.TilePartitioner(layout)),
+            CubedSpherePartitioner(TilePartitioner(layout)),
         )
         communicator_list.append(communicator)
     state_list = []
     for communicator in communicator_list:
         state_list.append({})
-        ndsl.util.open_restart(
+        open_restart(
             os.path.join(DATA_DIRECTORY, "c12_restart"),
             communicator,
             to_state=state_list[-1],
@@ -166,16 +175,16 @@ def test_open_c12_restart_empty_to_state_without_crashing(layout):
             if name == "time":
                 assert isinstance(value, cftime.DatetimeJulian)
             else:
-                assert isinstance(value, ndsl.util.Quantity)
+                assert isinstance(value, Quantity)
                 assert np.sum(np.isnan(value.view[:])) == 0
                 for dim, extent in zip(value.dims, value.extent):
-                    if dim == ndsl.util.X_DIM:
+                    if dim == X_DIM:
                         assert extent == nx
-                    elif dim == ndsl.util.X_INTERFACE_DIM:
+                    elif dim == X_INTERFACE_DIM:
                         assert extent == nx + 1
-                    elif dim == ndsl.util.Y_DIM:
+                    elif dim == Y_DIM:
                         assert extent == ny
-                    elif dim == ndsl.util.Y_INTERFACE_DIM:
+                    elif dim == Y_INTERFACE_DIM:
                         assert extent == ny + 1
 
 
@@ -189,24 +198,22 @@ def test_open_c12_restart_to_allocated_state_without_crashing(layout):
     shared_buffer = {}
     communicator_list = []
     for rank in range(total_ranks):
-        communicator = ndsl.util.CubedSphereCommunicator(
+        communicator = CubedSphereCommunicator(
             DummyComm(rank, total_ranks, shared_buffer),
-            ndsl.util.CubedSpherePartitioner(ndsl.util.TilePartitioner(layout)),
+            CubedSpherePartitioner(TilePartitioner(layout)),
         )
         communicator_list.append(communicator)
     state_list = []
     for communicator in communicator_list:
         state_list.append(
-            ndsl.util.open_restart(
-                os.path.join(DATA_DIRECTORY, "c12_restart"), communicator
-            )
+            open_restart(os.path.join(DATA_DIRECTORY, "c12_restart"), communicator)
         )
     for state in state_list:
         for name, value in state.items():
             if name != "time":
                 value.view[:] = np.nan
     for state, communicator in zip(state_list, communicator_list):
-        ndsl.util.open_restart(
+        open_restart(
             os.path.join(DATA_DIRECTORY, "c12_restart"), communicator, to_state=state
         )
 
@@ -217,16 +224,16 @@ def test_open_c12_restart_to_allocated_state_without_crashing(layout):
             if name == "time":
                 assert isinstance(value, cftime.DatetimeJulian)
             else:
-                assert isinstance(value, ndsl.util.Quantity)
+                assert isinstance(value, Quantity)
                 assert np.sum(np.isnan(value.view[:])) == 0
                 for dim, extent in zip(value.dims, value.extent):
-                    if dim == ndsl.util.X_DIM:
+                    if dim == X_DIM:
                         assert extent == nx
-                    elif dim == ndsl.util.X_INTERFACE_DIM:
+                    elif dim == X_INTERFACE_DIM:
                         assert extent == nx + 1
-                    elif dim == ndsl.util.Y_DIM:
+                    elif dim == Y_DIM:
                         assert extent == ny
-                    elif dim == ndsl.util.Y_INTERFACE_DIM:
+                    elif dim == Y_INTERFACE_DIM:
                         assert extent == ny + 1
 
 
@@ -250,7 +257,7 @@ def coupler_res_file_and_time(request):
 def test_get_current_date_from_coupler_res(coupler_res_file_and_time):
     filename, current_time = coupler_res_file_and_time
     with open(filename, "r") as f:
-        result = ndsl.util.io.get_current_date_from_coupler_res(f)
+        result = io.get_current_date_from_coupler_res(f)
     assert result == current_time
 
 
@@ -280,7 +287,7 @@ def result_dims(data_array, new_dims):
 @pytest.mark.cpu_only
 @requires_xarray
 def test_apply_dims(data_array, new_dims, result_dims):
-    result = ndsl.util.restart._legacy_restart._apply_dims(data_array, new_dims)
+    result = _apply_dims(data_array, new_dims)
     np.testing.assert_array_equal(result.values, data_array.values)
     assert result.dims == result_dims
     assert result.attrs == data_array.attrs
@@ -323,7 +330,7 @@ def test_apply_dims(data_array, new_dims, result_dims):
 )
 @pytest.mark.cpu_only
 def test_map_keys(old_dict, key_mapping, new_dict):
-    result = ndsl.util.restart._legacy_restart.map_keys(old_dict, key_mapping)
+    result = map_keys(old_dict, key_mapping)
     assert result == new_dict
 
 
@@ -358,7 +365,7 @@ def test_map_keys(old_dict, key_mapping, new_dict):
 )
 @pytest.mark.cpu_only
 def test_get_rank_suffix(rank, total_ranks, suffix):
-    result = ndsl.util.restart._legacy_restart.get_rank_suffix(rank, total_ranks)
+    result = get_rank_suffix(rank, total_ranks)
     assert result == suffix
 
 
@@ -367,7 +374,7 @@ def test_get_rank_suffix(rank, total_ranks, suffix):
 def test_get_rank_suffix_invalid_total_ranks(invalid_total_ranks):
     with pytest.raises(ValueError):
         # total_ranks should be multiple of 6
-        ndsl.util.restart._legacy_restart.get_rank_suffix(0, invalid_total_ranks)
+        get_rank_suffix(0, invalid_total_ranks)
 
 
 @pytest.mark.cpu_only
@@ -377,7 +384,7 @@ def test_read_state_incorrectly_encoded_time():
         state_ds = xr.DataArray(0.0, name="time").to_dataset()
         state_ds.to_netcdf(file.name)
         with pytest.raises(ValueError, match="Time in stored state"):
-            ndsl.util.io.read_state(file.name)
+            io.read_state(file.name)
 
 
 @pytest.mark.cpu_only
@@ -387,7 +394,7 @@ def test_read_state_non_scalar_time():
         state_ds = xr.DataArray([0.0, 1.0], dims=["T"], name="time").to_dataset()
         state_ds.to_netcdf(file.name)
         with pytest.raises(ValueError, match="scalar time"):
-            ndsl.util.io.read_state(file.name)
+            io.read_state(file.name)
 
 
 @pytest.mark.parametrize(

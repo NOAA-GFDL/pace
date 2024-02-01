@@ -3,15 +3,15 @@ import unittest.mock
 from typing import Tuple
 
 import pytest
-from Comm.decomposition import (
+from ndsl.comm.decomposition import (
     block_waiting_for_compilation,
     build_cache_path,
     check_cached_path_exists,
     determine_rank_is_compiling,
     unblock_waiting_tiles,
 )
-from Comm.mpi import MPI
-from Comm.partitioner import CubedSpherePartitioner, TilePartitioner
+from ndsl.comm.mpi import MPI
+from ndsl.comm.partitioner import CubedSpherePartitioner, TilePartitioner
 
 
 @pytest.mark.parametrize(

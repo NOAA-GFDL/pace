@@ -3,9 +3,9 @@ import enum
 import hashlib
 from typing import Any, Callable, Dict, Hashable, Iterable, Optional, Sequence, Tuple
 
-from Comm.communicator import Communicator
-from Comm.decomposition import determine_rank_is_compiling, set_distributed_caches
-from Comm.partitioner import Partitioner
+from ndsl.comm.communicator import Communicator
+from ndsl.comm.decomposition import determine_rank_is_compiling, set_distributed_caches
+from ndsl.comm.partitioner import Partitioner
 from gt4py.cartesian.gtc.passes.oir_pipeline import DefaultPipeline, OirPipeline
 
 from ndsl.dsl.dace.dace_config import DaceConfig, DaCeOrchestration

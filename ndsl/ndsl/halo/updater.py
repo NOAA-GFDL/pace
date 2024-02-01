@@ -2,20 +2,20 @@ from collections import defaultdict
 from typing import TYPE_CHECKING, Dict, Iterable, List, Mapping, Optional, Tuple
 
 import numpy as np
-from Comm.boundary import Boundary
-from Quantity import Quantity, QuantityHaloSpec
+from ndsl.comm.boundary import Boundary
+from ndsl.quantity import Quantity, QuantityHaloSpec
 
 from ndsl.buffer import Buffer
 from ndsl.halo.data_transformer import HaloDataTransformer, HaloExchangeSpec
 from ndsl.halo.rotate import rotate_scalar_data
 from ndsl.performance.timer import NullTimer, Timer
 from ndsl.types import AsyncRequest, NumpyModule
-from ndsl.util import constants
+import ndsl.constants as constants
 from ndsl.utils import device_synchronize
 
 
 if TYPE_CHECKING:
-    from Comm.communicator import Communicator
+    from ndsl.comm.communicator import Communicator
 
 _HaloSendTuple = Tuple[AsyncRequest, Buffer]
 _HaloRecvTuple = Tuple[AsyncRequest, Buffer, np.ndarray]

@@ -57,7 +57,7 @@ class Timer:
             following would time a time.sleep operation::
 
                 >>> import time
-                >>> from ndsl.util import Timer
+                >>> from ndsl.performance.timer import Timer
                 >>> timer = Timer()
                 >>> with timer.clock("sleep"):
                 ...     time.sleep(1)

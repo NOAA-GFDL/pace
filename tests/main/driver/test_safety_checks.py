@@ -3,7 +3,7 @@ import unittest.mock
 import numpy as np
 import pytest
 
-from ndsl.util import Quantity
+from ndsl.quantity import Quantity
 from pace.driver.safety_checks import SafetyChecker
 
 

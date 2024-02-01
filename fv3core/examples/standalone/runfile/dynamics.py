@@ -12,7 +12,7 @@ import f90nml
 import numpy as np
 import xarray as xr
 import yaml
-from Comm.null_comm import NullComm
+from ndsl.comm.null_comm import NullComm
 from mpi4py import MPI
 
 # NOTE: we need to import dsl.stencil prior to

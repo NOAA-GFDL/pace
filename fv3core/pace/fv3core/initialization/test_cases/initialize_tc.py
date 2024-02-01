@@ -1,10 +1,11 @@
 import numpy as np
 
 import ndsl.constants as constants
-import ndsl.util as fv3util
 import pace.fv3core.initialization.init_utils as init_utils
 from ndsl.grid import GridData, great_circle_distance_lon_lat
 from pace.fv3core.dycore_state import DycoreState
+from ndsl.comm.communicator import CubedSphereCommunicator
+from ndsl.initialization.allocator import QuantityFactory
 
 
 def _calculate_distance_from_tc_center(pe_v, ps_v, muv, calc, tc_properties):
@@ -14,7 +15,7 @@ def _calculate_distance_from_tc_center(pe_v, ps_v, muv, calc, tc_properties):
         muv["midpoint"][:, :, 0] - calc["p0"][0]
     )
     d2 = np.cos(calc["p0"][1]) * np.sin(muv["midpoint"][:, :, 0] - calc["p0"][0])
-    d = np.sqrt(d1 ** 2 + d2 ** 2)
+    d = np.sqrt(d1**2 + d2**2)
     d[d < 1e-15] = 1e-15
 
     r = great_circle_distance_lon_lat(
@@ -478,9 +479,9 @@ def _initialize_delz_w(pe, ps, pt, qvapor, tc_properties, calc, shape):
 
 def init_tc_state(
     grid_data: GridData,
-    quantity_factory: fv3util.QuantityFactory,
+    quantity_factory: QuantityFactory,
     hydrostatic: bool,
-    comm: fv3util.CubedSphereCommunicator,
+    comm: CubedSphereCommunicator,
 ) -> DycoreState:
     """
     --WARNING--WARNING--WARNING--WARNING--WARNING--WARNING--WARNING---

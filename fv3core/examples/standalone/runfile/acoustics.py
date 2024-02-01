@@ -7,7 +7,7 @@ import click
 import f90nml
 import serialbox
 import yaml
-from Comm.null_comm import NullComm
+from ndsl.comm.null_comm import NullComm
 from timing import collect_data_and_write_to_file
 
 import ndsl.dsl

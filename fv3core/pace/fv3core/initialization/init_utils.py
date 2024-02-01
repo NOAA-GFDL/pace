@@ -5,7 +5,6 @@ from types import SimpleNamespace
 import numpy as np
 
 import ndsl.constants as constants
-import ndsl.util as fv3util
 from ndsl.dsl.typing import Float
 from ndsl.grid import lon_lat_midpoint
 from ndsl.grid.gnomonic import get_lonlat_vect, get_unit_vector_direction
@@ -29,7 +28,7 @@ LAPSE_RATE = 0.005  # From Table VI of DCMIP2016
 SURFACE_PRESSURE = 1.0e5  # units of (Pa), from Table VI of DCMIP2016
 # NOTE RADIUS = 6.3712e6 in FV3 vs Jabowski paper 6.371229e6
 R = constants.RADIUS / 10.0  # Perturbation radiusfor test case 13
-NHALO = fv3util.N_HALO_DEFAULT
+NHALO = constants.N_HALO_DEFAULT
 
 
 def cell_average_nine_components(
@@ -217,7 +216,7 @@ def initialize_kappa_pressures(pe, peln, ptop):
     """
     pk = np.zeros(pe.shape)
     pkz = np.zeros(pe.shape)
-    pk[:, :, 0] = ptop ** constants.KAPPA
+    pk[:, :, 0] = ptop**constants.KAPPA
     pk[:, :, 1:] = np.exp(constants.KAPPA * np.log(pe[:, :, 1:]))
     pkz[:, :, :-1] = (pk[:, :, 1:] - pk[:, :, :-1]) / (
         constants.KAPPA * (peln[:, :, 1:] - peln[:, :, :-1])

@@ -1,4 +1,4 @@
-from Comm.communicator import Communicator
+from ndsl.comm.communicator import Communicator
 from gt4py.cartesian.gtscript import (
     __INLINED,
     PARALLEL,

@@ -2,7 +2,7 @@ import copy
 from typing import List
 
 import numpy as np
-from Quantity import Quantity
+from ndsl.quantity import Quantity
 
 
 def copy_temporaries(obj, max_depth: int) -> dict:

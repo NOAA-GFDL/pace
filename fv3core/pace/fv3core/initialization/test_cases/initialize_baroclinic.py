@@ -4,10 +4,11 @@ import numpy as np
 
 import ndsl.constants as constants
 import ndsl.dsl.gt4py_utils as utils
-import ndsl.util as fv3util
 import pace.fv3core.initialization.init_utils as init_utils
 from ndsl.grid import GridData, great_circle_distance_lon_lat, lon_lat_midpoint
 from pace.fv3core.dycore_state import DycoreState
+from ndsl.comm.communicator import CubedSphereCommunicator
+from ndsl.initialization.allocator import QuantityFactory
 
 
 # maximum windspeed amplitude - close to windspeed of zonal-mean time-mean
@@ -19,7 +20,7 @@ U1 = 1.0
 SURFACE_PRESSURE = 1.0e5  # units of (Pa), from Table VI of DCMIP2016
 # NOTE RADIUS = 6.3712e6 in FV3 vs Jabowski paper 6.371229e6
 R = constants.RADIUS / 10.0  # Perturbation radiusfor test case 13
-NHALO = fv3util.N_HALO_DEFAULT
+NHALO = constants.N_HALO_DEFAULT
 
 
 def apply_perturbation(u_component, up, lon, lat):
@@ -245,11 +246,11 @@ def baroclinic_initialization(
 
 def init_baroclinic_state(
     grid_data: GridData,
-    quantity_factory: fv3util.QuantityFactory,
+    quantity_factory: QuantityFactory,
     adiabatic: bool,
     hydrostatic: bool,
     moist_phys: bool,
-    comm: fv3util.CubedSphereCommunicator,
+    comm: CubedSphereCommunicator,
 ) -> DycoreState:
     """
     Create a DycoreState object with quantities initialized to the Jablonowski &

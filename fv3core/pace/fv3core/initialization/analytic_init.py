@@ -1,8 +1,9 @@
 from enum import Enum
 
-import ndsl.util as fv3util
+from ndsl.comm.communicator import Communicator, CubedSphereCommunicator
+from ndsl.initialization.allocator import QuantityFactory
 from ndsl.grid import GridData
-from ndsl.util import MetaEnumStr
+from ndsl.utils import MetaEnumStr
 from pace.fv3core.dycore_state import DycoreState
 
 
@@ -14,11 +15,11 @@ class Cases(Enum, metaclass=MetaEnumStr):
 def init_analytic_state(
     analytic_init_case: str,
     grid_data: GridData,
-    quantity_factory: fv3util.QuantityFactory,
+    quantity_factory: QuantityFactory,
     adiabatic: bool,
     hydrostatic: bool,
     moist_phys: bool,
-    comm: fv3util.Communicator,
+    comm: Communicator,
 ) -> DycoreState:
     """
     This method initializes the choosen analytic test case type
@@ -38,7 +39,7 @@ def init_analytic_state(
         if analytic_init_case == Cases.baroclinic.value:  # type: ignore
             import pace.fv3core.initialization.test_cases.initialize_baroclinic as bc
 
-            assert isinstance(comm, fv3util.CubedSphereCommunicator)
+            assert isinstance(comm, CubedSphereCommunicator)
 
             return bc.init_baroclinic_state(
                 grid_data=grid_data,
@@ -52,7 +53,7 @@ def init_analytic_state(
         elif analytic_init_case == Cases.tropicalcyclone.value:  # type: ignore
             import pace.fv3core.initialization.test_cases.initialize_tc as tc
 
-            assert isinstance(comm, fv3util.CubedSphereCommunicator)
+            assert isinstance(comm, CubedSphereCommunicator)
 
             return tc.init_tc_state(
                 grid_data=grid_data,

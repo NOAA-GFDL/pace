@@ -5,8 +5,9 @@ from typing import Any, Dict, List
 import numpy as np
 import pytest
 
-import ndsl.util as fv3util
 from ndsl.dsl import gt4py_utils as utils
+from ndsl.quantity import Quantity
+from ndsl.constants import N_HALO_DEFAULT, HORIZONTAL_DIMS, X_DIMS, Y_DIMS
 
 from .translate import TranslateFortranData2Py, read_serialized_data
 
@@ -70,7 +71,7 @@ class ParallelTranslate:
             input_data = state[name]
             if len(properties["dims"]) > 0:
                 dims = properties["dims"]
-                state[properties["name"]] = fv3util.Quantity(
+                state[properties["name"]] = Quantity(
                     input_data,
                     dims,
                     properties["units"],
@@ -108,7 +109,7 @@ class ParallelTranslate:
             if len(properties["dims"]) > 0:
                 output_slice = _serialize_slice(
                     state[standard_name],
-                    properties.get("n_halo", fv3util.N_HALO_DEFAULT),
+                    properties.get("n_halo", N_HALO_DEFAULT),
                 )
                 return_dict[name] = utils.asarray(
                     state[standard_name].data[output_slice]
@@ -143,7 +144,7 @@ class ParallelTranslateBaseSlicing(ParallelTranslate):
         storages = {}
         for name, properties in self.outputs.items():
             standard_name = properties.get("name", name)
-            if isinstance(state[standard_name], fv3util.Quantity):
+            if isinstance(state[standard_name], Quantity):
                 storages[name] = state[standard_name].data
             elif len(self.outputs[name]["dims"]) > 0:
                 storages[name] = state[standard_name]  # assume it's a storage
@@ -159,12 +160,12 @@ def _serialize_slice(quantity, n_halo, real_dims=None):
     slice_list = []
     for dim, origin, extent in zip(quantity.dims, quantity.origin, quantity.extent):
         if dim in real_dims:
-            if dim in fv3util.HORIZONTAL_DIMS:
+            if dim in HORIZONTAL_DIMS:
                 if isinstance(n_halo, int):
                     halo = n_halo
-                elif dim in fv3util.X_DIMS:
+                elif dim in X_DIMS:
                     halo = n_halo[0]
-                elif dim in fv3util.Y_DIMS:
+                elif dim in Y_DIMS:
                     halo = n_halo[1]
                 else:
                     raise RuntimeError(n_halo)
@@ -197,7 +198,7 @@ class ParallelTranslateGrid(ParallelTranslate):
                 )
                 input_slice = _serialize_slice(
                     state[standard_name],
-                    properties.get("n_halo", fv3util.N_HALO_DEFAULT),
+                    properties.get("n_halo", N_HALO_DEFAULT),
                 )
                 if len(properties["dims"]) > 0:
                     state[standard_name].data[input_slice] = utils.asarray(
@@ -237,7 +238,7 @@ class ParallelTranslate2Py(ParallelTranslate):
         quantity_result = self.outputs_from_state(result)
         result.update(quantity_result)
         for name, data in result.items():
-            if isinstance(data, fv3util.Quantity):
+            if isinstance(data, Quantity):
                 result[name] = data.data
         result.update(self._base.slice_output(result))
         return result

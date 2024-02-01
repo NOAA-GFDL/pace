@@ -1,7 +1,7 @@
 import copy
 from typing import Any, Mapping
 
-from Comm.comm_abc import Comm, Request
+from ndsl.comm.comm_abc import Comm, Request
 
 
 class NullAsyncResult(Request):

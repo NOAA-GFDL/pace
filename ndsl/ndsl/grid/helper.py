@@ -10,7 +10,7 @@ try:
     from ndsl.dsl.gt4py_utils import split_cartesian_into_storages
 except ImportError:
     split_cartesian_into_storages = None
-from Quantity import Quantity
+from ndsl.quantity import Quantity
 
 import ndsl.constants as constants
 from ndsl.constants import Z_DIM, Z_INTERFACE_DIM
