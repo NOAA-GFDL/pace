@@ -2,270 +2,281 @@ from dataclasses import asdict, dataclass, field, fields
 from typing import Any, Dict, Mapping, Union
 
 import xarray as xr
+from Comm.communicator import Communicator
+from Quantity import Quantity
 
 import ndsl.dsl.gt4py_utils as gt_utils
-import ndsl.util
+from ndsl.constants import (
+    X_DIM,
+    X_INTERFACE_DIM,
+    Y_DIM,
+    Y_INTERFACE_DIM,
+    Z_DIM,
+    Z_INTERFACE_DIM,
+)
 from ndsl.dsl.typing import Float
-from ndsl.util.quantity import Quantity
+from ndsl.initialization.allocator import QuantityFactory
+from ndsl.initialization.sizer import GridSizer
+from ndsl.restart._legacy_restart import open_restart
 
 
 @dataclass()
 class DycoreState:
-    u: ndsl.util.Quantity = field(
+    u: Quantity = field(
         metadata={
             "name": "x_wind",
-            "dims": [ndsl.util.X_DIM, ndsl.util.Y_INTERFACE_DIM, ndsl.util.Z_DIM],
+            "dims": [X_DIM, Y_INTERFACE_DIM, Z_DIM],
             "units": "m/s",
             "intent": "inout",
         }
     )
-    v: ndsl.util.Quantity = field(
+    v: Quantity = field(
         metadata={
             "name": "y_wind",
-            "dims": [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
+            "dims": [X_INTERFACE_DIM, Y_DIM, Z_DIM],
             "units": "m/s",
             "intent": "inout",
         }
     )
-    w: ndsl.util.Quantity = field(
+    w: Quantity = field(
         metadata={
             "name": "vertical_wind",
-            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
+            "dims": [X_DIM, Y_DIM, Z_DIM],
             "units": "m/s",
             "intent": "inout",
         }
     )
     # TODO: move a-grid winds to temporary internal storage
-    ua: ndsl.util.Quantity = field(
+    ua: Quantity = field(
         metadata={
             "name": "eastward_wind",
-            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
+            "dims": [X_DIM, Y_DIM, Z_DIM],
             "units": "m/s",
             "intent": "inout",
         }
     )
-    va: ndsl.util.Quantity = field(
+    va: Quantity = field(
         metadata={
             "name": "northward_wind",
-            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
+            "dims": [X_DIM, Y_DIM, Z_DIM],
             "units": "m/s",
         }
     )
-    uc: ndsl.util.Quantity = field(
+    uc: Quantity = field(
         metadata={
             "name": "x_wind_on_c_grid",
-            "dims": [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
+            "dims": [X_INTERFACE_DIM, Y_DIM, Z_DIM],
             "units": "m/s",
             "intent": "inout",
         }
     )
-    vc: ndsl.util.Quantity = field(
+    vc: Quantity = field(
         metadata={
             "name": "y_wind_on_c_grid",
-            "dims": [ndsl.util.X_DIM, ndsl.util.Y_INTERFACE_DIM, ndsl.util.Z_DIM],
+            "dims": [X_DIM, Y_INTERFACE_DIM, Z_DIM],
             "units": "m/s",
             "intent": "inout",
         }
     )
-    delp: ndsl.util.Quantity = field(
+    delp: Quantity = field(
         metadata={
             "name": "pressure_thickness_of_atmospheric_layer",
-            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
+            "dims": [X_DIM, Y_DIM, Z_DIM],
             "units": "Pa",
             "intent": "inout",
         }
     )
-    delz: ndsl.util.Quantity = field(
+    delz: Quantity = field(
         metadata={
             "name": "vertical_thickness_of_atmospheric_layer",
-            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
+            "dims": [X_DIM, Y_DIM, Z_DIM],
             "units": "m",
             "intent": "inout",
         }
     )
-    ps: ndsl.util.Quantity = field(
+    ps: Quantity = field(
         metadata={
             "name": "surface_pressure",
-            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
+            "dims": [X_DIM, Y_DIM],
             "units": "Pa",
             "intent": "inout",
         }
     )
-    pe: ndsl.util.Quantity = field(
+    pe: Quantity = field(
         metadata={
             "name": "interface_pressure",
-            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_INTERFACE_DIM],
+            "dims": [X_DIM, Y_DIM, Z_INTERFACE_DIM],
             "units": "Pa",
             "n_halo": 1,
             "intent": "inout",
         }
     )
-    pt: ndsl.util.Quantity = field(
+    pt: Quantity = field(
         metadata={
             "name": "air_temperature",
-            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
+            "dims": [X_DIM, Y_DIM, Z_DIM],
             "units": "degK",
             "intent": "inout",
         }
     )
-    peln: ndsl.util.Quantity = field(
+    peln: Quantity = field(
         metadata={
             "name": "logarithm_of_interface_pressure",
             "dims": [
-                ndsl.util.X_DIM,
-                ndsl.util.Y_DIM,
-                ndsl.util.Z_INTERFACE_DIM,
+                X_DIM,
+                Y_DIM,
+                Z_INTERFACE_DIM,
             ],
             "units": "ln(Pa)",
             "n_halo": 0,
             "intent": "inout",
         }
     )
-    pk: ndsl.util.Quantity = field(
+    pk: Quantity = field(
         metadata={
             "name": "interface_pressure_raised_to_power_of_kappa",
-            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_INTERFACE_DIM],
+            "dims": [X_DIM, Y_DIM, Z_INTERFACE_DIM],
             "units": "unknown",
             "n_halo": 0,
             "intent": "inout",
         }
     )
-    pkz: ndsl.util.Quantity = field(
+    pkz: Quantity = field(
         metadata={
             "name": "layer_mean_pressure_raised_to_power_of_kappa",
-            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
+            "dims": [X_DIM, Y_DIM, Z_DIM],
             "units": "unknown",
             "n_halo": 0,
             "intent": "inout",
         }
     )
-    qvapor: ndsl.util.Quantity = field(
+    qvapor: Quantity = field(
         metadata={
             "name": "specific_humidity",
-            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
+            "dims": [X_DIM, Y_DIM, Z_DIM],
             "units": "kg/kg",
         }
     )
-    qliquid: ndsl.util.Quantity = field(
+    qliquid: Quantity = field(
         metadata={
             "name": "cloud_water_mixing_ratio",
-            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
+            "dims": [X_DIM, Y_DIM, Z_DIM],
             "units": "kg/kg",
             "intent": "inout",
         }
     )
-    qice: ndsl.util.Quantity = field(
+    qice: Quantity = field(
         metadata={
             "name": "cloud_ice_mixing_ratio",
-            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
+            "dims": [X_DIM, Y_DIM, Z_DIM],
             "units": "kg/kg",
             "intent": "inout",
         }
     )
-    qrain: ndsl.util.Quantity = field(
+    qrain: Quantity = field(
         metadata={
             "name": "rain_mixing_ratio",
-            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
+            "dims": [X_DIM, Y_DIM, Z_DIM],
             "units": "kg/kg",
             "intent": "inout",
         }
     )
-    qsnow: ndsl.util.Quantity = field(
+    qsnow: Quantity = field(
         metadata={
             "name": "snow_mixing_ratio",
-            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
+            "dims": [X_DIM, Y_DIM, Z_DIM],
             "units": "kg/kg",
             "intent": "inout",
         }
     )
-    qgraupel: ndsl.util.Quantity = field(
+    qgraupel: Quantity = field(
         metadata={
             "name": "graupel_mixing_ratio",
-            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
+            "dims": [X_DIM, Y_DIM, Z_DIM],
             "units": "kg/kg",
             "intent": "inout",
         }
     )
-    qo3mr: ndsl.util.Quantity = field(
+    qo3mr: Quantity = field(
         metadata={
             "name": "ozone_mixing_ratio",
-            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
+            "dims": [X_DIM, Y_DIM, Z_DIM],
             "units": "kg/kg",
             "intent": "inout",
         }
     )
-    qsgs_tke: ndsl.util.Quantity = field(
+    qsgs_tke: Quantity = field(
         metadata={
             "name": "turbulent_kinetic_energy",
-            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
+            "dims": [X_DIM, Y_DIM, Z_DIM],
             "units": "m**2/s**2",
             "intent": "inout",
         }
     )
-    qcld: ndsl.util.Quantity = field(
+    qcld: Quantity = field(
         metadata={
             "name": "cloud_fraction",
-            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
+            "dims": [X_DIM, Y_DIM, Z_DIM],
             "units": "",
             "intent": "inout",
         }
     )
-    q_con: ndsl.util.Quantity = field(
+    q_con: Quantity = field(
         metadata={
             "name": "total_condensate_mixing_ratio",
-            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
+            "dims": [X_DIM, Y_DIM, Z_DIM],
             "units": "kg/kg",
             "intent": "inout",
         }
     )
-    omga: ndsl.util.Quantity = field(
+    omga: Quantity = field(
         metadata={
             "name": "vertical_pressure_velocity",
-            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
+            "dims": [X_DIM, Y_DIM, Z_DIM],
             "units": "Pa/s",
             "intent": "inout",
         }
     )
-    mfxd: ndsl.util.Quantity = field(
+    mfxd: Quantity = field(
         metadata={
             "name": "accumulated_x_mass_flux",
-            "dims": [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
+            "dims": [X_INTERFACE_DIM, Y_DIM, Z_DIM],
             "units": "unknown",
             "n_halo": 0,
             "intent": "inout",
         }
     )
-    mfyd: ndsl.util.Quantity = field(
+    mfyd: Quantity = field(
         metadata={
             "name": "accumulated_y_mass_flux",
-            "dims": [ndsl.util.X_DIM, ndsl.util.Y_INTERFACE_DIM, ndsl.util.Z_DIM],
+            "dims": [X_DIM, Y_INTERFACE_DIM, Z_DIM],
             "units": "unknown",
             "n_halo": 0,
             "intent": "inout",
         }
     )
-    cxd: ndsl.util.Quantity = field(
+    cxd: Quantity = field(
         metadata={
             "name": "accumulated_x_courant_number",
-            "dims": [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
+            "dims": [X_INTERFACE_DIM, Y_DIM, Z_DIM],
             "units": "",
             "n_halo": (0, 3),
             "intent": "inout",
         }
     )
-    cyd: ndsl.util.Quantity = field(
+    cyd: Quantity = field(
         metadata={
             "name": "accumulated_y_courant_number",
-            "dims": [ndsl.util.X_DIM, ndsl.util.Y_INTERFACE_DIM, ndsl.util.Z_DIM],
+            "dims": [X_DIM, Y_INTERFACE_DIM, Z_DIM],
             "units": "",
             "n_halo": (3, 0),
             "intent": "inout",
         }
     )
-    diss_estd: ndsl.util.Quantity = field(
+    diss_estd: Quantity = field(
         metadata={
             "name": "dissipation_estimate_from_heat_source",
-            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
+            "dims": [X_DIM, Y_DIM, Z_DIM],
             "units": "unknown",
             "n_halo": (3, 3),
             "intent": "inout",
@@ -275,11 +286,11 @@ class DycoreState:
     how much energy is dissipated, is mainly captured
     to send to the stochastic physics (in contrast to heat_source)
     """
-    phis: ndsl.util.Quantity = field(
+    phis: Quantity = field(
         metadata={
             "name": "surface_geopotential",
             "units": "m^2 s^-2",
-            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM],
+            "dims": [X_DIM, Y_DIM],
             "intent": "in",
         }
     )
@@ -301,7 +312,7 @@ class DycoreState:
                         )
 
     @classmethod
-    def init_zeros(cls, quantity_factory: ndsl.util.QuantityFactory):
+    def init_zeros(cls, quantity_factory: QuantityFactory):
         initial_storages = {}
         for _field in fields(cls):
             if "dims" in _field.metadata.keys():
@@ -316,7 +327,7 @@ class DycoreState:
 
     @classmethod
     def init_from_numpy_arrays(
-        cls, dict_of_numpy_arrays, sizer: ndsl.util.GridSizer, backend: str
+        cls, dict_of_numpy_arrays, sizer: GridSizer, backend: str
     ):
         field_names = [_field.name for _field in fields(cls)]
         for variable_name in dict_of_numpy_arrays.keys():
@@ -328,7 +339,7 @@ class DycoreState:
         for _field in fields(cls):
             if "dims" in _field.metadata.keys():
                 dims = _field.metadata["dims"]
-                dict_state[_field.name] = ndsl.util.Quantity(
+                dict_state[_field.name] = Quantity(
                     dict_of_numpy_arrays[_field.name],
                     dims,
                     _field.metadata["units"],
@@ -343,7 +354,7 @@ class DycoreState:
     def init_from_storages(
         cls,
         storages: Mapping[str, Any],
-        sizer: ndsl.util.GridSizer,
+        sizer: GridSizer,
         bdt: float = 0.0,
         mdt: float = 0.0,
     ):
@@ -351,7 +362,7 @@ class DycoreState:
         for _field in fields(cls):
             if "dims" in _field.metadata.keys():
                 dims = _field.metadata["dims"]
-                quantity = ndsl.util.Quantity(
+                quantity = Quantity(
                     storages[_field.name],
                     dims,
                     _field.metadata["units"],
@@ -365,11 +376,11 @@ class DycoreState:
     def from_fortran_restart(
         cls,
         *,
-        quantity_factory: ndsl.util.QuantityFactory,
-        communicator: ndsl.util.Communicator,
+        quantity_factory: QuantityFactory,
+        communicator: Communicator,
         path: str,
     ):
-        state_dict: Mapping[str, ndsl.util.Quantity] = ndsl.util.open_restart(
+        state_dict: Mapping[str, Quantity] = open_restart(
             dirname=path,
             communicator=communicator,
             tracer_properties=TRACER_PROPERTIES,
@@ -434,7 +445,7 @@ class DycoreState:
     def xr_dataset(self):
         data_vars = {}
         for name, field_info in self.__dataclass_fields__.items():
-            if issubclass(field_info.type, ndsl.util.Quantity):
+            if issubclass(field_info.type, Quantity):
                 dims = [
                     f"{dim_name}_{name}" for dim_name in field_info.metadata["dims"]
                 ]
@@ -460,47 +471,47 @@ class DycoreState:
 
 TRACER_PROPERTIES = {
     "specific_humidity": {
-        "dims": [ndsl.util.Z_DIM, ndsl.util.Y_DIM, ndsl.util.X_DIM],
+        "dims": [Z_DIM, Y_DIM, X_DIM],
         "restart_name": "sphum",
         "units": "g/kg",
     },
     "cloud_liquid_water_mixing_ratio": {
-        "dims": [ndsl.util.Z_DIM, ndsl.util.Y_DIM, ndsl.util.X_DIM],
+        "dims": [Z_DIM, Y_DIM, X_DIM],
         "restart_name": "liq_wat",
         "units": "g/kg",
     },
     "cloud_ice_mixing_ratio": {
-        "dims": [ndsl.util.Z_DIM, ndsl.util.Y_DIM, ndsl.util.X_DIM],
+        "dims": [Z_DIM, Y_DIM, X_DIM],
         "restart_name": "ice_wat",
         "units": "g/kg",
     },
     "rain_mixing_ratio": {
-        "dims": [ndsl.util.Z_DIM, ndsl.util.Y_DIM, ndsl.util.X_DIM],
+        "dims": [Z_DIM, Y_DIM, X_DIM],
         "restart_name": "rainwat",
         "units": "g/kg",
     },
     "snow_mixing_ratio": {
-        "dims": [ndsl.util.Z_DIM, ndsl.util.Y_DIM, ndsl.util.X_DIM],
+        "dims": [Z_DIM, Y_DIM, X_DIM],
         "restart_name": "snowwat",
         "units": "g/kg",
     },
     "graupel_mixing_ratio": {
-        "dims": [ndsl.util.Z_DIM, ndsl.util.Y_DIM, ndsl.util.X_DIM],
+        "dims": [Z_DIM, Y_DIM, X_DIM],
         "restart_name": "graupel",
         "units": "g/kg",
     },
     "ozone_mixing_ratio": {
-        "dims": [ndsl.util.Z_DIM, ndsl.util.Y_DIM, ndsl.util.X_DIM],
+        "dims": [Z_DIM, Y_DIM, X_DIM],
         "restart_name": "o3mr",
         "units": "g/kg",
     },
     "turbulent_kinetic_energy": {
-        "dims": [ndsl.util.Z_DIM, ndsl.util.Y_DIM, ndsl.util.X_DIM],
+        "dims": [Z_DIM, Y_DIM, X_DIM],
         "restart_name": "sgs_tke",
         "units": "g/kg",
     },
     "cloud_fraction": {
-        "dims": [ndsl.util.Z_DIM, ndsl.util.Y_DIM, ndsl.util.X_DIM],
+        "dims": [Z_DIM, Y_DIM, X_DIM],
         "restart_name": "cld_amt",
         "units": "g/kg",
     },

@@ -7,8 +7,10 @@ import yaml
 import zarr
 from mpi4py import MPI
 
-import ndsl.dsl
-import ndsl.util
+from ndsl.comm.communicator import CubedSphereCommunicator
+from ndsl.comm.null_comm import NullComm
+from ndsl.comm.partitioner import CubedSpherePartitioner, TilePartitioner
+from ndsl.quantity import Quantity
 from pace.driver import DriverConfig
 from pace.driver.state import DriverState
 from pace.physics import PHYSICS_PACKAGES
@@ -52,11 +54,9 @@ def test_restart():
         with open("RESTART/restart.yaml", "r") as f:
             restart_config = DriverConfig.from_dict(yaml.safe_load(f))
 
-        mpi_comm = ndsl.util.NullComm(rank=0, total_ranks=6, fill_value=0.0)
-        partitioner = ndsl.util.CubedSpherePartitioner(
-            ndsl.util.TilePartitioner((1, 1))
-        )
-        communicator = ndsl.util.CubedSphereCommunicator(mpi_comm, partitioner)
+        mpi_comm = NullComm(rank=0, total_ranks=6, fill_value=0.0)
+        partitioner = CubedSpherePartitioner(TilePartitioner((1, 1)))
+        communicator = CubedSphereCommunicator(mpi_comm, partitioner)
         (damping_coefficients, driver_grid_data, grid_data,) = restart_config.get_grid(
             communicator=communicator,
         )
@@ -75,7 +75,7 @@ def test_restart():
             f"RESTART/restart_dycore_state_{communicator.rank}.nc"
         )
         for var in driver_state.dycore_state.__dict__.keys():
-            if isinstance(driver_state.dycore_state.__dict__[var], ndsl.util.Quantity):
+            if isinstance(driver_state.dycore_state.__dict__[var], Quantity):
                 np.testing.assert_allclose(
                     driver_state.dycore_state.__dict__[var].data,
                     restart_dycore[var].values,

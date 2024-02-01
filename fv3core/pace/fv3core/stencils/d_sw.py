@@ -10,13 +10,14 @@ from gt4py.cartesian.gtscript import (
     region,
 )
 
-import ndsl.util
 import pace.fv3core.stencils.delnflux as delnflux
+from ndsl.constants import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_DIM
 from ndsl.dsl.dace.orchestration import orchestrate
 from ndsl.dsl.stencil import StencilFactory
 from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ, FloatFieldK
-from ndsl.util import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_DIM
-from ndsl.util.grid import DampingCoefficients, GridData
+from ndsl.grid import DampingCoefficients, GridData
+from ndsl.initialization.allocator import QuantityFactory
+from ndsl.quantity import Quantity
 from pace.fv3core._config import DGridShallowWaterLagrangianDynamicsConfig
 from pace.fv3core.stencils.d2a2c_vect import contravariant
 from pace.fv3core.stencils.delnflux import DelnFluxNoSG
@@ -624,7 +625,7 @@ def update_u_and_v(
 # Set the unique parameters for the smallest
 # k-values, e.g. k = 0, 1, 2 when generating
 # the column namelist
-def set_low_kvals(col: Mapping[str, ndsl.util.Quantity], k):
+def set_low_kvals(col: Mapping[str, Quantity], k):
     for name in ["nord", "nord_w", "d_con"]:
         col[name].view[k] = 0
     col["damp_w"].view[k] = col["d2_divg"].view[k]
@@ -645,7 +646,7 @@ def lowest_kvals(column, k, do_vort_damp):
 
 def get_column_namelist(
     config: DGridShallowWaterLagrangianDynamicsConfig,
-    quantity_factory: ndsl.util.QuantityFactory,
+    quantity_factory: QuantityFactory,
 ):
     """
     Generate a dictionary of columns that specify how parameters (such as nord, damp)
@@ -662,7 +663,7 @@ def get_column_namelist(
         "damp_t",
         "d2_divg",
     ]
-    col: Dict[str, ndsl.util.Quantity] = {}
+    col: Dict[str, Quantity] = {}
     for name in all_names:
         # TODO: fill units information
         col[name] = quantity_factory.zeros(
@@ -748,7 +749,7 @@ class DGridShallowWaterLagrangianDynamics:
     def __init__(
         self,
         stencil_factory: StencilFactory,
-        quantity_factory: ndsl.util.QuantityFactory,
+        quantity_factory: QuantityFactory,
         grid_data: GridData,
         damping_coefficients: DampingCoefficients,
         column_namelist,

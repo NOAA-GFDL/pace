@@ -12,11 +12,21 @@ from datetime import datetime, timedelta
 import cftime
 import pytest
 
-import ndsl.util
-from ndsl.util import X_DIMS, Y_DIMS
-from ndsl.util.monitor.zarr_monitor import array_chunks, get_calendar
-from ndsl.util.optional_imports import xarray as xr
-from ndsl.util.testing import DummyComm
+from ndsl.comm.partitioner import CubedSpherePartitioner, TilePartitioner
+from ndsl.constants import (
+    X_DIM,
+    X_DIMS,
+    X_INTERFACE_DIM,
+    Y_DIM,
+    Y_DIMS,
+    Y_INTERFACE_DIM,
+    Z_DIM,
+)
+from ndsl.monitor import ZarrMonitor
+from ndsl.monitor.zarr_monitor import array_chunks, get_calendar
+from ndsl.optional_imports import xarray as xr
+from ndsl.quantity import Quantity
+from ndsl.testing import DummyComm
 
 
 requires_zarr = pytest.mark.skipif(zarr is None, reason="zarr is not installed")
@@ -79,12 +89,12 @@ def layout():
 
 @pytest.fixture
 def tile_partitioner(layout):
-    return ndsl.util.TilePartitioner(layout)
+    return TilePartitioner(layout)
 
 
 @pytest.fixture
 def cube_partitioner(tile_partitioner):
-    return ndsl.util.CubedSpherePartitioner(tile_partitioner)
+    return CubedSpherePartitioner(tile_partitioner)
 
 
 @pytest.fixture(params=["empty", "one_var_2d", "one_var_3d", "two_vars"])
@@ -93,7 +103,7 @@ def base_state(request, nz, ny, nx, numpy):
         return {}
     elif request.param == "one_var_2d":
         return {
-            "var1": ndsl.util.Quantity(
+            "var1": Quantity(
                 numpy.ones([ny, nx]),
                 dims=("y", "x"),
                 units="m",
@@ -101,7 +111,7 @@ def base_state(request, nz, ny, nx, numpy):
         }
     elif request.param == "one_var_3d":
         return {
-            "var1": ndsl.util.Quantity(
+            "var1": Quantity(
                 numpy.ones([nz, ny, nx]),
                 dims=("z", "y", "x"),
                 units="m",
@@ -109,12 +119,12 @@ def base_state(request, nz, ny, nx, numpy):
         }
     elif request.param == "two_vars":
         return {
-            "var1": ndsl.util.Quantity(
+            "var1": Quantity(
                 numpy.ones([ny, nx]),
                 dims=("y", "x"),
                 units="m",
             ),
-            "var2": ndsl.util.Quantity(
+            "var2": Quantity(
                 numpy.ones([nz, ny, nx]),
                 dims=("z", "y", "x"),
                 units="degK",
@@ -140,7 +150,7 @@ def state_list(base_state, n_times, start_time, time_step, numpy):
 @requires_xarray
 def test_monitor_file_store(state_list, cube_partitioner, numpy, start_time):
     with tempfile.TemporaryDirectory(suffix=".zarr") as tempdir:
-        monitor = ndsl.util.ZarrMonitor(tempdir, cube_partitioner)
+        monitor = ZarrMonitor(tempdir, cube_partitioner)
         for state in state_list:
             monitor.store(state)
         validate_store(state_list, tempdir, numpy, start_time)
@@ -227,17 +237,17 @@ def test_monitor_file_store_multi_rank_state(
     nz, ny, nx = shape
     ny_rank = int(ny / layout[0] + ny_rank_add)
     nx_rank = int(nx / layout[1] + nx_rank_add)
-    grid = ndsl.util.TilePartitioner(layout)
+    grid = TilePartitioner(layout)
     time = cftime.DatetimeJulian(2010, 6, 20, 6, 0, 0)
     timestep = timedelta(hours=1)
     total_ranks = 6 * layout[0] * layout[1]
-    partitioner = ndsl.util.CubedSpherePartitioner(grid)
+    partitioner = CubedSpherePartitioner(grid)
     store = zarr.storage.DirectoryStore(tmpdir)
     shared_buffer = {}
     monitor_list = []
     for rank in range(total_ranks):
         monitor_list.append(
-            ndsl.util.ZarrMonitor(
+            ZarrMonitor(
                 store,
                 partitioner,
                 "w",
@@ -250,7 +260,7 @@ def test_monitor_file_store_multi_rank_state(
         for rank in range(total_ranks):
             state = {
                 "time": time + i_t * timestep,
-                "var1": ndsl.util.Quantity(
+                "var1": Quantity(
                     numpy.ones([nz, ny_rank, nx_rank]),
                     dims=dims,
                     units=units,
@@ -269,25 +279,25 @@ def test_monitor_file_store_multi_rank_state(
         pytest.param(
             (1, 1),
             (7, 6, 6),
-            [ndsl.util.Z_DIM, ndsl.util.Y_DIM, ndsl.util.X_DIM],
+            [Z_DIM, Y_DIM, X_DIM],
             (7, 6, 6),
             id="single_chunk_tile_3d",
         ),
         pytest.param(
             (1, 1),
             (6, 6),
-            [ndsl.util.Y_DIM, ndsl.util.X_DIM],
+            [Y_DIM, X_DIM],
             (6, 6),
             id="single_chunk_tile_2d",
         ),
-        pytest.param((1, 1), (6,), [ndsl.util.Y_DIM], (6,), id="single_chunk_tile_1d"),
+        pytest.param((1, 1), (6,), [Y_DIM], (6,), id="single_chunk_tile_1d"),
         pytest.param(
             (1, 1),
             (7, 6, 6),
             [
-                ndsl.util.Z_DIM,
-                ndsl.util.Y_INTERFACE_DIM,
-                ndsl.util.X_INTERFACE_DIM,
+                Z_DIM,
+                Y_INTERFACE_DIM,
+                X_INTERFACE_DIM,
             ],
             (7, 5, 5),
             id="single_chunk_tile_3d_interfaces",
@@ -295,14 +305,14 @@ def test_monitor_file_store_multi_rank_state(
         pytest.param(
             (2, 2),
             (7, 6, 6),
-            [ndsl.util.Z_DIM, ndsl.util.Y_DIM, ndsl.util.X_DIM],
+            [Z_DIM, Y_DIM, X_DIM],
             (7, 3, 3),
             id="2_by_2_tile_3d",
         ),
         pytest.param(
             (2, 2),
             (6, 16, 6),
-            [ndsl.util.Y_DIM, ndsl.util.Z_DIM, ndsl.util.X_DIM],
+            [Y_DIM, Z_DIM, X_DIM],
             (3, 16, 3),
             id="2_by_2_tile_3d_odd_dim_order",
         ),
@@ -310,9 +320,9 @@ def test_monitor_file_store_multi_rank_state(
             (2, 2),
             (7, 7, 7),
             [
-                ndsl.util.Z_DIM,
-                ndsl.util.Y_INTERFACE_DIM,
-                ndsl.util.X_INTERFACE_DIM,
+                Z_DIM,
+                Y_INTERFACE_DIM,
+                X_INTERFACE_DIM,
             ],
             (7, 3, 3),
             id="2_by_2_tile_3d_interfaces",
@@ -342,10 +352,8 @@ def test_open_zarr_without_nans(cube_partitioner, numpy, backend, mask_and_scale
     store = {}
 
     # initialize store
-    monitor = ndsl.util.ZarrMonitor(store, cube_partitioner)
-    zero_quantity = ndsl.util.Quantity(
-        numpy.zeros([10, 10]), dims=("y", "x"), units="m"
-    )
+    monitor = ZarrMonitor(store, cube_partitioner)
+    zero_quantity = Quantity(numpy.zeros([10, 10]), dims=("y", "x"), units="m")
     monitor.store({"var": zero_quantity})
 
     # open w/o dask using chunks=None
@@ -362,10 +370,8 @@ def test_values_preserved(cube_partitioner, numpy):
     store = {}
 
     # initialize store
-    monitor = ndsl.util.ZarrMonitor(store, cube_partitioner)
-    quantity = ndsl.util.Quantity(
-        numpy.random.uniform(size=(10, 10)), dims=dims, units=units
-    )
+    monitor = ZarrMonitor(store, cube_partitioner)
+    quantity = Quantity(numpy.random.uniform(size=(10, 10)), dims=dims, units=units)
     monitor.store({"var": quantity})
 
     # open w/o dask using chunks=None
@@ -397,7 +403,7 @@ def test_monitor_file_store_inconsistent_calendars(
     state_list_with_inconsistent_calendars, cube_partitioner, numpy
 ):
     with tempfile.TemporaryDirectory(suffix=".zarr") as tempdir:
-        monitor = ndsl.util.ZarrMonitor(tempdir, cube_partitioner)
+        monitor = ZarrMonitor(tempdir, cube_partitioner)
         initial_state, final_state = state_list_with_inconsistent_calendars
         monitor.store(initial_state)
         with pytest.raises(ValueError, match="Calendar type"):
@@ -415,7 +421,7 @@ def test_monitor_file_store_inconsistent_calendars(
 )
 def diag(request, numpy):
     dims = request.param
-    diag = ndsl.util.Quantity(
+    diag = Quantity(
         numpy.ones([size + 2 for size in range(len(dims))]), dims=dims, units="m"
     )
     return diag
@@ -437,7 +443,7 @@ def zarr_store(tmpdir_factory):
 
 @pytest.fixture(scope="function")
 def zarr_monitor_single_rank(zarr_store, cube_partitioner):
-    return ndsl.util.ZarrMonitor(zarr_store, cube_partitioner)
+    return ZarrMonitor(zarr_store, cube_partitioner)
 
 
 @requires_zarr
@@ -447,7 +453,7 @@ def test_transposed_diags_write_across_ranks(diag, cube_partitioner, zarr_store)
     total_ranks = 6 * layout[0] * layout[1]
     shared_buffer = {}
     for rank in range(total_ranks):
-        monitor = ndsl.util.ZarrMonitor(
+        monitor = ZarrMonitor(
             zarr_store,
             cube_partitioner,
             mpi_comm=DummyComm(
@@ -490,7 +496,7 @@ def test_diags_fail_different_dim_set(diag, numpy, zarr_monitor_single_rank):
     zarr_monitor_single_rank.store({"time": time_1, "a": diag})
     new_dims = list(diag.dims)
     new_dims[-1] = "some_other_dim"
-    diag_2 = ndsl.util.Quantity(
+    diag_2 = Quantity(
         numpy.ones([size + 2 for size in range(len(diag.dims))]),
         dims=new_dims,
         units="m",
@@ -510,6 +516,6 @@ def test_diags_only_consistent_units_attrs_required(diag, zarr_monitor_single_ra
     diag_2 = copy.deepcopy(diag)
     diag_2._attrs.update({"some_non_units_attrs": 9.0})
     zarr_monitor_single_rank.store({"time": time_2, "a": diag_2})
-    diag_3 = ndsl.util.Quantity(data=diag.values, dims=diag.dims, units="not_m")
+    diag_3 = Quantity(data=diag.values, dims=diag.dims, units="not_m")
     with pytest.raises(ValueError):
         zarr_monitor_single_rank.store({"time": time_3, "a": diag_3})

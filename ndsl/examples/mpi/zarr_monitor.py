@@ -5,20 +5,20 @@ import numpy as np
 import zarr
 from mpi4py import MPI
 
-import ndsl.util
+from ndsl.comm.partitioner import CubedSpherePartitioner, TilePartitioner
+from ndsl.constants import X_DIM, Y_DIM, Z_DIM
+from ndsl.initialization.allocator import QuantityFactory
+from ndsl.initialization.sizer import SubtileGridSizer
+from ndsl.monitor import ZarrMonitor
 
 
 OUTPUT_PATH = "output/zarr_monitor.zarr"
 
 
 def get_example_state(time):
-    sizer = ndsl.util.SubtileGridSizer(
-        nx=48, ny=48, nz=70, n_halo=3, extra_dim_lengths={}
-    )
-    allocator = ndsl.util.QuantityFactory(sizer, np)
-    air_temperature = allocator.zeros(
-        [ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM], units="degK"
-    )
+    sizer = SubtileGridSizer(nx=48, ny=48, nz=70, n_halo=3, extra_dim_lengths={})
+    allocator = QuantityFactory(sizer, np)
+    air_temperature = allocator.zeros([X_DIM, Y_DIM, Z_DIM], units="degK")
     air_temperature.view[:] = np.random.randn(*air_temperature.extent)
     return {"time": time, "air_temperature": air_temperature}
 
@@ -30,8 +30,8 @@ if __name__ == "__main__":
     layout = (ranks_per_edge, ranks_per_edge)
 
     store = zarr.storage.DirectoryStore(OUTPUT_PATH)
-    partitioner = ndsl.util.CubedSpherePartitioner(ndsl.util.TilePartitioner(layout))
-    monitor = ndsl.util.ZarrMonitor(store, partitioner, mpi_comm=MPI.COMM_WORLD)
+    partitioner = CubedSpherePartitioner(TilePartitioner(layout))
+    monitor = ZarrMonitor(store, partitioner, mpi_comm=MPI.COMM_WORLD)
 
     time = cftime.DatetimeJulian(2020, 1, 1)
     timestep = timedelta(hours=1)

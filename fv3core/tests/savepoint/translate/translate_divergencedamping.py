@@ -1,7 +1,8 @@
 from typing import Optional
 
-import ndsl.dsl
-import ndsl.util
+from ndsl.constants import Z_DIM
+from ndsl.dsl.stencil import StencilFactory
+from ndsl.namelist import Namelist
 from pace.fv3core.stencils.divergence_damping import DivergenceDamping
 from pace.fv3core.testing import TranslateDycoreFortranData2Py
 
@@ -10,8 +11,8 @@ class TranslateDivergenceDamping(TranslateDycoreFortranData2Py):
     def __init__(
         self,
         grid,
-        namelist: ndsl.util.Namelist,
-        stencil_factory: ndsl.dsl.StencilFactory,
+        namelist: Namelist,
+        stencil_factory: StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
         self.in_vars["data_vars"] = {
@@ -40,13 +41,9 @@ class TranslateDivergenceDamping(TranslateDycoreFortranData2Py):
         self.namelist = namelist  # type: ignore
 
     def compute_from_storage(self, inputs):
-        nord_col = self.grid.quantity_factory.zeros(
-            dims=[ndsl.util.Z_DIM], units="unknown"
-        )
+        nord_col = self.grid.quantity_factory.zeros(dims=[Z_DIM], units="unknown")
         nord_col.data[:] = nord_col.np.asarray(inputs.pop("nord_col"))
-        d2_bg = self.grid.quantity_factory.zeros(
-            dims=[ndsl.util.Z_DIM], units="unknown"
-        )
+        d2_bg = self.grid.quantity_factory.zeros(dims=[Z_DIM], units="unknown")
         d2_bg.data[:] = d2_bg.np.asarray(inputs.pop("d2_bg"))
         self.divdamp = DivergenceDamping(
             self.stencil_factory,

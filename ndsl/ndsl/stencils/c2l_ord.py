@@ -1,3 +1,4 @@
+from Comm.communicator import Communicator
 from gt4py.cartesian.gtscript import (
     __INLINED,
     PARALLEL,
@@ -8,12 +9,12 @@ from gt4py.cartesian.gtscript import (
 )
 
 import ndsl.dsl.gt4py_utils as utils
-import ndsl.util
+from ndsl.constants import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_DIM
 from ndsl.dsl.dace.wrapped_halo_exchange import WrappedHaloUpdater
 from ndsl.dsl.stencil import StencilFactory
 from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ
-from ndsl.util.constants import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_DIM
-from ndsl.util.grid import GridData
+from ndsl.grid import GridData
+from ndsl.initialization.allocator import QuantityFactory
 from pace import fv3core
 
 
@@ -158,11 +159,11 @@ class CubedToLatLon:
         self,
         state: fv3core.DycoreState,
         stencil_factory: StencilFactory,
-        quantity_factory: ndsl.util.QuantityFactory,
+        quantity_factory: QuantityFactory,
         grid_data: GridData,
         grid_type: int,
         order: int,
-        comm: ndsl.util.Communicator,
+        comm: Communicator,
     ):
         """
         Initializes stencils to use either 2nd or 4th order of interpolation

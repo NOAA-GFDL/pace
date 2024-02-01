@@ -5,8 +5,9 @@ from collections.abc import Mapping
 from typing import List, Protocol
 
 import numpy as np
+from Comm.comm_abc import Comm
 
-import ndsl.util
+from ndsl.optional_imports import cupy as cp
 from ndsl.performance.report import (
     Report,
     TimeReport,
@@ -16,8 +17,7 @@ from ndsl.performance.report import (
     write_to_timestamped_json,
 )
 from ndsl.performance.timer import NullTimer, Timer
-from ndsl.util.optional_imports import cupy as cp
-from ndsl.util.utils import GPU_AVAILABLE
+from ndsl.utils import GPU_AVAILABLE
 
 from .report import collect_data_and_write_to_file
 
@@ -59,7 +59,7 @@ class AbstractPerformanceCollector(Protocol):
 
 
 class PerformanceCollector(AbstractPerformanceCollector):
-    def __init__(self, experiment_name: str, comm: ndsl.util.Comm):
+    def __init__(self, experiment_name: str, comm: Comm):
         self.times_per_step: List[Mapping[str, float]] = []
         self.hits_per_step: List[Mapping[str, int]] = []
         self.timestep_timer = Timer()

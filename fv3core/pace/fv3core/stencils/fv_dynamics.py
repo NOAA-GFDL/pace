@@ -5,18 +5,21 @@ from dace.frontend.python.interface import nounroll as dace_no_unroll
 from gt4py.cartesian.gtscript import PARALLEL, computation, interval
 
 import ndsl.dsl.gt4py_utils as utils
-import ndsl.util
 import pace.fv3core.stencils.moist_cv as moist_cv
+from ndsl.checkpointer import Checkpointer, NullCheckpointer
+from ndsl.comm.communicator import Communicator
+from ndsl.comm.mpi import MPI
+from ndsl.constants import KAPPA, NQ, X_DIM, Y_DIM, Z_DIM, Z_INTERFACE_DIM, ZVIR
 from ndsl.dsl.dace.orchestration import dace_inhibitor, orchestrate
 from ndsl.dsl.dace.wrapped_halo_exchange import WrappedHaloUpdater
 from ndsl.dsl.stencil import StencilFactory
 from ndsl.dsl.typing import Float, FloatField
+from ndsl.grid import DampingCoefficients, GridData
+from ndsl.initialization.allocator import QuantityFactory
+from ndsl.logging import ndsl_log
 from ndsl.performance.timer import NullTimer, Timer
+from ndsl.quantity import Quantity
 from ndsl.stencils.c2l_ord import CubedToLatLon
-from ndsl.util import X_DIM, Y_DIM, Z_INTERFACE_DIM, constants
-from ndsl.util.comm.mpi import MPI
-from ndsl.util.grid import DampingCoefficients, GridData
-from ndsl.util.logging import ndsl_log
 from pace.fv3core._config import DynamicalCoreConfig
 from pace.fv3core.dycore_state import DycoreState
 from pace.fv3core.stencils import fvtp2d, tracer_2d_1l
@@ -56,19 +59,19 @@ def omega_from_w(delp: FloatField, delz: FloatField, w: FloatField, omega: Float
 
 
 def fvdyn_temporaries(
-    quantity_factory: ndsl.util.QuantityFactory,
-) -> Mapping[str, ndsl.util.Quantity]:
+    quantity_factory: QuantityFactory,
+) -> Mapping[str, Quantity]:
     tmps = {}
     for name in ["te_2d", "te0_2d", "wsd"]:
         quantity = quantity_factory.zeros(
-            dims=[ndsl.util.X_DIM, ndsl.util.Y_DIM],
+            dims=[X_DIM, Y_DIM],
             units="unknown",
             dtype=Float,
         )
         tmps[name] = quantity
     for name in ["dp1", "cvm"]:
         quantity = quantity_factory.zeros(
-            dims=[ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
+            dims=[X_DIM, Y_DIM, Z_DIM],
             units="unknown",
             dtype=Float,
         )
@@ -90,16 +93,16 @@ class DynamicalCore:
 
     def __init__(
         self,
-        comm: ndsl.util.Communicator,
+        comm: Communicator,
         grid_data: GridData,
         stencil_factory: StencilFactory,
-        quantity_factory: ndsl.util.QuantityFactory,
+        quantity_factory: QuantityFactory,
         damping_coefficients: DampingCoefficients,
         config: DynamicalCoreConfig,
-        phis: ndsl.util.Quantity,
+        phis: Quantity,
         state: DycoreState,
         timestep: timedelta,
-        checkpointer: Optional[ndsl.util.Checkpointer] = None,
+        checkpointer: Optional[Checkpointer] = None,
     ):
         """
         Args:
@@ -181,7 +184,7 @@ class DynamicalCore:
         # have not implemented, so they are hard-coded here.
         self.call_checkpointer = checkpointer is not None
         if checkpointer is None:
-            self.checkpointer: ndsl.util.Checkpointer = ndsl.util.NullCheckpointer()
+            self.checkpointer: Checkpointer = NullCheckpointer()
         else:
             self.checkpointer = checkpointer
         nested = False
@@ -214,7 +217,7 @@ class DynamicalCore:
         )
 
         self.tracers = {}
-        for name in utils.tracer_variables[0 : constants.NQ]:
+        for name in utils.tracer_variables[0:NQ]:
             self.tracers[name] = state.__dict__[name]
 
         temporaries = fvdyn_temporaries(quantity_factory)
@@ -295,7 +298,7 @@ class DynamicalCore:
         )
         self._cappa = self.acoustic_dynamics.cappa
 
-        if not (not self.config.inline_q and constants.NQ != 0):
+        if not (not self.config.inline_q and NQ != 0):
             raise NotImplementedError(
                 "Dynamical core (fv_dynamics):"
                 "tracer_2d not implemented. z_tracer available"
@@ -312,14 +315,14 @@ class DynamicalCore:
             quantity_factory=quantity_factory,
             config=config.remapping,
             area_64=grid_data.area_64,
-            nq=constants.NQ,
+            nq=NQ,
             pfull=self._pfull,
             tracers=self.tracers,
             checkpointer=checkpointer,
         )
 
         full_xyz_spec = quantity_factory.get_quantity_halo_spec(
-            dims=[ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
+            dims=[X_DIM, Y_DIM, Z_DIM],
             n_halo=grid_indexing.n_halo,
             dtype=Float,
         )
@@ -594,8 +597,8 @@ class DynamicalCore:
                         self._bk,
                         self._dp_initial,
                         self._ptop,
-                        constants.KAPPA,
-                        constants.ZVIR,
+                        KAPPA,
+                        ZVIR,
                         last_step,
                         self._conserve_total_energy,
                         self._timestep / self._k_split,

@@ -3,16 +3,28 @@ from typing import Any, Dict
 import numpy as np
 import pytest
 
-import ndsl.dsl
+import ndsl.constants as constants
 import ndsl.dsl.gt4py_utils as utils
-import ndsl.util
-import ndsl.util as fv3util
 import pace.fv3core.initialization.analytic_init as analytic_init
 import pace.fv3core.initialization.init_utils as init_utils
 import pace.fv3core.initialization.test_cases.initialize_baroclinic as baroclinic_init
+from ndsl.constants import (
+    N_HALO_DEFAULT,
+    X_DIM,
+    X_INTERFACE_DIM,
+    Y_DIM,
+    Y_INTERFACE_DIM,
+    Z_DIM,
+    Z_INTERFACE_DIM,
+)
+from ndsl.dsl.stencil import StencilFactory
+from ndsl.grid import GridData, MetricTerms
+from ndsl.initialization.allocator import QuantityFactory
+from ndsl.initialization.sizer import SubtileGridSizer
+from ndsl.namelist import Namelist
+from ndsl.quantity import Quantity
 from ndsl.stencils.testing import ParallelTranslateBaseSlicing
 from ndsl.stencils.testing.grid import TRACER_DIM  # type: ignore
-from ndsl.util.grid import GridData, MetricTerms
 from pace.fv3core.testing import TranslateDycoreFortranData2Py
 
 
@@ -20,91 +32,91 @@ class TranslateInitCase(ParallelTranslateBaseSlicing):
     outputs: Dict[str, Any] = {
         "u": {
             "name": "x_wind",
-            "dims": [fv3util.X_DIM, fv3util.Y_INTERFACE_DIM, fv3util.Z_DIM],
+            "dims": [X_DIM, Y_INTERFACE_DIM, Z_DIM],
             "units": "m/s",
         },
         "v": {
             "name": "y_wind",
-            "dims": [fv3util.X_INTERFACE_DIM, fv3util.Y_DIM, fv3util.Z_DIM],
+            "dims": [X_INTERFACE_DIM, Y_DIM, Z_DIM],
             "units": "m/s",
         },
         "ua": {
             "name": "eastward_wind",
-            "dims": [fv3util.X_DIM, fv3util.Y_DIM, fv3util.Z_DIM],
+            "dims": [X_DIM, Y_DIM, Z_DIM],
             "units": "m/s",
         },
         "va": {
             "name": "northward_wind",
-            "dims": [fv3util.X_DIM, fv3util.Y_DIM, fv3util.Z_DIM],
+            "dims": [X_DIM, Y_DIM, Z_DIM],
             "units": "m/s",
         },
         "uc": {
             "name": "x_wind_on_c_grid",
-            "dims": [fv3util.X_INTERFACE_DIM, fv3util.Y_DIM, fv3util.Z_DIM],
+            "dims": [X_INTERFACE_DIM, Y_DIM, Z_DIM],
             "units": "m/s",
         },
         "vc": {
             "name": "y_wind_on_c_grid",
-            "dims": [fv3util.X_DIM, fv3util.Y_INTERFACE_DIM, fv3util.Z_DIM],
+            "dims": [X_DIM, Y_INTERFACE_DIM, Z_DIM],
             "units": "m/s",
         },
         "w": {
             "name": "vertical_wind",
-            "dims": [fv3util.X_DIM, fv3util.Y_DIM, fv3util.Z_DIM],
+            "dims": [X_DIM, Y_DIM, Z_DIM],
             "units": "m/s",
         },
         "phis": {
             "name": "surface_geopotential",
             "units": "m^2 s^-2",
-            "dims": [fv3util.X_DIM, fv3util.Y_DIM],
+            "dims": [X_DIM, Y_DIM],
         },
         "delp": {
             "name": "pressure_thickness_of_atmospheric_layer",
-            "dims": [fv3util.X_DIM, fv3util.Y_DIM, fv3util.Z_DIM],
+            "dims": [X_DIM, Y_DIM, Z_DIM],
             "units": "Pa",
         },
         "delz": {
             "name": "vertical_thickness_of_atmospheric_layer",
-            "dims": [fv3util.X_DIM, fv3util.Y_DIM, fv3util.Z_DIM],
+            "dims": [X_DIM, Y_DIM, Z_DIM],
             "units": "m",
         },
         "ps": {
             "name": "surface_pressure",
-            "dims": [fv3util.X_DIM, fv3util.Y_DIM],
+            "dims": [X_DIM, Y_DIM],
             "units": "Pa",
         },
         "pe": {
             "name": "interface_pressure",
-            "dims": [fv3util.X_DIM, fv3util.Z_INTERFACE_DIM, fv3util.Y_DIM],
+            "dims": [X_DIM, Z_INTERFACE_DIM, Y_DIM],
             "units": "Pa",
             "n_halo": 1,
         },
         "pk": {
             "name": "interface_pressure_raised_to_power_of_kappa",
             "units": "unknown",
-            "dims": [fv3util.X_DIM, fv3util.Y_DIM, fv3util.Z_INTERFACE_DIM],
+            "dims": [X_DIM, Y_DIM, Z_INTERFACE_DIM],
             "n_halo": 0,
         },
         "pkz": {
             "name": "layer_mean_pressure_raised_to_power_of_kappa",
             "units": "unknown",
-            "dims": [fv3util.X_DIM, fv3util.Y_DIM, fv3util.Z_DIM],
+            "dims": [X_DIM, Y_DIM, Z_DIM],
             "n_halo": 0,
         },
         "peln": {
             "name": "logarithm_of_interface_pressure",
             "units": "ln(Pa)",
-            "dims": [fv3util.X_DIM, fv3util.Z_INTERFACE_DIM, fv3util.Y_DIM],
+            "dims": [X_DIM, Z_INTERFACE_DIM, Y_DIM],
             "n_halo": 0,
         },
         "pt": {
             "name": "air_temperature",
-            "dims": [fv3util.X_DIM, fv3util.Y_DIM, fv3util.Z_DIM],
+            "dims": [X_DIM, Y_DIM, Z_DIM],
             "units": "degK",
         },
         "q4d": {
             "name": "tracers",
-            "dims": [fv3util.X_DIM, fv3util.Y_DIM, fv3util.Z_DIM, TRACER_DIM],
+            "dims": [X_DIM, Y_DIM, Z_DIM, TRACER_DIM],
             "units": "kg/kg",
         },
     }
@@ -112,8 +124,8 @@ class TranslateInitCase(ParallelTranslateBaseSlicing):
     def __init__(
         self,
         grid_list,
-        namelist: ndsl.util.Namelist,
-        stencil_factory: ndsl.dsl.StencilFactory,
+        namelist: Namelist,
+        stencil_factory: StencilFactory,
     ):
         super().__init__(grid_list, namelist, stencil_factory)
         grid = grid_list[0]
@@ -184,11 +196,11 @@ class TranslateInitCase(ParallelTranslateBaseSlicing):
         state = {}
         full_shape = (
             *self.grid.domain_shape_full(add=(1, 1, 1)),
-            ndsl.util.constants.NQ,
+            constants.NQ,
         )
         for variable, properties in self.outputs.items():
             dims = properties["dims"]
-            state[variable] = fv3util.Quantity(
+            state[variable] = Quantity(
                 np.zeros(full_shape[0 : len(dims)]),
                 dims,
                 properties["units"],
@@ -205,23 +217,23 @@ class TranslateInitCase(ParallelTranslateBaseSlicing):
             backend=self.stencil_factory.backend,
         )
 
-        sizer = ndsl.util.SubtileGridSizer.from_tile_params(
+        sizer = SubtileGridSizer.from_tile_params(
             nx_tile=self.namelist.nx_tile,
             ny_tile=self.namelist.nx_tile,
             nz=self.namelist.nz,
-            n_halo=ndsl.util.N_HALO_DEFAULT,
+            n_halo=N_HALO_DEFAULT,
             extra_dim_lengths={},
             layout=self.namelist.layout,
             tile_partitioner=communicator.partitioner.tile,
             tile_rank=communicator.tile.rank,
         )
 
-        quantity_factory = ndsl.util.QuantityFactory.from_backend(
+        quantity_factory = QuantityFactory.from_backend(
             sizer, backend=self.stencil_factory.backend
         )
 
         grid_data = GridData.new_from_metric_terms(metric_terms)
-        quantity_factory = fv3util.QuantityFactory()
+        quantity_factory = QuantityFactory()
 
         state = analytic_init.init_analytic_state(
             analytic_init_case="baroclinic",
@@ -257,8 +269,8 @@ class TranslateInitPreJab(TranslateDycoreFortranData2Py):
     def __init__(
         self,
         grid,
-        namelist: ndsl.util.Namelist,
-        stencil_factory: ndsl.dsl.StencilFactory,
+        namelist: Namelist,
+        stencil_factory: StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
         self.in_vars["data_vars"] = {"ak": {}, "bk": {}, "delp": {}}
@@ -316,8 +328,8 @@ class TranslateJablonowskiBaroclinic(TranslateDycoreFortranData2Py):
     def __init__(
         self,
         grid,
-        namelist: ndsl.util.Namelist,
-        stencil_factory: ndsl.dsl.StencilFactory,
+        namelist: Namelist,
+        stencil_factory: StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
         self.in_vars["data_vars"] = {
@@ -398,8 +410,8 @@ class TranslatePVarAuxiliaryPressureVars(TranslateDycoreFortranData2Py):
     def __init__(
         self,
         grid,
-        namelist: ndsl.util.Namelist,
-        stencil_factory: ndsl.dsl.StencilFactory,
+        namelist: Namelist,
+        stencil_factory: StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
         self.in_vars["data_vars"] = {

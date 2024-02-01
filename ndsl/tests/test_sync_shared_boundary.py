@@ -1,7 +1,11 @@
 import pytest
 
-import ndsl.util
+from ndsl.comm.communicator import CubedSphereCommunicator
+from ndsl.comm.partitioner import CubedSpherePartitioner, TilePartitioner
+from ndsl.constants import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM
 from ndsl.performance.timer import Timer
+from ndsl.quantity import Quantity
+from ndsl.testing import DummyComm
 
 
 @pytest.fixture
@@ -34,12 +38,12 @@ def total_ranks(ranks_per_tile):
 
 @pytest.fixture
 def tile_partitioner(layout):
-    return ndsl.util.TilePartitioner(layout)
+    return TilePartitioner(layout)
 
 
 @pytest.fixture
 def cube_partitioner(tile_partitioner):
-    return ndsl.util.CubedSpherePartitioner(tile_partitioner)
+    return CubedSpherePartitioner(tile_partitioner)
 
 
 @pytest.fixture
@@ -48,8 +52,8 @@ def communicator_list(cube_partitioner, total_ranks):
     return_list = []
     for rank in range(cube_partitioner.total_ranks):
         return_list.append(
-            ndsl.util.CubedSphereCommunicator(
-                comm=ndsl.util.testing.DummyComm(
+            CubedSphereCommunicator(
+                comm=DummyComm(
                     rank=rank, total_ranks=total_ranks, buffer_dict=shared_buffer
                 ),
                 partitioner=cube_partitioner,
@@ -68,18 +72,18 @@ def rank_quantity_list(total_ranks, numpy, dtype, units=units):
     for rank in range(total_ranks):
         x_data = numpy.empty((3, 2), dtype=dtype)
         x_data[:] = rank
-        x_quantity = ndsl.util.Quantity(
+        x_quantity = Quantity(
             x_data,
-            dims=(ndsl.util.Y_INTERFACE_DIM, ndsl.util.X_DIM),
+            dims=(Y_INTERFACE_DIM, X_DIM),
             units=units,
             origin=(0, 0),
             extent=(3, 2),
         )
         y_data = numpy.empty((2, 3), dtype=dtype)
         y_data[:] = rank
-        y_quantity = ndsl.util.Quantity(
+        y_quantity = Quantity(
             y_data,
-            dims=(ndsl.util.Y_DIM, ndsl.util.X_INTERFACE_DIM),
+            dims=(Y_DIM, X_INTERFACE_DIM),
             units=units,
             origin=(0, 0),
             extent=(2, 3),
@@ -134,17 +138,17 @@ def counting_quantity_list(total_ranks, numpy, dtype, units=units):
     quantity_list = []
     for rank in range(total_ranks):
         x_data = numpy.array([[0, 1], [2, 3], [4, 5]]) + 6 * rank
-        x_quantity = ndsl.util.Quantity(
+        x_quantity = Quantity(
             x_data,
-            dims=(ndsl.util.Y_INTERFACE_DIM, ndsl.util.X_DIM),
+            dims=(Y_INTERFACE_DIM, X_DIM),
             units=units,
             origin=(0, 0),
             extent=(3, 2),
         )
         y_data = 6 * total_ranks + numpy.array([[0, 1, 2], [3, 4, 5]]) + 6 * rank
-        y_quantity = ndsl.util.Quantity(
+        y_quantity = Quantity(
             y_data,
-            dims=(ndsl.util.Y_DIM, ndsl.util.X_INTERFACE_DIM),
+            dims=(Y_DIM, X_INTERFACE_DIM),
             units=units,
             origin=(0, 0),
             extent=(2, 3),

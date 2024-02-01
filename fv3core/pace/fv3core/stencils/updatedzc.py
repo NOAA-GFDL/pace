@@ -1,12 +1,13 @@
 import gt4py.cartesian.gtscript as gtscript
 from gt4py.cartesian.gtscript import BACKWARD, FORWARD, PARALLEL, computation, interval
 
-import ndsl.util
-import ndsl.util.constants as constants
+import ndsl.constants as constants
+from ndsl.constants import X_DIM, Y_DIM, Z_DIM
 from ndsl.dsl.stencil import StencilFactory
 from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ, FloatFieldK
+from ndsl.initialization.allocator import QuantityFactory
+from ndsl.quantity import Quantity
 from ndsl.stencils import corners
-from ndsl.util import X_DIM, Y_DIM, Z_DIM
 
 
 DZ_MIN = constants.DZ_MIN
@@ -121,9 +122,9 @@ class UpdateGeopotentialHeightOnCGrid:
     def __init__(
         self,
         stencil_factory: StencilFactory,
-        quantity_factory: ndsl.util.QuantityFactory,
-        area: ndsl.util.Quantity,
-        dp_ref: ndsl.util.Quantity,
+        quantity_factory: QuantityFactory,
+        area: Quantity,
+        dp_ref: Quantity,
         grid_type,
     ):
         grid_indexing = stencil_factory.grid_indexing

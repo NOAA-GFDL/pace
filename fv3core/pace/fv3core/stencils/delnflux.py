@@ -10,24 +10,23 @@ from gt4py.cartesian.gtscript import (
     region,
 )
 
-import ndsl.util
+from ndsl.constants import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_DIM
 from ndsl.dsl.dace.orchestration import orchestrate
 from ndsl.dsl.stencil import StencilFactory, get_stencils_with_varied_bounds
 from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ, FloatFieldK
-from ndsl.util import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_DIM
-from ndsl.util.grid import DampingCoefficients
+from ndsl.grid import DampingCoefficients
+from ndsl.initialization.allocator import QuantityFactory
+from ndsl.quantity import Quantity
 
 
-def calc_damp(
-    damp_c: ndsl.util.Quantity, da_min: Float, nord: ndsl.util.Quantity
-) -> ndsl.util.Quantity:
+def calc_damp(damp_c: Quantity, da_min: Float, nord: Quantity) -> Quantity:
     if damp_c.dims != nord.dims or damp_c.data.shape != nord.data.shape:
         raise NotImplementedError(
             "current implementation requires damp_c and nord to have "
             "identical data shape and dims"
         )
     data = (damp_c.data * da_min) ** (nord.data + 1)
-    return ndsl.util.Quantity(
+    return Quantity(
         data=data,
         dims=damp_c.dims,
         # TODO: find and document units
@@ -953,11 +952,11 @@ class DelnFlux:
     def __init__(
         self,
         stencil_factory: StencilFactory,
-        quantity_factory: ndsl.util.QuantityFactory,
+        quantity_factory: QuantityFactory,
         damping_coefficients: DampingCoefficients,
-        rarea: ndsl.util.Quantity,
-        nord_col: ndsl.util.Quantity,
-        damp_c: ndsl.util.Quantity,
+        rarea: Quantity,
+        nord_col: Quantity,
+        damp_c: Quantity,
     ):
         """
         nord sets the order of damping to apply:
@@ -1074,8 +1073,8 @@ class DelnFluxNoSG:
         self,
         stencil_factory: StencilFactory,
         damping_coefficients: DampingCoefficients,
-        rarea: ndsl.util.Quantity,
-        nord: ndsl.util.Quantity,
+        rarea: Quantity,
+        nord: Quantity,
         nk: Optional[int] = None,
     ):
         """

@@ -11,11 +11,7 @@ from gt4py.cartesian.gtscript import (
 )
 
 import ndsl.dsl.gt4py_utils as utils
-import ndsl.util
-from ndsl.dsl.stencil import StencilFactory
-from ndsl.dsl.typing import Float, FloatField
-from ndsl.util import X_DIM, Y_DIM, Z_DIM
-from ndsl.util.constants import (
+from ndsl.constants import (
     C_ICE,
     C_LIQ,
     CP_AIR,
@@ -24,8 +20,15 @@ from ndsl.util.constants import (
     CV_VAP,
     GRAV,
     RDGAS,
+    X_DIM,
+    Y_DIM,
+    Z_DIM,
     ZVIR,
 )
+from ndsl.dsl.stencil import StencilFactory
+from ndsl.dsl.typing import Float, FloatField
+from ndsl.initialization.allocator import QuantityFactory
+from ndsl.quantity import Quantity
 from pace.fv3core.dycore_state import DycoreState
 from pace.fv3core.stencils.basic_operations import dim
 
@@ -776,7 +779,7 @@ class DryConvectiveAdjustment:
     def __init__(
         self,
         stencil_factory: StencilFactory,
-        quantity_factory: ndsl.util.QuantityFactory,
+        quantity_factory: QuantityFactory,
         nwat: int,
         fv_sg_adj: Float,
         n_sponge: int,
@@ -855,8 +858,8 @@ class DryConvectiveAdjustment:
     def __call__(
         self,
         state: DycoreState,
-        u_dt: ndsl.util.Quantity,
-        v_dt: ndsl.util.Quantity,
+        u_dt: Quantity,
+        v_dt: Quantity,
         timestep: Float,
     ):
         """

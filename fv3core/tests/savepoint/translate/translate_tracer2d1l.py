@@ -1,11 +1,11 @@
 import pytest
 
-import ndsl.dsl
 import ndsl.dsl.gt4py_utils as utils
-import ndsl.util
-import ndsl.util as fv3util
 import pace.fv3core.stencils.fvtp2d
 import pace.fv3core.stencils.tracer_2d_1l
+from ndsl.constants import X_DIM, Y_DIM, Z_DIM
+from ndsl.dsl.stencil import StencilFactory
+from ndsl.namelist import Namelist
 from ndsl.stencils.testing import ParallelTranslate
 from pace.fv3core.utils.functional_validation import get_subset_func
 
@@ -13,7 +13,7 @@ from pace.fv3core.utils.functional_validation import get_subset_func
 class TranslateTracer2D1L(ParallelTranslate):
     inputs = {
         "tracers": {
-            "dims": [fv3util.X_DIM, fv3util.Y_DIM, fv3util.Z_DIM],
+            "dims": [X_DIM, Y_DIM, Z_DIM],
             "units": "kg/m^2",
         }
     }
@@ -21,8 +21,8 @@ class TranslateTracer2D1L(ParallelTranslate):
     def __init__(
         self,
         grid,
-        namelist: ndsl.util.Namelist,
-        stencil_factory: ndsl.dsl.StencilFactory,
+        namelist: Namelist,
+        stencil_factory: StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
         self._base.in_vars["data_vars"] = {
@@ -39,7 +39,7 @@ class TranslateTracer2D1L(ParallelTranslate):
         self.namelist = namelist
         self._subset = get_subset_func(
             self.grid.grid_indexing,
-            dims=[fv3util.X_DIM, fv3util.Y_DIM, fv3util.Z_DIM],
+            dims=[X_DIM, Y_DIM, Z_DIM],
             n_halo=((0, 0), (0, 0)),
         )
 

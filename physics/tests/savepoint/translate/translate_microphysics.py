@@ -4,8 +4,9 @@ import numpy as np
 from translate_physics import TranslatePhysicsFortranData2Py
 
 import ndsl.dsl.gt4py_utils as utils
-import ndsl.util
 from ndsl.dsl.typing import Float
+from ndsl.initialization.allocator import QuantityFactory
+from ndsl.initialization.sizer import SubtileGridSizer
 from pace.physics import PHYSICS_PACKAGES
 from pace.physics.stencils.microphysics import Microphysics
 from pace.physics.stencils.physics import PhysicsState
@@ -73,7 +74,7 @@ class TranslateMicroph(TranslatePhysicsFortranData2Py):
         inputs["omga"] = copy.deepcopy(storage)
         inputs["prsi"] = copy.deepcopy(storage)
         inputs["prsik"] = copy.deepcopy(storage)
-        sizer = ndsl.util.SubtileGridSizer.from_tile_params(
+        sizer = SubtileGridSizer.from_tile_params(
             nx_tile=self.namelist.npx - 1,
             ny_tile=self.namelist.npy - 1,
             nz=self.namelist.npz,
@@ -82,7 +83,7 @@ class TranslateMicroph(TranslatePhysicsFortranData2Py):
             layout=self.namelist.layout,
         )
 
-        quantity_factory = ndsl.util.QuantityFactory.from_backend(
+        quantity_factory = QuantityFactory.from_backend(
             sizer, self.stencil_factory.backend
         )
         physics_state = PhysicsState.init_from_storages(

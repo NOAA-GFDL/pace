@@ -2,12 +2,14 @@ from typing import Optional
 
 from gt4py.cartesian.gtscript import BACKWARD, FORWARD, PARALLEL, computation, interval
 
-import ndsl.util
 import pace.fv3core.stencils.fv_subgridz as fv_subgridz
+from ndsl.comm.communicator import Communicator
+from ndsl.constants import X_INTERFACE_DIM, Y_INTERFACE_DIM, Z_INTERFACE_DIM
 from ndsl.dsl.dace.orchestration import orchestrate
 from ndsl.dsl.stencil import StencilFactory
 from ndsl.dsl.typing import Float, FloatField
-from ndsl.util.grid import DriverGridData, GridData
+from ndsl.grid import DriverGridData, GridData
+from ndsl.initialization.allocator import QuantityFactory
 from pace import fv3core
 from pace.physics.update.fv_update_phys import ApplyPhysicsToDycore
 
@@ -147,7 +149,7 @@ class DycoreToPhysics:
     def __init__(
         self,
         stencil_factory: StencilFactory,
-        quantity_factory: ndsl.util.QuantityFactory,
+        quantity_factory: QuantityFactory,
         dycore_config: fv3core.DynamicalCoreConfig,
         do_dry_convective_adjust: bool,
         dycore_only: bool,
@@ -161,9 +163,9 @@ class DycoreToPhysics:
         self._copy_dycore_to_physics = stencil_factory.from_dims_halo(
             copy_dycore_to_physics,
             compute_dims=[
-                ndsl.util.X_INTERFACE_DIM,
-                ndsl.util.Y_INTERFACE_DIM,
-                ndsl.util.Z_INTERFACE_DIM,
+                X_INTERFACE_DIM,
+                Y_INTERFACE_DIM,
+                Z_INTERFACE_DIM,
             ],
             compute_halos=(0, 0),
         )
@@ -240,10 +242,10 @@ class UpdateAtmosphereState:
         stencil_factory: StencilFactory,
         grid_data: GridData,
         namelist,
-        comm: ndsl.util.Communicator,
+        comm: Communicator,
         grid_info: DriverGridData,
         state: fv3core.DycoreState,
-        quantity_factory: ndsl.util.QuantityFactory,
+        quantity_factory: QuantityFactory,
         dycore_only: bool,
         apply_tendencies: bool,
         tendency_state,

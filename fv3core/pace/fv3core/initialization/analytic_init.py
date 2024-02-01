@@ -1,8 +1,8 @@
 from enum import Enum
 
 import ndsl.util as fv3util
+from ndsl.grid import GridData
 from ndsl.util import MetaEnumStr
-from ndsl.util.grid import GridData
 from pace.fv3core.dycore_state import DycoreState
 
 

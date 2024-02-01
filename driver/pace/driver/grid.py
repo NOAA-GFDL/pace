@@ -5,27 +5,26 @@ from typing import ClassVar, Optional, Tuple
 import f90nml
 import xarray as xr
 
-import ndsl.dsl
-import ndsl.stencils
-import ndsl.util
-import ndsl.util.grid
-from ndsl.stencils.testing import TranslateGrid
-from ndsl.util import Communicator, QuantityFactory
-from ndsl.util.grid import (
+from ndsl.comm.communicator import Communicator
+from ndsl.comm.partitioner import get_tile_index
+from ndsl.constants import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM
+from ndsl.grid import (
     DampingCoefficients,
     DriverGridData,
     GridData,
     MetricTerms,
     direct_transform,
 )
-from ndsl.util.grid.helper import (
+from ndsl.grid.helper import (
     AngleGridData,
     ContravariantGridData,
     HorizontalGridData,
     VerticalGridData,
 )
-from ndsl.util.logging import ndsl_log
-from ndsl.util.namelist import Namelist
+from ndsl.initialization.allocator import QuantityFactory
+from ndsl.logging import ndsl_log
+from ndsl.namelist import Namelist
+from ndsl.stencils.testing import TranslateGrid, grid
 
 from .registry import Registry
 
@@ -34,8 +33,8 @@ class GridInitializer(abc.ABC):
     @abc.abstractmethod
     def get_grid(
         self,
-        quantity_factory: ndsl.util.QuantityFactory,
-        communicator: ndsl.util.Communicator,
+        quantity_factory: QuantityFactory,
+        communicator: Communicator,
     ) -> Tuple[DampingCoefficients, DriverGridData, GridData]:
         ...
 
@@ -160,7 +159,7 @@ class SerialboxGridConfig(GridInitializer):
     def _namelist(self) -> Namelist:
         return Namelist.from_f90nml(self._f90_namelist)
 
-    def _serializer(self, communicator: ndsl.util.Communicator):
+    def _serializer(self, communicator: Communicator):
         import serialbox
 
         serializer = serialbox.Serializer(
@@ -172,9 +171,9 @@ class SerialboxGridConfig(GridInitializer):
 
     def _get_serialized_grid(
         self,
-        communicator: ndsl.util.Communicator,
+        communicator: Communicator,
         backend: str,
-    ) -> ndsl.stencils.testing.grid.Grid:  # type: ignore
+    ) -> grid.Grid:  # type: ignore
         ser = self._serializer(communicator)
         grid = TranslateGrid.new_from_serialized_data(
             ser, communicator.rank, self._namelist.layout, backend
@@ -187,7 +186,7 @@ class SerialboxGridConfig(GridInitializer):
         communicator: Communicator,
     ) -> Tuple[DampingCoefficients, DriverGridData, GridData]:
         backend = quantity_factory.zeros(
-            dims=[ndsl.util.X_DIM, ndsl.util.Y_DIM], units="unknown"
+            dims=[X_DIM, Y_DIM], units="unknown"
         ).gt4py_backend
 
         ndsl_log.info("Using serialized grid data")
@@ -240,9 +239,7 @@ class ExternalNetcdfGridConfig(GridInitializer):
         # ToDo: refactor when grid_type is an enum
         if self.grid_type <= 3:
             tile_num = (
-                ndsl.util.get_tile_index(
-                    communicator.rank, communicator.partitioner.total_ranks
-                )
+                get_tile_index(communicator.rank, communicator.partitioner.total_ranks)
                 + 1
             )
             tile_file = self.grid_file_path + str(tile_num) + ".nc"
@@ -257,7 +254,7 @@ class ExternalNetcdfGridConfig(GridInitializer):
 
         subtile_slice_grid = communicator.partitioner.tile.subtile_slice(
             rank=communicator.rank,
-            global_dims=[ndsl.util.Y_INTERFACE_DIM, ndsl.util.X_INTERFACE_DIM],
+            global_dims=[Y_INTERFACE_DIM, X_INTERFACE_DIM],
             global_extent=(npy, npx),
             overlap=True,
         )

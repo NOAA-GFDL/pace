@@ -1,11 +1,10 @@
 from gt4py.cartesian.gtscript import PARALLEL, computation, interval
 
-import ndsl.dsl
-import ndsl.util
 import pace.fv3core.stencils.xtp_u as xtp_u
 from ndsl.dsl.stencil import StencilFactory
 from ndsl.dsl.typing import FloatField, FloatFieldIJ
-from ndsl.util.grid import GridData
+from ndsl.grid import GridData
+from ndsl.namelist import Namelist
 
 from .translate_ytp_v import TranslateYTP_V
 
@@ -79,8 +78,8 @@ class TranslateXTP_U(TranslateYTP_V):
     def __init__(
         self,
         grid,
-        namelist: ndsl.util.Namelist,
-        stencil_factory: ndsl.dsl.StencilFactory,
+        namelist: Namelist,
+        stencil_factory: StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
         self.in_vars["data_vars"]["u"] = {}

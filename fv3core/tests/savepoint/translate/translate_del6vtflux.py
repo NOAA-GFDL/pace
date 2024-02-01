@@ -1,6 +1,7 @@
-import ndsl.dsl
-import ndsl.util
 import pace.fv3core.stencils.delnflux as delnflux
+from ndsl.constants import Z_DIM
+from ndsl.dsl.stencil import StencilFactory
+from ndsl.namelist import Namelist
 from pace.fv3core.testing import TranslateDycoreFortranData2Py
 
 
@@ -8,8 +9,8 @@ class TranslateDel6VtFlux(TranslateDycoreFortranData2Py):
     def __init__(
         self,
         grid,
-        namelist: ndsl.util.Namelist,
-        stencil_factory: ndsl.dsl.StencilFactory,
+        namelist: Namelist,
+        stencil_factory: StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
         fxstat = grid.x3d_domain_dict()
@@ -36,9 +37,7 @@ class TranslateDel6VtFlux(TranslateDycoreFortranData2Py):
     # use_sg -- 'dx', 'dy', 'rdxc', 'rdyc', 'sin_sg needed
     def compute(self, inputs):
         self.make_storage_data_input_vars(inputs)
-        nord_col = self.grid.quantity_factory.zeros(
-            dims=[ndsl.util.Z_DIM], units="unknown"
-        )
+        nord_col = self.grid.quantity_factory.zeros(dims=[Z_DIM], units="unknown")
         nord_col.data[:] = nord_col.np.asarray(inputs.pop("nord_w"))
         self.compute_func = delnflux.DelnFluxNoSG(  # type: ignore
             self.stencil_factory,

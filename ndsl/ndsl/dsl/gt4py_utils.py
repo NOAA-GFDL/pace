@@ -4,9 +4,9 @@ from typing import Any, Callable, Dict, List, Optional, Sequence, Tuple, Union
 import gt4py
 import numpy as np
 
+from ndsl.constants import N_HALO_DEFAULT
 from ndsl.dsl.typing import DTypes, Field, Float
-from ndsl.util.constants import N_HALO_DEFAULT
-from ndsl.util.logging import ndsl_log
+from ndsl.logging import ndsl_log
 
 
 try:

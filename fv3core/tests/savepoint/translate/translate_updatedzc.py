@@ -1,8 +1,9 @@
 import numpy as np
 
-import ndsl.dsl
-import ndsl.util
 import pace.fv3core.stencils.updatedzc as updatedzc
+from ndsl.constants import X_DIM, Y_DIM, Z_DIM
+from ndsl.dsl.stencil import StencilFactory
+from ndsl.namelist import Namelist
 from pace.fv3core.testing import TranslateDycoreFortranData2Py
 from pace.fv3core.utils.functional_validation import get_subset_func
 
@@ -11,8 +12,8 @@ class TranslateUpdateDzC(TranslateDycoreFortranData2Py):
     def __init__(
         self,
         grid,
-        namelist: ndsl.util.Namelist,
-        stencil_factory: ndsl.dsl.StencilFactory,
+        namelist: Namelist,
+        stencil_factory: StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
         self.stencil_factory = stencil_factory
@@ -43,12 +44,12 @@ class TranslateUpdateDzC(TranslateDycoreFortranData2Py):
         }
         self._subset = get_subset_func(
             self.grid.grid_indexing,
-            dims=[ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
+            dims=[X_DIM, Y_DIM, Z_DIM],
             n_halo=((0, 0), (0, 0)),
         )
         self._subset_2d = get_subset_func(
             self.grid.grid_indexing,
-            dims=[ndsl.util.X_DIM, ndsl.util.Y_DIM],
+            dims=[X_DIM, Y_DIM],
             n_halo=((0, 0), (0, 0)),
         )
 

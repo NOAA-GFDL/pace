@@ -2,14 +2,23 @@ import math
 from typing import Dict
 
 import gt4py.cartesian.gtscript as gtscript
+from Comm.communicator import Communicator
 from gt4py.cartesian.gtscript import PARALLEL, computation, horizontal, interval, region
 
-import ndsl.util
+from ndsl.constants import (
+    N_HALO_DEFAULT,
+    X_DIM,
+    X_INTERFACE_DIM,
+    Y_DIM,
+    Y_INTERFACE_DIM,
+    Z_DIM,
+)
 from ndsl.dsl.dace.orchestration import orchestrate
 from ndsl.dsl.dace.wrapped_halo_exchange import WrappedHaloUpdater
 from ndsl.dsl.stencil import StencilFactory
 from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ
-from ndsl.util import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_DIM
+from ndsl.initialization.allocator import QuantityFactory
+from ndsl.quantity import Quantity
 from pace.fv3core.stencils.fvtp2d import FiniteVolumeTransport
 
 
@@ -177,11 +186,11 @@ class TracerAdvection:
     def __init__(
         self,
         stencil_factory: StencilFactory,
-        quantity_factory: ndsl.util.QuantityFactory,
+        quantity_factory: QuantityFactory,
         transport: FiniteVolumeTransport,
         grid_data,
-        comm: ndsl.util.Communicator,
-        tracers: Dict[str, ndsl.util.Quantity],
+        comm: Communicator,
+        tracers: Dict[str, Quantity],
     ):
         orchestrate(
             obj=self,
@@ -267,8 +276,8 @@ class TracerAdvection:
 
         # Setup halo updater for tracers
         tracer_halo_spec = quantity_factory.get_quantity_halo_spec(
-            dims=[ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
-            n_halo=ndsl.util.N_HALO_DEFAULT,
+            dims=[X_DIM, Y_DIM, Z_DIM],
+            n_halo=N_HALO_DEFAULT,
             dtype=Float,
         )
         self._tracers_halo_updater = WrappedHaloUpdater(
@@ -279,7 +288,7 @@ class TracerAdvection:
 
     def __call__(
         self,
-        tracers: Dict[str, ndsl.util.Quantity],
+        tracers: Dict[str, Quantity],
         dp1,
         x_mass_flux,
         y_mass_flux,

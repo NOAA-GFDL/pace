@@ -1,10 +1,10 @@
 from types import SimpleNamespace
 
-import ndsl.dsl
 import ndsl.dsl.gt4py_utils as utils
-import ndsl.util
-import ndsl.util as fv3util
 import pace.fv3core.stencils.fv_subgridz as fv_subgridz
+from ndsl.constants import X_DIM, Y_DIM, Z_DIM, Z_INTERFACE_DIM
+from ndsl.dsl.stencil import StencilFactory
+from ndsl.namelist import Namelist
 from ndsl.stencils.testing import ParallelTranslateBaseSlicing
 
 
@@ -15,105 +15,105 @@ class TranslateFVSubgridZ(ParallelTranslateBaseSlicing):
     inputs = {
         "delp": {
             "name": "pressure_thickness_of_atmospheric_layer",
-            "dims": [fv3util.X_DIM, fv3util.Y_DIM, fv3util.Z_DIM],
+            "dims": [X_DIM, Y_DIM, Z_DIM],
             "units": "Pa",
         },
         "delz": {
             "name": "vertical_thickness_of_atmospheric_layer",
-            "dims": [fv3util.X_DIM, fv3util.Y_DIM, fv3util.Z_DIM],
+            "dims": [X_DIM, Y_DIM, Z_DIM],
             "units": "m",
         },
         "pe": {
             "name": "interface_pressure",
-            "dims": [fv3util.X_DIM, fv3util.Z_INTERFACE_DIM, fv3util.Y_DIM],
+            "dims": [X_DIM, Z_INTERFACE_DIM, Y_DIM],
             "units": "Pa",
             "n_halo": 1,
         },
         "pkz": {
             "name": "layer_mean_pressure_raised_to_power_of_kappa",
             "units": "unknown",
-            "dims": [fv3util.X_DIM, fv3util.Y_DIM, fv3util.Z_DIM],
+            "dims": [X_DIM, Y_DIM, Z_DIM],
             "n_halo": 0,
         },
         "peln": {
             "name": "logarithm_of_interface_pressure",
             "units": "ln(Pa)",
-            "dims": [fv3util.X_DIM, fv3util.Z_INTERFACE_DIM, fv3util.Y_DIM],
+            "dims": [X_DIM, Z_INTERFACE_DIM, Y_DIM],
             "n_halo": 0,
         },
         "pt": {
             "name": "air_temperature",
-            "dims": [fv3util.X_DIM, fv3util.Y_DIM, fv3util.Z_DIM],
+            "dims": [X_DIM, Y_DIM, Z_DIM],
             "units": "degK",
         },
         "ua": {
             "name": "eastward_wind",
-            "dims": [fv3util.X_DIM, fv3util.Y_DIM, fv3util.Z_DIM],
+            "dims": [X_DIM, Y_DIM, Z_DIM],
             "units": "m/s",
         },
         "va": {
             "name": "northward_wind",
-            "dims": [fv3util.X_DIM, fv3util.Y_DIM, fv3util.Z_DIM],
+            "dims": [X_DIM, Y_DIM, Z_DIM],
             "units": "m/s",
         },
         "w": {
             "name": "vertical_wind",
-            "dims": [fv3util.X_DIM, fv3util.Y_DIM, fv3util.Z_DIM],
+            "dims": [X_DIM, Y_DIM, Z_DIM],
             "units": "m/s",
         },
         "qvapor": {
             "name": "specific_humidity",
-            "dims": [fv3util.X_DIM, fv3util.Y_DIM, fv3util.Z_DIM],
+            "dims": [X_DIM, Y_DIM, Z_DIM],
             "units": "kg/kg",
         },
         "qliquid": {
             "name": "cloud_water_mixing_ratio",
-            "dims": [fv3util.X_DIM, fv3util.Y_DIM, fv3util.Z_DIM],
+            "dims": [X_DIM, Y_DIM, Z_DIM],
             "units": "kg/kg",
         },
         "qice": {
             "name": "cloud_ice_mixing_ratio",
-            "dims": [fv3util.X_DIM, fv3util.Y_DIM, fv3util.Z_DIM],
+            "dims": [X_DIM, Y_DIM, Z_DIM],
             "units": "kg/kg",
         },
         "qrain": {
             "name": "rain_mixing_ratio",
-            "dims": [fv3util.X_DIM, fv3util.Y_DIM, fv3util.Z_DIM],
+            "dims": [X_DIM, Y_DIM, Z_DIM],
             "units": "kg/kg",
         },
         "qsnow": {
             "name": "snow_mixing_ratio",
-            "dims": [fv3util.X_DIM, fv3util.Y_DIM, fv3util.Z_DIM],
+            "dims": [X_DIM, Y_DIM, Z_DIM],
             "units": "kg/kg",
         },
         "qgraupel": {
             "name": "graupel_mixing_ratio",
-            "dims": [fv3util.X_DIM, fv3util.Y_DIM, fv3util.Z_DIM],
+            "dims": [X_DIM, Y_DIM, Z_DIM],
             "units": "kg/kg",
         },
         "qo3mr": {
             "name": "ozone_mixing_ratio",
-            "dims": [fv3util.X_DIM, fv3util.Y_DIM, fv3util.Z_DIM],
+            "dims": [X_DIM, Y_DIM, Z_DIM],
             "units": "kg/kg",
         },
         "qsgs_tke": {
             "name": "turbulent_kinetic_energy",
-            "dims": [fv3util.X_DIM, fv3util.Y_DIM, fv3util.Z_DIM],
+            "dims": [X_DIM, Y_DIM, Z_DIM],
             "units": "m**2/s**2",
         },
         "qcld": {
             "name": "cloud_fraction",
-            "dims": [fv3util.X_DIM, fv3util.Y_DIM, fv3util.Z_DIM],
+            "dims": [X_DIM, Y_DIM, Z_DIM],
             "units": "",
         },
         "u_dt": {
             "name": "eastward_wind_tendency_due_to_physics",
-            "dims": [fv3util.X_DIM, fv3util.Y_DIM, fv3util.Z_DIM],
+            "dims": [X_DIM, Y_DIM, Z_DIM],
             "units": "m/s**2",
         },
         "v_dt": {
             "name": "northward_wind_tendency_due_to_physics",
-            "dims": [fv3util.X_DIM, fv3util.Y_DIM, fv3util.Z_DIM],
+            "dims": [X_DIM, Y_DIM, Z_DIM],
             "units": "m/s**2",
         },
         "dt": {"dims": []},
@@ -126,8 +126,8 @@ class TranslateFVSubgridZ(ParallelTranslateBaseSlicing):
     def __init__(
         self,
         grid,
-        namelist: ndsl.util.Namelist,
-        stencil_factory: ndsl.dsl.StencilFactory,
+        namelist: Namelist,
+        stencil_factory: StencilFactory,
         *args,
         **kwargs,
     ):

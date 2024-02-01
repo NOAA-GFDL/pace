@@ -1,12 +1,13 @@
 import unittest.mock
 
+from Comm.communicator import CubedSpherePartitioner, TilePartitioner
+
 from ndsl.dsl.dace.dace_config import DaceConfig, _determine_compiling_ranks
 from ndsl.dsl.dace.orchestration import (
     DaCeOrchestration,
     orchestrate,
     orchestrate_function,
 )
-from ndsl.util.comm.communicator import CubedSpherePartitioner, TilePartitioner
 
 
 """

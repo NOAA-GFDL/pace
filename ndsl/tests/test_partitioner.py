@@ -1,8 +1,24 @@
 import numpy as np
 import pytest
+from Comm.partitioner import (
+    CubedSpherePartitioner,
+    TilePartitioner,
+    _subtile_extents_from_tile_metadata,
+    get_tile_index,
+    get_tile_number,
+    tile_extent_from_rank_metadata,
+)
+from Quantity import Quantity
 
-import ndsl.util
-import ndsl.util.comm.partitioner
+from ndsl.constants import (
+    TILE_DIM,
+    X_DIM,
+    X_INTERFACE_DIM,
+    Y_DIM,
+    Y_INTERFACE_DIM,
+    Z_DIM,
+    Z_INTERFACE_DIM,
+)
 
 
 rank_list = []
@@ -25,7 +41,7 @@ for ranks_per_tile in (1, 4):
 )
 @pytest.mark.cpu_only
 def test_get_tile_number(rank, total_ranks, tile_index):
-    tile = ndsl.util.get_tile_number(rank, total_ranks)
+    tile = get_tile_number(rank, total_ranks)
     assert tile == tile_index + 1
 
 
@@ -34,7 +50,7 @@ def test_get_tile_number(rank, total_ranks, tile_index):
 )
 @pytest.mark.cpu_only
 def test_get_tile_index(rank, total_ranks, tile_index):
-    tile = ndsl.util.get_tile_index(rank, total_ranks)
+    tile = get_tile_index(rank, total_ranks)
     assert tile == tile_index
 
 
@@ -63,37 +79,37 @@ for layout in ((1, 1), (1, 2), (2, 2), (2, 3)):
 )
 @pytest.mark.cpu_only
 def test_subtile_index(rank, layout, subtile_index):
-    partitioner = ndsl.util.TilePartitioner(layout)
+    partitioner = TilePartitioner(layout)
     assert partitioner.subtile_index(rank) == subtile_index
 
 
 @pytest.mark.parametrize(
     "array_extent, array_dims, layout, tile_extent",
     [
-        ((16, 32), (ndsl.util.Y_DIM, ndsl.util.X_DIM), (1, 1), (16, 32)),
-        ((16, 32), (ndsl.util.Y_DIM, ndsl.util.X_INTERFACE_DIM), (1, 1), (16, 32)),
-        ((16, 32), (ndsl.util.Y_INTERFACE_DIM, ndsl.util.X_DIM), (1, 1), (16, 32)),
+        ((16, 32), (Y_DIM, X_DIM), (1, 1), (16, 32)),
+        ((16, 32), (Y_DIM, X_INTERFACE_DIM), (1, 1), (16, 32)),
+        ((16, 32), (Y_INTERFACE_DIM, X_DIM), (1, 1), (16, 32)),
         (
             (16, 32),
-            (ndsl.util.Y_INTERFACE_DIM, ndsl.util.X_INTERFACE_DIM),
+            (Y_INTERFACE_DIM, X_INTERFACE_DIM),
             (1, 1),
             (16, 32),
         ),
         (
             (8, 16, 32),
-            (ndsl.util.Z_DIM, ndsl.util.Y_DIM, ndsl.util.X_DIM),
+            (Z_DIM, Y_DIM, X_DIM),
             (1, 1),
             (8, 16, 32),
         ),
-        ((2, 2), (ndsl.util.Y_DIM, ndsl.util.X_DIM), (2, 2), (4, 4)),
-        ((3, 2), (ndsl.util.Y_INTERFACE_DIM, ndsl.util.X_DIM), (2, 2), (5, 4)),
-        ((2, 3), (ndsl.util.Y_DIM, ndsl.util.X_INTERFACE_DIM), (2, 2), (4, 5)),
+        ((2, 2), (Y_DIM, X_DIM), (2, 2), (4, 4)),
+        ((3, 2), (Y_INTERFACE_DIM, X_DIM), (2, 2), (5, 4)),
+        ((2, 3), (Y_DIM, X_INTERFACE_DIM), (2, 2), (4, 5)),
         (
             (4, 2, 3),
             (
-                ndsl.util.Z_INTERFACE_DIM,
-                ndsl.util.Y_DIM,
-                ndsl.util.X_INTERFACE_DIM,
+                Z_INTERFACE_DIM,
+                Y_DIM,
+                X_INTERFACE_DIM,
             ),
             (2, 2),
             (4, 4, 5),
@@ -102,9 +118,7 @@ def test_subtile_index(rank, layout, subtile_index):
 )
 @pytest.mark.cpu_only
 def test_tile_extent_from_rank_metadata(array_extent, array_dims, layout, tile_extent):
-    result = ndsl.util.comm.partitioner.tile_extent_from_rank_metadata(
-        array_dims, array_extent, layout
-    )
+    result = tile_extent_from_rank_metadata(array_dims, array_extent, layout)
     assert result == tile_extent
 
 
@@ -115,7 +129,7 @@ def test_tile_extent_from_rank_metadata(array_extent, array_dims, layout, tile_e
     ),
     [
         pytest.param(
-            [ndsl.util.Y_DIM, ndsl.util.X_DIM],
+            [Y_DIM, X_DIM],
             (8, 8),
             (1, 1),
             0,
@@ -125,7 +139,7 @@ def test_tile_extent_from_rank_metadata(array_extent, array_dims, layout, tile_e
             id="6_rank_centered",
         ),
         pytest.param(
-            [ndsl.util.Z_DIM, ndsl.util.Y_DIM, ndsl.util.X_DIM],
+            [Z_DIM, Y_DIM, X_DIM],
             (10, 8, 8),
             (1, 1),
             0,
@@ -135,7 +149,7 @@ def test_tile_extent_from_rank_metadata(array_extent, array_dims, layout, tile_e
             id="6_rank_centered_3d",
         ),
         pytest.param(
-            [ndsl.util.Z_INTERFACE_DIM, ndsl.util.Y_DIM, ndsl.util.X_DIM],
+            [Z_INTERFACE_DIM, Y_DIM, X_DIM],
             (11, 8, 8),
             (1, 1),
             0,
@@ -145,7 +159,7 @@ def test_tile_extent_from_rank_metadata(array_extent, array_dims, layout, tile_e
             id="6_rank_centered_z_interface",
         ),
         pytest.param(
-            [ndsl.util.Y_INTERFACE_DIM, ndsl.util.X_DIM],
+            [Y_INTERFACE_DIM, X_DIM],
             (9, 8),
             (1, 1),
             0,
@@ -155,7 +169,7 @@ def test_tile_extent_from_rank_metadata(array_extent, array_dims, layout, tile_e
             id="6_rank_y_interface",
         ),
         pytest.param(
-            [ndsl.util.Y_DIM, ndsl.util.X_INTERFACE_DIM],
+            [Y_DIM, X_INTERFACE_DIM],
             (8, 9),
             (1, 1),
             0,
@@ -165,7 +179,7 @@ def test_tile_extent_from_rank_metadata(array_extent, array_dims, layout, tile_e
             id="6_rank_x_interface",
         ),
         pytest.param(
-            [ndsl.util.Y_INTERFACE_DIM, ndsl.util.X_INTERFACE_DIM],
+            [Y_INTERFACE_DIM, X_INTERFACE_DIM],
             (9, 9),
             (1, 1),
             0,
@@ -175,7 +189,7 @@ def test_tile_extent_from_rank_metadata(array_extent, array_dims, layout, tile_e
             id="6_rank_both_interface",
         ),
         pytest.param(
-            [ndsl.util.Y_DIM, ndsl.util.X_DIM],
+            [Y_DIM, X_DIM],
             (8, 8),
             (2, 2),
             0,
@@ -185,7 +199,7 @@ def test_tile_extent_from_rank_metadata(array_extent, array_dims, layout, tile_e
             id="24_rank_centered_left",
         ),
         pytest.param(
-            [ndsl.util.Y_DIM, ndsl.util.X_DIM],
+            [Y_DIM, X_DIM],
             (8, 8),
             (2, 2),
             3,
@@ -195,7 +209,7 @@ def test_tile_extent_from_rank_metadata(array_extent, array_dims, layout, tile_e
             id="24_rank_centered_right",
         ),
         pytest.param(
-            [ndsl.util.Y_INTERFACE_DIM, ndsl.util.X_INTERFACE_DIM],
+            [Y_INTERFACE_DIM, X_INTERFACE_DIM],
             (9, 9),
             (2, 2),
             0,
@@ -205,7 +219,7 @@ def test_tile_extent_from_rank_metadata(array_extent, array_dims, layout, tile_e
             id="24_rank_interface_left_no_overlap",
         ),
         pytest.param(
-            [ndsl.util.Y_INTERFACE_DIM, ndsl.util.X_INTERFACE_DIM],
+            [Y_INTERFACE_DIM, X_INTERFACE_DIM],
             (9, 9),
             (2, 2),
             3,
@@ -215,7 +229,7 @@ def test_tile_extent_from_rank_metadata(array_extent, array_dims, layout, tile_e
             id="24_rank_interface_right_no_overlap",
         ),
         pytest.param(
-            [ndsl.util.Y_INTERFACE_DIM, ndsl.util.X_INTERFACE_DIM],
+            [Y_INTERFACE_DIM, X_INTERFACE_DIM],
             (9, 9),
             (2, 2),
             0,
@@ -225,7 +239,7 @@ def test_tile_extent_from_rank_metadata(array_extent, array_dims, layout, tile_e
             id="24_rank_interface_left_overlap",
         ),
         pytest.param(
-            [ndsl.util.Y_INTERFACE_DIM, ndsl.util.X_INTERFACE_DIM],
+            [Y_INTERFACE_DIM, X_INTERFACE_DIM],
             (9, 9),
             (2, 2),
             3,
@@ -235,7 +249,7 @@ def test_tile_extent_from_rank_metadata(array_extent, array_dims, layout, tile_e
             id="24_rank_interface_right_overlap",
         ),
         pytest.param(
-            [ndsl.util.Y_DIM, ndsl.util.X_DIM],
+            [Y_DIM, X_DIM],
             (4, 4),
             (1, 2),
             0,
@@ -245,7 +259,7 @@ def test_tile_extent_from_rank_metadata(array_extent, array_dims, layout, tile_e
             id="12_rank_no_interface_right_overlap",
         ),
         pytest.param(
-            [ndsl.util.Y_DIM, ndsl.util.X_DIM],
+            [Y_DIM, X_DIM],
             (4, 4),
             (1, 2),
             1,
@@ -255,7 +269,7 @@ def test_tile_extent_from_rank_metadata(array_extent, array_dims, layout, tile_e
             id="12_rank_no_interface_right_overlap",
         ),
         pytest.param(
-            [ndsl.util.Y_DIM, ndsl.util.X_DIM],
+            [Y_DIM, X_DIM],
             (4, 4),
             (1, 2),
             1,
@@ -265,7 +279,7 @@ def test_tile_extent_from_rank_metadata(array_extent, array_dims, layout, tile_e
             id="12_rank_centered_right_no_overlap_rectangle_layout",
         ),
         pytest.param(
-            [ndsl.util.Z_INTERFACE_DIM, ndsl.util.Y_DIM, ndsl.util.X_DIM],
+            [Z_INTERFACE_DIM, Y_DIM, X_DIM],
             (5, 4, 4),
             (1, 3),
             0,
@@ -275,7 +289,7 @@ def test_tile_extent_from_rank_metadata(array_extent, array_dims, layout, tile_e
             id="18_rank_left_no_overlap_rectangle_layout_half_edge_tiles_3d",
         ),
         pytest.param(
-            [ndsl.util.Z_INTERFACE_DIM, ndsl.util.Y_DIM, ndsl.util.X_DIM],
+            [Z_INTERFACE_DIM, Y_DIM, X_DIM],
             (5, 4, 4),
             (1, 3),
             1,
@@ -285,7 +299,7 @@ def test_tile_extent_from_rank_metadata(array_extent, array_dims, layout, tile_e
             id="18_rank_mid_no_overlap_rectangle_layout_half_edge_tiles_3d",
         ),
         pytest.param(
-            [ndsl.util.Z_INTERFACE_DIM, ndsl.util.Y_DIM, ndsl.util.X_DIM],
+            [Z_INTERFACE_DIM, Y_DIM, X_DIM],
             (5, 4, 4),
             (1, 3),
             2,
@@ -295,7 +309,7 @@ def test_tile_extent_from_rank_metadata(array_extent, array_dims, layout, tile_e
             id="18_rank_right_no_overlap_rectangle_layout_half_edge_tiles_3d",
         ),
         pytest.param(
-            [ndsl.util.Z_INTERFACE_DIM, ndsl.util.Y_DIM, ndsl.util.X_DIM],
+            [Z_INTERFACE_DIM, Y_DIM, X_DIM],
             (5, 4, 4),
             (2, 3),
             0,
@@ -305,7 +319,7 @@ def test_tile_extent_from_rank_metadata(array_extent, array_dims, layout, tile_e
             id="36_rank_botleft_right_no_overlap_rectangle_layout_half_edge_tiles_3d",
         ),
         pytest.param(
-            [ndsl.util.Z_INTERFACE_DIM, ndsl.util.Y_DIM, ndsl.util.X_DIM],
+            [Z_INTERFACE_DIM, Y_DIM, X_DIM],
             (5, 4, 4),
             (2, 3),
             1,
@@ -315,7 +329,7 @@ def test_tile_extent_from_rank_metadata(array_extent, array_dims, layout, tile_e
             id="36_rank_botmid_right_no_overlap_rectangle_layout_half_edge_tiles_3d",
         ),
         pytest.param(
-            [ndsl.util.Z_INTERFACE_DIM, ndsl.util.Y_DIM, ndsl.util.X_DIM],
+            [Z_INTERFACE_DIM, Y_DIM, X_DIM],
             (5, 4, 4),
             (2, 3),
             2,
@@ -325,7 +339,7 @@ def test_tile_extent_from_rank_metadata(array_extent, array_dims, layout, tile_e
             id="36_rank_botright_right_no_overlap_rectangle_layout_half_edge_tiles_3d",
         ),
         pytest.param(
-            [ndsl.util.Z_INTERFACE_DIM, ndsl.util.Y_DIM, ndsl.util.X_DIM],
+            [Z_INTERFACE_DIM, Y_DIM, X_DIM],
             (5, 4, 4),
             (2, 3),
             3,
@@ -335,7 +349,7 @@ def test_tile_extent_from_rank_metadata(array_extent, array_dims, layout, tile_e
             id="36_rank_topleft_no_overlap_rectangle_layout_half_edge_tiles_3d",
         ),
         pytest.param(
-            [ndsl.util.Z_INTERFACE_DIM, ndsl.util.Y_DIM, ndsl.util.X_DIM],
+            [Z_INTERFACE_DIM, Y_DIM, X_DIM],
             (5, 4, 4),
             (2, 3),
             4,
@@ -345,7 +359,7 @@ def test_tile_extent_from_rank_metadata(array_extent, array_dims, layout, tile_e
             id="36_rank_topmid_no_overlap_rectangle_layout_half_edge_tiles_3d",
         ),
         pytest.param(
-            [ndsl.util.Z_INTERFACE_DIM, ndsl.util.Y_DIM, ndsl.util.X_DIM],
+            [Z_INTERFACE_DIM, Y_DIM, X_DIM],
             (5, 4, 4),
             (2, 3),
             5,
@@ -355,7 +369,7 @@ def test_tile_extent_from_rank_metadata(array_extent, array_dims, layout, tile_e
             id="36_rank_topright_no_overlap_rectangle_layout_half_edge_tiles_3d",
         ),
         pytest.param(
-            [ndsl.util.Z_INTERFACE_DIM, ndsl.util.Y_DIM, ndsl.util.X_DIM],
+            [Z_INTERFACE_DIM, Y_DIM, X_DIM],
             (5, 8, 8),
             (3, 3),
             0,
@@ -365,7 +379,7 @@ def test_tile_extent_from_rank_metadata(array_extent, array_dims, layout, tile_e
             id="54_rank_botleft_no_overlap_square_layout_half_edge_tiles_3d",
         ),
         pytest.param(
-            [ndsl.util.Z_INTERFACE_DIM, ndsl.util.Y_DIM, ndsl.util.X_DIM],
+            [Z_INTERFACE_DIM, Y_DIM, X_DIM],
             (5, 8, 8),
             (3, 3),
             1,
@@ -375,7 +389,7 @@ def test_tile_extent_from_rank_metadata(array_extent, array_dims, layout, tile_e
             id="54_rank_botmid_no_overlap_square_layout_half_edge_tiles_3d",
         ),
         pytest.param(
-            [ndsl.util.Z_INTERFACE_DIM, ndsl.util.Y_DIM, ndsl.util.X_DIM],
+            [Z_INTERFACE_DIM, Y_DIM, X_DIM],
             (5, 8, 8),
             (3, 3),
             4,
@@ -385,7 +399,7 @@ def test_tile_extent_from_rank_metadata(array_extent, array_dims, layout, tile_e
             id="54_rank_midmid_no_overlap_square_layout_half_edge_tiles_3d",
         ),
         pytest.param(
-            [ndsl.util.Z_INTERFACE_DIM, ndsl.util.Y_DIM, ndsl.util.X_DIM],
+            [Z_INTERFACE_DIM, Y_DIM, X_DIM],
             (5, 8, 8),
             (3, 3),
             5,
@@ -395,7 +409,7 @@ def test_tile_extent_from_rank_metadata(array_extent, array_dims, layout, tile_e
             id="54_rank_midright_no_overlap_square_layout_half_edge_tiles_3d",
         ),
         pytest.param(
-            [ndsl.util.Z_INTERFACE_DIM, ndsl.util.Y_DIM, ndsl.util.X_DIM],
+            [Z_INTERFACE_DIM, Y_DIM, X_DIM],
             (5, 8, 8),
             (3, 3),
             8,
@@ -405,7 +419,7 @@ def test_tile_extent_from_rank_metadata(array_extent, array_dims, layout, tile_e
             id="54_rank_topright_no_overlap_square_layout_half_edge_tiles_3d",
         ),
         pytest.param(
-            [ndsl.util.Z_INTERFACE_DIM, ndsl.util.Y_DIM, ndsl.util.X_DIM],
+            [Z_INTERFACE_DIM, Y_DIM, X_DIM],
             (5, 8, 8),
             (3, 3),
             0,
@@ -415,7 +429,7 @@ def test_tile_extent_from_rank_metadata(array_extent, array_dims, layout, tile_e
             id="54_rank_botleft_no_overlap_square_layout_sixth_edge_tiles_3d",
         ),
         pytest.param(
-            [ndsl.util.Z_INTERFACE_DIM, ndsl.util.Y_DIM, ndsl.util.X_DIM],
+            [Z_INTERFACE_DIM, Y_DIM, X_DIM],
             (5, 8, 8),
             (3, 3),
             1,
@@ -425,7 +439,7 @@ def test_tile_extent_from_rank_metadata(array_extent, array_dims, layout, tile_e
             id="54_rank_botmid_no_overlap_square_layout_sixth_edge_tiles_3d",
         ),
         pytest.param(
-            [ndsl.util.Z_INTERFACE_DIM, ndsl.util.Y_DIM, ndsl.util.X_DIM],
+            [Z_INTERFACE_DIM, Y_DIM, X_DIM],
             (5, 8, 8),
             (3, 3),
             4,
@@ -435,7 +449,7 @@ def test_tile_extent_from_rank_metadata(array_extent, array_dims, layout, tile_e
             id="54_rank_midmid_no_overlap_square_layout_sixth_edge_tiles_3d",
         ),
         pytest.param(
-            [ndsl.util.Z_INTERFACE_DIM, ndsl.util.Y_DIM, ndsl.util.X_DIM],
+            [Z_INTERFACE_DIM, Y_DIM, X_DIM],
             (5, 8, 8),
             (3, 3),
             5,
@@ -445,7 +459,7 @@ def test_tile_extent_from_rank_metadata(array_extent, array_dims, layout, tile_e
             id="54_rank_midright_no_overlap_square_layout_sixth_edge_tiles_3d",
         ),
         pytest.param(
-            [ndsl.util.Z_INTERFACE_DIM, ndsl.util.Y_DIM, ndsl.util.X_DIM],
+            [Z_INTERFACE_DIM, Y_DIM, X_DIM],
             (5, 8, 8),
             (3, 3),
             8,
@@ -455,7 +469,7 @@ def test_tile_extent_from_rank_metadata(array_extent, array_dims, layout, tile_e
             id="54_rank_topright_no_overlap_square_layout_half_edge_tiles_3d",
         ),
         pytest.param(
-            [ndsl.util.Z_INTERFACE_DIM, ndsl.util.Y_DIM, ndsl.util.X_DIM],
+            [Z_INTERFACE_DIM, Y_DIM, X_DIM],
             (5, 16, 16),
             (4, 4),
             0,
@@ -465,7 +479,7 @@ def test_tile_extent_from_rank_metadata(array_extent, array_dims, layout, tile_e
             id="96_rank_farbotfarleft_no_overlap_square_layout_third_edge_tiles_3d",
         ),
         pytest.param(
-            [ndsl.util.Z_INTERFACE_DIM, ndsl.util.Y_DIM, ndsl.util.X_DIM],
+            [Z_INTERFACE_DIM, Y_DIM, X_DIM],
             (5, 16, 16),
             (4, 4),
             1,
@@ -475,7 +489,7 @@ def test_tile_extent_from_rank_metadata(array_extent, array_dims, layout, tile_e
             id="96_rank_farbotcloseleft_no_overlap_square_layout_third_edge_tiles_3d",
         ),
         pytest.param(
-            [ndsl.util.Z_INTERFACE_DIM, ndsl.util.Y_DIM, ndsl.util.X_DIM],
+            [Z_INTERFACE_DIM, Y_DIM, X_DIM],
             (5, 16, 16),
             (4, 4),
             6,
@@ -488,7 +502,7 @@ def test_tile_extent_from_rank_metadata(array_extent, array_dims, layout, tile_e
             ),
         ),
         pytest.param(
-            [ndsl.util.Z_INTERFACE_DIM, ndsl.util.Y_DIM, ndsl.util.X_DIM],
+            [Z_INTERFACE_DIM, Y_DIM, X_DIM],
             (5, 16, 16),
             (4, 4),
             14,
@@ -498,7 +512,7 @@ def test_tile_extent_from_rank_metadata(array_extent, array_dims, layout, tile_e
             id="96_rank_fartopcloseright_no_overlap_square_layout_third_edge_tiles_3d",
         ),
         pytest.param(
-            [ndsl.util.Y_INTERFACE_DIM, ndsl.util.X_INTERFACE_DIM],
+            [Y_INTERFACE_DIM, X_INTERFACE_DIM],
             (13, 13),
             (2, 4),
             1,
@@ -508,7 +522,7 @@ def test_tile_extent_from_rank_metadata(array_extent, array_dims, layout, tile_e
             id="48_rank_botcloseleft_interface_right_overlap",
         ),
         pytest.param(
-            [ndsl.util.Y_INTERFACE_DIM, ndsl.util.X_INTERFACE_DIM],
+            [Y_INTERFACE_DIM, X_INTERFACE_DIM],
             (13, 13),
             (2, 4),
             1,
@@ -518,7 +532,7 @@ def test_tile_extent_from_rank_metadata(array_extent, array_dims, layout, tile_e
             id="48_rank_botcloseleft_interface_overlap_half_edge",
         ),
         pytest.param(
-            [ndsl.util.Y_INTERFACE_DIM, ndsl.util.X_INTERFACE_DIM],
+            [Y_INTERFACE_DIM, X_INTERFACE_DIM],
             (13, 13),
             (2, 4),
             7,
@@ -528,7 +542,7 @@ def test_tile_extent_from_rank_metadata(array_extent, array_dims, layout, tile_e
             id="48_rank_topfarright_interface_overlap_half_edge",
         ),
         pytest.param(
-            [ndsl.util.Y_DIM, ndsl.util.X_DIM],
+            [Y_DIM, X_DIM],
             (12, 12),
             (2, 4),
             0,
@@ -538,7 +552,7 @@ def test_tile_extent_from_rank_metadata(array_extent, array_dims, layout, tile_e
             id="48_rank_botfarleft_overlap_half_edge",
         ),
         pytest.param(
-            [ndsl.util.Y_DIM, ndsl.util.X_INTERFACE_DIM],
+            [Y_DIM, X_INTERFACE_DIM],
             (12, 13),
             (3, 4),
             0,
@@ -548,7 +562,7 @@ def test_tile_extent_from_rank_metadata(array_extent, array_dims, layout, tile_e
             id="72_rank_botfarleft_x_interface_half_edge",
         ),
         pytest.param(
-            [ndsl.util.Y_DIM, ndsl.util.X_INTERFACE_DIM],
+            [Y_DIM, X_INTERFACE_DIM],
             (12, 13),
             (3, 4),
             1,
@@ -558,7 +572,7 @@ def test_tile_extent_from_rank_metadata(array_extent, array_dims, layout, tile_e
             id="72_rank_botcloseleft_x_interface_half_edge",
         ),
         pytest.param(
-            [ndsl.util.Y_DIM, ndsl.util.X_INTERFACE_DIM],
+            [Y_DIM, X_INTERFACE_DIM],
             (12, 13),
             (3, 4),
             11,
@@ -568,7 +582,7 @@ def test_tile_extent_from_rank_metadata(array_extent, array_dims, layout, tile_e
             id="72_rank_topfarright_x_interface_half_edge",
         ),
         pytest.param(
-            [ndsl.util.Y_INTERFACE_DIM, ndsl.util.X_DIM],
+            [Y_INTERFACE_DIM, X_DIM],
             (13, 12),
             (3, 4),
             0,
@@ -578,7 +592,7 @@ def test_tile_extent_from_rank_metadata(array_extent, array_dims, layout, tile_e
             id="72_rank_botfarleft_y_interface_half_edge",
         ),
         pytest.param(
-            [ndsl.util.Y_INTERFACE_DIM, ndsl.util.X_DIM],
+            [Y_INTERFACE_DIM, X_DIM],
             (13, 12),
             (3, 4),
             1,
@@ -588,7 +602,7 @@ def test_tile_extent_from_rank_metadata(array_extent, array_dims, layout, tile_e
             id="72_rank_botcloseleft_y_interface_half_edge",
         ),
         pytest.param(
-            [ndsl.util.Y_INTERFACE_DIM, ndsl.util.X_DIM],
+            [Y_INTERFACE_DIM, X_DIM],
             (13, 12),
             (3, 4),
             8,
@@ -598,7 +612,7 @@ def test_tile_extent_from_rank_metadata(array_extent, array_dims, layout, tile_e
             id="72_rank_topfarleft_y_interface_half_edge",
         ),
         pytest.param(
-            [ndsl.util.Y_INTERFACE_DIM, ndsl.util.X_DIM],
+            [Y_INTERFACE_DIM, X_DIM],
             (13, 12),
             (3, 4),
             11,
@@ -613,7 +627,7 @@ def test_tile_extent_from_rank_metadata(array_extent, array_dims, layout, tile_e
 def test_subtile_slice(
     array_dims, tile_extent, layout, rank, subtile_slice, overlap, edge_interior_ratio
 ):
-    partitioner = ndsl.util.TilePartitioner(layout, edge_interior_ratio)
+    partitioner = TilePartitioner(layout, edge_interior_ratio)
     result = partitioner.subtile_slice(rank, array_dims, tile_extent, overlap)
     assert result == subtile_slice
 
@@ -625,7 +639,7 @@ def test_subtile_slice(
     ),
     [
         pytest.param(
-            [ndsl.util.Y_DIM, ndsl.util.X_DIM],
+            [Y_DIM, X_DIM],
             (16, 16),
             (5, 5),
             0,
@@ -635,7 +649,7 @@ def test_subtile_slice(
             id="150_rank_yx_botfarleft",
         ),
         pytest.param(
-            [ndsl.util.Y_DIM, ndsl.util.X_DIM],
+            [Y_DIM, X_DIM],
             (16, 16),
             (5, 5),
             1,
@@ -645,7 +659,7 @@ def test_subtile_slice(
             id="150_rank_yx_botcloseleft",
         ),
         pytest.param(
-            [ndsl.util.Y_DIM, ndsl.util.X_DIM],
+            [Y_DIM, X_DIM],
             (16, 16),
             (5, 5),
             8,
@@ -655,7 +669,7 @@ def test_subtile_slice(
             id="150_rank_yx_closebotcloseright",
         ),
         pytest.param(
-            [ndsl.util.Y_DIM, ndsl.util.X_DIM],
+            [Y_DIM, X_DIM],
             (16, 16),
             (5, 5),
             14,
@@ -665,7 +679,7 @@ def test_subtile_slice(
             id="150_rank_yx_midfarright",
         ),
         pytest.param(
-            [ndsl.util.Y_DIM, ndsl.util.X_DIM],
+            [Y_DIM, X_DIM],
             (16, 16),
             (5, 5),
             24,
@@ -675,7 +689,7 @@ def test_subtile_slice(
             id="150_rank_yx_fartopfarright",
         ),
         pytest.param(
-            [ndsl.util.X_DIM, ndsl.util.Y_DIM],
+            [X_DIM, Y_DIM],
             (16, 16),
             (5, 5),
             0,
@@ -685,7 +699,7 @@ def test_subtile_slice(
             id="150_rank_xy_botfarleft",
         ),
         pytest.param(
-            [ndsl.util.X_DIM, ndsl.util.Y_DIM],
+            [X_DIM, Y_DIM],
             (16, 16),
             (5, 5),
             1,
@@ -695,7 +709,7 @@ def test_subtile_slice(
             id="150_rank_xy_botcloseleft",
         ),
         pytest.param(
-            [ndsl.util.X_DIM, ndsl.util.Y_DIM],
+            [X_DIM, Y_DIM],
             (16, 16),
             (5, 5),
             8,
@@ -705,7 +719,7 @@ def test_subtile_slice(
             id="150_rank_xy_closebotcloseright",
         ),
         pytest.param(
-            [ndsl.util.X_DIM, ndsl.util.Y_DIM],
+            [X_DIM, Y_DIM],
             (16, 16),
             (5, 5),
             14,
@@ -715,7 +729,7 @@ def test_subtile_slice(
             id="150_rank_xy_midfarright",
         ),
         pytest.param(
-            [ndsl.util.X_DIM, ndsl.util.Y_DIM],
+            [X_DIM, Y_DIM],
             (16, 16),
             (5, 5),
             24,
@@ -730,7 +744,7 @@ def test_subtile_slice(
 def test_subtile_slice_even_grid_odd_layout(
     array_dims, tile_extent, layout, rank, subtile_slice, overlap, edge_interior_ratio
 ):
-    partitioner = ndsl.util.TilePartitioner(layout, edge_interior_ratio)
+    partitioner = TilePartitioner(layout, edge_interior_ratio)
     result = partitioner.subtile_slice(rank, array_dims, tile_extent, overlap)
     assert result == subtile_slice
 
@@ -742,7 +756,7 @@ def test_subtile_slice_even_grid_odd_layout(
     ),
     [
         pytest.param(
-            [ndsl.util.Y_DIM, ndsl.util.X_DIM],
+            [Y_DIM, X_DIM],
             (13, 19),
             (4, 4),
             24,
@@ -755,7 +769,7 @@ def test_subtile_slice_even_grid_odd_layout(
             id="48_rank_odd_grid_even_layout_y",
         ),
         pytest.param(
-            [ndsl.util.Y_DIM, ndsl.util.X_DIM],
+            [Y_DIM, X_DIM],
             (12, 19),
             (4, 2),
             24,
@@ -779,7 +793,7 @@ def test_subtile_slice_odd_grid_even_layout_no_interface(
     overlap,
     edge_interior_ratio,
 ):
-    partitioner = ndsl.util.TilePartitioner(layout, edge_interior_ratio)
+    partitioner = TilePartitioner(layout, edge_interior_ratio)
     with pytest.raises(ValueError, match=expected_error_string):
         partitioner.subtile_slice(rank, array_dims, tile_extent, overlap)
 
@@ -788,7 +802,7 @@ def test_subtile_slice_odd_grid_even_layout_no_interface(
     "array_dims, tile_extent, layout, edge_interior_ratio, rank_extent",
     [
         pytest.param(
-            [ndsl.util.Y_DIM, ndsl.util.X_DIM],
+            [Y_DIM, X_DIM],
             (12, 12),
             (2, 3),
             1.0,
@@ -796,7 +810,7 @@ def test_subtile_slice_odd_grid_even_layout_no_interface(
             id="36_rank_full_edge_tiles",
         ),
         pytest.param(
-            [ndsl.util.Y_DIM, ndsl.util.X_DIM],
+            [Y_DIM, X_DIM],
             (12, 12),
             (2, 3),
             0.5,
@@ -804,7 +818,7 @@ def test_subtile_slice_odd_grid_even_layout_no_interface(
             id="36_rank_half_edge_tiles",
         ),
         pytest.param(
-            [ndsl.util.X_DIM, ndsl.util.Y_DIM],
+            [X_DIM, Y_DIM],
             (12, 12),
             (3, 4),
             0.5,
@@ -812,7 +826,7 @@ def test_subtile_slice_odd_grid_even_layout_no_interface(
             id="72_rank_half_edge_tiles",
         ),
         pytest.param(
-            [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_DIM],
+            [X_INTERFACE_DIM, Y_DIM],
             (13, 12),
             (3, 4),
             0.5,
@@ -820,7 +834,7 @@ def test_subtile_slice_odd_grid_even_layout_no_interface(
             id="72_rank_half_edge_tiles_x_interface",
         ),
         pytest.param(
-            [ndsl.util.X_DIM, ndsl.util.Y_INTERFACE_DIM],
+            [X_DIM, Y_INTERFACE_DIM],
             (12, 13),
             (3, 4),
             0.5,
@@ -828,7 +842,7 @@ def test_subtile_slice_odd_grid_even_layout_no_interface(
             id="72_rank_half_edge_tiles_y_interface",
         ),
         pytest.param(
-            [ndsl.util.X_DIM, ndsl.util.Z_DIM, ndsl.util.Y_DIM],
+            [X_DIM, Z_DIM, Y_DIM],
             (12, 5, 12),
             (3, 4),
             0.5,
@@ -837,10 +851,10 @@ def test_subtile_slice_odd_grid_even_layout_no_interface(
         ),
         pytest.param(
             [
-                ndsl.util.TILE_DIM,
-                ndsl.util.X_DIM,
-                ndsl.util.Z_DIM,
-                ndsl.util.Y_DIM,
+                TILE_DIM,
+                X_DIM,
+                Z_DIM,
+                Y_DIM,
             ],
             (6, 12, 5, 12),
             (3, 4),
@@ -854,11 +868,11 @@ def test_subtile_slice_odd_grid_even_layout_no_interface(
 def test_subtile_extents_from_tile_metadata(
     array_dims, tile_extent, layout, edge_interior_ratio, rank_extent
 ):
-    result = ndsl.util.comm.partitioner._subtile_extents_from_tile_metadata(
+    result = _subtile_extents_from_tile_metadata(
         array_dims, tile_extent, layout, edge_interior_ratio
     )
     assert result == rank_extent
-    result = ndsl.util.comm.partitioner._subtile_extents_from_tile_metadata(
+    result = _subtile_extents_from_tile_metadata(
         dims=array_dims,
         tile_extent=tile_extent,
         layout=layout,
@@ -875,7 +889,7 @@ def test_subtile_extents_from_tile_metadata(
     ),
     [
         pytest.param(
-            [ndsl.util.Y_DIM, ndsl.util.X_DIM],
+            [Y_DIM, X_DIM],
             (12, 12),
             (3, 4),
             1.0,
@@ -901,19 +915,19 @@ def test_tile_extent_from_metadata(
     expected_extent,
     expected_error_string,
 ):
-    partitioner = ndsl.util.TilePartitioner(layout, half_edge_interior_ratio)
+    partitioner = TilePartitioner(layout, half_edge_interior_ratio)
     subtile_slice = partitioner.subtile_slice(0, array_dims, tile_extent, False)
     assert subtile_slice == expected_slice
     slice_extent = (
         subtile_slice[0].stop - subtile_slice[0].start,
         subtile_slice[1].stop - subtile_slice[1].start,
     )
-    rank_extent = ndsl.util.comm.partitioner.tile_extent_from_rank_metadata(
+    rank_extent = tile_extent_from_rank_metadata(
         array_dims, slice_extent, layout, full_edge_interior_ratio
     )
     assert rank_extent == expected_extent
     with pytest.raises(NotImplementedError, match=expected_error_string):
-        ndsl.util.comm.partitioner.tile_extent_from_rank_metadata(
+        tile_extent_from_rank_metadata(
             array_dims, slice_extent, layout, half_edge_interior_ratio
         )
 
@@ -926,10 +940,10 @@ def test_tile_extent_from_metadata(
     [
         pytest.param(
             [
-                ndsl.util.TILE_DIM,
-                ndsl.util.X_DIM,
-                ndsl.util.Z_DIM,
-                ndsl.util.Y_DIM,
+                TILE_DIM,
+                X_DIM,
+                Z_DIM,
+                Y_DIM,
             ],
             (6, 12, 5, 12),
             (3, 4),
@@ -941,10 +955,10 @@ def test_tile_extent_from_metadata(
         ),
         pytest.param(
             [
-                ndsl.util.TILE_DIM,
-                ndsl.util.Y_DIM,
-                ndsl.util.Z_DIM,
-                ndsl.util.X_DIM,
+                TILE_DIM,
+                Y_DIM,
+                Z_DIM,
+                X_DIM,
             ],
             (6, 12, 5, 12),
             (3, 4),
@@ -956,10 +970,10 @@ def test_tile_extent_from_metadata(
         ),
         pytest.param(
             [
-                ndsl.util.Z_DIM,
-                ndsl.util.Y_DIM,
-                ndsl.util.TILE_DIM,
-                ndsl.util.X_DIM,
+                Z_DIM,
+                Y_DIM,
+                TILE_DIM,
+                X_DIM,
             ],
             (5, 12, 6, 12),
             (3, 4),
@@ -981,10 +995,10 @@ def test_subtile_extent_with_tile_dimensions(
     cubedsphere_expected,
 ):
     data_array = np.zeros((tile_extent))
-    quantity = ndsl.util.Quantity(data_array, array_dims, "dimensionless", [0, 0, 0, 0])
+    quantity = Quantity(data_array, array_dims, "dimensionless", [0, 0, 0, 0])
 
-    tile_partitioner = ndsl.util.TilePartitioner(layout, edge_interior_ratio)
-    cubedsphere_partitioner = ndsl.util.CubedSpherePartitioner(tile_partitioner)
+    tile_partitioner = TilePartitioner(layout, edge_interior_ratio)
+    cubedsphere_partitioner = CubedSpherePartitioner(tile_partitioner)
 
     tile_result = tile_partitioner.subtile_extent(quantity.metadata, rank)
     assert tile_result == tile_expected

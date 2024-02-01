@@ -11,14 +11,15 @@ from gt4py.cartesian.gtscript import (
     sqrt,
 )
 
-import ndsl.util
-import ndsl.util.constants as constants
+import ndsl.constants as constants
 import pace.physics.functions.microphysics_funcs as functions
+from ndsl.constants import X_DIM, Y_DIM, Z_DIM
 from ndsl.dsl.dace.orchestration import orchestrate
 from ndsl.dsl.stencil import StencilFactory
 from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ, Int
-from ndsl.util import X_DIM, Y_DIM, Z_DIM
-from ndsl.util.grid import GridData
+from ndsl.grid import GridData
+from ndsl.initialization.allocator import QuantityFactory
+from ndsl.quantity import Quantity
 
 from .._config import PhysicsConfig
 
@@ -1571,24 +1572,24 @@ class MicrophysicsState:
 
     def __init__(
         self,
-        pt: ndsl.util.Quantity,
-        qvapor: ndsl.util.Quantity,
-        qliquid: ndsl.util.Quantity,
-        qrain: ndsl.util.Quantity,
-        qice: ndsl.util.Quantity,
-        qsnow: ndsl.util.Quantity,
-        qgraupel: ndsl.util.Quantity,
-        qcld: ndsl.util.Quantity,
-        ua: ndsl.util.Quantity,
-        va: ndsl.util.Quantity,
-        delp: ndsl.util.Quantity,
-        delz: ndsl.util.Quantity,
-        omga: ndsl.util.Quantity,
-        delprsi: ndsl.util.Quantity,
-        wmp: ndsl.util.Quantity,
-        dz: ndsl.util.Quantity,
-        tendency: ndsl.util.Quantity,
-        land: ndsl.util.Quantity,
+        pt: Quantity,
+        qvapor: Quantity,
+        qliquid: Quantity,
+        qrain: Quantity,
+        qice: Quantity,
+        qsnow: Quantity,
+        qgraupel: Quantity,
+        qcld: Quantity,
+        ua: Quantity,
+        va: Quantity,
+        delp: Quantity,
+        delz: Quantity,
+        omga: Quantity,
+        delprsi: Quantity,
+        wmp: Quantity,
+        dz: Quantity,
+        tendency: Quantity,
+        land: Quantity,
     ):
         self.pt = pt
         self.qvapor = qvapor
@@ -1623,7 +1624,7 @@ class Microphysics:
     def __init__(
         self,
         stencil_factory: StencilFactory,
-        quantity_factory: ndsl.util.QuantityFactory,
+        quantity_factory: QuantityFactory,
         grid_data: GridData,
         namelist: PhysicsConfig,
     ):

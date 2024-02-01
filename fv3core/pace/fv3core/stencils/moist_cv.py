@@ -8,7 +8,7 @@ from gt4py.cartesian.gtscript import (
     log,
 )
 
-import ndsl.util.constants as constants
+import ndsl.constants as constants
 from ndsl.dsl.typing import Float, FloatField
 
 

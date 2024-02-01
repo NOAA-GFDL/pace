@@ -1,8 +1,8 @@
 from typing import Any, Dict
 
-import ndsl.dsl
-import ndsl.util
 import pace.fv3core
+from ndsl.dsl.stencil import StencilFactory
+from ndsl.namelist import Namelist
 from pace.fv3core.stencils import temperature_adjust
 from pace.fv3core.stencils.dyn_core import get_nk_heat_dissipation
 from pace.fv3core.testing import TranslateDycoreFortranData2Py
@@ -14,8 +14,8 @@ class TranslatePressureAdjustedTemperature_NonHydrostatic(
     def __init__(
         self,
         grid,
-        namelist: ndsl.util.Namelist,
-        stencil_factory: ndsl.dsl.StencilFactory,
+        namelist: Namelist,
+        stencil_factory: StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
         dycore_config = pace.fv3core.DynamicalCoreConfig.from_namelist(namelist)

@@ -9,7 +9,7 @@ from dace.sdfg import graph as gr
 from dace.sdfg import utils as sdutil
 from dace.transformation.helpers import get_parent_map
 
-from ndsl.util.logging import ndsl_log
+from ndsl.logging import ndsl_log
 
 
 def _filter_all_maps(

@@ -6,9 +6,12 @@ import cftime
 import numpy as np
 import pytest
 
-import ndsl.util
-from ndsl.util.optional_imports import xarray as xr
-from ndsl.util.testing import DummyComm
+from ndsl.comm.communicator import CubedSphereCommunicator
+from ndsl.comm.partitioner import CubedSpherePartitioner, TilePartitioner
+from ndsl.monitor import NetCDFMonitor
+from ndsl.optional_imports import xarray as xr
+from ndsl.quantity import Quantity
+from ndsl.testing import DummyComm
 
 
 requires_xarray = pytest.mark.skipif(xr is None, reason="xarray is not installed")
@@ -39,16 +42,16 @@ def test_monitor_store_multi_rank_state(
     nz, ny, nx = shape
     ny_rank = int(ny / layout[0] + ny_rank_add)
     nx_rank = int(nx / layout[1] + nx_rank_add)
-    tile = ndsl.util.TilePartitioner(layout)
+    tile = TilePartitioner(layout)
     time = cftime.DatetimeJulian(2010, 6, 20, 6, 0, 0)
     timestep = timedelta(hours=1)
     total_ranks = 6 * layout[0] * layout[1]
-    partitioner = ndsl.util.CubedSpherePartitioner(tile)
+    partitioner = CubedSpherePartitioner(tile)
     shared_buffer = {}
-    monitor_list: List[ndsl.util.NetCDFMonitor] = []
+    monitor_list: List[NetCDFMonitor] = []
 
     for rank in range(total_ranks):
-        communicator = ndsl.util.CubedSphereCommunicator(
+        communicator = CubedSphereCommunicator(
             partitioner=partitioner,
             comm=DummyComm(
                 rank=rank, total_ranks=total_ranks, buffer_dict=shared_buffer
@@ -58,7 +61,7 @@ def test_monitor_store_multi_rank_state(
         # created in ascending order
         communicator.tile
         monitor_list.append(
-            ndsl.util.NetCDFMonitor(
+            NetCDFMonitor(
                 path=tmpdir,
                 communicator=communicator,
                 time_chunk_size=time_chunk_size,
@@ -67,7 +70,7 @@ def test_monitor_store_multi_rank_state(
 
     for rank in range(total_ranks - 1, -1, -1):
         state = {
-            "var_const1": ndsl.util.Quantity(
+            "var_const1": Quantity(
                 numpy.ones([nz, ny_rank, nx_rank]),
                 dims=dims,
                 units=units,
@@ -80,7 +83,7 @@ def test_monitor_store_multi_rank_state(
         for rank in range(total_ranks - 1, -1, -1):
             state = {
                 "time": time + i_t * timestep,
-                "var1": ndsl.util.Quantity(
+                "var1": Quantity(
                     numpy.ones([nz, ny_rank, nx_rank]),
                     dims=dims,
                     units=units,
@@ -93,7 +96,7 @@ def test_monitor_store_multi_rank_state(
 
     for rank in range(total_ranks - 1, -1, -1):
         state = {
-            "var_const2": ndsl.util.Quantity(
+            "var_const2": Quantity(
                 numpy.ones([nz, ny_rank, nx_rank]),
                 dims=dims,
                 units=units,

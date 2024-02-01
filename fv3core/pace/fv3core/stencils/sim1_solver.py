@@ -10,10 +10,10 @@ from gt4py.cartesian.gtscript import (
     log,
 )
 
-import ndsl.util.constants as constants
+import ndsl.constants as constants
+from ndsl.constants import X_DIM, Y_DIM, Z_INTERFACE_DIM
 from ndsl.dsl.stencil import StencilFactory
 from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ
-from ndsl.util import X_DIM, Y_DIM, Z_INTERFACE_DIM
 
 
 @typing.no_type_check

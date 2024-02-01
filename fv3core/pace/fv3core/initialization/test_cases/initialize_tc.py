@@ -1,9 +1,9 @@
 import numpy as np
 
+import ndsl.constants as constants
 import ndsl.util as fv3util
-import ndsl.util.constants as constants
 import pace.fv3core.initialization.init_utils as init_utils
-from ndsl.util.grid import GridData, great_circle_distance_lon_lat
+from ndsl.grid import GridData, great_circle_distance_lon_lat
 from pace.fv3core.dycore_state import DycoreState
 
 

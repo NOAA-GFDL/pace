@@ -1,7 +1,7 @@
 from gt4py.cartesian import gtscript
 from gt4py.cartesian.gtscript import exp, log, sqrt
 
-import ndsl.util.constants as constants
+import ndsl.constants as constants
 
 
 # Marshall-Palmer constants ###

@@ -1,9 +1,10 @@
 import dataclasses
 from typing import List, Optional
 
+from Comm.communicator import Communicator
+
 from ndsl.dsl.dace.orchestration import dace_inhibitor
-from ndsl.util.comm.communicator import Communicator
-from ndsl.util.halo.updater import HaloUpdater
+from ndsl.halo.updater import HaloUpdater
 
 
 class WrappedHaloUpdater:

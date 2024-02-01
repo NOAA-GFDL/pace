@@ -2,8 +2,8 @@ import warnings
 from timeit import default_timer as time
 from typing import Mapping
 
-from ndsl.util.optional_imports import cupy as cp
-from ndsl.util.utils import GPU_AVAILABLE
+from ndsl.optional_imports import cupy as cp
+from ndsl.utils import GPU_AVAILABLE
 
 
 class Timer:

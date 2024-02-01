@@ -12,12 +12,12 @@ from gt4py.cartesian.gtscript import (
     log,
 )
 
-import ndsl.util
-import ndsl.util.constants as constants
+import ndsl.constants as constants
+from ndsl.constants import X_DIM, Y_DIM, Z_DIM, Z_INTERFACE_DIM
 from ndsl.dsl.dace import orchestrate
 from ndsl.dsl.stencil import StencilFactory
 from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ
-from ndsl.util import X_DIM, Y_DIM, Z_DIM, Z_INTERFACE_DIM
+from ndsl.initialization.allocator import QuantityFactory
 from pace.fv3core._config import RiemannConfig
 from pace.fv3core.stencils.sim1_solver import Sim1Solver
 
@@ -158,7 +158,7 @@ class NonhydrostaticVerticalSolver:
     def __init__(
         self,
         stencil_factory: StencilFactory,
-        quantity_factory: ndsl.util.QuantityFactory,
+        quantity_factory: QuantityFactory,
         config: RiemannConfig,
     ):
         grid_indexing = stencil_factory.grid_indexing

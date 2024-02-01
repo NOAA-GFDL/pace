@@ -6,14 +6,15 @@ from typing import Any, Dict, List
 import numpy as np
 import pytest
 
-import ndsl.dsl
 import ndsl.dsl.gt4py_utils as gt_utils
-import ndsl.util
+from ndsl.comm.communicator import CubedSphereCommunicator, TileCommunicator
+from ndsl.comm.mpi import MPI
+from ndsl.comm.partitioner import CubedSpherePartitioner, TilePartitioner
 from ndsl.dsl.dace.dace_config import DaceConfig
-from ndsl.dsl.stencil import CompilationConfig
+from ndsl.dsl.stencil import CompilationConfig, StencilConfig
+from ndsl.quantity import Quantity
 from ndsl.stencils.testing import SavepointCase, dataset_to_dict
-from ndsl.util.comm.mpi import MPI
-from ndsl.util.testing import compare_scalar, perturb, success, success_array
+from ndsl.testing import compare_scalar, perturb, success, success_array
 
 
 # this only matters for manually-added print statements
@@ -232,7 +233,7 @@ def test_sequential_savepoint(
         pytest.xfail(
             f"no translate object available for savepoint {case.savepoint_name}"
         )
-    stencil_config = ndsl.dsl.StencilConfig(
+    stencil_config = StencilConfig(
         compilation_config=CompilationConfig(backend=backend),
         dace_config=DaceConfig(
             communicator=None,
@@ -309,13 +310,13 @@ def test_sequential_savepoint(
 
 
 def state_from_savepoint(serializer, savepoint, name_to_std_name):
-    properties = ndsl.util.fortran_info.properties_by_std_name
+    properties = ndsl.fortran_info.properties_by_std_name
     origin = gt_utils.origin
     state = {}
     for name, std_name in name_to_std_name.items():
         array = serializer.read(name, savepoint)
         extent = tuple(np.asarray(array.shape) - 2 * np.asarray(origin))
-        state["air_temperature"] = ndsl.util.Quantity(
+        state["air_temperature"] = Quantity(
             array,
             dims=reversed(properties["air_temperature"]["dims"]),
             units=properties["air_temperature"]["units"],
@@ -326,14 +327,14 @@ def state_from_savepoint(serializer, savepoint, name_to_std_name):
 
 
 def get_communicator(comm, layout):
-    partitioner = ndsl.util.CubedSpherePartitioner(ndsl.util.TilePartitioner(layout))
-    communicator = ndsl.util.CubedSphereCommunicator(comm, partitioner)
+    partitioner = CubedSpherePartitioner(TilePartitioner(layout))
+    communicator = CubedSphereCommunicator(comm, partitioner)
     return communicator
 
 
 def get_tile_communicator(comm, layout):
-    partitioner = ndsl.util.TilePartitioner(layout)
-    communicator = ndsl.util.TileCommunicator(comm, partitioner)
+    partitioner = TilePartitioner(layout)
+    communicator = TileCommunicator(comm, partitioner)
     return communicator
 
 
@@ -369,7 +370,7 @@ def test_parallel_savepoint(
         pytest.xfail(
             f"no translate object available for savepoint {case.savepoint_name}"
         )
-    stencil_config = ndsl.dsl.StencilConfig(
+    stencil_config = StencilConfig(
         compilation_config=CompilationConfig(backend=backend),
         dace_config=DaceConfig(
             communicator=communicator,

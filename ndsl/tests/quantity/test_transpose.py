@@ -1,6 +1,16 @@
 import pytest
+from Quantity import Quantity
 
-import ndsl.util
+from ndsl.constants import (
+    X_DIM,
+    X_DIMS,
+    X_INTERFACE_DIM,
+    Y_DIM,
+    Y_DIMS,
+    Y_INTERFACE_DIM,
+    Z_DIM,
+    Z_DIMS,
+)
 
 
 @pytest.fixture
@@ -71,7 +81,7 @@ def final_data(initial_data, transpose_order, numpy):
 
 @pytest.fixture
 def quantity(quantity_data_input, initial_dims, initial_origin, initial_extent):
-    return ndsl.util.Quantity(
+    return Quantity(
         quantity_data_input,
         dims=initial_dims,
         units="unit_string",
@@ -98,56 +108,56 @@ def param_product(*param_lists):
     ),
     [
         pytest.param(
-            (ndsl.util.X_DIM, ndsl.util.Y_DIM),
+            (X_DIM, Y_DIM),
             (6, 7),
             (1, 2),
             (2, 3),
-            (ndsl.util.X_DIM, ndsl.util.Y_DIM),
+            (X_DIM, Y_DIM),
             (0, 1),
             id="2d_keep_order",
         ),
         pytest.param(
-            (ndsl.util.X_DIM, ndsl.util.Y_DIM),
+            (X_DIM, Y_DIM),
             (6, 7),
             (1, 2),
             (2, 3),
-            (ndsl.util.Y_DIM, ndsl.util.X_DIM),
+            (Y_DIM, X_DIM),
             (1, 0),
             id="2d_transpose",
         ),
         pytest.param(
-            (ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM),
+            (X_DIM, Y_DIM, Z_DIM),
             (6, 7, 8),
             (1, 2, 3),
             (2, 3, 4),
-            (ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM),
+            (X_DIM, Y_DIM, Z_DIM),
             (0, 1, 2),
             id="3d_keep_order",
         ),
         pytest.param(
-            (ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM),
+            (X_DIM, Y_DIM, Z_DIM),
             (6, 7, 8),
             (1, 2, 3),
             (2, 3, 4),
-            (ndsl.util.X_DIMS, ndsl.util.Y_DIMS, ndsl.util.Z_DIMS),
+            (X_DIMS, Y_DIMS, Z_DIMS),
             (0, 1, 2),
             id="3d_keep_order_list_dims",
         ),
         pytest.param(
-            (ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM),
+            (X_DIM, Y_DIM, Z_DIM),
             (6, 7, 8),
             (1, 2, 3),
             (2, 3, 4),
-            (ndsl.util.Z_DIM, ndsl.util.Y_DIM, ndsl.util.X_DIM),
+            (Z_DIM, Y_DIM, X_DIM),
             (2, 1, 0),
             id="3d_transpose",
         ),
         pytest.param(
-            (ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM),
+            (X_DIM, Y_DIM, Z_DIM),
             (6, 7, 8),
             (1, 2, 3),
             (2, 3, 4),
-            (ndsl.util.Z_DIMS, ndsl.util.Y_DIMS, ndsl.util.X_DIMS),
+            (Z_DIMS, Y_DIMS, X_DIMS),
             (2, 1, 0),
             id="3d_transpose_list_dims",
         ),
@@ -173,24 +183,22 @@ def test_transpose(
         "initial_extent, target_dims, transpose_order"
     ),
     [
+        pytest.param((X_DIM,), (6,), (1,), (2,), (Y_DIM,), (0,), id="1d"),
         pytest.param(
-            (ndsl.util.X_DIM,), (6,), (1,), (2,), (ndsl.util.Y_DIM,), (0,), id="1d"
-        ),
-        pytest.param(
-            (ndsl.util.X_DIM, ndsl.util.Y_INTERFACE_DIM),
+            (X_DIM, Y_INTERFACE_DIM),
             (6, 7),
             (1, 2),
             (2, 3),
-            (ndsl.util.X_DIM, ndsl.util.Y_DIM),
+            (X_DIM, Y_DIM),
             (0, 1),
             id="2d_switch_stagger",
         ),
         pytest.param(
-            (ndsl.util.X_DIM, ndsl.util.Y_DIM),
+            (X_DIM, Y_DIM),
             (6, 7),
             (1, 2),
             (2, 3),
-            (ndsl.util.Y_DIM, ndsl.util.X_INTERFACE_DIM),
+            (Y_DIM, X_INTERFACE_DIM),
             (1, 0),
             id="2d_transpose_switch_stagger",
         ),
@@ -205,9 +213,7 @@ def test_transpose_invalid_cases(
 
 
 def test_transpose_retains_attrs(numpy):
-    quantity = ndsl.util.Quantity(
-        numpy.random.randn(3, 4), dims=["x", "y"], units="unit_string"
-    )
+    quantity = Quantity(numpy.random.randn(3, 4), dims=["x", "y"], units="unit_string")
     quantity._attrs = {"long_name": "500 mb height"}
     transposed = quantity.transpose(["y", "x"])
     assert transposed.attrs == quantity.attrs

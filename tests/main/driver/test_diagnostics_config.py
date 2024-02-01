@@ -2,9 +2,10 @@ import unittest.mock
 
 import pytest
 
-import ndsl.util
 import pace.driver
 import pace.driver.diagnostics
+from ndsl.initialization.allocator import QuantityFactory
+from ndsl.initialization.sizer import SubtileGridSizer
 from pace.fv3core.dycore_state import DycoreState
 
 
@@ -42,10 +43,8 @@ def test_zselect_raises_error_if_not_3d(tmpdir):
             z_select=[pace.driver.diagnostics.ZSelect(level=0, names=["phis"])],
         )
         result = config.diagnostics_factory(unittest.mock.MagicMock())
-        quantity_factory = ndsl.util.QuantityFactory.from_backend(
-            sizer=ndsl.util.SubtileGridSizer(
-                nx=12, ny=12, nz=79, n_halo=3, extra_dim_lengths={}
-            ),
+        quantity_factory = QuantityFactory.from_backend(
+            sizer=SubtileGridSizer(nx=12, ny=12, nz=79, n_halo=3, extra_dim_lengths={}),
             backend="numpy",
         )
         state = DycoreState.init_zeros(quantity_factory)
@@ -59,10 +58,8 @@ def test_zselect_raises_error_if_3rd_dim_not_z(tmpdir):
             z_select=[pace.driver.diagnostics.ZSelect(level=0, names=["foo"])],
         )
         result = config.diagnostics_factory(unittest.mock.MagicMock())
-        quantity_factory = ndsl.util.QuantityFactory.from_backend(
-            sizer=ndsl.util.SubtileGridSizer(
-                nx=12, ny=12, nz=79, n_halo=3, extra_dim_lengths={}
-            ),
+        quantity_factory = QuantityFactory.from_backend(
+            sizer=SubtileGridSizer(nx=12, ny=12, nz=79, n_halo=3, extra_dim_lengths={}),
             backend="numpy",
         )
         state = DycoreState.init_zeros(quantity_factory)

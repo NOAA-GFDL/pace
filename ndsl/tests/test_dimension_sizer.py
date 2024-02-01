@@ -2,7 +2,17 @@ from collections import namedtuple
 
 import pytest
 
-import ndsl.util
+from ndsl.constants import (
+    N_HALO_DEFAULT,
+    X_DIM,
+    X_INTERFACE_DIM,
+    Y_DIM,
+    Y_INTERFACE_DIM,
+    Z_DIM,
+    Z_INTERFACE_DIM,
+)
+from ndsl.initialization.allocator import QuantityFactory
+from ndsl.initialization.sizer import SubtileGridSizer
 
 
 @pytest.fixture(params=[48, 96])
@@ -60,16 +70,16 @@ def namelist(nx_tile, ny_tile, nz, layout):
 @pytest.fixture(params=["from_namelist", "from_tile_params"])
 def sizer(request, nx_tile, ny_tile, nz, layout, namelist, extra_dimension_lengths):
     if request.param == "from_tile_params":
-        sizer = ndsl.util.SubtileGridSizer.from_tile_params(
+        sizer = SubtileGridSizer.from_tile_params(
             nx_tile,
             ny_tile,
             nz,
-            ndsl.util.N_HALO_DEFAULT,
+            N_HALO_DEFAULT,
             extra_dimension_lengths,
             layout,
         )
     elif request.param == "from_namelist":
-        sizer = ndsl.util.SubtileGridSizer.from_namelist(namelist)
+        sizer = SubtileGridSizer.from_namelist(namelist)
     else:
         raise NotImplementedError()
     return sizer
@@ -103,62 +113,62 @@ DimCase = namedtuple("DimCase", ["dims", "origin", "extent", "shape"])
 def dim_case(request, nx, ny, nz):
     if request.param == "x_only":
         return DimCase(
-            (ndsl.util.X_DIM,),
-            (ndsl.util.N_HALO_DEFAULT,),
+            (X_DIM,),
+            (N_HALO_DEFAULT,),
             (nx,),
-            (2 * ndsl.util.N_HALO_DEFAULT + nx + 1,),
+            (2 * N_HALO_DEFAULT + nx + 1,),
         )
     elif request.param == "x_interface_only":
         return DimCase(
-            (ndsl.util.X_INTERFACE_DIM,),
-            (ndsl.util.N_HALO_DEFAULT,),
+            (X_INTERFACE_DIM,),
+            (N_HALO_DEFAULT,),
             (nx + 1,),
-            (2 * ndsl.util.N_HALO_DEFAULT + nx + 1,),
+            (2 * N_HALO_DEFAULT + nx + 1,),
         )
     elif request.param == "y_only":
         return DimCase(
-            (ndsl.util.Y_DIM,),
-            (ndsl.util.N_HALO_DEFAULT,),
+            (Y_DIM,),
+            (N_HALO_DEFAULT,),
             (ny,),
-            (2 * ndsl.util.N_HALO_DEFAULT + ny + 1,),
+            (2 * N_HALO_DEFAULT + ny + 1,),
         )
     elif request.param == "y_interface_only":
         return DimCase(
-            (ndsl.util.Y_INTERFACE_DIM,),
-            (ndsl.util.N_HALO_DEFAULT,),
+            (Y_INTERFACE_DIM,),
+            (N_HALO_DEFAULT,),
             (ny + 1,),
-            (2 * ndsl.util.N_HALO_DEFAULT + ny + 1,),
+            (2 * N_HALO_DEFAULT + ny + 1,),
         )
     elif request.param == "z_only":
-        return DimCase((ndsl.util.Z_DIM,), (0,), (nz,), (nz + 1,))
+        return DimCase((Z_DIM,), (0,), (nz,), (nz + 1,))
     elif request.param == "z_interface_only":
-        return DimCase((ndsl.util.Z_INTERFACE_DIM,), (0,), (nz + 1,), (nz + 1,))
+        return DimCase((Z_INTERFACE_DIM,), (0,), (nz + 1,), (nz + 1,))
     elif request.param == "x_y":
         return DimCase(
             (
-                ndsl.util.X_DIM,
-                ndsl.util.Y_DIM,
+                X_DIM,
+                Y_DIM,
             ),
-            (ndsl.util.N_HALO_DEFAULT, ndsl.util.N_HALO_DEFAULT),
+            (N_HALO_DEFAULT, N_HALO_DEFAULT),
             (nx, ny),
             (
-                2 * ndsl.util.N_HALO_DEFAULT + nx + 1,
-                2 * ndsl.util.N_HALO_DEFAULT + ny + 1,
+                2 * N_HALO_DEFAULT + nx + 1,
+                2 * N_HALO_DEFAULT + ny + 1,
             ),
         )
     elif request.param == "z_y_x":
         return DimCase(
             (
-                ndsl.util.Z_DIM,
-                ndsl.util.Y_DIM,
-                ndsl.util.X_DIM,
+                Z_DIM,
+                Y_DIM,
+                X_DIM,
             ),
-            (0, ndsl.util.N_HALO_DEFAULT, ndsl.util.N_HALO_DEFAULT),
+            (0, N_HALO_DEFAULT, N_HALO_DEFAULT),
             (nz, ny, nx),
             (
                 nz + 1,
-                2 * ndsl.util.N_HALO_DEFAULT + ny + 1,
-                2 * ndsl.util.N_HALO_DEFAULT + nx + 1,
+                2 * N_HALO_DEFAULT + ny + 1,
+                2 * N_HALO_DEFAULT + nx + 1,
             ),
         )
 
@@ -182,7 +192,7 @@ def test_subtile_dimension_sizer_shape(sizer, dim_case):
 
 
 def test_allocator_zeros(numpy, sizer, dim_case, units, dtype):
-    allocator = ndsl.util.QuantityFactory(sizer, numpy)
+    allocator = QuantityFactory(sizer, numpy)
     quantity = allocator.zeros(dim_case.dims, units, dtype=dtype)
     assert quantity.units == units
     assert quantity.dims == dim_case.dims
@@ -193,7 +203,7 @@ def test_allocator_zeros(numpy, sizer, dim_case, units, dtype):
 
 
 def test_allocator_ones(numpy, sizer, dim_case, units, dtype):
-    allocator = ndsl.util.QuantityFactory(sizer, numpy)
+    allocator = QuantityFactory(sizer, numpy)
     quantity = allocator.ones(dim_case.dims, units, dtype=dtype)
     assert quantity.units == units
     assert quantity.dims == dim_case.dims
@@ -204,7 +214,7 @@ def test_allocator_ones(numpy, sizer, dim_case, units, dtype):
 
 
 def test_allocator_empty(numpy, sizer, dim_case, units, dtype):
-    allocator = ndsl.util.QuantityFactory(sizer, numpy)
+    allocator = QuantityFactory(sizer, numpy)
     quantity = allocator.empty(dim_case.dims, units, dtype=dtype)
     assert quantity.units == units
     assert quantity.dims == dim_case.dims

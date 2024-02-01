@@ -1,6 +1,7 @@
-import ndsl.dsl
-import ndsl.util
-from ndsl.util.namelist import Namelist
+from ndsl.constants import N_HALO_DEFAULT
+from ndsl.initialization.allocator import QuantityFactory
+from ndsl.initialization.sizer import SubtileGridSizer
+from ndsl.namelist import Namelist
 from pace.driver.run import Driver, DriverConfig
 from pace.driver.state import TendencyState
 from pace.fv3core._config import DynamicalCoreConfig
@@ -28,18 +29,18 @@ class TranslateDriver(TranslateFVDynamics):
 
     def compute_parallel(self, inputs, communicator):
         dycore_state = self.state_from_inputs(inputs)
-        sizer = ndsl.util.SubtileGridSizer.from_tile_params(
+        sizer = SubtileGridSizer.from_tile_params(
             nx_tile=self.namelist.npx - 1,
             ny_tile=self.namelist.npy - 1,
             nz=self.namelist.npz,
-            n_halo=ndsl.util.N_HALO_DEFAULT,
+            n_halo=N_HALO_DEFAULT,
             extra_dim_lengths={},
             layout=self.namelist.layout,
             tile_partitioner=communicator.partitioner.tile,
             tile_rank=communicator.tile.rank,
         )
 
-        quantity_factory = ndsl.util.QuantityFactory.from_backend(
+        quantity_factory = QuantityFactory.from_backend(
             sizer, backend=self.stencil_config.compilation_config.backend
         )
         physics_state = PhysicsState.init_zeros(

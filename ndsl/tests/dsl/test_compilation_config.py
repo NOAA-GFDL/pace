@@ -2,10 +2,10 @@ import unittest.mock
 from math import sqrt
 
 import pytest
+from Comm.communicator import CubedSphereCommunicator
+from Comm.partitioner import CubedSpherePartitioner, TilePartitioner
 
 from ndsl.dsl.stencil import CompilationConfig, RunMode
-from ndsl.util.comm.communicator import CubedSphereCommunicator
-from ndsl.util.comm.partitioner import CubedSpherePartitioner, TilePartitioner
 
 
 def test_safety_checks():

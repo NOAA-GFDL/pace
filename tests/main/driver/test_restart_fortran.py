@@ -2,6 +2,8 @@ import os
 
 import numpy as np
 import xarray as xr
+from Comm.local_comm import LocalComm
+from Comm.null_comm import NullComm
 
 import pace.driver
 from ndsl.util import (
@@ -11,8 +13,6 @@ from ndsl.util import (
     SubtileGridSizer,
     TilePartitioner,
 )
-from ndsl.util.comm.local_comm import LocalComm
-from ndsl.util.comm.null_comm import NullComm
 from pace.driver.initialization import FortranRestartInit
 from pace.physics import PHYSICS_PACKAGES
 

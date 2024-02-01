@@ -1,7 +1,9 @@
-import ndsl.dsl
 import ndsl.dsl.gt4py_utils as utils
-import ndsl.util
 import pace.fv3core.stencils.dyn_core as dyn_core
+from ndsl.constants import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_DIM
+from ndsl.dsl.stencil import StencilFactory
+from ndsl.namelist import Namelist
+from ndsl.quantity import Quantity
 from ndsl.stencils.testing import ParallelTranslate2PyState
 from pace.fv3core import DycoreState, DynamicalCoreConfig
 
@@ -9,39 +11,39 @@ from pace.fv3core import DycoreState, DynamicalCoreConfig
 class TranslateDynCore(ParallelTranslate2PyState):
     inputs = {
         "q_con": {
-            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
+            "dims": [X_DIM, Y_DIM, Z_DIM],
             "units": "default",
         },
         "cappa": {
-            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
+            "dims": [X_DIM, Y_DIM, Z_DIM],
             "units": "default",
         },
         "delp": {
-            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
+            "dims": [X_DIM, Y_DIM, Z_DIM],
             "units": "default",
         },
         "pt": {
-            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
+            "dims": [X_DIM, Y_DIM, Z_DIM],
             "units": "K",
         },
         "u": {
-            "dims": [ndsl.util.X_DIM, ndsl.util.Y_INTERFACE_DIM, ndsl.util.Z_DIM],
+            "dims": [X_DIM, Y_INTERFACE_DIM, Z_DIM],
             "units": "m/s",
         },
         "v": {
-            "dims": [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
+            "dims": [X_INTERFACE_DIM, Y_DIM, Z_DIM],
             "units": "m/s",
         },
         "uc": {
-            "dims": [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
+            "dims": [X_INTERFACE_DIM, Y_DIM, Z_DIM],
             "units": "m/s",
         },
         "vc": {
-            "dims": [ndsl.util.X_DIM, ndsl.util.Y_INTERFACE_DIM, ndsl.util.Z_DIM],
+            "dims": [X_DIM, Y_INTERFACE_DIM, Z_DIM],
             "units": "m/s",
         },
         "w": {
-            "dims": [ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
+            "dims": [X_DIM, Y_DIM, Z_DIM],
             "units": "m/s",
         },
     }
@@ -49,8 +51,8 @@ class TranslateDynCore(ParallelTranslate2PyState):
     def __init__(
         self,
         grid,
-        namelist: ndsl.util.Namelist,
-        stencil_factory: ndsl.dsl.StencilFactory,
+        namelist: Namelist,
+        stencil_factory: StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
         self._base.in_vars["data_vars"] = {
@@ -140,20 +142,20 @@ class TranslateDynCore(ParallelTranslate2PyState):
             grid_data.ptop = inputs["ptop"]
         self._base.make_storage_data_input_vars(inputs)
         state = DycoreState.init_zeros(quantity_factory=self.grid.quantity_factory)
-        wsd: ndsl.util.Quantity = self.grid.quantity_factory.zeros(
-            dims=[ndsl.util.X_DIM, ndsl.util.Y_DIM],
+        wsd: Quantity = self.grid.quantity_factory.zeros(
+            dims=[X_DIM, Y_DIM],
             units="unknown",
         )
         for name, value in inputs.items():
-            if hasattr(state, name) and isinstance(state[name], ndsl.util.Quantity):
+            if hasattr(state, name) and isinstance(state[name], Quantity):
                 # the ndarray can have buffer points at the end, so value.shape
                 # is often not equal to state[name].shape
                 selection = tuple(slice(0, end) for end in value.shape)
                 state[name].data[selection] = value
             else:
                 setattr(state, name, value)
-        phis: ndsl.util.Quantity = self.grid.quantity_factory.zeros(
-            dims=[ndsl.util.X_DIM, ndsl.util.Y_DIM],
+        phis: Quantity = self.grid.quantity_factory.zeros(
+            dims=[X_DIM, Y_DIM],
             units="m",
         )
         phis.data[:] = phis.np.asarray(inputs["phis"])
@@ -178,7 +180,7 @@ class TranslateDynCore(ParallelTranslate2PyState):
         # on variables attached to `state`
         storages_only = {}
         for name, value in vars(state).items():
-            if isinstance(value, ndsl.util.Quantity):
+            if isinstance(value, Quantity):
                 storages_only[name] = value.data
             else:
                 storages_only[name] = value

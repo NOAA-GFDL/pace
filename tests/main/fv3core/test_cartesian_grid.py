@@ -1,9 +1,11 @@
 import numpy as np
 import pytest
+from Comm.communicator import TileCommunicator
+from Comm.null_comm import NullComm
+from Comm.partitioner import TilePartitioner
 
-import ndsl.util
-from ndsl.util.constants import PI
-from ndsl.util.grid.generation import MetricTerms
+from ndsl.constants import PI
+from ndsl.grid.generation import MetricTerms
 
 
 @pytest.mark.parametrize("npx", [8])
@@ -22,9 +24,9 @@ def test_cartesian_grid_generation(
     deglat: float,
     backend: str,
 ):
-    mpi_comm = ndsl.util.NullComm(rank=0, total_ranks=1)
-    partitioner = ndsl.util.TilePartitioner((1, 1))
-    communicator = ndsl.util.TileCommunicator(mpi_comm, partitioner)
+    mpi_comm = NullComm(rank=0, total_ranks=1)
+    partitioner = TilePartitioner((1, 1))
+    communicator = TileCommunicator(mpi_comm, partitioner)
     grid_generator = MetricTerms.from_tile_sizing(
         npx=npx,
         npy=npy,

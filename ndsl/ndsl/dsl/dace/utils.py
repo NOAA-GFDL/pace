@@ -11,8 +11,8 @@ from gt4py.cartesian.gtscript import PARALLEL, computation, interval
 from ndsl.dsl.dace.dace_config import DaceConfig
 from ndsl.dsl.stencil import CompilationConfig, FrozenStencil, StencilConfig
 from ndsl.dsl.typing import Float, FloatField
-from ndsl.util.logging import ndsl_log
-from ndsl.util.optional_imports import cupy as cp
+from ndsl.logging import ndsl_log
+from ndsl.optional_imports import cupy as cp
 
 
 # ----------------------------------------------------------

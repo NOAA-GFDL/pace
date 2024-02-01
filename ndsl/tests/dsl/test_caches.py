@@ -2,16 +2,20 @@ import pytest
 from gt4py.cartesian.gtscript import PARALLEL, Field, computation, interval
 from gt4py.storage import empty, ones
 
-import ndsl.dsl
 from ndsl.dsl.dace import orchestrate
 from ndsl.dsl.dace.dace_config import DaceConfig, DaCeOrchestration
-from ndsl.dsl.stencil import CompilationConfig, GridIndexing
+from ndsl.dsl.stencil import (
+    CompilationConfig,
+    GridIndexing,
+    StencilConfig,
+    StencilFactory,
+)
 
 
 def _make_storage(
     func,
     grid_indexing,
-    stencil_config: ndsl.dsl.StencilConfig,
+    stencil_config: StencilConfig,
     *,
     dtype=float,
     aligned_index=(0, 0, 0),
@@ -40,12 +44,12 @@ def _build_stencil(backend, orchestrated: DaCeOrchestration):
         east_edge=True,
     )
 
-    stencil_config = ndsl.dsl.StencilConfig(
+    stencil_config = StencilConfig(
         compilation_config=CompilationConfig(backend=backend, rebuild=True),
         dace_config=DaceConfig(None, backend, 5, 5, orchestrated),
     )
 
-    stencil_factory = ndsl.dsl.StencilFactory(stencil_config, grid_indexing)
+    stencil_factory = StencilFactory(stencil_config, grid_indexing)
 
     built_stencil = stencil_factory.from_origin_domain(
         _stencil, (0, 0, 0), domain=grid_indexing.domain
@@ -136,7 +140,7 @@ def test_relocatability(backend: str):
     import gt4py
     from gt4py.cartesian import config as gt_config
 
-    from ndsl.util.comm.mpi import MPI
+    from ndsl.comm.mpi import MPI
 
     # Restore original dir name
     gt4py.cartesian.config.cache_settings["dir_name"] = os.environ.get(

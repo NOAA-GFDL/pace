@@ -1,15 +1,17 @@
 import gt4py.cartesian.gtscript as gtscript
 from gt4py.cartesian.gtscript import FORWARD, PARALLEL, computation, exp, interval, log
 
-import ndsl.util
-import ndsl.util.constants as constants
+import ndsl.constants as constants
+from ndsl.comm.communicator import Communicator
+from ndsl.constants import X_DIM, Y_DIM, Z_DIM
 from ndsl.dsl.dace.orchestration import orchestrate
 from ndsl.dsl.dace.wrapped_halo_exchange import WrappedHaloUpdater
 from ndsl.dsl.stencil import StencilFactory
 from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ
+from ndsl.grid import DriverGridData, GridData
+from ndsl.initialization.allocator import QuantityFactory
+from ndsl.quantity import Quantity
 from ndsl.stencils.c2l_ord import CubedToLatLon
-from ndsl.util import X_DIM, Y_DIM
-from ndsl.util.grid import DriverGridData, GridData
 from pace import fv3core
 from pace.physics.update.update_dwind_phys import AGrid2DGridPhysics
 
@@ -83,14 +85,14 @@ class ApplyPhysicsToDycore:
     def __init__(
         self,
         stencil_factory: StencilFactory,
-        quantity_factory: ndsl.util.QuantityFactory,
+        quantity_factory: QuantityFactory,
         grid_data: GridData,
         namelist,
-        comm: ndsl.util.Communicator,
+        comm: Communicator,
         grid_info: DriverGridData,
         state: fv3core.DycoreState,
-        u_dt: ndsl.util.Quantity,
-        v_dt: ndsl.util.Quantity,
+        u_dt: Quantity,
+        v_dt: Quantity,
     ):
         self._grid_type = grid_info.grid_type
         orchestrate(
@@ -130,7 +132,7 @@ class ApplyPhysicsToDycore:
         origin = grid_indexing.origin_compute()
         shape = grid_indexing.max_shape
         full_3Dfield_1pts_halo_spec = quantity_factory.get_quantity_halo_spec(
-            dims=[ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
+            dims=[X_DIM, Y_DIM, Z_DIM],
             n_halo=1,
         )
         self._udt_halo_updater = WrappedHaloUpdater(

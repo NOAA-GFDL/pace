@@ -3,14 +3,14 @@ import io
 from typing import List
 
 import numpy as np
+from Comm.caching_comm import CachingCommReader, CachingCommWriter
+from Comm.communicator import CubedSphereCommunicator
+from Comm.local_comm import LocalComm
+from Comm.null_comm import NullComm
+from Comm.partitioner import CubedSpherePartitioner, TilePartitioner
+from Quantity import Quantity
 
-from ndsl.util.comm.caching_comm import CachingCommReader, CachingCommWriter
-from ndsl.util.comm.communicator import CubedSphereCommunicator
-from ndsl.util.comm.local_comm import LocalComm
-from ndsl.util.comm.null_comm import NullComm
-from ndsl.util.comm.partitioner import CubedSpherePartitioner, TilePartitioner
-from ndsl.util.constants import X_DIM, Y_DIM
-from ndsl.util.quantity import Quantity
+from ndsl.constants import X_DIM, Y_DIM
 
 
 def test_halo_update_integration():

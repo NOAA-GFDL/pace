@@ -12,6 +12,7 @@ import f90nml
 import numpy as np
 import xarray as xr
 import yaml
+from Comm.null_comm import NullComm
 from mpi4py import MPI
 
 # NOTE: we need to import dsl.stencil prior to
@@ -21,10 +22,9 @@ import ndsl.dsl.stencil
 import ndsl.util as util
 from ndsl.dsl import StencilFactory
 from ndsl.dsl.dace.orchestration import DaceConfig
+from ndsl.grid import DampingCoefficients, GridData, MetricTerms
 from ndsl.stencils.testing import dataset_to_dict
 from ndsl.stencils.testing.grid import Grid
-from ndsl.util.comm.null_comm import NullComm
-from ndsl.util.grid import DampingCoefficients, GridData, MetricTerms
 from pace.fv3core import DynamicalCore, DynamicalCoreConfig
 from pace.fv3core.dycore_state import DycoreState
 from pace.fv3core.initialization.baroclinic import init_baroclinic_state

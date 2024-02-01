@@ -13,20 +13,21 @@ from gt4py.cartesian.gtscript import (
     region,
 )
 
-import ndsl.util
 import pace.fv3core.stencils.moist_cv as moist_cv
-from ndsl.dsl.dace.orchestration import orchestrate
-from ndsl.dsl.stencil import StencilFactory
-from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ, FloatFieldK
-from ndsl.util import (
+from ndsl.checkpointer import Checkpointer
+from ndsl.constants import (
     X_DIM,
     X_INTERFACE_DIM,
     Y_DIM,
     Y_INTERFACE_DIM,
     Z_DIM,
     Z_INTERFACE_DIM,
-    Quantity,
 )
+from ndsl.dsl.dace.orchestration import orchestrate
+from ndsl.dsl.stencil import StencilFactory
+from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ, FloatFieldK
+from ndsl.initialization.allocator import QuantityFactory
+from ndsl.quantity import Quantity
 from pace.fv3core._config import RemappingConfig
 from pace.fv3core.stencils.basic_operations import adjust_divide_stencil
 from pace.fv3core.stencils.map_single import MapSingle
@@ -291,13 +292,13 @@ class LagrangianToEulerian:
     def __init__(
         self,
         stencil_factory: StencilFactory,
-        quantity_factory: ndsl.util.QuantityFactory,
+        quantity_factory: QuantityFactory,
         config: RemappingConfig,
         area_64,
         nq,
         pfull,
         tracers: Dict[str, Quantity],
-        checkpointer: Optional[ndsl.util.Checkpointer] = None,
+        checkpointer: Optional[Checkpointer] = None,
     ):
         orchestrate(
             obj=self,

@@ -1,7 +1,7 @@
 import pytest
 
-from ndsl.util.buffer import BUFFER_CACHE, Buffer, recv_buffer, send_buffer
-from ndsl.util.utils import is_c_contiguous, is_contiguous
+from ndsl.buffer import BUFFER_CACHE, Buffer, recv_buffer, send_buffer
+from ndsl.utils import is_c_contiguous, is_contiguous
 
 
 @pytest.fixture

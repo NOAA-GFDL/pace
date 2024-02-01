@@ -1,6 +1,6 @@
-import ndsl.dsl
-import ndsl.util
 import pace.fv3core.stencils.nh_p_grad as NH_P_Grad
+from ndsl.dsl.stencil import StencilFactory
+from ndsl.namelist import Namelist
 from pace.fv3core.testing import TranslateDycoreFortranData2Py
 
 
@@ -10,8 +10,8 @@ class TranslateNH_P_Grad(TranslateDycoreFortranData2Py):
     def __init__(
         self,
         grid,
-        namelist: ndsl.util.Namelist,
-        stencil_factory: ndsl.dsl.StencilFactory,
+        namelist: Namelist,
+        stencil_factory: StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
         self.in_vars["data_vars"] = {

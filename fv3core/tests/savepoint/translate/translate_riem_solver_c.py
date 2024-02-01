@@ -1,5 +1,5 @@
-import ndsl.dsl
-import ndsl.util
+from ndsl.dsl.stencil import StencilFactory
+from ndsl.namelist import Namelist
 from pace.fv3core.stencils.riem_solver_c import NonhydrostaticVerticalSolverCGrid
 from pace.fv3core.testing import TranslateDycoreFortranData2Py
 
@@ -8,8 +8,8 @@ class TranslateRiem_Solver_C(TranslateDycoreFortranData2Py):
     def __init__(
         self,
         grid,
-        namelist: ndsl.util.Namelist,
-        stencil_factory: ndsl.dsl.StencilFactory,
+        namelist: Namelist,
+        stencil_factory: StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
         self.compute_func = NonhydrostaticVerticalSolverCGrid(  # type: ignore

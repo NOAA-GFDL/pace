@@ -10,11 +10,11 @@ from gt4py.cartesian.gtscript import (
     interval,
 )
 
-import ndsl.util
+from ndsl.constants import X_DIM, Y_DIM, Z_DIM, Z_INTERFACE_DIM
 from ndsl.dsl.dace.orchestration import orchestrate
 from ndsl.dsl.stencil import StencilFactory
 from ndsl.dsl.typing import BoolField, Float, FloatField, FloatFieldIJ
-from ndsl.util import X_DIM, Y_DIM, Z_DIM, Z_INTERFACE_DIM
+from ndsl.initialization.allocator import QuantityFactory
 
 
 @gtscript.function
@@ -571,7 +571,7 @@ class RemapProfile:
     def __init__(
         self,
         stencil_factory: StencilFactory,
-        quantity_factory: ndsl.util.QuantityFactory,
+        quantity_factory: QuantityFactory,
         kord: int,
         iv: int,
         dims: Sequence[str],

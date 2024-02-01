@@ -10,13 +10,14 @@ from gt4py.cartesian.gtscript import (
 )
 
 import ndsl.stencils.corners as corners
-import ndsl.util
 import pace.fv3core.stencils.basic_operations as basic
+from ndsl.constants import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_DIM
 from ndsl.dsl.dace.orchestration import dace_inhibitor, orchestrate
 from ndsl.dsl.stencil import StencilFactory, get_stencils_with_varied_bounds
 from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ, FloatFieldK
-from ndsl.util import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_DIM
-from ndsl.util.grid import DampingCoefficients, GridData
+from ndsl.grid import DampingCoefficients, GridData
+from ndsl.initialization.allocator import QuantityFactory
+from ndsl.quantity import Quantity
 from pace.fv3core.stencils.a2b_ord4 import (
     AGrid2BGridFourthOrder,
     doubly_periodic_a2b_ord4,
@@ -307,7 +308,7 @@ class DivergenceDamping:
     def __init__(
         self,
         stencil_factory: StencilFactory,
-        quantity_factory: ndsl.util.QuantityFactory,
+        quantity_factory: QuantityFactory,
         grid_data: GridData,
         damping_coefficients: DampingCoefficients,
         nested: bool,
@@ -316,7 +317,7 @@ class DivergenceDamping:
         d4_bg,
         nord: int,
         grid_type,
-        nord_col: ndsl.util.Quantity,
+        nord_col: Quantity,
         d2_bg: FloatFieldK,
     ):
         orchestrate(

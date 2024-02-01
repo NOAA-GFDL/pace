@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 
-import ndsl.util
+from ndsl.quantity import Quantity
 
 
 try:
@@ -62,9 +62,7 @@ def data(n_halo, extent_1d, n_dims, numpy, dtype):
 
 @pytest.fixture
 def quantity(data, origin, extent, dims, units):
-    return ndsl.util.Quantity(
-        data, origin=origin, extent=extent, dims=dims, units=units
-    )
+    return Quantity(data, origin=origin, extent=extent, dims=dims, units=units)
 
 
 def test_numpy(quantity, backend):
@@ -78,7 +76,7 @@ def test_numpy(quantity, backend):
 def test_modifying_numpy_data_modifies_view():
     shape = (6, 6)
     data = np.zeros(shape, dtype=float)
-    quantity = ndsl.util.Quantity(
+    quantity = Quantity(
         data,
         origin=(0, 0),
         extent=shape,
@@ -110,7 +108,7 @@ def test_data_exists(quantity, backend):
 def test_accessing_data_does_not_break_view(
     data, origin, extent, dims, units, gt4py_backend
 ):
-    quantity = ndsl.util.Quantity(
+    quantity = Quantity(
         data,
         origin=origin,
         extent=extent,
@@ -128,7 +126,7 @@ def test_numpy_data_becomes_cupy_with_gpu_backend(
     data, origin, extent, dims, units, gt4py_backend
 ):
     cpu_data = np.zeros(data.shape)
-    quantity = ndsl.util.Quantity(
+    quantity = Quantity(
         cpu_data,
         origin=origin,
         extent=extent,

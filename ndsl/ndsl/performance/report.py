@@ -5,8 +5,7 @@ from datetime import datetime
 from typing import Any, Dict, List, Mapping
 
 import numpy as np
-
-from ndsl.util.comm.comm_abc import Comm
+from Comm.comm_abc import Comm
 
 
 @dataclasses.dataclass

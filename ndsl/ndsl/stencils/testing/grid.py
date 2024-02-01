@@ -3,11 +3,12 @@ from typing import Dict, Tuple
 
 import numpy as np
 
-import ndsl.util
+from ndsl.comm.partitioner import TilePartitioner
+from ndsl.constants import N_HALO_DEFAULT, X_DIM, Y_DIM, Z_DIM
 from ndsl.dsl import gt4py_utils as utils
 from ndsl.dsl.stencil import GridIndexing
 from ndsl.dsl.typing import Float
-from ndsl.util.grid import (
+from ndsl.grid import (
     AngleGridData,
     ContravariantGridData,
     DampingCoefficients,
@@ -18,7 +19,10 @@ from ndsl.util.grid import (
     MetricTerms,
     VerticalGridData,
 )
-from ndsl.util.halo.data_transformer import QuantityHaloSpec
+from ndsl.halo.data_transformer import QuantityHaloSpec
+from ndsl.initialization.allocator import QuantityFactory
+from ndsl.initialization.sizer import SubtileGridSizer
+from ndsl.quantity import Quantity
 
 
 TRACER_DIM = "tracers"
@@ -47,13 +51,13 @@ class Grid:
         ny = int((npy - 1) / layout[1])
         indices = {
             "isd": 0,
-            "ied": nx + 2 * ndsl.util.N_HALO_DEFAULT - 1,
-            "is_": ndsl.util.N_HALO_DEFAULT,
-            "ie": nx + ndsl.util.N_HALO_DEFAULT - 1,
+            "ied": nx + 2 * N_HALO_DEFAULT - 1,
+            "is_": N_HALO_DEFAULT,
+            "ie": nx + N_HALO_DEFAULT - 1,
             "jsd": 0,
-            "jed": ny + 2 * ndsl.util.N_HALO_DEFAULT - 1,
-            "js": ndsl.util.N_HALO_DEFAULT,
-            "je": ny + ndsl.util.N_HALO_DEFAULT - 1,
+            "jed": ny + 2 * N_HALO_DEFAULT - 1,
+            "js": N_HALO_DEFAULT,
+            "je": ny + N_HALO_DEFAULT - 1,
         }
         return cls(indices, shape_params, rank, layout, backend, local_indices=True)
 
@@ -87,7 +91,7 @@ class Grid:
     ):
         self.rank = rank
         self.backend = backend
-        self.partitioner = ndsl.util.TilePartitioner(layout)
+        self.partitioner = TilePartitioner(layout)
         self.subtile_index = self.partitioner.subtile_index(self.rank)
         self.layout = layout
         for s in self.shape_params:
@@ -104,7 +108,7 @@ class Grid:
         self.njd = int(self.jed - self.jsd + 1)
         self.nic = int(self.ie - self.is_ + 1)
         self.njc = int(self.je - self.js + 1)
-        self.halo = ndsl.util.N_HALO_DEFAULT
+        self.halo = N_HALO_DEFAULT
         self.global_is, self.global_js = self.local_to_global_indices(self.is_, self.js)
         self.global_ie, self.global_je = self.local_to_global_indices(self.ie, self.je)
         self.global_isd, self.global_jsd = self.local_to_global_indices(
@@ -137,7 +141,7 @@ class Grid:
         if self._sizer is None:
             # in the future this should use from_namelist, when we have a non-flattened
             # namelist
-            self._sizer = ndsl.util.SubtileGridSizer.from_tile_params(
+            self._sizer = SubtileGridSizer.from_tile_params(
                 nx_tile=self.npx - 1,
                 ny_tile=self.npy - 1,
                 nz=self.npz,
@@ -153,9 +157,9 @@ class Grid:
         return self._sizer
 
     @property
-    def quantity_factory(self) -> ndsl.util.QuantityFactory:
+    def quantity_factory(self) -> QuantityFactory:
         if self._quantity_factory is None:
-            self._quantity_factory = ndsl.util.QuantityFactory.from_backend(
+            self._quantity_factory = QuantityFactory.from_backend(
                 self.sizer, backend=self.backend
             )
         return self._quantity_factory
@@ -163,7 +167,7 @@ class Grid:
     def make_quantity(
         self,
         array,
-        dims=[ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
+        dims=[X_DIM, Y_DIM, Z_DIM],
         units="Unknown",
         origin=None,
         extent=None,
@@ -172,15 +176,13 @@ class Grid:
             origin = self.compute_origin()
         if extent is None:
             extent = self.domain_shape_compute()
-        return ndsl.util.Quantity(
-            array, dims=dims, units=units, origin=origin, extent=extent
-        )
+        return Quantity(array, dims=dims, units=units, origin=origin, extent=extent)
 
     def quantity_dict_update(
         self,
         data_dict,
         varname,
-        dims=[ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
+        dims=[X_DIM, Y_DIM, Z_DIM],
         units="Unknown",
     ):
         data_dict[varname + "_quantity"] = self.quantity_wrap(
@@ -190,14 +192,12 @@ class Grid:
     def quantity_wrap(
         self,
         data,
-        dims=[ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
+        dims=[X_DIM, Y_DIM, Z_DIM],
         units="unknown",
     ):
         origin = self.sizer.get_origin(dims)
         extent = self.sizer.get_extent(dims)
-        return ndsl.util.Quantity(
-            data, dims=dims, units=units, origin=origin, extent=extent
-        )
+        return Quantity(data, dims=dims, units=units, origin=origin, extent=extent)
 
     def global_to_local_1d(self, global_value, subtile_index, subtile_length):
         return int(global_value - subtile_index * subtile_length)
@@ -441,7 +441,7 @@ class Grid:
         shape,
         origin,
         halo_points,
-        dims=[ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
+        dims=[X_DIM, Y_DIM, Z_DIM],
     ) -> QuantityHaloSpec:
         """Build memory specifications for the halo update."""
         return self.quantity_factory.get_quantity_halo_spec(
@@ -485,7 +485,7 @@ class Grid:
         # The translate code pads ndarray axes with zeros in certain cases,
         # in particular the vertical axis. Since we're deprecating those tests,
         # we simply "fix" those arrays here.
-        clipped_data: Dict[str, ndsl.util.Quantity] = {}
+        clipped_data: Dict[str, Quantity] = {}
         for name in (
             "ee1",
             "ee2",
@@ -764,7 +764,7 @@ class Grid:
         return self._grid_data
 
     @property
-    def driver_grid_data(self) -> "GridData":
+    def driver_grid_data(self) -> DriverGridData:
         if self._driver_grid_data is None:
             self._driver_grid_data = DriverGridData.new_from_grid_variables(
                 vlon=self.vlon,

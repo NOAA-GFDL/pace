@@ -3,14 +3,14 @@ import os
 from typing import Any, Dict, Optional, Tuple
 
 import dace.config
+from Comm.communicator import Communicator, Partitioner
 from dace.codegen.compiled_sdfg import CompiledSDFG
 from dace.frontend.python.parser import DaceProgram
 
 from ndsl.dsl.caches.cache_location import identify_code_path
 from ndsl.dsl.caches.codepath import FV3CodePath
 from ndsl.dsl.gt4py_utils import is_gpu_backend
-from ndsl.util.comm.communicator import Communicator, Partitioner
-from ndsl.util.optional_imports import cupy as cp
+from ndsl.optional_imports import cupy as cp
 
 
 # This can be turned on to revert compilation for orchestration

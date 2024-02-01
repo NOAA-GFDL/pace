@@ -6,13 +6,18 @@ from typing import Tuple
 
 import ndsl.dsl.stencil
 import ndsl.stencils.testing
-import ndsl.util
 import pace.fv3core.initialization.analytic_init as ai
+from ndsl.comm.communicator import CubedSphereCommunicator
+from ndsl.comm.null_comm import NullComm
+from ndsl.comm.partitioner import CubedSpherePartitioner, TilePartitioner
 from ndsl.dsl.dace.dace_config import DaceConfig
+from ndsl.dsl.stencil import GridIndexing
+from ndsl.grid import DampingCoefficients, GridData, MetricTerms
+from ndsl.initialization.allocator import QuantityFactory
+from ndsl.initialization.sizer import SubtileGridSizer
 from ndsl.performance.timer import NullTimer, Timer
+from ndsl.quantity import Quantity
 from ndsl.stencils.testing import assert_same_temporaries, copy_temporaries
-from ndsl.util.comm.null_comm import NullComm
-from ndsl.util.grid import DampingCoefficients, GridData, MetricTerms
 from pace import fv3core
 from pace.fv3core.dycore_state import DycoreState
 
@@ -69,10 +74,8 @@ def setup_dycore() -> Tuple[fv3core.DynamicalCore, fv3core.DycoreState, Timer]:
     mpi_comm = NullComm(
         rank=0, total_ranks=6 * config.layout[0] * config.layout[1], fill_value=0.0
     )
-    partitioner = ndsl.util.CubedSpherePartitioner(
-        ndsl.util.TilePartitioner(config.layout)
-    )
-    communicator = ndsl.util.CubedSphereCommunicator(mpi_comm, partitioner)
+    partitioner = CubedSpherePartitioner(TilePartitioner(config.layout))
+    communicator = CubedSphereCommunicator(mpi_comm, partitioner)
     dace_config = DaceConfig(communicator=communicator, backend=backend)
     stencil_config = ndsl.dsl.stencil.StencilConfig(
         compilation_config=ndsl.dsl.stencil.CompilationConfig(
@@ -80,7 +83,7 @@ def setup_dycore() -> Tuple[fv3core.DynamicalCore, fv3core.DycoreState, Timer]:
         ),
         dace_config=dace_config,
     )
-    sizer = ndsl.util.SubtileGridSizer.from_tile_params(
+    sizer = SubtileGridSizer.from_tile_params(
         nx_tile=config.npx - 1,
         ny_tile=config.npy - 1,
         nz=config.npz,
@@ -90,12 +93,10 @@ def setup_dycore() -> Tuple[fv3core.DynamicalCore, fv3core.DycoreState, Timer]:
         tile_partitioner=partitioner.tile,
         tile_rank=communicator.tile.rank,
     )
-    grid_indexing = ndsl.dsl.stencil.GridIndexing.from_sizer_and_communicator(
+    grid_indexing = GridIndexing.from_sizer_and_communicator(
         sizer=sizer, comm=communicator
     )
-    quantity_factory = ndsl.util.QuantityFactory.from_backend(
-        sizer=sizer, backend=backend
-    )
+    quantity_factory = QuantityFactory.from_backend(sizer=sizer, backend=backend)
     eta_file = "tests/main/input/eta79.nc"
     metric_terms = MetricTerms(
         quantity_factory=quantity_factory,
@@ -139,9 +140,9 @@ def copy_state(state1: DycoreState, state2: DycoreState):
     # copy all attributes of state1 to state2
     for attr_name in dir(state1):
         for _field in fields(type(state1)):
-            if issubclass(_field.type, ndsl.util.Quantity):
+            if issubclass(_field.type, Quantity):
                 attr = getattr(state1, attr_name)
-                if isinstance(attr, ndsl.util.Quantity):
+                if isinstance(attr, Quantity):
                     getattr(state2, attr_name).data[:] = attr.data
 
 

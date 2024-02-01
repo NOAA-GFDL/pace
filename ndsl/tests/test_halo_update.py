@@ -3,10 +3,32 @@ from typing import Any, Dict
 
 import pytest
 
-import ndsl.util
+from ndsl.buffer import BUFFER_CACHE
+from ndsl.comm._boundary_utils import get_boundary_slice
+from ndsl.comm.communicator import CubedSphereCommunicator, TileCommunicator
+from ndsl.comm.partitioner import CubedSpherePartitioner, TilePartitioner
+from ndsl.constants import (
+    BOUNDARY_TYPES,
+    EDGE_BOUNDARY_TYPES,
+    HORIZONTAL_DIMS,
+    NORTHEAST,
+    NORTHWEST,
+    SOUTHEAST,
+    SOUTHWEST,
+    X_DIM,
+    X_DIMS,
+    X_INTERFACE_DIM,
+    Y_DIM,
+    Y_DIMS,
+    Y_INTERFACE_DIM,
+    Z_DIM,
+    Z_INTERFACE_DIM,
+)
+from ndsl.exceptions import OutOfBoundsError
+from ndsl.halo.updater import HaloUpdater
 from ndsl.performance.timer import Timer
-from ndsl.util.buffer import BUFFER_CACHE
-from ndsl.util.halo.updater import HaloUpdater
+from ndsl.quantity import Quantity, QuantityHaloSpec
+from ndsl.testing import DummyComm
 
 
 @pytest.fixture
@@ -63,26 +85,22 @@ def n_points_update(request, n_points, fast):
 
 @pytest.fixture(
     params=[
-        pytest.param((ndsl.util.Y_DIM, ndsl.util.X_DIM), id="center"),
+        pytest.param((Y_DIM, X_DIM), id="center"),
+        pytest.param((Z_DIM, Y_DIM, X_DIM), id="center_3d"),
         pytest.param(
-            (ndsl.util.Z_DIM, ndsl.util.Y_DIM, ndsl.util.X_DIM), id="center_3d"
-        ),
-        pytest.param(
-            (ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM),
+            (X_DIM, Y_DIM, Z_DIM),
             id="center_3d_reverse",
         ),
         pytest.param(
-            (ndsl.util.X_DIM, ndsl.util.Z_DIM, ndsl.util.Y_DIM),
+            (X_DIM, Z_DIM, Y_DIM),
             id="center_3d_shuffle",
         ),
-        pytest.param(
-            (ndsl.util.Y_INTERFACE_DIM, ndsl.util.X_INTERFACE_DIM), id="interface"
-        ),
+        pytest.param((Y_INTERFACE_DIM, X_INTERFACE_DIM), id="interface"),
         pytest.param(
             (
-                ndsl.util.Z_INTERFACE_DIM,
-                ndsl.util.Y_INTERFACE_DIM,
-                ndsl.util.X_INTERFACE_DIM,
+                Z_INTERFACE_DIM,
+                Y_INTERFACE_DIM,
+                X_INTERFACE_DIM,
             ),
             id="interface_3d",
         ),
@@ -90,11 +108,11 @@ def n_points_update(request, n_points, fast):
 )
 def dims(request, fast):
     if fast and request.param in (
-        (ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM),
+        (X_DIM, Y_DIM, Z_DIM),
         (
-            ndsl.util.Z_INTERFACE_DIM,
-            ndsl.util.Y_INTERFACE_DIM,
-            ndsl.util.X_INTERFACE_DIM,
+            Z_INTERFACE_DIM,
+            Y_INTERFACE_DIM,
+            X_INTERFACE_DIM,
         ),
     ):
         pytest.skip("running in fast mode")
@@ -130,12 +148,12 @@ def n_buffer(request):
 def shape(nz, ny, nx, dims, n_points, n_buffer):
     return_list = []
     length_dict = {
-        ndsl.util.X_DIM: 2 * n_points + nx + n_buffer,
-        ndsl.util.X_INTERFACE_DIM: 2 * n_points + nx + 1 + n_buffer,
-        ndsl.util.Y_DIM: 2 * n_points + ny + n_buffer,
-        ndsl.util.Y_INTERFACE_DIM: 2 * n_points + ny + 1 + n_buffer,
-        ndsl.util.Z_DIM: nz + n_buffer,
-        ndsl.util.Z_INTERFACE_DIM: nz + 1 + n_buffer,
+        X_DIM: 2 * n_points + nx + n_buffer,
+        X_INTERFACE_DIM: 2 * n_points + nx + 1 + n_buffer,
+        Y_DIM: 2 * n_points + ny + n_buffer,
+        Y_INTERFACE_DIM: 2 * n_points + ny + 1 + n_buffer,
+        Z_DIM: nz + n_buffer,
+        Z_INTERFACE_DIM: nz + 1 + n_buffer,
     }
     for dim in dims:
         return_list.append(length_dict[dim])
@@ -146,12 +164,12 @@ def shape(nz, ny, nx, dims, n_points, n_buffer):
 def origin(n_points, dims, n_buffer):
     return_list = []
     origin_dict = {
-        ndsl.util.X_DIM: n_points + n_buffer,
-        ndsl.util.X_INTERFACE_DIM: n_points + n_buffer,
-        ndsl.util.Y_DIM: n_points + n_buffer,
-        ndsl.util.Y_INTERFACE_DIM: n_points + n_buffer,
-        ndsl.util.Z_DIM: n_buffer,
-        ndsl.util.Z_INTERFACE_DIM: n_buffer,
+        X_DIM: n_points + n_buffer,
+        X_INTERFACE_DIM: n_points + n_buffer,
+        Y_DIM: n_points + n_buffer,
+        Y_INTERFACE_DIM: n_points + n_buffer,
+        Z_DIM: n_buffer,
+        Z_INTERFACE_DIM: n_buffer,
     }
     for dim in dims:
         return_list.append(origin_dict[dim])
@@ -162,12 +180,12 @@ def origin(n_points, dims, n_buffer):
 def extent(n_points, dims, nz, ny, nx):
     return_list = []
     extent_dict = {
-        ndsl.util.X_DIM: nx,
-        ndsl.util.X_INTERFACE_DIM: nx + 1,
-        ndsl.util.Y_DIM: ny,
-        ndsl.util.Y_INTERFACE_DIM: ny + 1,
-        ndsl.util.Z_DIM: nz,
-        ndsl.util.Z_INTERFACE_DIM: nz + 1,
+        X_DIM: nx,
+        X_INTERFACE_DIM: nx + 1,
+        Y_DIM: ny,
+        Y_INTERFACE_DIM: ny + 1,
+        Z_DIM: nz,
+        Z_INTERFACE_DIM: nz + 1,
     }
     for dim in dims:
         return_list.append(extent_dict[dim])
@@ -175,14 +193,14 @@ def extent(n_points, dims, nz, ny, nx):
 
 
 @pytest.fixture
-def communicator_list(cube_partitioner: ndsl.util.CubedSpherePartitioner):
+def communicator_list(cube_partitioner: CubedSpherePartitioner):
     total_ranks = cube_partitioner.total_ranks
     shared_buffer: Dict[str, Any] = {}
     return_list = []
     for rank in range(total_ranks):
         return_list.append(
-            ndsl.util.CubedSphereCommunicator(
-                comm=ndsl.util.testing.DummyComm(
+            CubedSphereCommunicator(
+                comm=DummyComm(
                     rank=rank, total_ranks=total_ranks, buffer_dict=shared_buffer
                 ),
                 partitioner=cube_partitioner,
@@ -199,8 +217,8 @@ def tile_communicator_list(tile_partitioner):
     return_list = []
     for rank in range(total_ranks):
         return_list.append(
-            ndsl.util.TileCommunicator(
-                comm=ndsl.util.testing.DummyComm(
+            TileCommunicator(
+                comm=DummyComm(
                     rank=rank, total_ranks=total_ranks, buffer_dict=shared_buffer
                 ),
                 partitioner=tile_partitioner,
@@ -212,12 +230,12 @@ def tile_communicator_list(tile_partitioner):
 
 @pytest.fixture
 def tile_partitioner(layout):
-    return ndsl.util.TilePartitioner(layout)
+    return TilePartitioner(layout)
 
 
 @pytest.fixture
 def cube_partitioner(tile_partitioner):
-    return ndsl.util.CubedSpherePartitioner(tile_partitioner)
+    return CubedSpherePartitioner(tile_partitioner)
 
 
 @pytest.fixture
@@ -225,16 +243,12 @@ def updated_slice(ny, nx, dims, n_points, n_points_update):
     n_points_remain = n_points - n_points_update
     return_list = []
     length_dict = {
-        ndsl.util.X_DIM: slice(n_points_remain, n_points + nx + n_points_update),
-        ndsl.util.X_INTERFACE_DIM: slice(
-            n_points_remain, n_points + nx + 1 + n_points_update
-        ),
-        ndsl.util.Y_DIM: slice(n_points_remain, n_points + ny + n_points_update),
-        ndsl.util.Y_INTERFACE_DIM: slice(
-            n_points_remain, n_points + ny + 1 + n_points_update
-        ),
-        ndsl.util.Z_DIM: slice(None, None),
-        ndsl.util.Z_INTERFACE_DIM: slice(None, None),
+        X_DIM: slice(n_points_remain, n_points + nx + n_points_update),
+        X_INTERFACE_DIM: slice(n_points_remain, n_points + nx + 1 + n_points_update),
+        Y_DIM: slice(n_points_remain, n_points + ny + n_points_update),
+        Y_INTERFACE_DIM: slice(n_points_remain, n_points + ny + 1 + n_points_update),
+        Z_DIM: slice(None, None),
+        Z_INTERFACE_DIM: slice(None, None),
     }
     for dim in dims:
         return_list.append(length_dict[dim])
@@ -250,33 +264,25 @@ def remaining_ones(nz, ny, nx, n_points, n_points_update):
 @pytest.fixture
 def boundary_dict(ranks_per_tile):
     if ranks_per_tile == 1:
-        return {0: ndsl.util.EDGE_BOUNDARY_TYPES}
+        return {0: EDGE_BOUNDARY_TYPES}
     elif ranks_per_tile == 4:
         return {
-            0: ndsl.util.EDGE_BOUNDARY_TYPES
-            + (ndsl.util.NORTHWEST, ndsl.util.NORTHEAST, ndsl.util.SOUTHEAST),
-            1: ndsl.util.EDGE_BOUNDARY_TYPES
-            + (ndsl.util.NORTHWEST, ndsl.util.NORTHEAST, ndsl.util.SOUTHWEST),
-            2: ndsl.util.EDGE_BOUNDARY_TYPES
-            + (ndsl.util.NORTHEAST, ndsl.util.SOUTHWEST, ndsl.util.SOUTHEAST),
-            3: ndsl.util.EDGE_BOUNDARY_TYPES
-            + (ndsl.util.NORTHWEST, ndsl.util.SOUTHWEST, ndsl.util.SOUTHEAST),
+            0: EDGE_BOUNDARY_TYPES + (NORTHWEST, NORTHEAST, SOUTHEAST),
+            1: EDGE_BOUNDARY_TYPES + (NORTHWEST, NORTHEAST, SOUTHWEST),
+            2: EDGE_BOUNDARY_TYPES + (NORTHEAST, SOUTHWEST, SOUTHEAST),
+            3: EDGE_BOUNDARY_TYPES + (NORTHWEST, SOUTHWEST, SOUTHEAST),
         }
     elif ranks_per_tile == 9:
         return {
-            0: ndsl.util.EDGE_BOUNDARY_TYPES
-            + (ndsl.util.NORTHWEST, ndsl.util.NORTHEAST, ndsl.util.SOUTHEAST),
-            1: ndsl.util.BOUNDARY_TYPES,
-            2: ndsl.util.EDGE_BOUNDARY_TYPES
-            + (ndsl.util.NORTHWEST, ndsl.util.NORTHEAST, ndsl.util.SOUTHWEST),
-            3: ndsl.util.BOUNDARY_TYPES,
-            4: ndsl.util.BOUNDARY_TYPES,
-            5: ndsl.util.BOUNDARY_TYPES,
-            6: ndsl.util.EDGE_BOUNDARY_TYPES
-            + (ndsl.util.NORTHEAST, ndsl.util.SOUTHWEST, ndsl.util.SOUTHEAST),
-            7: ndsl.util.BOUNDARY_TYPES,
-            8: ndsl.util.EDGE_BOUNDARY_TYPES
-            + (ndsl.util.NORTHWEST, ndsl.util.SOUTHWEST, ndsl.util.SOUTHEAST),
+            0: EDGE_BOUNDARY_TYPES + (NORTHWEST, NORTHEAST, SOUTHEAST),
+            1: BOUNDARY_TYPES,
+            2: EDGE_BOUNDARY_TYPES + (NORTHWEST, NORTHEAST, SOUTHWEST),
+            3: BOUNDARY_TYPES,
+            4: BOUNDARY_TYPES,
+            5: BOUNDARY_TYPES,
+            6: EDGE_BOUNDARY_TYPES + (NORTHEAST, SOUTHWEST, SOUTHEAST),
+            7: BOUNDARY_TYPES,
+            8: EDGE_BOUNDARY_TYPES + (NORTHWEST, SOUTHWEST, SOUTHEAST),
         }
     else:
         raise NotImplementedError(ranks_per_tile)
@@ -294,7 +300,7 @@ def depth_quantity_list(
         data[:] = numpy.nan
         for n_inside in range(max(n_points, max(extent) // 2), -1, -1):
             for i, dim in enumerate(dims):
-                if (n_inside <= extent[i] // 2) and (dim in ndsl.util.HORIZONTAL_DIMS):
+                if (n_inside <= extent[i] // 2) and (dim in HORIZONTAL_DIMS):
                     pos = [slice(None, None)] * len(dims)
                     pos[i] = origin[i] + n_inside
                     data[tuple(pos)] = n_inside
@@ -302,13 +308,13 @@ def depth_quantity_list(
                     data[tuple(pos)] = n_inside
         for n_outside in range(1, n_points + 1):
             for i, dim in enumerate(dims):
-                if dim in ndsl.util.HORIZONTAL_DIMS:
+                if dim in HORIZONTAL_DIMS:
                     pos = [slice(None, None)] * len(dims)
                     pos[i] = origin[i] - n_outside
                     data[tuple(pos)] = numpy.nan
                     pos[i] = origin[i] + extent[i] + n_outside - 1
                     data[tuple(pos)] = numpy.nan
-        quantity = ndsl.util.Quantity(
+        quantity = Quantity(
             data,
             dims=dims,
             units=units,
@@ -331,7 +337,7 @@ def tile_depth_quantity_list(
         data[:] = numpy.nan
         for n_inside in range(max(n_points, max(extent) // 2), -1, -1):
             for i, dim in enumerate(dims):
-                if (n_inside <= extent[i] // 2) and (dim in ndsl.util.HORIZONTAL_DIMS):
+                if (n_inside <= extent[i] // 2) and (dim in HORIZONTAL_DIMS):
                     pos = [slice(None, None)] * len(dims)
                     pos[i] = origin[i] + n_inside
                     data[tuple(pos)] = n_inside
@@ -339,13 +345,13 @@ def tile_depth_quantity_list(
                     data[tuple(pos)] = n_inside
         for n_outside in range(1, n_points + 1):
             for i, dim in enumerate(dims):
-                if dim in ndsl.util.HORIZONTAL_DIMS:
+                if dim in HORIZONTAL_DIMS:
                     pos = [slice(None, None)] * len(dims)
                     pos[i] = origin[i] - n_outside
                     data[tuple(pos)] = numpy.nan
                     pos[i] = origin[i] + extent[i] + n_outside - 1
                     data[tuple(pos)] = numpy.nan
-        quantity = ndsl.util.Quantity(
+        quantity = Quantity(
             data,
             dims=dims,
             units=units,
@@ -358,7 +364,7 @@ def tile_depth_quantity_list(
 
 @pytest.mark.parametrize(
     "layout, n_points, n_points_update, dims",
-    [[(1, 1), 3, "same", [ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM]]],
+    [[(1, 1), 3, "same", [X_DIM, Y_DIM, Z_DIM]]],
     indirect=True,
 )
 def test_halo_update_timer(
@@ -489,7 +495,7 @@ def zeros_quantity_list(total_ranks, dims, units, origin, extent, shape, numpy, 
     return_list = []
     for rank in range(total_ranks):
         data = numpy.ones(shape, dtype=dtype)
-        quantity = ndsl.util.Quantity(
+        quantity = Quantity(
             data,
             dims=dims,
             units=units,
@@ -510,7 +516,7 @@ def zeros_quantity_tile_list(
     return_list = []
     for rank in range(single_tile_ranks):
         data = numpy.ones(shape, dtype=dtype)
-        quantity = ndsl.util.Quantity(
+        quantity = Quantity(
             data,
             dims=dims,
             units=units,
@@ -534,7 +540,7 @@ def test_too_many_points_requested(
     test that an exception is raised when trying to update more halo points than exist
     """
     for communicator, quantity in zip(communicator_list, zeros_quantity_list):
-        with pytest.raises(ndsl.util.OutOfBoundsError):
+        with pytest.raises(OutOfBoundsError):
             communicator.start_halo_update(quantity, n_points_update)
 
 
@@ -552,7 +558,7 @@ def test_too_many_points_requested_tile(
     on a tile
     """
     for communicator, quantity in zip(tile_communicator_list, zeros_quantity_tile_list):
-        with pytest.raises(ndsl.util.OutOfBoundsError):
+        with pytest.raises(OutOfBoundsError):
             communicator.start_halo_update(quantity, n_points_update)
 
 
@@ -577,7 +583,7 @@ def test_zeros_halo_update(
         for rank, quantity in enumerate(zeros_quantity_list):
             boundaries = boundary_dict[rank % ranks_per_tile]
             for boundary in boundaries:
-                boundary_slice = ndsl.util._boundary_utils.get_boundary_slice(
+                boundary_slice = get_boundary_slice(
                     quantity.dims,
                     quantity.origin,
                     quantity.extent,
@@ -600,8 +606,8 @@ def test_zeros_halo_update(
 @pytest.mark.parametrize(
     "layout, n_points, n_points_update, dims",
     [
-        [(1, 1), 3, "same", [ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM]],
-        [(2, 2), 3, "same", [ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM]],
+        [(1, 1), 3, "same", [X_DIM, Y_DIM, Z_DIM]],
+        [(2, 2), 3, "same", [X_DIM, Y_DIM, Z_DIM]],
     ],
     indirect=True,
 )
@@ -647,7 +653,7 @@ def test_zeros_tile_halo_update(
                 rank % ranks_per_tile
             ]  # Is the %ranks_per_tile necessary?
             for boundary in boundaries:
-                boundary_slice = ndsl.util._boundary_utils.get_boundary_slice(
+                boundary_slice = get_boundary_slice(
                     quantity.dims,
                     quantity.origin,
                     quantity.extent,
@@ -695,7 +701,7 @@ def test_zeros_vector_halo_update(
         for rank, (y_quantity, x_quantity) in enumerate(zip(y_list, x_list)):
             boundaries = boundary_dict[rank % ranks_per_tile]
             for boundary in boundaries:
-                boundary_slice = ndsl.util._boundary_utils.get_boundary_slice(
+                boundary_slice = get_boundary_slice(
                     x_quantity.dims,
                     x_quantity.origin,
                     x_quantity.extent,
@@ -746,7 +752,7 @@ def test_zeros_vector_tile_halo_update(
         for rank, (y_quantity, x_quantity) in enumerate(zip(y_list, x_list)):
             boundaries = boundary_dict[rank % ranks_per_tile]
             for boundary in boundaries:
-                boundary_slice = ndsl.util._boundary_utils.get_boundary_slice(
+                boundary_slice = get_boundary_slice(
                     x_quantity.dims,
                     x_quantity.origin,
                     x_quantity.extent,
@@ -769,7 +775,7 @@ def test_zeros_vector_tile_halo_update(
 
 @pytest.mark.parametrize(
     "layout, n_points, n_points_update, dims",
-    [[(1, 1), 3, "same", [ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM]]],
+    [[(1, 1), 3, "same", [X_DIM, Y_DIM, Z_DIM]]],
     indirect=True,
 )
 def test_vector_halo_update_timer(
@@ -818,13 +824,13 @@ def test_vector_halo_update_timer(
 
 
 def get_horizontal_dims(dims):
-    for dim in ndsl.util.X_DIMS:
+    for dim in X_DIMS:
         if dim in dims:
             x_dim = dim
             break
     else:
         raise ValueError(f"no x dimension in {dims}")
-    for dim in ndsl.util.Y_DIMS:
+    for dim in Y_DIMS:
         if dim in dims:
             y_dim = dim
             break
@@ -855,7 +861,7 @@ def test_halo_updater_stability(
     BUFFER_CACHE.clear()
     halo_updaters = []
     for communicator, quantity in zip(communicator_list, zeros_quantity_list):
-        specification = ndsl.util.QuantityHaloSpec(
+        specification = QuantityHaloSpec(
             n_points,
             quantity.data.strides,
             quantity.data.itemsize,

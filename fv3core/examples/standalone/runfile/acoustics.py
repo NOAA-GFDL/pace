@@ -7,6 +7,7 @@ import click
 import f90nml
 import serialbox
 import yaml
+from Comm.null_comm import NullComm
 from timing import collect_data_and_write_to_file
 
 import ndsl.dsl
@@ -14,7 +15,6 @@ import ndsl.util as util
 from ndsl.dsl.dace.orchestration import DaceConfig
 from ndsl.dsl.stencil import CompilationConfig
 from ndsl.stencils.testing.grid import Grid
-from ndsl.util.comm.null_comm import NullComm
 from pace.fv3core._config import DynamicalCoreConfig
 from pace.fv3core.stencils.dyn_core import AcousticDynamics
 from pace.fv3core.testing import TranslateDynCore

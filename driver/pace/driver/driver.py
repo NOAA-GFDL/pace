@@ -9,25 +9,28 @@ import dace
 import dacite
 import yaml
 
-import ndsl.dsl
-import ndsl.stencils
-import ndsl.util
-import ndsl.util.grid
 import pace.driver
 import pace.physics
-from ndsl.dsl.dace.dace_config import DaceConfig
-from ndsl.dsl.dace.orchestration import dace_inhibitor, orchestrate
-from ndsl.dsl.stencil_config import CompilationConfig, RunMode
-from ndsl.dsl.typing import Float
-from ndsl.performance import PerformanceConfig
-from ndsl.performance.collector import PerformanceCollector
-from ndsl.performance.timer import Timer
-from ndsl.util.comm.communicator import (
+from ndsl.comm.comm_abc import Comm
+from ndsl.comm.communicator import (
     Communicator,
     CubedSphereCommunicator,
     TileCommunicator,
 )
-from ndsl.util.logging import ndsl_log
+from ndsl.comm.partitioner import TilePartitioner
+from ndsl.constants import N_HALO_DEFAULT
+from ndsl.dsl.dace.dace_config import DaceConfig
+from ndsl.dsl.dace.orchestration import dace_inhibitor, orchestrate
+from ndsl.dsl.stencil import GridIndexing, StencilFactory
+from ndsl.dsl.stencil_config import CompilationConfig, RunMode, StencilConfig
+from ndsl.dsl.typing import Float
+from ndsl.grid import DampingCoefficients, DriverGridData, GridData
+from ndsl.initialization.allocator import QuantityFactory
+from ndsl.initialization.sizer import SubtileGridSizer
+from ndsl.logging import ndsl_log
+from ndsl.performance import PerformanceConfig
+from ndsl.performance.collector import PerformanceCollector
+from ndsl.performance.timer import Timer
 from pace import fv3core
 from pace.driver.safety_checks import SafetyChecker
 
@@ -89,7 +92,7 @@ class DriverConfig:
             defaults to every timestep
     """
 
-    stencil_config: ndsl.dsl.StencilConfig
+    stencil_config: StencilConfig
     initialization: InitializerSelector
     nx_tile: int
     nz: int
@@ -164,25 +167,21 @@ class DriverConfig:
 
     def get_grid(
         self,
-        communicator: ndsl.util.Communicator,
-        quantity_factory: Optional[ndsl.util.QuantityFactory] = None,
-    ) -> Tuple[
-        ndsl.util.grid.DampingCoefficients,
-        ndsl.util.grid.DriverGridData,
-        ndsl.util.grid.GridData,
-    ]:
+        communicator: Communicator,
+        quantity_factory: Optional[QuantityFactory] = None,
+    ) -> Tuple[DampingCoefficients, DriverGridData, GridData]:
         if quantity_factory is None:
-            sizer = ndsl.util.SubtileGridSizer.from_tile_params(
+            sizer = SubtileGridSizer.from_tile_params(
                 nx_tile=self.nx_tile,
                 ny_tile=self.nx_tile,
                 nz=self.nz,
-                n_halo=ndsl.util.N_HALO_DEFAULT,
+                n_halo=N_HALO_DEFAULT,
                 extra_dim_lengths={},
                 layout=self.layout,
                 tile_partitioner=communicator.partitioner.tile,
                 tile_rank=communicator.tile.rank,
             )
-            quantity_factory = ndsl.util.QuantityFactory.from_backend(
+            quantity_factory = QuantityFactory.from_backend(
                 sizer, backend=self.stencil_config.compilation_config.backend
             )
 
@@ -193,36 +192,34 @@ class DriverConfig:
 
     def get_driver_state(
         self,
-        communicator: ndsl.util.Communicator,
-        damping_coefficients: ndsl.util.grid.DampingCoefficients,
-        driver_grid_data: ndsl.util.grid.DriverGridData,
-        grid_data: ndsl.util.grid.GridData,
-        quantity_factory: Optional[ndsl.util.QuantityFactory] = None,
-        stencil_factory: Optional[ndsl.dsl.StencilFactory] = None,
+        communicator: Communicator,
+        damping_coefficients: DampingCoefficients,
+        driver_grid_data: DriverGridData,
+        grid_data: GridData,
+        quantity_factory: Optional[QuantityFactory] = None,
+        stencil_factory: Optional[StencilFactory] = None,
     ) -> DriverState:
         """Load the initial state of the driver."""
         if quantity_factory is None or stencil_factory is None:
-            sizer = ndsl.util.SubtileGridSizer.from_tile_params(
+            sizer = SubtileGridSizer.from_tile_params(
                 nx_tile=self.nx_tile,
                 ny_tile=self.nx_tile,
                 nz=self.nz,
-                n_halo=ndsl.util.N_HALO_DEFAULT,
+                n_halo=N_HALO_DEFAULT,
                 extra_dim_lengths={},
                 layout=self.layout,
                 tile_partitioner=communicator.partitioner.tile,
                 tile_rank=communicator.tile.rank,
             )
             if quantity_factory is None:
-                quantity_factory = ndsl.util.QuantityFactory.from_backend(
+                quantity_factory = QuantityFactory.from_backend(
                     sizer, backend=self.stencil_config.compilation_config.backend
                 )
             if stencil_factory is None:
-                grid_indexing = (
-                    ndsl.dsl.stencil.GridIndexing.from_sizer_and_communicator(
-                        sizer=sizer, comm=communicator
-                    )
+                grid_indexing = GridIndexing.from_sizer_and_communicator(
+                    sizer=sizer, comm=communicator
                 )
-                stencil_factory = ndsl.dsl.StencilFactory(
+                stencil_factory = StencilFactory(
                     config=self.stencil_config, grid_indexing=grid_indexing
                 )
 
@@ -353,7 +350,7 @@ class RestartConfig:
         self,
         state: DriverState,
         *,
-        comm: ndsl.util.Comm,
+        comm: Comm,
         time: datetime,
         driver_config: DriverConfig,
         restart_path: str,
@@ -371,7 +368,7 @@ class RestartConfig:
         state: DriverState,
         *,
         step: int,
-        comm: ndsl.util.Comm,
+        comm: Comm,
         time: Union[datetime, timedelta],
         driver_config: DriverConfig,
         restart_path: str,
@@ -715,7 +712,7 @@ class Driver:
         self.comm_config.cleanup(self.comm)
 
 
-def log_subtile_location(partitioner: ndsl.util.TilePartitioner, rank: int):
+def log_subtile_location(partitioner: TilePartitioner, rank: int):
     location_info = {
         "north": partitioner.on_tile_top(rank),
         "south": partitioner.on_tile_bottom(rank),
@@ -727,9 +724,9 @@ def log_subtile_location(partitioner: ndsl.util.TilePartitioner, rank: int):
 
 def _setup_factories(
     config: DriverConfig,
-    communicator: ndsl.util.Communicator,
+    communicator: Communicator,
     stencil_compare_comm,
-) -> Tuple[ndsl.util.QuantityFactory, ndsl.dsl.StencilFactory]:
+) -> Tuple[QuantityFactory, StencilFactory]:
     """
     Args:
         config: configuration of driver
@@ -743,24 +740,24 @@ def _setup_factories(
         stencil_factory: creates Stencils
     """
 
-    sizer = ndsl.util.SubtileGridSizer.from_tile_params(
+    sizer = SubtileGridSizer.from_tile_params(
         nx_tile=config.nx_tile,
         ny_tile=config.nx_tile,
         nz=config.nz,
-        n_halo=ndsl.util.N_HALO_DEFAULT,
+        n_halo=N_HALO_DEFAULT,
         extra_dim_lengths={},
         layout=config.layout,
         tile_partitioner=communicator.partitioner.tile,
         tile_rank=communicator.tile.rank,
     )
 
-    grid_indexing = ndsl.dsl.stencil.GridIndexing.from_sizer_and_communicator(
+    grid_indexing = GridIndexing.from_sizer_and_communicator(
         sizer=sizer, comm=communicator
     )
-    quantity_factory = ndsl.util.QuantityFactory.from_backend(
+    quantity_factory = QuantityFactory.from_backend(
         sizer, backend=config.stencil_config.compilation_config.backend
     )
-    stencil_factory = ndsl.dsl.StencilFactory(
+    stencil_factory = StencilFactory(
         config=config.stencil_config,
         grid_indexing=grid_indexing,
         comm=stencil_compare_comm,

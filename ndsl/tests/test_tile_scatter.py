@@ -1,7 +1,10 @@
 import pytest
 
-import ndsl.util
-from ndsl.util.testing import DummyComm
+from ndsl.comm.communicator import TileCommunicator
+from ndsl.comm.partitioner import TilePartitioner
+from ndsl.constants import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM
+from ndsl.quantity import Quantity
+from ndsl.testing import DummyComm
 
 
 def rank_scatter_results(communicator_list, quantity):
@@ -19,7 +22,7 @@ def get_tile_communicator_list(partitioner):
     tile_communicator_list = []
     for rank in range(total_ranks):
         tile_communicator_list.append(
-            ndsl.util.TileCommunicator(
+            TileCommunicator(
                 comm=DummyComm(
                     rank=rank, total_ranks=total_ranks, buffer_dict=shared_buffer
                 ),
@@ -32,14 +35,14 @@ def get_tile_communicator_list(partitioner):
 @pytest.mark.parametrize("layout", [(1, 1), (1, 2), (2, 1), (2, 2), (3, 3)])
 def test_interface_state_two_by_two_per_rank_scatter_tile(layout, numpy):
     state = {
-        "pos_j": ndsl.util.Quantity(
+        "pos_j": Quantity(
             numpy.empty([layout[0] + 1, layout[1] + 1]),
-            dims=[ndsl.util.Y_INTERFACE_DIM, ndsl.util.X_INTERFACE_DIM],
+            dims=[Y_INTERFACE_DIM, X_INTERFACE_DIM],
             units="dimensionless",
         ),
-        "pos_i": ndsl.util.Quantity(
+        "pos_i": Quantity(
             numpy.empty([layout[0] + 1, layout[1] + 1], dtype=numpy.int32),
-            dims=[ndsl.util.Y_INTERFACE_DIM, ndsl.util.X_INTERFACE_DIM],
+            dims=[Y_INTERFACE_DIM, X_INTERFACE_DIM],
             units="dimensionless",
         ),
     }
@@ -47,7 +50,7 @@ def test_interface_state_two_by_two_per_rank_scatter_tile(layout, numpy):
     state["pos_j"].view[:, :] = numpy.arange(0, layout[0] + 1)[:, None]
     state["pos_i"].view[:, :] = numpy.arange(0, layout[1] + 1)[None, :]
 
-    partitioner = ndsl.util.TilePartitioner(layout)
+    partitioner = TilePartitioner(layout)
     tile_communicator_list = get_tile_communicator_list(partitioner)
     for communicator, rank_array in rank_scatter_results(
         tile_communicator_list, state["pos_j"]
@@ -76,24 +79,24 @@ def test_interface_state_two_by_two_per_rank_scatter_tile(layout, numpy):
 def test_centered_state_one_item_per_rank_scatter_tile(layout, numpy):
     total_ranks = layout[0] * layout[1]
     state = {
-        "rank": ndsl.util.Quantity(
+        "rank": Quantity(
             numpy.empty([layout[0], layout[1]]),
-            dims=[ndsl.util.Y_DIM, ndsl.util.X_DIM],
+            dims=[Y_DIM, X_DIM],
             units="dimensionless",
         ),
-        "rank_pos_j": ndsl.util.Quantity(
+        "rank_pos_j": Quantity(
             numpy.empty([layout[0], layout[1]]),
-            dims=[ndsl.util.Y_DIM, ndsl.util.X_DIM],
+            dims=[Y_DIM, X_DIM],
             units="dimensionless",
         ),
-        "rank_pos_i": ndsl.util.Quantity(
+        "rank_pos_i": Quantity(
             numpy.empty([layout[0], layout[1]]),
-            dims=[ndsl.util.Y_DIM, ndsl.util.X_DIM],
+            dims=[Y_DIM, X_DIM],
             units="dimensionless",
         ),
     }
 
-    partitioner = ndsl.util.TilePartitioner(layout)
+    partitioner = TilePartitioner(layout)
     for rank in range(total_ranks):
         rank = numpy.asarray([rank])
         state["rank"].view[numpy.unravel_index(rank, state["rank"].extent)] = rank
@@ -105,7 +108,7 @@ def test_centered_state_one_item_per_rank_scatter_tile(layout, numpy):
             numpy.unravel_index(rank, state["rank_pos_i"].extent)
         ] = i
 
-    partitioner = ndsl.util.TilePartitioner(layout)
+    partitioner = TilePartitioner(layout)
     tile_communicator_list = get_tile_communicator_list(partitioner)
     for communicator, rank_array in rank_scatter_results(
         tile_communicator_list, state["rank"]
@@ -131,30 +134,30 @@ def test_centered_state_one_item_per_rank_with_halo_scatter_tile(layout, n_halo,
     extent = layout
     total_ranks = layout[0] * layout[1]
     state = {
-        "rank": ndsl.util.Quantity(
+        "rank": Quantity(
             numpy.empty([layout[0] + 2 * n_halo, layout[1] + 2 * n_halo]),
-            dims=[ndsl.util.Y_DIM, ndsl.util.X_DIM],
+            dims=[Y_DIM, X_DIM],
             units="dimensionless",
             origin=(n_halo, n_halo),
             extent=extent,
         ),
-        "rank_pos_j": ndsl.util.Quantity(
+        "rank_pos_j": Quantity(
             numpy.empty([layout[0] + 2 * n_halo, layout[1] + 2 * n_halo]),
-            dims=[ndsl.util.Y_DIM, ndsl.util.X_DIM],
+            dims=[Y_DIM, X_DIM],
             units="dimensionless",
             origin=(n_halo, n_halo),
             extent=extent,
         ),
-        "rank_pos_i": ndsl.util.Quantity(
+        "rank_pos_i": Quantity(
             numpy.empty([layout[0] + 2 * n_halo, layout[1] + 2 * n_halo]),
-            dims=[ndsl.util.Y_DIM, ndsl.util.X_DIM],
+            dims=[Y_DIM, X_DIM],
             units="dimensionless",
             origin=(n_halo, n_halo),
             extent=extent,
         ),
     }
 
-    partitioner = ndsl.util.TilePartitioner(layout)
+    partitioner = TilePartitioner(layout)
     for rank in range(total_ranks):
         rank = numpy.asarray([rank])
         state["rank"].view[numpy.unravel_index(rank, state["rank"].extent)] = rank

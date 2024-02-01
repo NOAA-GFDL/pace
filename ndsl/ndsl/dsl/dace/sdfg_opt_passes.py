@@ -1,6 +1,6 @@
 import dace
 
-from ndsl.util.logging import ndsl_log
+from ndsl.logging import ndsl_log
 
 
 def splittable_region_expansion(sdfg: dace.SDFG, verbose: bool = False):

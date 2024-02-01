@@ -3,7 +3,19 @@ import datetime
 
 import pytest
 
-import ndsl.util
+from ndsl.comm.communicator import TileCommunicator
+from ndsl.comm.partitioner import TilePartitioner
+from ndsl.constants import (
+    HORIZONTAL_DIMS,
+    X_DIM,
+    X_INTERFACE_DIM,
+    Y_DIM,
+    Y_INTERFACE_DIM,
+    Z_DIM,
+    Z_INTERFACE_DIM,
+)
+from ndsl.quantity import Quantity
+from ndsl.testing import DummyComm
 
 
 try:
@@ -30,23 +42,23 @@ def n_tile_halo(request):
 @pytest.fixture(params=["x,y", "y,x", "xi,y", "x,y,z", "z,y,x", "y,z,x"])
 def dims(request, fast):
     if request.param == "x,y":
-        return [ndsl.util.X_DIM, ndsl.util.Y_DIM]
+        return [X_DIM, Y_DIM]
     elif request.param == "y,x":
         if fast:
             pytest.skip("running in fast mode")
         else:
-            return [ndsl.util.Y_DIM, ndsl.util.X_DIM]
+            return [Y_DIM, X_DIM]
     elif request.param == "xi,y":
-        return [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_DIM]
+        return [X_INTERFACE_DIM, Y_DIM]
     elif request.param == "x,y,z":
-        return [ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM]
+        return [X_DIM, Y_DIM, Z_DIM]
     elif request.param == "z,y,x":
         if fast:
             pytest.skip("running in fast mode")
         else:
-            return [ndsl.util.Z_DIM, ndsl.util.Y_DIM, ndsl.util.X_DIM]
+            return [Z_DIM, Y_DIM, X_DIM]
     elif request.param == "y,z,x":
-        return [ndsl.util.Y_DIM, ndsl.util.Z_DIM, ndsl.util.X_DIM]
+        return [Y_DIM, Z_DIM, X_DIM]
     else:
         raise NotImplementedError()
 
@@ -64,12 +76,12 @@ def time():
 @pytest.fixture()
 def dim_lengths(layout):
     return {
-        ndsl.util.X_DIM: 2 * layout[1],
-        ndsl.util.X_INTERFACE_DIM: 2 * layout[1] + 1,
-        ndsl.util.Y_DIM: 2 * layout[0],
-        ndsl.util.Y_INTERFACE_DIM: 2 * layout[0] + 1,
-        ndsl.util.Z_DIM: 3,
-        ndsl.util.Z_INTERFACE_DIM: 4,
+        X_DIM: 2 * layout[1],
+        X_INTERFACE_DIM: 2 * layout[1] + 1,
+        Y_DIM: 2 * layout[0],
+        Y_INTERFACE_DIM: 2 * layout[0] + 1,
+        Z_DIM: 3,
+        Z_INTERFACE_DIM: 4,
     }
 
 
@@ -80,9 +92,9 @@ def communicator_list(layout):
     return_list = []
     for rank in range(total_ranks):
         return_list.append(
-            ndsl.util.TileCommunicator(
-                ndsl.util.testing.DummyComm(rank, total_ranks, shared_buffer),
-                ndsl.util.TilePartitioner(layout),
+            TileCommunicator(
+                DummyComm(rank, total_ranks, shared_buffer),
+                TilePartitioner(layout),
             )
         )
     return return_list
@@ -105,7 +117,7 @@ def tile_quantity(dims, units, dim_lengths, tile_extent, n_tile_halo, numpy):
 def scattered_quantities(tile_quantity, layout, n_rank_halo, numpy):
     return_list = []
     total_ranks = layout[0] * layout[1]
-    partitioner = ndsl.util.TilePartitioner(layout)
+    partitioner = TilePartitioner(layout)
     for rank in range(total_ranks):
         # partitioner is tested in other tests, here we assume it works
         subtile_slice = partitioner.subtile_slice(
@@ -138,10 +150,10 @@ def get_quantity(dims, units, extent, n_halo, numpy):
     shape = list(copy.deepcopy(extent))
     origin = [0 for dim in dims]
     for i, dim in enumerate(dims):
-        if dim in ndsl.util.HORIZONTAL_DIMS:
+        if dim in HORIZONTAL_DIMS:
             origin[i] += n_halo
             shape[i] += 2 * n_halo
-    return ndsl.util.Quantity(
+    return Quantity(
         numpy.zeros(shape),
         dims,
         units,

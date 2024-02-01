@@ -10,19 +10,11 @@ from IPython.display import HTML, display
 from matplotlib import animation
 from units_config import units
 
+from ndsl.constants import RADIUS
 from ndsl.dsl.dace.dace_config import DaceConfig, DaCeOrchestration
 from ndsl.dsl.stencil import GridIndexing, StencilConfig, StencilFactory
 from ndsl.dsl.stencil_config import CompilationConfig, RunMode
-from ndsl.util import (
-    CubedSphereCommunicator,
-    CubedSpherePartitioner,
-    Quantity,
-    QuantityFactory,
-    SubtileGridSizer,
-    TilePartitioner,
-)
-from ndsl.util.constants import RADIUS
-from ndsl.util.grid import (
+from ndsl.grid import (
     AngleGridData,
     ContravariantGridData,
     DampingCoefficients,
@@ -31,7 +23,15 @@ from ndsl.util.grid import (
     MetricTerms,
     VerticalGridData,
 )
-from ndsl.util.grid.gnomonic import great_circle_distance_lon_lat
+from ndsl.grid.gnomonic import great_circle_distance_lon_lat
+from ndsl.util import (
+    CubedSphereCommunicator,
+    CubedSpherePartitioner,
+    Quantity,
+    QuantityFactory,
+    SubtileGridSizer,
+    TilePartitioner,
+)
 from pace.fv3core.stencils.fvtp2d import FiniteVolumeTransport
 from pace.fv3core.stencils.fxadv import FiniteVolumeFluxPrep
 from pace.fv3core.stencils.tracer_2d_1l import TracerAdvection

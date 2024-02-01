@@ -1,34 +1,33 @@
 from typing import Dict
 
 import numpy as np
-from util.ndsl.util.grid.helper import GridData
 
-import ndsl.util
 import pace.fv3core
-from ndsl.util.comm.mpi import MPIComm
-from ndsl.util.grid import MetricTerms
-from ndsl.util.quantity import Quantity
+from ndsl.comm.communicator import CubedSphereCommunicator, TileCommunicator
+from ndsl.comm.mpi import MPIComm
+from ndsl.comm.partitioner import CubedSpherePartitioner, TilePartitioner
+from ndsl.grid import MetricTerms
+from ndsl.grid.helper import GridData
+from ndsl.initialization.allocator import QuantityFactory
+from ndsl.initialization.sizer import SubtileGridSizer
+from ndsl.quantity import Quantity
 from pace.fv3core.initialization.test_cases.initialize_baroclinic import (
     init_baroclinic_state,
 )
 
 
 def get_cube_comm(layout, comm: MPIComm):
-    return ndsl.util.CubedSphereCommunicator(
+    return CubedSphereCommunicator(
         comm=comm,
-        partitioner=ndsl.util.CubedSpherePartitioner(
-            ndsl.util.TilePartitioner(layout=layout)
-        ),
+        partitioner=CubedSpherePartitioner(TilePartitioner(layout=layout)),
     )
 
 
 def get_quantity_factory(layout, nx_tile, ny_tile, nz):
     nx = nx_tile // layout[0]
     ny = ny_tile // layout[1]
-    return ndsl.util.QuantityFactory(
-        sizer=ndsl.util.SubtileGridSizer(
-            nx=nx, ny=ny, nz=nz, n_halo=3, extra_dim_lengths={}
-        ),
+    return QuantityFactory(
+        sizer=SubtileGridSizer(nx=nx, ny=ny, nz=nz, n_halo=3, extra_dim_lengths={}),
         numpy=np,
     )
 
@@ -144,7 +143,7 @@ def dycore_state_to_quantity_dict(
 
 
 def gather_all(
-    quantity_dict: Dict[str, Quantity], tile_comm: ndsl.util.TileCommunicator
+    quantity_dict: Dict[str, Quantity], tile_comm: TileCommunicator
 ) -> Dict[str, Quantity]:
     gathered = {}
     for name, quantity in quantity_dict.items():
@@ -235,7 +234,7 @@ def test_baroclinic_init_not_decomposition_dependent():
             assert allclose(computed_1by1[name], gathered_3by3[name], name, global_rank)
 
 
-def allclose(q_1by1: ndsl.util.Quantity, q_3by3: ndsl.util.Quantity, name: str, rank):
+def allclose(q_1by1: Quantity, q_3by3: Quantity, name: str, rank):
     print("1by1", q_1by1.metadata, "3by3", q_3by3.metadata)
     assert q_1by1.view[:].shape == q_3by3.view[:].shape, name
     same = (q_1by1.view[:] == q_3by3.view[:]) | np.isnan(q_1by1.view[:])

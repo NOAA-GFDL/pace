@@ -10,7 +10,7 @@ from gt4py.cartesian.gtscript import (
 from ndsl.dsl.dace import orchestrate
 from ndsl.dsl.stencil import StencilFactory
 from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ
-from ndsl.util.grid import GridData
+from ndsl.grid import GridData
 from pace.fv3core.stencils.d2a2c_vect import contravariant
 
 
@@ -583,7 +583,7 @@ class FiniteVolumeFluxPrep:
         )
         # self._set_nans = get_set_nan_func(
         #     grid_indexing,
-        #     dims=[ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
+        #     dims=[X_DIM, Y_DIM, Z_DIM],
         #     n_halo=((2, 2), (2, 2)),
         # )
 

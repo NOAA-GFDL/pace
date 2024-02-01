@@ -6,11 +6,13 @@ from translate_physics import (
     transform_dwind_serialized_data,
 )
 
-import ndsl.dsl
 import ndsl.dsl.gt4py_utils as utils
-import ndsl.util
+from ndsl.constants import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_DIM
+from ndsl.dsl.stencil import StencilFactory
 from ndsl.dsl.typing import FloatField, FloatFieldIJ
-from ndsl.util.utils import safe_assign_array
+from ndsl.namelist import Namelist
+from ndsl.quantity import Quantity
+from ndsl.utils import safe_assign_array
 from pace.physics.update.fv_update_phys import ApplyPhysicsToDycore
 
 
@@ -53,8 +55,8 @@ class TranslateFVUpdatePhys(ParallelPhysicsTranslate2Py):
     def __init__(
         self,
         grid,
-        namelist: ndsl.util.Namelist,
-        stencil_factory: ndsl.dsl.StencilFactory,
+        namelist: Namelist,
+        stencil_factory: StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
         self.stencil_factory = stencil_factory
@@ -173,9 +175,9 @@ class TranslateFVUpdatePhys(ParallelPhysicsTranslate2Py):
         tendencies = {}
         for key in ["u_dt", "v_dt", "t_dt"]:
             storage = inputs.pop(key)
-            tendencies[key] = ndsl.util.Quantity(
+            tendencies[key] = Quantity(
                 storage,
-                dims=[ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM],
+                dims=[X_DIM, Y_DIM, Z_DIM],
                 units="test",
                 origin=(0, 0, 0),
                 extent=storage.shape,
@@ -192,14 +194,14 @@ class TranslateFVUpdatePhys(ParallelPhysicsTranslate2Py):
             tendencies["u_dt"],
             tendencies["v_dt"],
         )
-        dims_u = [ndsl.util.X_DIM, ndsl.util.Y_INTERFACE_DIM, ndsl.util.Z_DIM]
+        dims_u = [X_DIM, Y_INTERFACE_DIM, Z_DIM]
         u_quantity = self.grid.make_quantity(
             state.u,
             dims=dims_u,
             origin=self.grid.sizer.get_origin(dims_u),
             extent=self.grid.sizer.get_extent(dims_u),
         )
-        dims_v = [ndsl.util.X_INTERFACE_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM]
+        dims_v = [X_INTERFACE_DIM, Y_DIM, Z_DIM]
         v_quantity = self.grid.make_quantity(
             state.v,
             dims=dims_v,

@@ -1,7 +1,23 @@
 import pytest
+from Comm.partitioner import (
+    CubedSpherePartitioner,
+    TilePartitioner,
+    rotate_subtile_rank,
+)
 
-import ndsl.util
-import ndsl.util.comm.partitioner
+from ndsl.constants import (
+    BOUNDARY_TYPES,
+    CORNER_BOUNDARY_TYPES,
+    EAST,
+    EDGE_BOUNDARY_TYPES,
+    NORTH,
+    NORTHEAST,
+    NORTHWEST,
+    SOUTH,
+    SOUTHEAST,
+    SOUTHWEST,
+    WEST,
+)
 
 
 # the test examples for the 2x2 cube here were recorded by manually inspecting
@@ -10,25 +26,25 @@ import ndsl.util.comm.partitioner
 
 @pytest.fixture
 def partitioner_1_by_1():
-    grid = ndsl.util.TilePartitioner((1, 1))
-    return ndsl.util.CubedSpherePartitioner(grid)
+    grid = TilePartitioner((1, 1))
+    return CubedSpherePartitioner(grid)
 
 
 @pytest.fixture
 def partitioner_2_by_2():
-    grid = ndsl.util.TilePartitioner((2, 2))
-    return ndsl.util.CubedSpherePartitioner(grid)
+    grid = TilePartitioner((2, 2))
+    return CubedSpherePartitioner(grid)
 
 
 @pytest.fixture
 def tile_partitioner_3_by_3():
-    return ndsl.util.TilePartitioner((3, 3))
+    return TilePartitioner((3, 3))
 
 
 @pytest.fixture
 def partitioner_3_by_3():
-    grid = ndsl.util.TilePartitioner((3, 3))
-    return ndsl.util.CubedSpherePartitioner(grid)
+    grid = TilePartitioner((3, 3))
+    return CubedSpherePartitioner(grid)
 
 
 @pytest.mark.parametrize(
@@ -64,7 +80,7 @@ def partitioner_3_by_3():
 def test_2_by_2_left_edge(
     partitioner_2_by_2, from_rank, to_rank, n_clockwise_rotations
 ):
-    edge = partitioner_2_by_2.boundary(ndsl.util.WEST, from_rank)
+    edge = partitioner_2_by_2.boundary(WEST, from_rank)
     assert edge.from_rank == from_rank
     assert edge.to_rank == to_rank
     assert edge.n_clockwise_rotations == n_clockwise_rotations
@@ -88,7 +104,7 @@ def test_2_by_2_left_edge(
 def test_single_3_by_3_left_edge(
     tile_partitioner_3_by_3, from_rank, to_rank, n_clockwise_rotations
 ):
-    edge = tile_partitioner_3_by_3.boundary(ndsl.util.WEST, from_rank)
+    edge = tile_partitioner_3_by_3.boundary(WEST, from_rank)
     assert edge.from_rank == from_rank
     assert edge.to_rank == to_rank
     assert edge.n_clockwise_rotations == n_clockwise_rotations
@@ -102,7 +118,7 @@ def test_single_3_by_3_left_edge(
 def test_1_by_1_left_edge(
     partitioner_1_by_1, from_rank, to_rank, n_clockwise_rotations
 ):
-    edge = partitioner_1_by_1.boundary(ndsl.util.WEST, from_rank)
+    edge = partitioner_1_by_1.boundary(WEST, from_rank)
     assert edge.from_rank == from_rank
     assert edge.to_rank == to_rank
     assert edge.n_clockwise_rotations == n_clockwise_rotations
@@ -120,9 +136,7 @@ def test_1_by_1_left_edge(
 )
 @pytest.mark.cpu_only
 def test_rotate_subtile_rank(rank, layout, n_clockwise_rotations, new_rank):
-    result = ndsl.util.comm.partitioner.rotate_subtile_rank(
-        rank, layout, n_clockwise_rotations
-    )
+    result = rotate_subtile_rank(rank, layout, n_clockwise_rotations)
     assert result == new_rank
 
 
@@ -157,7 +171,7 @@ def test_rotate_subtile_rank(rank, layout, n_clockwise_rotations, new_rank):
 )
 @pytest.mark.cpu_only
 def test_2_by_2_top_edge(partitioner_2_by_2, from_rank, to_rank, n_clockwise_rotations):
-    edge = partitioner_2_by_2.boundary(ndsl.util.NORTH, from_rank)
+    edge = partitioner_2_by_2.boundary(NORTH, from_rank)
     assert edge.from_rank == from_rank
     assert edge.to_rank == to_rank
     assert edge.n_clockwise_rotations == n_clockwise_rotations
@@ -181,7 +195,7 @@ def test_2_by_2_top_edge(partitioner_2_by_2, from_rank, to_rank, n_clockwise_rot
 def test_single_3_by_3_top_edge(
     tile_partitioner_3_by_3, from_rank, to_rank, n_clockwise_rotations
 ):
-    edge = tile_partitioner_3_by_3.boundary(ndsl.util.NORTH, from_rank)
+    edge = tile_partitioner_3_by_3.boundary(NORTH, from_rank)
     assert edge.from_rank == from_rank
     assert edge.to_rank == to_rank
     assert edge.n_clockwise_rotations == n_clockwise_rotations
@@ -193,7 +207,7 @@ def test_single_3_by_3_top_edge(
 )
 @pytest.mark.cpu_only
 def test_1_by_1_top_edge(partitioner_1_by_1, from_rank, to_rank, n_clockwise_rotations):
-    edge = partitioner_1_by_1.boundary(ndsl.util.NORTH, from_rank)
+    edge = partitioner_1_by_1.boundary(NORTH, from_rank)
     assert edge.from_rank == from_rank
     assert edge.to_rank == to_rank
     assert edge.n_clockwise_rotations == n_clockwise_rotations
@@ -232,7 +246,7 @@ def test_1_by_1_top_edge(partitioner_1_by_1, from_rank, to_rank, n_clockwise_rot
 def test_2_by_2_bottom_edge(
     partitioner_2_by_2, from_rank, to_rank, n_clockwise_rotations
 ):
-    edge = partitioner_2_by_2.boundary(ndsl.util.SOUTH, from_rank)
+    edge = partitioner_2_by_2.boundary(SOUTH, from_rank)
     assert edge.from_rank == from_rank
     assert edge.to_rank == to_rank
     assert edge.n_clockwise_rotations == n_clockwise_rotations
@@ -256,7 +270,7 @@ def test_2_by_2_bottom_edge(
 def test_single_3_by_3_bottom_edge(
     tile_partitioner_3_by_3, from_rank, to_rank, n_clockwise_rotations
 ):
-    edge = tile_partitioner_3_by_3.boundary(ndsl.util.SOUTH, from_rank)
+    edge = tile_partitioner_3_by_3.boundary(SOUTH, from_rank)
     assert edge.from_rank == from_rank
     assert edge.to_rank == to_rank
     assert edge.n_clockwise_rotations == n_clockwise_rotations
@@ -270,7 +284,7 @@ def test_single_3_by_3_bottom_edge(
 def test_1_by_1_bottom_edge(
     partitioner_1_by_1, from_rank, to_rank, n_clockwise_rotations
 ):
-    edge = partitioner_1_by_1.boundary(ndsl.util.SOUTH, from_rank)
+    edge = partitioner_1_by_1.boundary(SOUTH, from_rank)
     assert edge.from_rank == from_rank
     assert edge.to_rank == to_rank
     assert edge.n_clockwise_rotations == n_clockwise_rotations
@@ -309,7 +323,7 @@ def test_1_by_1_bottom_edge(
 def test_2_by_2_right_edge(
     partitioner_2_by_2, from_rank, to_rank, n_clockwise_rotations
 ):
-    edge = partitioner_2_by_2.boundary(ndsl.util.EAST, from_rank)
+    edge = partitioner_2_by_2.boundary(EAST, from_rank)
     assert edge.from_rank == from_rank
     assert edge.to_rank == to_rank
     assert edge.n_clockwise_rotations == n_clockwise_rotations
@@ -333,7 +347,7 @@ def test_2_by_2_right_edge(
 def test_single_3_by_3_right_edge(
     tile_partitioner_3_by_3, from_rank, to_rank, n_clockwise_rotations
 ):
-    edge = tile_partitioner_3_by_3.boundary(ndsl.util.EAST, from_rank)
+    edge = tile_partitioner_3_by_3.boundary(EAST, from_rank)
     assert edge.from_rank == from_rank
     assert edge.to_rank == to_rank
     assert edge.n_clockwise_rotations == n_clockwise_rotations
@@ -347,7 +361,7 @@ def test_single_3_by_3_right_edge(
 def test_1_by_1_right_edge(
     partitioner_1_by_1, from_rank, to_rank, n_clockwise_rotations
 ):
-    edge = partitioner_1_by_1.boundary(ndsl.util.EAST, from_rank)
+    edge = partitioner_1_by_1.boundary(EAST, from_rank)
     assert edge.from_rank == from_rank
     assert edge.to_rank == to_rank
     assert edge.n_clockwise_rotations == n_clockwise_rotations
@@ -356,28 +370,28 @@ def test_1_by_1_right_edge(
 @pytest.mark.parametrize("from_rank", [0, 1, 2, 3, 4, 5])
 @pytest.mark.cpu_only
 def test_1_by_1_top_left_corner(partitioner_1_by_1, from_rank):
-    corner = partitioner_1_by_1.boundary(ndsl.util.NORTHWEST, from_rank)
+    corner = partitioner_1_by_1.boundary(NORTHWEST, from_rank)
     assert corner is None
 
 
 @pytest.mark.parametrize("from_rank", [0, 1, 2, 3, 4, 5])
 @pytest.mark.cpu_only
 def test_1_by_1_top_right_corner(partitioner_1_by_1, from_rank):
-    corner = partitioner_1_by_1.boundary(ndsl.util.NORTHEAST, from_rank)
+    corner = partitioner_1_by_1.boundary(NORTHEAST, from_rank)
     assert corner is None
 
 
 @pytest.mark.parametrize("from_rank", [0, 1, 2, 3, 4, 5])
 @pytest.mark.cpu_only
 def test_1_by_1_bottom_left_corner(partitioner_1_by_1, from_rank):
-    corner = partitioner_1_by_1.boundary(ndsl.util.SOUTHWEST, from_rank)
+    corner = partitioner_1_by_1.boundary(SOUTHWEST, from_rank)
     assert corner is None
 
 
 @pytest.mark.parametrize("from_rank", [0, 1, 2, 3, 4, 5])
 @pytest.mark.cpu_only
 def test_1_by_1_bottom_right_corner(partitioner_1_by_1, from_rank):
-    corner = partitioner_1_by_1.boundary(ndsl.util.SOUTHEAST, from_rank)
+    corner = partitioner_1_by_1.boundary(SOUTHEAST, from_rank)
     assert corner is None
 
 
@@ -414,7 +428,7 @@ def test_1_by_1_bottom_right_corner(partitioner_1_by_1, from_rank):
 def test_2_by_2_top_left_corner(
     partitioner_2_by_2, from_rank, to_rank, n_clockwise_rotations
 ):
-    corner = partitioner_2_by_2.boundary(ndsl.util.NORTHWEST, from_rank)
+    corner = partitioner_2_by_2.boundary(NORTHWEST, from_rank)
     if to_rank is None:
         assert corner is None
     else:
@@ -441,7 +455,7 @@ def test_2_by_2_top_left_corner(
 def test_single_3_by_3_top_left_corner(
     tile_partitioner_3_by_3, from_rank, to_rank, n_clockwise_rotations
 ):
-    edge = tile_partitioner_3_by_3.boundary(ndsl.util.NORTHWEST, from_rank)
+    edge = tile_partitioner_3_by_3.boundary(NORTHWEST, from_rank)
     assert edge.from_rank == from_rank
     assert edge.to_rank == to_rank
     assert edge.n_clockwise_rotations == n_clockwise_rotations
@@ -450,23 +464,23 @@ def test_single_3_by_3_top_left_corner(
 @pytest.mark.parametrize(
     "layout, boundary_type, from_rank, to_rank",
     (
-        ((1, 1), ndsl.util.WEST, 0, 0),
-        ((1, 1), ndsl.util.EAST, 0, 0),
-        ((1, 1), ndsl.util.NORTH, 0, 0),
-        ((1, 1), ndsl.util.SOUTH, 0, 0),
-        ((2, 2), ndsl.util.WEST, 0, 1),
-        ((2, 2), ndsl.util.EAST, 0, 1),
-        ((2, 2), ndsl.util.NORTH, 0, 2),
-        ((2, 2), ndsl.util.SOUTH, 0, 2),
-        ((2, 2), ndsl.util.WEST, 3, 2),
-        ((2, 2), ndsl.util.EAST, 3, 2),
-        ((2, 2), ndsl.util.NORTH, 3, 1),
-        ((2, 2), ndsl.util.SOUTH, 3, 1),
+        ((1, 1), WEST, 0, 0),
+        ((1, 1), EAST, 0, 0),
+        ((1, 1), NORTH, 0, 0),
+        ((1, 1), SOUTH, 0, 0),
+        ((2, 2), WEST, 0, 1),
+        ((2, 2), EAST, 0, 1),
+        ((2, 2), NORTH, 0, 2),
+        ((2, 2), SOUTH, 0, 2),
+        ((2, 2), WEST, 3, 2),
+        ((2, 2), EAST, 3, 2),
+        ((2, 2), NORTH, 3, 1),
+        ((2, 2), SOUTH, 3, 1),
     ),
 )
 @pytest.mark.cpu_only
 def test_tile_boundary(layout, boundary_type, from_rank, to_rank):
-    tile = ndsl.util.TilePartitioner(layout)
+    tile = TilePartitioner(layout)
     boundary = tile.boundary(boundary_type, from_rank)
     assert boundary.from_rank == from_rank
     assert boundary.to_rank == to_rank
@@ -506,7 +520,7 @@ def test_tile_boundary(layout, boundary_type, from_rank, to_rank):
 def test_2_by_2_top_right_corner(
     partitioner_2_by_2, from_rank, to_rank, n_clockwise_rotations
 ):
-    corner = partitioner_2_by_2.boundary(ndsl.util.NORTHEAST, from_rank)
+    corner = partitioner_2_by_2.boundary(NORTHEAST, from_rank)
     if to_rank is None:
         assert corner is None
     else:
@@ -533,7 +547,7 @@ def test_2_by_2_top_right_corner(
 def test_single_3_by_3_top_right_corner(
     tile_partitioner_3_by_3, from_rank, to_rank, n_clockwise_rotations
 ):
-    edge = tile_partitioner_3_by_3.boundary(ndsl.util.NORTHEAST, from_rank)
+    edge = tile_partitioner_3_by_3.boundary(NORTHEAST, from_rank)
     assert edge.from_rank == from_rank
     assert edge.to_rank == to_rank
     assert edge.n_clockwise_rotations == n_clockwise_rotations
@@ -572,7 +586,7 @@ def test_single_3_by_3_top_right_corner(
 def test_2_by_2_bottom_left_corner(
     partitioner_2_by_2, from_rank, to_rank, n_clockwise_rotations
 ):
-    corner = partitioner_2_by_2.boundary(ndsl.util.SOUTHWEST, from_rank)
+    corner = partitioner_2_by_2.boundary(SOUTHWEST, from_rank)
     if to_rank is None:
         assert corner is None
     else:
@@ -599,7 +613,7 @@ def test_2_by_2_bottom_left_corner(
 def test_single_3_by_3_bottom_left_corner(
     tile_partitioner_3_by_3, from_rank, to_rank, n_clockwise_rotations
 ):
-    edge = tile_partitioner_3_by_3.boundary(ndsl.util.SOUTHWEST, from_rank)
+    edge = tile_partitioner_3_by_3.boundary(SOUTHWEST, from_rank)
     assert edge.from_rank == from_rank
     assert edge.to_rank == to_rank
     assert edge.n_clockwise_rotations == n_clockwise_rotations
@@ -638,7 +652,7 @@ def test_single_3_by_3_bottom_left_corner(
 def test_2_by_2_bottom_right_corner(
     partitioner_2_by_2, from_rank, to_rank, n_clockwise_rotations
 ):
-    corner = partitioner_2_by_2.boundary(ndsl.util.SOUTHEAST, from_rank)
+    corner = partitioner_2_by_2.boundary(SOUTHEAST, from_rank)
     if to_rank is None:
         assert corner is None
     else:
@@ -665,16 +679,16 @@ def test_2_by_2_bottom_right_corner(
 def test_single_3_by_3_bottom_right_corner(
     tile_partitioner_3_by_3, from_rank, to_rank, n_clockwise_rotations
 ):
-    edge = tile_partitioner_3_by_3.boundary(ndsl.util.SOUTHEAST, from_rank)
+    edge = tile_partitioner_3_by_3.boundary(SOUTHEAST, from_rank)
     assert edge.from_rank == from_rank
     assert edge.to_rank == to_rank
     assert edge.n_clockwise_rotations == n_clockwise_rotations
 
 
 def test_boundary_returns_correct_boundary_type():
-    tile = ndsl.util.TilePartitioner((3, 3))
-    partitioner = ndsl.util.CubedSpherePartitioner(tile)
-    for boundary_type in ndsl.util.BOUNDARY_TYPES:
+    tile = TilePartitioner((3, 3))
+    partitioner = CubedSpherePartitioner(tile)
+    for boundary_type in BOUNDARY_TYPES:
         boundary = partitioner.boundary(boundary_type, rank=4)  # center face
         assert boundary.boundary_type == boundary_type
 
@@ -687,10 +701,10 @@ def test_boundary_returns_correct_boundary_type():
 @pytest.mark.parametrize(
     "boundary_type, from_rank, to_rank, n_clockwise_rotations",
     [
-        (ndsl.util.WEST, 0, 4 * 9 + 8, 1),
-        (ndsl.util.SOUTH, 0, 5 * 9 + 6, 0),
-        (ndsl.util.WEST, 42, 2 * 9 + 6, 1),
-        (ndsl.util.NORTH, 42, 6, 3),
+        (WEST, 0, 4 * 9 + 8, 1),
+        (SOUTH, 0, 5 * 9 + 6, 0),
+        (WEST, 42, 2 * 9 + 6, 1),
+        (NORTH, 42, 6, 3),
     ],
 )
 @pytest.mark.cpu_only
@@ -709,11 +723,11 @@ def test_3_by_3_difficult_cases(
 @pytest.mark.parametrize("layout", [(1, 1), (2, 2), (4, 4)])
 @pytest.mark.cpu_only
 def test_edge_boundaries_pair(layout, subtests):
-    order = [ndsl.util.WEST, ndsl.util.NORTH, ndsl.util.EAST, ndsl.util.SOUTH]
-    tile = ndsl.util.TilePartitioner(layout)
-    partitioner = ndsl.util.CubedSpherePartitioner(tile)
+    order = [WEST, NORTH, EAST, SOUTH]
+    tile = TilePartitioner(layout)
+    partitioner = CubedSpherePartitioner(tile)
     for rank in range(partitioner.total_ranks):
-        for boundary_type in ndsl.util.EDGE_BOUNDARY_TYPES:
+        for boundary_type in EDGE_BOUNDARY_TYPES:
             with subtests.test(rank=rank, boundary_type=boundary_type):
                 out_boundary = partitioner.boundary(boundary_type, rank)
                 in_boundary = partitioner.boundary(
@@ -734,15 +748,15 @@ def test_edge_boundaries_pair(layout, subtests):
 @pytest.mark.cpu_only
 def test_corner_boundaries_pair(layout, subtests):
     order = [
-        ndsl.util.NORTHWEST,
-        ndsl.util.NORTHEAST,
-        ndsl.util.SOUTHEAST,
-        ndsl.util.SOUTHWEST,
+        NORTHWEST,
+        NORTHEAST,
+        SOUTHEAST,
+        SOUTHWEST,
     ]
-    tile = ndsl.util.TilePartitioner(layout)
-    partitioner = ndsl.util.CubedSpherePartitioner(tile)
+    tile = TilePartitioner(layout)
+    partitioner = CubedSpherePartitioner(tile)
     for rank in range(partitioner.total_ranks):
-        for boundary_type in ndsl.util.CORNER_BOUNDARY_TYPES:
+        for boundary_type in CORNER_BOUNDARY_TYPES:
             with subtests.test(rank=rank, boundary_type=boundary_type):
                 out_boundary = partitioner.boundary(boundary_type, rank)
                 if out_boundary is not None:

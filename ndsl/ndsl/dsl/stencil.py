@@ -19,19 +19,20 @@ from typing import (
 import dace
 import gt4py
 import numpy as np
+from Comm.comm_abc import Comm
+from Comm.communicator import Communicator
+from Comm.decomposition import block_waiting_for_compilation, unblock_waiting_tiles
+from Comm.mpi import MPI
 from gt4py.cartesian import gtscript
 from gt4py.cartesian.gtc.passes.oir_pipeline import DefaultPipeline, OirPipeline
+from Quantity import Quantity
 
-import ndsl.util
+from ndsl import testing
+from ndsl.constants import X_DIM, X_DIMS, Y_DIM, Y_DIMS, Z_DIM, Z_DIMS
 from ndsl.dsl.dace.orchestration import SDFGConvertible
 from ndsl.dsl.stencil_config import CompilationConfig, RunMode, StencilConfig
 from ndsl.dsl.typing import Float, Index3D, cast_to_index3d
-from ndsl.util import testing
-from ndsl.util.comm.decomposition import (
-    block_waiting_for_compilation,
-    unblock_waiting_tiles,
-)
-from ndsl.util.comm.mpi import MPI
+from ndsl.initialization import GridSizer, SubtileGridSizer
 
 
 try:
@@ -44,13 +45,13 @@ def report_difference(args, kwargs, args_copy, kwargs_copy, function_name, gt_id
     report_head = f"comparing against numpy for func {function_name}, gt_id {gt_id}:"
     report_segments = []
     for i, (arg, numpy_arg) in enumerate(zip(args, args_copy)):
-        if isinstance(arg, ndsl.util.Quantity):
+        if isinstance(arg, Quantity):
             arg = arg.data
             numpy_arg = numpy_arg.data
         if isinstance(arg, np.ndarray):
             report_segments.append(report_diff(arg, numpy_arg, label=f"arg {i}"))
     for name in kwargs:
-        if isinstance(kwargs[name], ndsl.util.Quantity):
+        if isinstance(kwargs[name], Quantity):
             kwarg = kwargs[name].data
             numpy_kwarg = kwargs_copy[name].data
         else:
@@ -181,7 +182,7 @@ class CompareToNumpyStencil:
         externals: Optional[Mapping[str, Any]] = None,
         skip_passes: Optional[Tuple[str, ...]] = None,
         timing_collector: Optional[TimingCollector] = None,
-        comm: Optional[ndsl.util.Comm] = None,
+        comm: Optional[Comm] = None,
     ):
         self._actual = FrozenStencil(
             func=func,
@@ -250,13 +251,13 @@ def get_pair_rank(rank: int, size: int):
         return rank - dycore_ranks
 
 
-def compare_ranks(comm: ndsl.util.Comm, data) -> Mapping[str, int]:
+def compare_ranks(comm: Comm, data) -> Mapping[str, int]:
     rank = comm.Get_rank()
     size = comm.Get_size()
     pair_rank = get_pair_rank(rank, size)
     differences = {}
     for name, maybe_array in sorted(data.items(), key=lambda x: x[0]):
-        if isinstance(maybe_array, ndsl.util.Quantity):
+        if isinstance(maybe_array, Quantity):
             maybe_array = maybe_array.data
         if hasattr(maybe_array, "data") and isinstance(maybe_array.data, np.ndarray):
             array = maybe_array.data
@@ -287,7 +288,7 @@ class FrozenStencil(SDFGConvertible):
         externals: Optional[Mapping[str, Any]] = None,
         skip_passes: Tuple[str, ...] = (),
         timing_collector: Optional[TimingCollector] = None,
-        comm: Optional[ndsl.util.Comm] = None,
+        comm: Optional[Comm] = None,
     ):
         """
         Args:
@@ -528,7 +529,7 @@ def _convert_quantities_to_storage(args, kwargs):
     for i, arg in enumerate(args):
         try:
             # Check that 'dims' is an attribute of arg. If so,
-            # this means it's a ndsl.util.Quantity, so we need
+            # this means it's a Quantity, so we need
             # to pull off the ndarray.
             arg.dims
             args[i] = arg.data
@@ -537,7 +538,7 @@ def _convert_quantities_to_storage(args, kwargs):
     for name, arg in kwargs.items():
         try:
             # Check that 'dims' is an attribute of arg. If so,
-            # this means it's a ndsl.util.Quantity, so we need
+            # this means it's a Quantity, so we need
             # to pull off the ndarray.
             arg.dims
             kwargs[name] = arg.data
@@ -588,7 +589,7 @@ class GridIndexing:
     @domain.setter
     def domain(self, domain):
         self._domain = domain
-        self._sizer = ndsl.util.SubtileGridSizer(
+        self._sizer = SubtileGridSizer(
             nx=domain[0],
             ny=domain[1],
             nz=domain[2],
@@ -598,13 +599,13 @@ class GridIndexing:
 
     @classmethod
     def from_sizer_and_communicator(
-        cls, sizer: ndsl.util.GridSizer, comm: ndsl.util.Communicator
+        cls, sizer: GridSizer, comm: Communicator
     ) -> "GridIndexing":
         # TODO: if this class is refactored to split off the *_edge booleans,
         # this init routine can be refactored to require only a GridSizer
         domain = cast(
             Tuple[int, int, int],
-            sizer.get_extent([ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM]),
+            sizer.get_extent([X_DIM, Y_DIM, Z_DIM]),
         )
         south_edge = comm.tile.partitioner.on_tile_bottom(comm.rank)
         north_edge = comm.tile.partitioner.on_tile_top(comm.rank)
@@ -789,11 +790,11 @@ class GridIndexing:
     def _origin_from_dims(self, dims: Iterable[str]) -> List[int]:
         return_origin = []
         for dim in dims:
-            if dim in ndsl.util.X_DIMS:
+            if dim in X_DIMS:
                 return_origin.append(self.origin[0])
-            elif dim in ndsl.util.Y_DIMS:
+            elif dim in Y_DIMS:
                 return_origin.append(self.origin[1])
-            elif dim in ndsl.util.Z_DIMS:
+            elif dim in Z_DIMS:
                 return_origin.append(self.origin[2])
         return return_origin
 
@@ -816,7 +817,7 @@ class GridIndexing:
         for i, d in enumerate(dims):
             # need n_halo points at the start of the domain, regardless of whether
             # they are read, so that data is aligned in memory
-            if d in (ndsl.util.X_DIMS + ndsl.util.Y_DIMS):
+            if d in (X_DIMS + Y_DIMS):
                 shape[i] += self.n_halo
         for i, n in enumerate(halos):
             shape[i] += n
@@ -868,7 +869,7 @@ class StencilFactory:
         self,
         config: StencilConfig,
         grid_indexing: GridIndexing,
-        comm: Optional[ndsl.util.Comm] = None,
+        comm: Optional[Comm] = None,
     ):
         """
         Args:

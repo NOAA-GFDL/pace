@@ -8,8 +8,12 @@ import functools
 import numpy as np
 import pytest
 
-import ndsl.util
+from ndsl.comm.communicator import CubedSphereCommunicator
+from ndsl.comm.partitioner import CubedSpherePartitioner, TilePartitioner
+from ndsl.constants import X_DIM, Y_DIM, Z_DIM
 from ndsl.performance.timer import Timer
+from ndsl.quantity import Quantity
+from ndsl.testing import DummyComm
 
 
 try:
@@ -38,12 +42,12 @@ def total_ranks(ranks_per_tile):
 
 @pytest.fixture
 def tile_partitioner(layout):
-    return ndsl.util.TilePartitioner(layout)
+    return TilePartitioner(layout)
 
 
 @pytest.fixture
 def cube_partitioner(tile_partitioner):
-    return ndsl.util.CubedSpherePartitioner(tile_partitioner)
+    return CubedSpherePartitioner(tile_partitioner)
 
 
 @pytest.fixture
@@ -52,8 +56,8 @@ def cpu_communicators(cube_partitioner):
     return_list = []
     for rank in range(cube_partitioner.total_ranks):
         return_list.append(
-            ndsl.util.CubedSphereCommunicator(
-                comm=ndsl.util.testing.DummyComm(
+            CubedSphereCommunicator(
+                comm=DummyComm(
                     rank=rank, total_ranks=total_ranks, buffer_dict=shared_buffer
                 ),
                 force_cpu=True,
@@ -70,8 +74,8 @@ def gpu_communicators(cube_partitioner):
     return_list = []
     for rank in range(cube_partitioner.total_ranks):
         return_list.append(
-            ndsl.util.CubedSphereCommunicator(
-                comm=ndsl.util.testing.DummyComm(
+            CubedSphereCommunicator(
+                comm=DummyComm(
                     rank=rank, total_ranks=total_ranks, buffer_dict=shared_buffer
                 ),
                 partitioner=cube_partitioner,
@@ -116,9 +120,9 @@ def module_count_calls_to_zeros(module):
 def test_halo_update_only_communicate_on_gpu(backend, gpu_communicators):
     with module_count_calls_to_zeros(np), module_count_calls_to_zeros(cp):
         shape = (10, 10, 79)
-        dims = (ndsl.util.X_DIM, ndsl.util.Y_DIM, ndsl.util.Z_DIM)
+        dims = (X_DIM, Y_DIM, Z_DIM)
         data = cp.ones(shape, dtype=float)
-        quantity = ndsl.util.Quantity(
+        quantity = Quantity(
             data,
             dims=dims,
             units="m",
@@ -144,12 +148,12 @@ def test_halo_update_communicate_though_cpu(backend, cpu_communicators):
     with module_count_calls_to_zeros(np), module_count_calls_to_zeros(cp):
         shape = (10, 10, 79)
         data = cp.ones(shape, dtype=float)
-        quantity = ndsl.util.Quantity(
+        quantity = Quantity(
             data,
             dims=(
-                ndsl.util.X_DIM,
-                ndsl.util.Y_DIM,
-                ndsl.util.Z_DIM,
+                X_DIM,
+                Y_DIM,
+                Z_DIM,
             ),
             units="m",
             origin=(3, 3, 0),

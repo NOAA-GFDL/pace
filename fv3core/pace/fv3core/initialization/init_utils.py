@@ -4,11 +4,11 @@ from types import SimpleNamespace
 
 import numpy as np
 
+import ndsl.constants as constants
 import ndsl.util as fv3util
-import ndsl.util.constants as constants
 from ndsl.dsl.typing import Float
-from ndsl.util.grid import lon_lat_midpoint
-from ndsl.util.grid.gnomonic import get_lonlat_vect, get_unit_vector_direction
+from ndsl.grid import lon_lat_midpoint
+from ndsl.grid.gnomonic import get_lonlat_vect, get_unit_vector_direction
 from pace.fv3core.dycore_state import DycoreState
 
 

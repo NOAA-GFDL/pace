@@ -3,12 +3,12 @@ import dataclasses
 
 import numpy as np
 
-import ndsl.util
+from ndsl.quantity import Quantity
 
 
 def test_deepcopy_copy_is_editable_by_view():
     nx, ny, nz = 12, 12, 15
-    quantity = ndsl.util.Quantity(
+    quantity = Quantity(
         np.zeros([nx, ny, nz]),
         origin=(0, 0, 0),
         extent=(nx, ny, nz),
@@ -27,7 +27,7 @@ def test_deepcopy_copy_is_editable_by_view():
 
 def test_deepcopy_copy_is_editable_by_data():
     nx, ny, nz = 12, 12, 15
-    quantity = ndsl.util.Quantity(
+    quantity = Quantity(
         np.zeros([nx, ny, nz]),
         origin=(0, 0, 0),
         extent=(nx, ny, nz),
@@ -42,7 +42,7 @@ def test_deepcopy_copy_is_editable_by_data():
 
 def test_deepcopy_of_dataclass_is_editable_by_data():
     nx, ny, nz = 12, 12, 15
-    quantity = ndsl.util.Quantity(
+    quantity = Quantity(
         np.zeros([nx, ny, nz]),
         origin=(0, 0, 0),
         extent=(nx, ny, nz),
@@ -54,7 +54,7 @@ def test_deepcopy_of_dataclass_is_editable_by_data():
 
     @dataclasses.dataclass
     class MyClass:
-        quantity: ndsl.util.Quantity
+        quantity: Quantity
 
     instance = MyClass(quantity)
     instance_copy = copy.deepcopy(instance)

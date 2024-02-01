@@ -1,7 +1,18 @@
 import pytest
 
-import ndsl.util
+from ndsl.comm.communicator import CubedSphereCommunicator
+from ndsl.comm.partitioner import CubedSpherePartitioner, TilePartitioner
+from ndsl.constants import (
+    X_DIM,
+    X_INTERFACE_DIM,
+    Y_DIM,
+    Y_INTERFACE_DIM,
+    Z_DIM,
+    Z_INTERFACE_DIM,
+)
 from ndsl.performance.timer import Timer
+from ndsl.quantity import Quantity
+from ndsl.testing import DummyComm
 
 
 @pytest.fixture
@@ -28,12 +39,12 @@ def total_ranks(ranks_per_tile):
 def shape(nz, ny, nx, dims, n_points):
     return_list = []
     length_dict = {
-        ndsl.util.X_DIM: 2 * n_points + nx,
-        ndsl.util.X_INTERFACE_DIM: 2 * n_points + nx + 1,
-        ndsl.util.Y_DIM: 2 * n_points + ny,
-        ndsl.util.Y_INTERFACE_DIM: 2 * n_points + ny + 1,
-        ndsl.util.Z_DIM: nz,
-        ndsl.util.Z_INTERFACE_DIM: nz + 1,
+        X_DIM: 2 * n_points + nx,
+        X_INTERFACE_DIM: 2 * n_points + nx + 1,
+        Y_DIM: 2 * n_points + ny,
+        Y_INTERFACE_DIM: 2 * n_points + ny + 1,
+        Z_DIM: nz,
+        Z_INTERFACE_DIM: nz + 1,
     }
     for dim in dims:
         return_list.append(length_dict[dim])
@@ -44,12 +55,12 @@ def shape(nz, ny, nx, dims, n_points):
 def origin(n_points, dims):
     return_list = []
     origin_dict = {
-        ndsl.util.X_DIM: n_points,
-        ndsl.util.X_INTERFACE_DIM: n_points,
-        ndsl.util.Y_DIM: n_points,
-        ndsl.util.Y_INTERFACE_DIM: n_points,
-        ndsl.util.Z_DIM: 0,
-        ndsl.util.Z_INTERFACE_DIM: 0,
+        X_DIM: n_points,
+        X_INTERFACE_DIM: n_points,
+        Y_DIM: n_points,
+        Y_INTERFACE_DIM: n_points,
+        Z_DIM: 0,
+        Z_INTERFACE_DIM: 0,
     }
     for dim in dims:
         return_list.append(origin_dict[dim])
@@ -60,12 +71,12 @@ def origin(n_points, dims):
 def extent(n_points, dims, nz, ny, nx):
     return_list = []
     extent_dict = {
-        ndsl.util.X_DIM: nx,
-        ndsl.util.X_INTERFACE_DIM: nx + 1,
-        ndsl.util.Y_DIM: ny,
-        ndsl.util.Y_INTERFACE_DIM: ny + 1,
-        ndsl.util.Z_DIM: nz,
-        ndsl.util.Z_INTERFACE_DIM: nz + 1,
+        X_DIM: nx,
+        X_INTERFACE_DIM: nx + 1,
+        Y_DIM: ny,
+        Y_INTERFACE_DIM: ny + 1,
+        Z_DIM: nz,
+        Z_INTERFACE_DIM: nz + 1,
     }
     for dim in dims:
         return_list.append(extent_dict[dim])
@@ -74,12 +85,12 @@ def extent(n_points, dims, nz, ny, nx):
 
 @pytest.fixture
 def tile_partitioner(layout):
-    return ndsl.util.TilePartitioner(layout)
+    return TilePartitioner(layout)
 
 
 @pytest.fixture
 def cube_partitioner(tile_partitioner):
-    return ndsl.util.CubedSpherePartitioner(tile_partitioner)
+    return CubedSpherePartitioner(tile_partitioner)
 
 
 @pytest.fixture()
@@ -88,8 +99,8 @@ def communicator_list(cube_partitioner, total_ranks):
     return_list = []
     for rank in range(cube_partitioner.total_ranks):
         return_list.append(
-            ndsl.util.CubedSphereCommunicator(
-                comm=ndsl.util.testing.DummyComm(
+            CubedSphereCommunicator(
+                comm=DummyComm(
                     rank=rank, total_ranks=total_ranks, buffer_dict=shared_buffer
                 ),
                 partitioner=cube_partitioner,
@@ -106,9 +117,9 @@ def rank_quantity_list(total_ranks, numpy, dtype):
         data = numpy.empty((3, 3), dtype=dtype)
         data[:] = numpy.nan
         data[1, 1] = rank
-        quantity = ndsl.util.Quantity(
+        quantity = Quantity(
             data,
-            dims=(ndsl.util.Y_DIM, ndsl.util.X_DIM),
+            dims=(Y_DIM, X_DIM),
             units="m",
             origin=(1, 1),
             extent=(1, 1),

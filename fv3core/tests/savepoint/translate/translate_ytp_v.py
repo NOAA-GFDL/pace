@@ -1,12 +1,11 @@
 from gt4py.cartesian.gtscript import PARALLEL, computation, interval
 
-import ndsl.dsl
-import ndsl.util
 import pace.fv3core
 import pace.fv3core.stencils.ytp_v as ytp_v
 from ndsl.dsl.stencil import StencilFactory
 from ndsl.dsl.typing import FloatField, FloatFieldIJ
-from ndsl.util.grid import GridData
+from ndsl.grid import GridData
+from ndsl.namelist import Namelist
 from pace.fv3core.testing import TranslateDycoreFortranData2Py
 
 
@@ -74,8 +73,8 @@ class TranslateYTP_V(TranslateDycoreFortranData2Py):
     def __init__(
         self,
         grid,
-        namelist: ndsl.util.Namelist,
-        stencil_factory: ndsl.dsl.StencilFactory,
+        namelist: Namelist,
+        stencil_factory: StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
         c_info = self.grid.compute_dict_buffer_2d()

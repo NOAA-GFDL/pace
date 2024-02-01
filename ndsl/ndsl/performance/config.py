@@ -1,6 +1,7 @@
 import dataclasses
 
-import ndsl.util
+from Comm.comm_abc import Comm
+
 from ndsl.performance.profiler import NullProfiler, Profiler
 
 from .collector import (
@@ -28,7 +29,7 @@ class PerformanceConfig:
     experiment_name: str = "test"
     json_all_rank_threshold: int = 1000
 
-    def build(self, comm: ndsl.util.Comm) -> AbstractPerformanceCollector:
+    def build(self, comm: Comm) -> AbstractPerformanceCollector:
         if self.collect_performance:
             return PerformanceCollector(experiment_name=self.experiment_name, comm=comm)
         else:

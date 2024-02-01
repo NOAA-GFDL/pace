@@ -1,13 +1,13 @@
 import gt4py.cartesian.gtscript as gtscript
 from gt4py.cartesian.gtscript import PARALLEL, computation, horizontal, interval, region
 
-import ndsl.util
+from ndsl.constants import X_DIM, Y_DIM, Z_DIM
 from ndsl.dsl.dace.orchestration import orchestrate
 from ndsl.dsl.stencil import StencilFactory
 from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ
+from ndsl.grid import GridData
+from ndsl.initialization.allocator import QuantityFactory
 from ndsl.stencils import corners
-from ndsl.util import X_DIM, Y_DIM, Z_DIM
-from ndsl.util.grid import GridData
 from pace.fv3core.stencils.a2b_ord4 import a1, a2, lagrange_x_func, lagrange_y_func
 
 
@@ -385,7 +385,7 @@ class DGrid2AGrid2CGridVectors:
     def __init__(
         self,
         stencil_factory: StencilFactory,
-        quantity_factory: ndsl.util.QuantityFactory,
+        quantity_factory: QuantityFactory,
         grid_data: GridData,
         nested: bool,
         grid_type: int,
