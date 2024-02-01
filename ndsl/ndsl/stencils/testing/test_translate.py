@@ -15,6 +15,7 @@ from ndsl.dsl.stencil import CompilationConfig, StencilConfig
 from ndsl.quantity import Quantity
 from ndsl.stencils.testing import SavepointCase, dataset_to_dict
 from ndsl.testing import compare_scalar, perturb, success, success_array
+from ndsl.restart._legacy_restart import RESTART_PROPERTIES
 
 
 # this only matters for manually-added print statements
@@ -310,7 +311,7 @@ def test_sequential_savepoint(
 
 
 def state_from_savepoint(serializer, savepoint, name_to_std_name):
-    properties = ndsl.fortran_info.properties_by_std_name
+    properties = RESTART_PROPERTIES
     origin = gt_utils.origin
     state = {}
     for name, std_name in name_to_std_name.items():
