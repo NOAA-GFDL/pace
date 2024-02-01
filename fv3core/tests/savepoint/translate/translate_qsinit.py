@@ -1,9 +1,9 @@
-import numpy as np
-
 import ndsl.dsl.gt4py_utils as utils
-import pace.fv3core.stencils.saturation_adjustment as satadjust
+import numpy as np
 from ndsl.dsl.stencil import StencilFactory
 from ndsl.namelist import Namelist
+
+import pace.fv3core.stencils.saturation_adjustment as satadjust
 from pace.fv3core.testing import TranslateDycoreFortranData2Py
 
 

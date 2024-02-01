@@ -2,10 +2,8 @@ import dataclasses
 from dataclasses import fields
 from typing import List
 
-import xarray as xr
-
 import ndsl.dsl.gt4py_utils as gt_utils
-import pace.physics
+import xarray as xr
 from ndsl.comm.communicator import Communicator
 from ndsl.constants import N_HALO_DEFAULT, X_DIM, Y_DIM, Z_DIM
 from ndsl.dsl.typing import Float
@@ -14,6 +12,8 @@ from ndsl.grid import DampingCoefficients, DriverGridData, GridData
 from ndsl.initialization.allocator import QuantityFactory
 from ndsl.initialization.sizer import SubtileGridSizer
 from ndsl.quantity import Quantity
+
+import pace.physics
 from pace import fv3core
 
 

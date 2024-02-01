@@ -1,8 +1,8 @@
+import ndsl.dsl.gt4py_utils as utils
 import numpy as np
+from ndsl.constants import KAPPA
 from translate_physics import TranslatePhysicsFortranData2Py
 
-import ndsl.dsl.gt4py_utils as utils
-from ndsl.constants import KAPPA
 from pace.physics.stencils.physics import atmos_phys_driver_statein
 
 

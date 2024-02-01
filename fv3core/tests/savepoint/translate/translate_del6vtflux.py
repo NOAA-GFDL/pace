@@ -1,7 +1,8 @@
-import pace.fv3core.stencils.delnflux as delnflux
 from ndsl.constants import Z_DIM
 from ndsl.dsl.stencil import StencilFactory
 from ndsl.namelist import Namelist
+
+import pace.fv3core.stencils.delnflux as delnflux
 from pace.fv3core.testing import TranslateDycoreFortranData2Py
 
 

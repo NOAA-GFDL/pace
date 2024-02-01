@@ -3,6 +3,7 @@ from typing import Dict, Tuple
 from ndsl.constants import X_INTERFACE_DIM, Y_INTERFACE_DIM, Z_DIM
 from ndsl.dsl.stencil import StencilFactory
 from ndsl.initialization.allocator import QuantityFactory
+
 from pace.fv3core.stencils.map_single import MapSingle
 
 

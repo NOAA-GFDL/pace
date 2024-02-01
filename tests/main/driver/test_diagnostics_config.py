@@ -1,11 +1,11 @@
 import unittest.mock
 
 import pytest
+from ndsl.initialization.allocator import QuantityFactory
+from ndsl.initialization.sizer import SubtileGridSizer
 
 import pace.driver
 import pace.driver.diagnostics
-from ndsl.initialization.allocator import QuantityFactory
-from ndsl.initialization.sizer import SubtileGridSizer
 from pace.fv3core.dycore_state import DycoreState
 
 

@@ -3,7 +3,6 @@ from typing import Sequence
 import numpy as np
 import pytest
 from gt4py.cartesian import gtscript
-
 from ndsl.constants import (
     X_DIM,
     X_INTERFACE_DIM,

@@ -5,16 +5,16 @@ from typing import Any, Dict, List, Optional, Tuple
 
 import click
 import f90nml
-import serialbox
-import yaml
-from timing import collect_data_and_write_to_file
-
 import ndsl.dsl
 import ndsl.util as util
+import serialbox
+import yaml
 from ndsl.comm.null_comm import NullComm
 from ndsl.dsl.dace.orchestration import DaceConfig
 from ndsl.dsl.stencil import CompilationConfig
 from ndsl.stencils.testing.grid import Grid
+from timing import collect_data_and_write_to_file
+
 from pace.fv3core._config import DynamicalCoreConfig
 from pace.fv3core.stencils.dyn_core import AcousticDynamics
 from pace.fv3core.testing import TranslateDynCore

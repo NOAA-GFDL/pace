@@ -1,9 +1,9 @@
-import numpy as np
-
 import ndsl.dsl.gt4py_utils as utils
+import numpy as np
 from ndsl.dsl.stencil import GridIndexing
 from ndsl.stencils.testing.parallel_translate import ParallelTranslate2Py
 from ndsl.stencils.testing.translate import TranslateFortranData2Py, as_numpy
+
 from pace.physics import PhysicsConfig
 
 

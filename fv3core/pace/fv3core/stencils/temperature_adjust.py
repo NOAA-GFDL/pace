@@ -1,7 +1,7 @@
-from gt4py.cartesian.gtscript import PARALLEL, computation, exp, interval, log
-
 import ndsl.constants as constants
+from gt4py.cartesian.gtscript import PARALLEL, computation, exp, interval, log
 from ndsl.dsl.typing import Float, FloatField
+
 from pace.fv3core.stencils.basic_operations import sign
 
 

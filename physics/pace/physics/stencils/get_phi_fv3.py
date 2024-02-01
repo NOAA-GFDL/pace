@@ -1,5 +1,4 @@
 from gt4py.cartesian.gtscript import BACKWARD, PARALLEL, computation, interval
-
 from ndsl.constants import ZVIR
 from ndsl.dsl.typing import FloatField
 

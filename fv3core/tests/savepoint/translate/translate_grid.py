@@ -1,9 +1,8 @@
 from typing import Any, Dict
 
+import ndsl.dsl.gt4py_utils as utils
 import numpy as np
 import pytest
-
-import ndsl.dsl.gt4py_utils as utils
 from ndsl.constants import (
     X_DIM,
     X_INTERFACE_DIM,

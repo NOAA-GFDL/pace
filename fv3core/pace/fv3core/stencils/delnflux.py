@@ -9,7 +9,6 @@ from gt4py.cartesian.gtscript import (
     interval,
     region,
 )
-
 from ndsl.constants import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_DIM
 from ndsl.dsl.dace.orchestration import orchestrate
 from ndsl.dsl.stencil import StencilFactory, get_stencils_with_varied_bounds

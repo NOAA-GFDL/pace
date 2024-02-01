@@ -1,5 +1,4 @@
 from gt4py.cartesian import gtscript
-
 from ndsl.dsl.typing import FloatField
 
 

@@ -1,6 +1,7 @@
-import pace.fv3core.stencils.nh_p_grad as NH_P_Grad
 from ndsl.dsl.stencil import StencilFactory
 from ndsl.namelist import Namelist
+
+import pace.fv3core.stencils.nh_p_grad as NH_P_Grad
 from pace.fv3core.testing import TranslateDycoreFortranData2Py
 
 

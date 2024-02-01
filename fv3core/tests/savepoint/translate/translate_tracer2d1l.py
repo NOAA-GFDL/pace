@@ -1,12 +1,12 @@
-import pytest
-
 import ndsl.dsl.gt4py_utils as utils
-import pace.fv3core.stencils.fvtp2d
-import pace.fv3core.stencils.tracer_2d_1l
+import pytest
 from ndsl.constants import X_DIM, Y_DIM, Z_DIM
 from ndsl.dsl.stencil import StencilFactory
 from ndsl.namelist import Namelist
 from ndsl.stencils.testing import ParallelTranslate
+
+import pace.fv3core.stencils.fvtp2d
+import pace.fv3core.stencils.tracer_2d_1l
 from pace.fv3core.utils.functional_validation import get_subset_func
 
 

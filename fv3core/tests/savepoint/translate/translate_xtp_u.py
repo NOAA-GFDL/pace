@@ -1,10 +1,10 @@
 from gt4py.cartesian.gtscript import PARALLEL, computation, interval
-
-import pace.fv3core.stencils.xtp_u as xtp_u
 from ndsl.dsl.stencil import StencilFactory
 from ndsl.dsl.typing import FloatField, FloatFieldIJ
 from ndsl.grid import GridData
 from ndsl.namelist import Namelist
+
+import pace.fv3core.stencils.xtp_u as xtp_u
 
 from .translate_ytp_v import TranslateYTP_V
 

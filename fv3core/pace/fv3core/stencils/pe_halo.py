@@ -1,5 +1,4 @@
 from gt4py.cartesian.gtscript import FORWARD, computation, horizontal, interval, region
-
 from ndsl.dsl.typing import Float, FloatField
 
 

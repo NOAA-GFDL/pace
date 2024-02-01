@@ -1,6 +1,7 @@
 import copy
 import typing
 
+import ndsl.constants as constants
 import numpy as np
 from gt4py.cartesian.gtscript import (
     BACKWARD,
@@ -10,9 +11,6 @@ from gt4py.cartesian.gtscript import (
     interval,
     sqrt,
 )
-
-import ndsl.constants as constants
-import pace.physics.functions.microphysics_funcs as functions
 from ndsl.constants import X_DIM, Y_DIM, Z_DIM
 from ndsl.dsl.dace.orchestration import orchestrate
 from ndsl.dsl.stencil import StencilFactory
@@ -20,6 +18,8 @@ from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ, Int
 from ndsl.grid import GridData
 from ndsl.initialization.allocator import QuantityFactory
 from ndsl.quantity import Quantity
+
+import pace.physics.functions.microphysics_funcs as functions
 
 from .._config import PhysicsConfig
 

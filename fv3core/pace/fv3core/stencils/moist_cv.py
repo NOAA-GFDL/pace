@@ -1,4 +1,5 @@
 import gt4py.cartesian.gtscript as gtscript
+import ndsl.constants as constants
 from gt4py.cartesian.gtscript import (
     __INLINED,
     PARALLEL,
@@ -7,8 +8,6 @@ from gt4py.cartesian.gtscript import (
     interval,
     log,
 )
-
-import ndsl.constants as constants
 from ndsl.dsl.typing import Float, FloatField
 
 

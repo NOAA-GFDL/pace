@@ -4,7 +4,6 @@ from typing import ClassVar, Optional, Tuple
 
 import f90nml
 import xarray as xr
-
 from ndsl.comm.communicator import Communicator
 from ndsl.comm.partitioner import get_tile_index
 from ndsl.constants import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM

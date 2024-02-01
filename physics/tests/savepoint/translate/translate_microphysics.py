@@ -1,12 +1,12 @@
 import copy
 
-import numpy as np
-from translate_physics import TranslatePhysicsFortranData2Py
-
 import ndsl.dsl.gt4py_utils as utils
+import numpy as np
 from ndsl.dsl.typing import Float
 from ndsl.initialization.allocator import QuantityFactory
 from ndsl.initialization.sizer import SubtileGridSizer
+from translate_physics import TranslatePhysicsFortranData2Py
+
 from pace.physics import PHYSICS_PACKAGES
 from pace.physics.stencils.microphysics import Microphysics
 from pace.physics.stencils.physics import PhysicsState

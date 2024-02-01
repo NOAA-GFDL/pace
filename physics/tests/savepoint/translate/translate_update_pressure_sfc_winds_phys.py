@@ -1,6 +1,6 @@
+from ndsl.constants import KAPPA
 from translate_physics import TranslatePhysicsFortranData2Py
 
-from ndsl.constants import KAPPA
 from pace.physics.update.fv_update_phys import update_pressure_and_surface_winds
 
 

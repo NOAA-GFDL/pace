@@ -1,5 +1,4 @@
 from gt4py.cartesian.gtscript import FORWARD, computation, horizontal, interval, region
-
 from ndsl.constants import X_DIM, Y_DIM
 from ndsl.dsl.stencil import StencilFactory
 from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ

@@ -2,6 +2,7 @@
 import collections
 
 import gt4py.cartesian.gtscript as gtscript
+import ndsl.dsl.gt4py_utils as utils
 from gt4py.cartesian.gtscript import (
     __INLINED,
     BACKWARD,
@@ -9,8 +10,6 @@ from gt4py.cartesian.gtscript import (
     computation,
     interval,
 )
-
-import ndsl.dsl.gt4py_utils as utils
 from ndsl.constants import (
     C_ICE,
     C_LIQ,
@@ -29,6 +28,7 @@ from ndsl.dsl.stencil import StencilFactory
 from ndsl.dsl.typing import Float, FloatField
 from ndsl.initialization.allocator import QuantityFactory
 from ndsl.quantity import Quantity
+
 from pace.fv3core.dycore_state import DycoreState
 from pace.fv3core.stencils.basic_operations import dim
 

@@ -8,9 +8,6 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import dace
 import dacite
 import yaml
-
-import pace.driver
-import pace.physics
 from ndsl.comm.comm_abc import Comm
 from ndsl.comm.communicator import (
     Communicator,
@@ -31,6 +28,9 @@ from ndsl.logging import ndsl_log
 from ndsl.performance import PerformanceConfig
 from ndsl.performance.collector import PerformanceCollector
 from ndsl.performance.timer import Timer
+
+import pace.driver
+import pace.physics
 from pace import fv3core
 from pace.driver.safety_checks import SafetyChecker
 

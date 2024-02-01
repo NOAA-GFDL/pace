@@ -1,8 +1,8 @@
+import ndsl.dsl.gt4py_utils as utils
 import numpy as np
+from ndsl.utils import safe_assign_array
 from translate_physics import TranslatePhysicsFortranData2Py
 
-import ndsl.dsl.gt4py_utils as utils
-from ndsl.utils import safe_assign_array
 from pace.physics.update.update_atmos_state import fill_gfs_delp
 
 

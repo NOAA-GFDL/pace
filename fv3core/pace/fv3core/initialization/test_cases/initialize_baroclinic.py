@@ -1,13 +1,13 @@
 import math
 
-import numpy as np
-
 import ndsl.constants as constants
 import ndsl.dsl.gt4py_utils as utils
-import pace.fv3core.initialization.init_utils as init_utils
+import numpy as np
 from ndsl.comm.communicator import CubedSphereCommunicator
 from ndsl.grid import GridData, great_circle_distance_lon_lat, lon_lat_midpoint
 from ndsl.initialization.allocator import QuantityFactory
+
+import pace.fv3core.initialization.init_utils as init_utils
 from pace.fv3core.dycore_state import DycoreState
 
 

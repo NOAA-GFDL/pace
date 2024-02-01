@@ -5,7 +5,6 @@ import numpy as np
 import pytest
 import xarray as xr
 import yaml
-
 from ndsl.comm.communicator import CubedSphereCommunicator
 from ndsl.comm.mpi import MPIComm
 from ndsl.comm.partitioner import (
@@ -14,6 +13,7 @@ from ndsl.comm.partitioner import (
     get_tile_number,
 )
 from ndsl.constants import PI, RADIUS, X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM
+
 from pace.driver import Driver, DriverConfig
 
 

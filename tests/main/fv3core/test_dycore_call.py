@@ -6,7 +6,6 @@ from typing import Tuple
 
 import ndsl.dsl.stencil
 import ndsl.stencils.testing
-import pace.fv3core.initialization.analytic_init as ai
 from ndsl.comm.communicator import CubedSphereCommunicator
 from ndsl.comm.null_comm import NullComm
 from ndsl.comm.partitioner import CubedSpherePartitioner, TilePartitioner
@@ -18,6 +17,8 @@ from ndsl.initialization.sizer import SubtileGridSizer
 from ndsl.performance.timer import NullTimer, Timer
 from ndsl.quantity import Quantity
 from ndsl.stencils.testing import assert_same_temporaries, copy_temporaries
+
+import pace.fv3core.initialization.analytic_init as ai
 from pace import fv3core
 from pace.fv3core.dycore_state import DycoreState
 

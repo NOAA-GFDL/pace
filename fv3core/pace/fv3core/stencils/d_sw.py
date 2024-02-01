@@ -9,8 +9,6 @@ from gt4py.cartesian.gtscript import (
     interval,
     region,
 )
-
-import pace.fv3core.stencils.delnflux as delnflux
 from ndsl.constants import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_DIM
 from ndsl.dsl.dace.orchestration import orchestrate
 from ndsl.dsl.stencil import StencilFactory
@@ -18,6 +16,8 @@ from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ, FloatFieldK
 from ndsl.grid import DampingCoefficients, GridData
 from ndsl.initialization.allocator import QuantityFactory
 from ndsl.quantity import Quantity
+
+import pace.fv3core.stencils.delnflux as delnflux
 from pace.fv3core._config import DGridShallowWaterLagrangianDynamicsConfig
 from pace.fv3core.stencils.d2a2c_vect import contravariant
 from pace.fv3core.stencils.delnflux import DelnFluxNoSG

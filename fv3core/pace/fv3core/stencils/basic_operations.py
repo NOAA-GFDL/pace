@@ -1,6 +1,5 @@
 import gt4py.cartesian.gtscript as gtscript
 from gt4py.cartesian.gtscript import PARALLEL, computation, interval
-
 from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ
 
 

@@ -1,11 +1,9 @@
 from datetime import timedelta
 from typing import Mapping, Optional
 
+import ndsl.dsl.gt4py_utils as utils
 from dace.frontend.python.interface import nounroll as dace_no_unroll
 from gt4py.cartesian.gtscript import PARALLEL, computation, interval
-
-import ndsl.dsl.gt4py_utils as utils
-import pace.fv3core.stencils.moist_cv as moist_cv
 from ndsl.checkpointer import Checkpointer, NullCheckpointer
 from ndsl.comm.communicator import Communicator
 from ndsl.comm.mpi import MPI
@@ -20,6 +18,8 @@ from ndsl.logging import ndsl_log
 from ndsl.performance.timer import NullTimer, Timer
 from ndsl.quantity import Quantity
 from ndsl.stencils.c2l_ord import CubedToLatLon
+
+import pace.fv3core.stencils.moist_cv as moist_cv
 from pace.fv3core._config import DynamicalCoreConfig
 from pace.fv3core.dycore_state import DycoreState
 from pace.fv3core.stencils import fvtp2d, tracer_2d_1l

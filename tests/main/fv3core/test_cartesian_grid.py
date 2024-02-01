@@ -1,6 +1,5 @@
 import numpy as np
 import pytest
-
 from ndsl.comm.communicator import TileCommunicator
 from ndsl.comm.null_comm import NullComm
 from ndsl.comm.partitioner import TilePartitioner

@@ -1,9 +1,8 @@
 from typing import Tuple
 
 import gt4py.cartesian.gtscript as gtscript
-from gt4py.cartesian.gtscript import BACKWARD, FORWARD, PARALLEL, computation, interval
-
 import ndsl.constants as constants
+from gt4py.cartesian.gtscript import BACKWARD, FORWARD, PARALLEL, computation, interval
 from ndsl.constants import (
     X_DIM,
     X_INTERFACE_DIM,
@@ -18,6 +17,7 @@ from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ, FloatFieldK
 from ndsl.grid import DampingCoefficients, GridData
 from ndsl.initialization.allocator import QuantityFactory
 from ndsl.quantity import Quantity
+
 from pace.fv3core.stencils.delnflux import DelnFluxNoSG
 from pace.fv3core.stencils.fvtp2d import FiniteVolumeTransport
 

@@ -3,7 +3,6 @@ from enum import Enum, unique
 from typing import List, Optional, Tuple
 
 import f90nml
-
 from ndsl.namelist import Namelist, NamelistDefaults
 from ndsl.utils import MetaEnumStr
 

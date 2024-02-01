@@ -1,4 +1,5 @@
 import gt4py.cartesian.gtscript as gtscript
+import ndsl.constants as constants
 from gt4py.cartesian.gtscript import (
     __INLINED,
     BACKWARD,
@@ -11,8 +12,6 @@ from gt4py.cartesian.gtscript import (
     region,
     sin,
 )
-
-import ndsl.constants as constants
 from ndsl.constants import X_INTERFACE_DIM, Y_INTERFACE_DIM, Z_DIM
 from ndsl.dsl.dace.orchestration import orchestrate
 from ndsl.dsl.stencil import StencilFactory
