@@ -146,7 +146,7 @@ gprof2dot==2021.2.21
     # via pytest-profiling
 gridtools-cpp==2.3.1
     # via gt4py
-gt4py==1.0.2
+gt4py==1.0.1
     # via ndsl
 identify==2.2.13
     # via pre-commit
