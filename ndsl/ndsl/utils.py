@@ -3,9 +3,9 @@ from typing import Iterable, Sequence, Tuple, TypeVar, Union
 
 import numpy as np
 
-from ndsl.util import constants
 from ndsl.optional_imports import cupy as cp
 from ndsl.types import Allocator
+from ndsl.util import constants
 
 
 # Run a deviceSynchronize() to check

@@ -3,16 +3,12 @@ import warnings
 from typing import Any, Dict, Iterable, Optional, Sequence, Tuple, Union, cast
 
 import numpy as np
+from Comm._boundary_utils import bound_default_slice, shift_boundary_slice_tuple
 
-from ndsl.util import constants
-from ndsl.optional_imports import xarray as xr
-
-from Comm._boundary_utils import (
-    bound_default_slice,
-    shift_boundary_slice_tuple,
-)
 from ndsl.optional_imports import cupy, dace, gt4py
+from ndsl.optional_imports import xarray as xr
 from ndsl.types import NumpyModule
+from ndsl.util import constants
 
 
 if cupy is None:

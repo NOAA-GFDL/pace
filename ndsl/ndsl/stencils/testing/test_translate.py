@@ -13,9 +13,9 @@ from ndsl.comm.partitioner import CubedSpherePartitioner, TilePartitioner
 from ndsl.dsl.dace.dace_config import DaceConfig
 from ndsl.dsl.stencil import CompilationConfig, StencilConfig
 from ndsl.quantity import Quantity
+from ndsl.restart._legacy_restart import RESTART_PROPERTIES
 from ndsl.stencils.testing import SavepointCase, dataset_to_dict
 from ndsl.testing import compare_scalar, perturb, success, success_array
-from ndsl.restart._legacy_restart import RESTART_PROPERTIES
 
 
 # this only matters for manually-added print statements

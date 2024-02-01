@@ -6,15 +6,6 @@ from typing import Tuple
 import numpy as np
 
 from ndsl import util
-from ndsl.dsl.gt4py_utils import asarray
-from ndsl.dsl.stencil import GridIndexing
-from ndsl.dsl.typing import Float
-from ndsl.stencils.corners import (
-    fill_corners_2d,
-    fill_corners_agrid,
-    fill_corners_cgrid,
-    fill_corners_dgrid,
-)
 from ndsl.constant import (
     X_DIM,
     X_INTERFACE_DIM,
@@ -23,7 +14,16 @@ from ndsl.constant import (
     Z_INTERFACE_DIM,
 )
 from ndsl.constants import N_HALO_DEFAULT, PI, RADIUS
+from ndsl.dsl.gt4py_utils import asarray
+from ndsl.dsl.stencil import GridIndexing
+from ndsl.dsl.typing import Float
 from ndsl.grid import eta
+from ndsl.stencils.corners import (
+    fill_corners_2d,
+    fill_corners_agrid,
+    fill_corners_cgrid,
+    fill_corners_dgrid,
+)
 
 from .geometry import (
     calc_unit_vector_south,

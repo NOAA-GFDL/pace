@@ -2,15 +2,15 @@ from collections import defaultdict
 from typing import TYPE_CHECKING, Dict, Iterable, List, Mapping, Optional, Tuple
 
 import numpy as np
-
-from ndsl.performance.timer import NullTimer, Timer
-from ndsl.util import constants
-from ndsl.buffer import Buffer
 from Comm.boundary import Boundary
+from Quantity import Quantity, QuantityHaloSpec
+
+from ndsl.buffer import Buffer
 from ndsl.halo.data_transformer import HaloDataTransformer, HaloExchangeSpec
 from ndsl.halo.rotate import rotate_scalar_data
-from Quantity import Quantity, QuantityHaloSpec
+from ndsl.performance.timer import NullTimer, Timer
 from ndsl.types import AsyncRequest, NumpyModule
+from ndsl.util import constants
 from ndsl.utils import device_synchronize
 
 

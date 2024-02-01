@@ -5,6 +5,7 @@ except ImportError:
 from typing import List, Optional, TypeVar, cast
 
 from Comm.comm_abc import Comm, Request
+
 from ndsl.logging import ndsl_log
 
 

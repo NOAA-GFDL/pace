@@ -1,9 +1,10 @@
 import dataclasses
 from typing import Dict, Iterable, Sequence, Tuple
 
-from ndsl.util import constants
 from Comm.partitioner import TilePartitioner
+
 from ndsl.constants import N_HALO_DEFAULT
+from ndsl.util import constants
 
 
 @dataclasses.dataclass
