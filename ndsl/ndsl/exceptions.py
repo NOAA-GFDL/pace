@@ -1,2 +1,0 @@
-class OutOfBoundsError(ValueError):
-    pass
