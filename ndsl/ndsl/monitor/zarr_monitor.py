@@ -2,14 +2,14 @@ from datetime import datetime, timedelta
 from typing import List, Tuple, Union
 
 import cftime
-from ndsl.comm.partitioner import Partitioner, subtile_slice
 
+import ndsl.constants as constants
+from ndsl.comm.partitioner import Partitioner, subtile_slice
 from ndsl.logging import ndsl_log
 from ndsl.monitor.convert import to_numpy
 from ndsl.optional_imports import cupy
 from ndsl.optional_imports import xarray as xr
 from ndsl.optional_imports import zarr
-import ndsl.constants as constants
 from ndsl.utils import list_by_dims
 
 

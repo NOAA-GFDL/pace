@@ -5,7 +5,6 @@ from typing import Dict, List, Optional, Sequence, Tuple
 from uuid import UUID, uuid1
 
 import numpy as np
-from ndsl.quantity import Quantity, QuantityHaloSpec
 
 from ndsl.buffer import Buffer
 from ndsl.halo.cuda_kernels import (
@@ -20,6 +19,7 @@ from ndsl.halo.cuda_kernels import (
 )
 from ndsl.halo.rotate import rotate_scalar_data, rotate_vector_data
 from ndsl.optional_imports import cupy as cp
+from ndsl.quantity import Quantity, QuantityHaloSpec
 from ndsl.types import NumpyModule
 from ndsl.utils import device_synchronize
 

@@ -2,7 +2,6 @@ import copy
 from typing import Any
 
 from ndsl.comm.comm_abc import Comm
-
 from ndsl.logging import ndsl_log
 from ndsl.utils import ensure_contiguous, safe_assign_array
 

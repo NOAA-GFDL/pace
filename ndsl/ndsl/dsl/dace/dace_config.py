@@ -3,10 +3,10 @@ import os
 from typing import Any, Dict, Optional, Tuple
 
 import dace.config
-from ndsl.comm.communicator import Communicator, Partitioner
 from dace.codegen.compiled_sdfg import CompiledSDFG
 from dace.frontend.python.parser import DaceProgram
 
+from ndsl.comm.communicator import Communicator, Partitioner
 from ndsl.dsl.caches.cache_location import identify_code_path
 from ndsl.dsl.caches.codepath import FV3CodePath
 from ndsl.dsl.gt4py_utils import is_gpu_backend

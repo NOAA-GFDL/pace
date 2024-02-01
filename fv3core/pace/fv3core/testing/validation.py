@@ -2,11 +2,11 @@ import inspect
 from typing import Callable, Mapping, Tuple
 
 import numpy as np
-from ndsl.quantity import Quantity
 
 import pace.fv3core.stencils.divergence_damping
 import pace.fv3core.stencils.updatedzd
 from ndsl.constants import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_DIM
+from ndsl.quantity import Quantity
 
 
 def get_selective_class(

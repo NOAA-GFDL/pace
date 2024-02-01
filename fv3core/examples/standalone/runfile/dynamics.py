@@ -12,7 +12,6 @@ import f90nml
 import numpy as np
 import xarray as xr
 import yaml
-from ndsl.comm.null_comm import NullComm
 from mpi4py import MPI
 
 # NOTE: we need to import dsl.stencil prior to
@@ -20,6 +19,7 @@ from mpi4py import MPI
 # very strange errors on some systems (e.g. daint)
 import ndsl.dsl.stencil
 import ndsl.util as util
+from ndsl.comm.null_comm import NullComm
 from ndsl.dsl import StencilFactory
 from ndsl.dsl.dace.orchestration import DaceConfig
 from ndsl.grid import DampingCoefficients, GridData, MetricTerms

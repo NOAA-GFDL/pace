@@ -1,10 +1,10 @@
 from typing import TextIO
 
 import cftime
-from ndsl.quantity import Quantity
 
-from ndsl.optional_imports import xarray as xr
 import ndsl.filesystem as filesystem
+from ndsl.optional_imports import xarray as xr
+from ndsl.quantity import Quantity
 
 
 # Calendar constant values copied from time_manager in FMS

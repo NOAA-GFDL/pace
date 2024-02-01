@@ -1,5 +1,5 @@
-from ndsl.quantity import Quantity
 from ndsl.comm.partitioner import TilePartitioner
+from ndsl.quantity import Quantity
 
 from .gnomonic import (
     get_lonlat_vect,
@@ -207,7 +207,7 @@ def calculate_supergrid_cos_sin(
 
         cos_sg[abs(1.0 - cos_sg) < 1e-15] = 1.0
 
-        sin_sg_tmp = 1.0 - cos_sg**2
+        sin_sg_tmp = 1.0 - cos_sg ** 2
         sin_sg_tmp[sin_sg_tmp < 0] = 0.0
         sin_sg = np.sqrt(sin_sg_tmp)
         sin_sg[sin_sg > 1.0] = 1.0

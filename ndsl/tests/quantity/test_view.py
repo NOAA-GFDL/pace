@@ -1,8 +1,8 @@
 import numpy as np
 import pytest
-from ndsl.quantity import Quantity
 
 from ndsl.constants import X_DIM, Y_DIM
+from ndsl.quantity import Quantity
 
 
 @pytest.fixture

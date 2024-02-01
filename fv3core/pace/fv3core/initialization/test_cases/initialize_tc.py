@@ -2,10 +2,10 @@ import numpy as np
 
 import ndsl.constants as constants
 import pace.fv3core.initialization.init_utils as init_utils
-from ndsl.grid import GridData, great_circle_distance_lon_lat
-from pace.fv3core.dycore_state import DycoreState
 from ndsl.comm.communicator import CubedSphereCommunicator
+from ndsl.grid import GridData, great_circle_distance_lon_lat
 from ndsl.initialization.allocator import QuantityFactory
+from pace.fv3core.dycore_state import DycoreState
 
 
 def _calculate_distance_from_tc_center(pe_v, ps_v, muv, calc, tc_properties):
@@ -15,7 +15,7 @@ def _calculate_distance_from_tc_center(pe_v, ps_v, muv, calc, tc_properties):
         muv["midpoint"][:, :, 0] - calc["p0"][0]
     )
     d2 = np.cos(calc["p0"][1]) * np.sin(muv["midpoint"][:, :, 0] - calc["p0"][0])
-    d = np.sqrt(d1**2 + d2**2)
+    d = np.sqrt(d1 ** 2 + d2 ** 2)
     d[d < 1e-15] = 1e-15
 
     r = great_circle_distance_lon_lat(

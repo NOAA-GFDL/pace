@@ -1,5 +1,6 @@
 import numpy
 import pytest
+
 from ndsl.comm.local_comm import LocalComm
 
 

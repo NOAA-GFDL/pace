@@ -4,6 +4,7 @@ import pickle
 from typing import Any, BinaryIO, List, Optional, TypeVar
 
 import numpy as np
+
 from ndsl.comm.comm_abc import Comm, Request
 
 

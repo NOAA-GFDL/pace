@@ -19,20 +19,20 @@ from typing import (
 import dace
 import gt4py
 import numpy as np
+from gt4py.cartesian import gtscript
+from gt4py.cartesian.gtc.passes.oir_pipeline import DefaultPipeline, OirPipeline
+
+from ndsl import testing
 from ndsl.comm.comm_abc import Comm
 from ndsl.comm.communicator import Communicator
 from ndsl.comm.decomposition import block_waiting_for_compilation, unblock_waiting_tiles
 from ndsl.comm.mpi import MPI
-from gt4py.cartesian import gtscript
-from gt4py.cartesian.gtc.passes.oir_pipeline import DefaultPipeline, OirPipeline
-from ndsl.quantity import Quantity
-
-from ndsl import testing
 from ndsl.constants import X_DIM, X_DIMS, Y_DIM, Y_DIMS, Z_DIM, Z_DIMS
 from ndsl.dsl.dace.orchestration import SDFGConvertible
 from ndsl.dsl.stencil_config import CompilationConfig, RunMode, StencilConfig
 from ndsl.dsl.typing import Float, Index3D, cast_to_index3d
 from ndsl.initialization import GridSizer, SubtileGridSizer
+from ndsl.quantity import Quantity
 
 
 try:

@@ -1,4 +1,5 @@
 import gt4py.cartesian.config
+
 from ndsl.comm.mpi import MPI
 
 from . import dace

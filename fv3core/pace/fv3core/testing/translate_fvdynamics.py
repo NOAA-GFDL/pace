@@ -3,8 +3,6 @@ from datetime import timedelta
 from typing import Any, Dict, Optional, Tuple
 
 import pytest
-from ndsl.namelist import Namelist
-from ndsl.quantity import Quantity
 
 import ndsl.dsl.gt4py_utils as utils
 import pace.fv3core.stencils.fv_dynamics as fv_dynamics
@@ -18,7 +16,9 @@ from ndsl.constants import (
 )
 from ndsl.dsl.stencil import StencilFactory
 from ndsl.grid import GridData
+from ndsl.namelist import Namelist
 from ndsl.performance.timer import NullTimer
+from ndsl.quantity import Quantity
 from ndsl.stencils.testing import ParallelTranslateBaseSlicing
 from ndsl.stencils.testing.translate import TranslateFortranData2Py
 from pace.fv3core._config import DynamicalCoreConfig

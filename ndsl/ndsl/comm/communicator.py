@@ -2,15 +2,15 @@ import abc
 from typing import List, Mapping, Optional, Sequence, Tuple, Union, cast
 
 import numpy as np
+
+import ndsl.constants as constants
+from ndsl.buffer import array_buffer, recv_buffer, send_buffer
 from ndsl.comm.boundary import Boundary
 from ndsl.comm.partitioner import CubedSpherePartitioner, Partitioner, TilePartitioner
-from ndsl.quantity import Quantity, QuantityHaloSpec, QuantityMetadata
-
-from ndsl.buffer import array_buffer, recv_buffer, send_buffer
 from ndsl.halo.updater import HaloUpdater, HaloUpdateRequest, VectorInterfaceHaloUpdater
 from ndsl.performance.timer import NullTimer, Timer
+from ndsl.quantity import Quantity, QuantityHaloSpec, QuantityMetadata
 from ndsl.types import NumpyModule
-import ndsl.constants as constants
 from ndsl.utils import device_synchronize
 
 

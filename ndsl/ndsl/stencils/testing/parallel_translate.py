@@ -5,9 +5,9 @@ from typing import Any, Dict, List
 import numpy as np
 import pytest
 
+from ndsl.constants import HORIZONTAL_DIMS, N_HALO_DEFAULT, X_DIMS, Y_DIMS
 from ndsl.dsl import gt4py_utils as utils
 from ndsl.quantity import Quantity
-from ndsl.constants import N_HALO_DEFAULT, HORIZONTAL_DIMS, X_DIMS, Y_DIMS
 
 from .translate import TranslateFortranData2Py, read_serialized_data
 

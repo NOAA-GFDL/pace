@@ -6,6 +6,8 @@ import f90nml
 import pytest
 import xarray as xr
 import yaml
+
+import ndsl.dsl
 from ndsl.comm.communicator import (
     Communicator,
     CubedSphereCommunicator,
@@ -13,8 +15,6 @@ from ndsl.comm.communicator import (
 )
 from ndsl.comm.mpi import MPI
 from ndsl.comm.partitioner import CubedSpherePartitioner, TilePartitioner
-
-import ndsl.dsl
 from ndsl.dsl.dace.dace_config import DaceConfig
 from ndsl.namelist import Namelist
 from ndsl.stencils.testing import ParallelTranslate, TranslateGrid

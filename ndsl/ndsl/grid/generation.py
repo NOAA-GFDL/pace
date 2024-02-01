@@ -5,25 +5,25 @@ from typing import Tuple
 
 import numpy as np
 
+from ndsl.comm.communicator import Communicator
 from ndsl.constants import (
-    X_DIM,
-    X_INTERFACE_DIM,
-    Y_DIM,
-    Z_DIM,
-    Y_INTERFACE_DIM,
-    Z_INTERFACE_DIM,
     N_HALO_DEFAULT,
     PI,
     RADIUS,
+    X_DIM,
+    X_INTERFACE_DIM,
+    Y_DIM,
+    Y_INTERFACE_DIM,
+    Z_DIM,
+    Z_INTERFACE_DIM,
 )
-from ndsl.initialization.allocator import QuantityFactory
-from ndsl.initialization.sizer import SubtileGridSizer
-from ndsl.comm.communicator import Communicator
-from ndsl.quantity import Quantity
 from ndsl.dsl.gt4py_utils import asarray
 from ndsl.dsl.stencil import GridIndexing
 from ndsl.dsl.typing import Float
 from ndsl.grid import eta
+from ndsl.initialization.allocator import QuantityFactory
+from ndsl.initialization.sizer import SubtileGridSizer
+from ndsl.quantity import Quantity
 from ndsl.stencils.corners import (
     fill_corners_2d,
     fill_corners_agrid,

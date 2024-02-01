@@ -4,9 +4,9 @@ import functools
 from typing import Callable, List, Optional, Sequence, Tuple, TypeVar, Union, cast
 
 import numpy as np
-from ndsl.comm import boundary as bd
-from ndsl.quantity import Quantity, QuantityMetadata
 
+import ndsl.constants as constants
+from ndsl.comm import boundary as bd
 from ndsl.constants import (
     EAST,
     NORTH,
@@ -17,7 +17,7 @@ from ndsl.constants import (
     SOUTHWEST,
     WEST,
 )
-import ndsl.constants as constants
+from ndsl.quantity import Quantity, QuantityMetadata
 from ndsl.utils import list_by_dims
 
 

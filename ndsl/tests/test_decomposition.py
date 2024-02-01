@@ -3,6 +3,7 @@ import unittest.mock
 from typing import Tuple
 
 import pytest
+
 from ndsl.comm.decomposition import (
     block_waiting_for_compilation,
     build_cache_path,

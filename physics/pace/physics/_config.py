@@ -4,8 +4,8 @@ from typing import List, Optional, Tuple
 
 import f90nml
 
-from ndsl.utils import MetaEnumStr
 from ndsl.namelist import Namelist, NamelistDefaults
+from ndsl.utils import MetaEnumStr
 
 
 DEFAULT_INT = 0

@@ -11,18 +11,18 @@ except ModuleNotFoundError:
 import numpy as np
 import pytest
 
-from ndsl.testing import DummyComm
+import ndsl.io as io
 from ndsl.comm.communicator import CubedSphereCommunicator
-from ndsl.comm.partitioner import TilePartitioner, CubedSpherePartitioner
+from ndsl.comm.partitioner import CubedSpherePartitioner, TilePartitioner
+from ndsl.constants import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_DIM
+from ndsl.quantity import Quantity
 from ndsl.restart._legacy_restart import (
-    open_restart,
-    map_keys,
     _apply_dims,
     get_rank_suffix,
+    map_keys,
+    open_restart,
 )
-from ndsl.quantity import Quantity
-from ndsl.constants import X_DIM, Y_DIM, Z_DIM, X_INTERFACE_DIM, Y_INTERFACE_DIM
-import ndsl.io as io
+from ndsl.testing import DummyComm
 
 
 requires_xarray = pytest.mark.skipif(xr is None, reason="xarray is not installed")

@@ -5,8 +5,8 @@ from collections.abc import Mapping
 from typing import List, Protocol
 
 import numpy as np
-from ndsl.comm.comm_abc import Comm
 
+from ndsl.comm.comm_abc import Comm
 from ndsl.optional_imports import cupy as cp
 from ndsl.performance.report import (
     Report,

@@ -1,10 +1,10 @@
 import pytest
+
 from ndsl.comm.partitioner import (
     CubedSpherePartitioner,
     TilePartitioner,
     rotate_subtile_rank,
 )
-
 from ndsl.constants import (
     BOUNDARY_TYPES,
     CORNER_BOUNDARY_TYPES,

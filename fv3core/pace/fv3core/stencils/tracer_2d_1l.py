@@ -2,9 +2,9 @@ import math
 from typing import Dict
 
 import gt4py.cartesian.gtscript as gtscript
-from ndsl.comm.communicator import Communicator
 from gt4py.cartesian.gtscript import PARALLEL, computation, horizontal, interval, region
 
+from ndsl.comm.communicator import Communicator
 from ndsl.constants import (
     N_HALO_DEFAULT,
     X_DIM,

@@ -1,8 +1,8 @@
 from enum import Enum
 
 from ndsl.comm.communicator import Communicator, CubedSphereCommunicator
-from ndsl.initialization.allocator import QuantityFactory
 from ndsl.grid import GridData
+from ndsl.initialization.allocator import QuantityFactory
 from ndsl.utils import MetaEnumStr
 from pace.fv3core.dycore_state import DycoreState
 

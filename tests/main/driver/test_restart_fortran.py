@@ -2,11 +2,11 @@ import os
 
 import numpy as np
 import xarray as xr
-from ndsl.comm.local_comm import LocalComm
-from ndsl.comm.null_comm import NullComm
 
 import pace.driver
-from ndsl.comm import CubedSphereCommunicator
+from ndsl.comm.communicator import CubedSphereCommunicator
+from ndsl.comm.local_comm import LocalComm
+from ndsl.comm.null_comm import NullComm
 from ndsl.comm.partitioner import CubedSpherePartitioner, TilePartitioner
 from ndsl.initialization.allocator import QuantityFactory
 from ndsl.initialization.sizer import SubtileGridSizer
