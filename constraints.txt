@@ -4,6 +4,18 @@
 #
 #    pip-compile --output-file=constraints.txt requirements_dev.txt requirements_docs.txt requirements_lint.txt
 #
+-e file:///home/Frank.Malatino/pace_refactor/NDSL
+    # via
+    #   -r requirements_dev.txt
+    #   pace-driver
+-e file:///home/Frank.Malatino/pace_refactor/driver
+    # via -r requirements_dev.txt
+-e file:///home/Frank.Malatino/pace_refactor/pySHiELD
+    # via -r requirements_dev.txt
+-e file:///home/Frank.Malatino/pace_refactor/pyFV3
+    # via
+    #   -r requirements_dev.txt
+    #   pace-driver
 aenum==3.1.11
     # via dace
 aiohttp==3.7.4.post0
@@ -74,7 +86,7 @@ coverage==5.5
     # via pytest-cov
 cytoolz==0.12.1
     # via gt4py
-dace
+dace @ file:///home/Frank.Malatino/pace_refactor/NDSL/external/dace
     # via ndsl
 dacite==1.6.0
     # via
@@ -147,7 +159,7 @@ gprof2dot==2021.2.21
     # via pytest-profiling
 gridtools-cpp==2.3.1
     # via gt4py
-gt4py
+gt4py @ file:///home/Frank.Malatino/pace_refactor/NDSL/external/gt4py
     # via ndsl
 h5netcdf==1.1.0
     # via ndsl
@@ -198,6 +210,8 @@ locket==0.2.1
     # via partd
 mako==1.1.6
     # via gt4py
+markdown-it-py==2.2.0
+    # via rich
 markupsafe==2.0.1
     # via
     #   jinja2
@@ -206,6 +220,8 @@ matplotlib-inline==0.1.6
     # via
     #   ipykernel
     #   ipython
+mdurl==0.1.2
+    # via markdown-it-py
 mpi4py==3.1.4
     # via
     #   -r requirements_dev.txt
@@ -324,11 +340,14 @@ pygments==2.10.0
     # via
     #   ipython
     #   nbmake
+    #   rich
     #   sphinx
 pyparsing==2.4.7
     # via packaging
 pyrsistent==0.18.1
     # via jsonschema
+pyshield==0.0.7
+    # via pace-driver
 pytest==6.2.4
     # via
     #   -r requirements_dev.txt
@@ -370,6 +389,8 @@ pyzmq==24.0.1
     #   jupyter-client
 recommonmark==0.7.1
     # via -r requirements_docs.txt
+regex==2023.12.25
+    # via pyshield
 requests==2.26.0
     # via
     #   dace
@@ -378,6 +399,8 @@ requests==2.26.0
     #   sphinx
 requests-oauthlib==1.3.0
     # via google-auth-oauthlib
+rich==13.2.0
+    # via pyshield
 rsa==4.7.2
     # via google-auth
 scipy==1.10.1
@@ -459,6 +482,7 @@ typing-extensions==4.3.0
     #   aiohttp
     #   black
     #   gt4py
+    #   rich
     #   setuptools-scm
 urllib3==1.26.6
     # via requests
