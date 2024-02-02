@@ -16,5 +16,5 @@ f90nml>=1.1.0
 numpy>=1.15
 -e NDSL
 -e physics
--e fv3core
+-e pyFV3
 -e driver

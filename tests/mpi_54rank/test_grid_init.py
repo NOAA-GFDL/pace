@@ -10,8 +10,8 @@ from ndsl.initialization.allocator import QuantityFactory
 from ndsl.initialization.sizer import SubtileGridSizer
 from ndsl.quantity import Quantity
 
-import pace.fv3core
-from pace.fv3core.initialization.test_cases.initialize_baroclinic import (
+import pyFV3
+from pyFV3.initialization.test_cases.initialize_baroclinic import (
     init_baroclinic_state,
 )
 
@@ -123,7 +123,7 @@ def metric_terms_to_quantity_dict(metric_terms: MetricTerms) -> Dict[str, Quanti
 
 
 def dycore_state_to_quantity_dict(
-    dycore_state: pace.fv3core.DycoreState,
+    dycore_state: pyFV3.DycoreState,
 ) -> Dict[str, Quantity]:
     return {
         "u": dycore_state.u,

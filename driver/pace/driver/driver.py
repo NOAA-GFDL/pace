@@ -31,7 +31,7 @@ from ndsl.performance.timer import Timer
 
 import pace.driver
 import pace.physics
-from pace import fv3core
+import pyFV3
 from pace.driver.safety_checks import SafetyChecker
 
 # TODO: move update_atmos_state into pace.driver
@@ -113,8 +113,8 @@ class DriverConfig:
     comm_config: CreatesCommSelector = dataclasses.field(
         default_factory=CreatesCommSelector
     )
-    dycore_config: fv3core.DynamicalCoreConfig = dataclasses.field(
-        default_factory=fv3core.DynamicalCoreConfig
+    dycore_config: pyFV3.DynamicalCoreConfig = dataclasses.field(
+        default_factory=pyFV3.DynamicalCoreConfig
     )
     physics_config: pace.physics.PhysicsConfig = dataclasses.field(
         default_factory=pace.physics.PhysicsConfig
@@ -243,7 +243,7 @@ class DriverConfig:
                     )
 
             kwargs["dycore_config"] = dacite.from_dict(
-                data_class=fv3core.DynamicalCoreConfig,
+                data_class=pyFV3.DynamicalCoreConfig,
                 data=kwargs.get("dycore_config", {}),
                 config=dacite.Config(strict=True),
             )
@@ -293,10 +293,10 @@ class DriverConfig:
             isinstance(kwargs["stencil_config"], dict)
             and "compilation_config" in kwargs["stencil_config"].keys()
         ):
-            kwargs["stencil_config"][
-                "compilation_config"
-            ] = CompilationConfig.from_dict(
-                data=kwargs["stencil_config"]["compilation_config"]
+            kwargs["stencil_config"]["compilation_config"] = (
+                CompilationConfig.from_dict(
+                    data=kwargs["stencil_config"]["compilation_config"]
+                )
             )
 
         return dacite.from_dict(
@@ -473,7 +473,11 @@ class Driver:
                 stencil_compare_comm=stencil_compare_comm,
             )
             ndsl_log.info("setting up grid started")
-            (damping_coefficients, driver_grid_data, grid_data,) = self.config.get_grid(
+            (
+                damping_coefficients,
+                driver_grid_data,
+                grid_data,
+            ) = self.config.get_grid(
                 quantity_factory=self.quantity_factory,
                 communicator=communicator,
             )
@@ -490,7 +494,7 @@ class Driver:
 
             self._start_time = self.config.initialization.start_time
             ndsl_log.info("setting up dycore object started")
-            self.dycore = fv3core.DynamicalCore(
+            self.dycore = pyFV3.DynamicalCore(
                 comm=communicator,
                 grid_data=self.state.grid_data,
                 stencil_factory=self.stencil_factory,

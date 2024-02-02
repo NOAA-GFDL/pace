@@ -5,12 +5,12 @@ from ndsl.namelist import Namelist
 
 from pace.driver.run import Driver, DriverConfig
 from pace.driver.state import TendencyState
-from pace.fv3core._config import DynamicalCoreConfig
+from pyFV3._config import DynamicalCoreConfig
 
-# TODO physics should not depend on fv3core
+# TODO physics should not depend on pyFV3
 # but also, driver tests should not be in physics
-from pace.fv3core.testing.translate_fvdynamics import TranslateFVDynamics
-from pace.fv3core.testing.validation import enable_selective_validation
+from pyFV3.testing.translate_fvdynamics import TranslateFVDynamics
+from pyFV3.testing.validation import enable_selective_validation
 from pace.physics import PHYSICS_PACKAGES, PhysicsConfig, PhysicsState
 
 

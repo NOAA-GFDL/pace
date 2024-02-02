@@ -12,7 +12,7 @@ from ndsl.grid import GridData
 from ndsl.monitor import Monitor, NetCDFMonitor, ZarrMonitor
 from ndsl.quantity import Quantity
 
-from pace.fv3core.dycore_state import DycoreState
+from pyFV3.dycore_state import DycoreState
 
 from .state import DriverState
 
@@ -25,16 +25,13 @@ except ModuleNotFoundError:
 
 class Diagnostics(abc.ABC):
     @abc.abstractmethod
-    def store(self, time: Union[datetime, timedelta], state: DriverState):
-        ...
+    def store(self, time: Union[datetime, timedelta], state: DriverState): ...
 
     @abc.abstractmethod
-    def store_grid(self, grid_data: GridData):
-        ...
+    def store_grid(self, grid_data: GridData): ...
 
     @abc.abstractmethod
-    def cleanup(self):
-        ...
+    def cleanup(self): ...
 
 
 @dataclasses.dataclass
