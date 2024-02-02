@@ -16,10 +16,9 @@ from ndsl.initialization.allocator import QuantityFactory
 from ndsl.namelist import Namelist
 from ndsl.stencils.testing import TranslateGrid, grid
 
-import pace.driver
-import pySHiELD
 import pyFV3
 import pyFV3.initialization.analytic_init as analytic_init
+import pySHiELD
 from pyFV3.testing import TranslateFVDynamics
 
 from .registry import Registry
@@ -29,7 +28,8 @@ from .state import DriverState, TendencyState, _restart_driver_state
 class Initializer(abc.ABC):
     @property
     @abc.abstractmethod
-    def start_time(self) -> datetime: ...
+    def start_time(self) -> datetime:
+        ...
 
     @abc.abstractmethod
     def get_driver_state(
@@ -40,7 +40,8 @@ class Initializer(abc.ABC):
         driver_grid_data: DriverGridData,
         grid_data: GridData,
         schemes: List[pySHiELD.PHYSICS_PACKAGES],
-    ) -> DriverState: ...
+    ) -> DriverState:
+        ...
 
 
 IT = TypeVar("IT", bound=Type[Initializer])

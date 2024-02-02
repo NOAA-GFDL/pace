@@ -57,11 +57,7 @@ def test_restart():
         mpi_comm = NullComm(rank=0, total_ranks=6, fill_value=0.0)
         partitioner = CubedSpherePartitioner(TilePartitioner((1, 1)))
         communicator = CubedSphereCommunicator(mpi_comm, partitioner)
-        (
-            damping_coefficients,
-            driver_grid_data,
-            grid_data,
-        ) = restart_config.get_grid(
+        (damping_coefficients, driver_grid_data, grid_data,) = restart_config.get_grid(
             communicator=communicator,
         )
 

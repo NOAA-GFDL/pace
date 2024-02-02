@@ -13,8 +13,8 @@ from ndsl.initialization.allocator import QuantityFactory
 from ndsl.initialization.sizer import SubtileGridSizer
 from ndsl.quantity import Quantity
 
-import pySHiELD
 import pyFV3
+import pySHiELD
 
 
 @dataclasses.dataclass()
