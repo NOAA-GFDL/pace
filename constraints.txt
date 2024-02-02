@@ -74,7 +74,7 @@ coverage==5.5
     # via pytest-cov
 cytoolz==0.12.1
     # via gt4py
-dace @ file:///home/Frank.Malatino/pace_refactor/NDSL/external/dace
+dace
     # via ndsl
 dacite==1.6.0
     # via
@@ -147,7 +147,7 @@ gprof2dot==2021.2.21
     # via pytest-profiling
 gridtools-cpp==2.3.1
     # via gt4py
-gt4py @ file:///home/Frank.Malatino/pace_refactor/NDSL/external/gt4py
+gt4py
     # via ndsl
 h5netcdf==1.1.0
     # via ndsl
