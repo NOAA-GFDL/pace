@@ -18,33 +18,12 @@ repos:
     rev: v0.812
     hooks:
     - id: mypy
-      name: mypy-pyFV3
-      args: [--config-file, setup.cfg]
-      files: pyFV3
-      exclude: |
-        (?x)^(
-        pyFV3/pace/fv3core/stencils/fv_subgridz.py |
-        pyFV3/tests/conftest.py
-        )$
-    - id: mypy
       name: mypy-driver
       args: [--config-file, setup.cfg]
       files: driver
       exclude: |
         (?x)^(
         tests/main/driver/__init__.py |
-        )$
-    - id: mypy
-      name: mypy-pySHiELD
-      args: [--config-file, setup.cfg]
-      files: pySHiELD
-    - id: mypy
-      name: mypy-ndsl
-      args: [--config-file, setup.cfg]
-      files: ndsl
-      exclude: |
-        (?x)^(
-        ndsl/ndsl/gt4py_utils.py |
         )$
 -   repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v2.3.0
