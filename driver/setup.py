@@ -7,8 +7,6 @@ setup_requirements: List[str] = []
 
 requirements = [
     "ndsl",
-    "pyFV3",
-    "pySHiELD",
     "dacite",
     "pyyaml",
     "mpi4py",
