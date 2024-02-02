@@ -18,17 +18,17 @@ from ndsl.performance.timer import NullTimer, Timer
 from ndsl.quantity import Quantity
 from ndsl.stencils.testing import assert_same_temporaries, copy_temporaries
 
-import pace.fv3core.initialization.analytic_init as ai
-from pace import fv3core
-from pace.fv3core.dycore_state import DycoreState
+import pyFV3
+import pyFV3.initialization.analytic_init as ai
+from pyFV3.dycore_state import DycoreState
 
 
 DIR = os.path.abspath(os.path.dirname(__file__))
 
 
-def setup_dycore() -> Tuple[fv3core.DynamicalCore, fv3core.DycoreState, Timer]:
+def setup_dycore() -> Tuple[pyFV3.DynamicalCore, pyFV3.DycoreState, Timer]:
     backend = "numpy"
-    config = fv3core.DynamicalCoreConfig(
+    config = pyFV3.DynamicalCoreConfig(
         layout=(1, 1),
         npx=13,
         npy=13,
@@ -122,7 +122,7 @@ def setup_dycore() -> Tuple[fv3core.DynamicalCore, fv3core.DycoreState, Timer]:
         grid_indexing=grid_indexing,
     )
 
-    dycore = fv3core.DynamicalCore(
+    dycore = pyFV3.DynamicalCore(
         comm=communicator,
         grid_data=grid_data,
         stencil_factory=stencil_factory,

@@ -2,3 +2,6 @@
 [submodule "NDSL"]
 	path = NDSL
 	url = git@github.com:NOAA-GFDL/NDSL.git
+[submodule "pyFV3"]
+	path = pyFV3
+	url = git@github.com:NOAA-GFDL/PyFV3.git

@@ -12,7 +12,7 @@ from ndsl.grid import GridData
 from ndsl.monitor import Monitor, NetCDFMonitor, ZarrMonitor
 from ndsl.quantity import Quantity
 
-from pace.fv3core.dycore_state import DycoreState
+from pyFV3.dycore_state import DycoreState
 
 from .state import DriverState
 
