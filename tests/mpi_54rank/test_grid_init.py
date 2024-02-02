@@ -1,6 +1,8 @@
 from typing import Dict
 
 import numpy as np
+
+import pyFV3
 from ndsl.comm.communicator import CubedSphereCommunicator, TileCommunicator
 from ndsl.comm.mpi import MPIComm
 from ndsl.comm.partitioner import CubedSpherePartitioner, TilePartitioner
@@ -9,8 +11,6 @@ from ndsl.grid.helper import GridData
 from ndsl.initialization.allocator import QuantityFactory
 from ndsl.initialization.sizer import SubtileGridSizer
 from ndsl.quantity import Quantity
-
-import pyFV3
 from pyFV3.initialization.test_cases.initialize_baroclinic import init_baroclinic_state
 
 

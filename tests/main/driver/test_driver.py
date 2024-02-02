@@ -3,6 +3,7 @@ from datetime import datetime, timedelta
 from typing import Literal, Tuple
 
 import pytest
+
 from ndsl.comm.null_comm import NullComm
 from ndsl.dsl.stencil import StencilConfig
 from ndsl.performance.report import (
@@ -11,7 +12,6 @@ from ndsl.performance.report import (
     gather_timing_data,
     get_sypd,
 )
-
 from pace.driver import CreatesCommSelector, DriverConfig, NullCommConfig
 
 

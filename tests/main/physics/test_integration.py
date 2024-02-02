@@ -2,6 +2,8 @@ from dataclasses import fields
 from datetime import timedelta
 
 import numpy as np
+
+import pySHiELD
 from ndsl.comm.communicator import CubedSphereCommunicator
 from ndsl.comm.null_comm import NullComm
 from ndsl.comm.partitioner import CubedSpherePartitioner, TilePartitioner
@@ -13,8 +15,6 @@ from ndsl.grid import GridData, MetricTerms
 from ndsl.initialization.allocator import QuantityFactory
 from ndsl.initialization.sizer import SubtileGridSizer
 from ndsl.stencils.testing import assert_same_temporaries, copy_temporaries
-
-import pySHiELD
 
 
 try:

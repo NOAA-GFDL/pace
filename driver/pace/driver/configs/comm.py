@@ -4,6 +4,7 @@ import os
 from typing import Any, ClassVar, List
 
 import dacite
+
 from ndsl.comm.caching_comm import CachingCommReader, CachingCommWriter
 from ndsl.comm.mpi import MPIComm
 from ndsl.comm.null_comm import NullComm

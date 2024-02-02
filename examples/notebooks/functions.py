@@ -8,6 +8,8 @@ from cartopy import crs as ccrs
 from fv3viz import pcolormesh_cube
 from IPython.display import HTML, display
 from matplotlib import animation
+from units_config import units
+
 from ndsl.comm.communicator import CubedSphereCommunicator
 from ndsl.comm.partitioner import CubedSpherePartitioner, TilePartitioner
 from ndsl.constants import RADIUS
@@ -27,8 +29,6 @@ from ndsl.grid.gnomonic import great_circle_distance_lon_lat
 from ndsl.initialization.allocator import QuantityFactory
 from ndsl.initialization.sizer import SubtileGridSizer
 from ndsl.quantity import Quantity
-from units_config import units
-
 from pyFV3.stencils.fvtp2d import FiniteVolumeTransport
 from pyFV3.stencils.fxadv import FiniteVolumeFluxPrep
 from pyFV3.stencils.tracer_2d_1l import TracerAdvection

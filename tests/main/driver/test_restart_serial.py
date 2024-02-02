@@ -5,14 +5,14 @@ from datetime import datetime
 import numpy as np
 import xarray as xr
 import yaml
+
+import pace.driver
 from ndsl.comm.communicator import CubedSphereCommunicator
 from ndsl.comm.null_comm import NullComm
 from ndsl.comm.partitioner import CubedSpherePartitioner, TilePartitioner
 from ndsl.initialization.allocator import QuantityFactory
 from ndsl.initialization.sizer import SubtileGridSizer
 from ndsl.quantity import Quantity
-
-import pace.driver
 from pace.driver import CreatesComm, DriverConfig
 from pace.driver.driver import RestartConfig
 from pace.driver.initialization import AnalyticInit

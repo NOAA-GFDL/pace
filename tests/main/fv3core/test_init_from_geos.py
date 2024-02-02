@@ -1,9 +1,9 @@
 import f90nml
 import numpy as np
 import pytest  # noqa
-from ndsl.comm.null_comm import NullComm
 
 import pyFV3
+from ndsl.comm.null_comm import NullComm
 
 
 def test_geos_wrapper():
