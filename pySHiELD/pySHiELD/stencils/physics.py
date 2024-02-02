@@ -16,11 +16,11 @@ from ndsl.dsl.typing import Float, FloatField
 from ndsl.grid import GridData
 from ndsl.initialization.allocator import QuantityFactory
 
-from pace.physics import PHYSICS_PACKAGES, PhysicsConfig
-from pace.physics.physics_state import PhysicsState
-from pace.physics.stencils.get_phi_fv3 import get_phi_fv3
-from pace.physics.stencils.get_prs_fv3 import get_prs_fv3
-from pace.physics.stencils.microphysics import Microphysics
+from pySHiELD import PHYSICS_PACKAGES, PhysicsConfig
+from pySHiELD.physics_state import PhysicsState
+from pySHiELD.stencils.get_phi_fv3 import get_phi_fv3
+from pySHiELD.stencils.get_prs_fv3 import get_prs_fv3
+from pySHiELD.stencils.microphysics import Microphysics
 
 
 def atmos_phys_driver_statein(

@@ -13,7 +13,7 @@ from translate_physics import (
     transform_dwind_serialized_data,
 )
 
-from pace.physics.update.fv_update_phys import ApplyPhysicsToDycore
+from pySHiELD.update.fv_update_phys import ApplyPhysicsToDycore
 
 
 try:

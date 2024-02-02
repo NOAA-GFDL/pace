@@ -18,13 +18,13 @@ repos:
     rev: v0.812
     hooks:
     - id: mypy
-      name: mypy-fv3core
+      name: mypy-pyFV3
       args: [--config-file, setup.cfg]
-      files: fv3core
+      files: pyFV3
       exclude: |
         (?x)^(
-        fv3core/pace/fv3core/stencils/fv_subgridz.py |
-        fv3core/tests/conftest.py
+        pyFV3/pace/fv3core/stencils/fv_subgridz.py |
+        pyFV3/tests/conftest.py
         )$
     - id: mypy
       name: mypy-driver
@@ -35,9 +35,9 @@ repos:
         tests/main/driver/__init__.py |
         )$
     - id: mypy
-      name: mypy-physics
+      name: mypy-pySHiELD
       args: [--config-file, setup.cfg]
-      files: physics
+      files: pySHiELD
     - id: mypy
       name: mypy-ndsl
       args: [--config-file, setup.cfg]

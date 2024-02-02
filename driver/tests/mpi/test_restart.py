@@ -13,7 +13,7 @@ from ndsl.quantity import Quantity
 
 from pace.driver import DriverConfig
 from pace.driver.state import DriverState
-from pace.physics import PHYSICS_PACKAGES
+from pySHiELD import PHYSICS_PACKAGES
 
 
 # The packages we import will import MPI, causing an MPI init, but we don't actually
@@ -57,7 +57,11 @@ def test_restart():
         mpi_comm = NullComm(rank=0, total_ranks=6, fill_value=0.0)
         partitioner = CubedSpherePartitioner(TilePartitioner((1, 1)))
         communicator = CubedSphereCommunicator(mpi_comm, partitioner)
-        (damping_coefficients, driver_grid_data, grid_data,) = restart_config.get_grid(
+        (
+            damping_coefficients,
+            driver_grid_data,
+            grid_data,
+        ) = restart_config.get_grid(
             communicator=communicator,
         )
 

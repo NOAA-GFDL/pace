@@ -11,7 +11,7 @@ from ndsl.initialization.allocator import QuantityFactory
 
 import pyFV3
 import pyFV3.stencils.fv_subgridz as fv_subgridz
-from pace.physics.update.fv_update_phys import ApplyPhysicsToDycore
+from pySHiELD.update.fv_update_phys import ApplyPhysicsToDycore
 
 
 # TODO: when this file is not importable from physics or pyFV3, import

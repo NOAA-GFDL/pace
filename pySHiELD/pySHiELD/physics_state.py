@@ -9,7 +9,7 @@ from ndsl.initialization.allocator import QuantityFactory
 from ndsl.initialization.sizer import GridSizer
 from ndsl.quantity import Quantity
 
-from pace.physics.stencils.microphysics import MicrophysicsState
+from pySHiELD.stencils.microphysics import MicrophysicsState
 
 from ._config import PHYSICS_PACKAGES
 

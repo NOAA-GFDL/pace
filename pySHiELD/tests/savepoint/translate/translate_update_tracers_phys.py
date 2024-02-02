@@ -1,6 +1,8 @@
 from translate_physics import TranslatePhysicsFortranData2Py
 
-from pace.physics.update.update_atmos_state import prepare_tendencies_and_update_tracers
+from pySHiELD.update.update_atmos_state import (
+    prepare_tendencies_and_update_tracers,
+)
 
 
 class TranslatePhysUpdateTracers(TranslatePhysicsFortranData2Py):

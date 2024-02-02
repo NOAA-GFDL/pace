@@ -11,7 +11,7 @@ setup_requirements: List[str] = []
 requirements = [
     "f90nml>=1.1.0",
     "numpy",
-    "ndsl",
+    "ndsl @ git+https://github.com/NOAA-GFDL/NDSL.git@main",
     "xarray",
 ]
 
@@ -30,7 +30,7 @@ setup(
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
     ],
-    description="pace-physics is a gt4py-based physical parameterization "
+    description="pySHiELD is a collection of NDSL-based physical parameterizations"
     "for atmospheric models",
     install_requires=requirements,
     extras_require={},
@@ -38,11 +38,11 @@ setup(
     long_description=readme,
     include_package_data=True,
     name="pace-physics",
-    packages=find_namespace_packages(include=["pace.*"]),
+    packages=find_namespace_packages(include=["pySHiELD", "pySHiELD.*"]),
     setup_requires=[],
     test_suite="tests",
     tests_require=test_requirements,
-    url="https://github.com/ai2cm/pace",
+    url="https://github.com/NOAA-GFDL/PySHiELD",
     version="0.2.0",
     zip_safe=False,
 )

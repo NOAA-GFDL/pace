@@ -16,7 +16,7 @@ import pace.driver
 from pace.driver import CreatesComm, DriverConfig
 from pace.driver.driver import RestartConfig
 from pace.driver.initialization import AnalyticInit
-from pace.physics import PHYSICS_PACKAGES
+from pySHiELD import PHYSICS_PACKAGES
 
 
 DIR = os.path.dirname(os.path.abspath(__file__))

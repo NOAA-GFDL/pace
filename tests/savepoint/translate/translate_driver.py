@@ -5,7 +5,7 @@ from ndsl.namelist import Namelist
 
 from pace.driver.run import Driver, DriverConfig
 from pace.driver.state import TendencyState
-from pace.physics import PHYSICS_PACKAGES, PhysicsConfig, PhysicsState
+from pySHiELD import PHYSICS_PACKAGES, PhysicsConfig, PhysicsState
 from pyFV3._config import DynamicalCoreConfig
 
 # TODO physics should not depend on pyFV3

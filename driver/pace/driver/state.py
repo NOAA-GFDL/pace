@@ -13,7 +13,7 @@ from ndsl.initialization.allocator import QuantityFactory
 from ndsl.initialization.sizer import SubtileGridSizer
 from ndsl.quantity import Quantity
 
-import pace.physics
+import pySHiELD
 import pyFV3
 
 
@@ -64,7 +64,7 @@ class TendencyState:
 @dataclasses.dataclass
 class DriverState:
     dycore_state: pyFV3.DycoreState
-    physics_state: pace.physics.PhysicsState
+    physics_state: pySHiELD.PhysicsState
     tendency_state: TendencyState
     grid_data: GridData
     damping_coefficients: DampingCoefficients
@@ -81,7 +81,7 @@ class DriverState:
         damping_coefficients: DampingCoefficients,
         driver_grid_data: DriverGridData,
         grid_data: GridData,
-        schemes: List[pace.physics.PHYSICS_PACKAGES],
+        schemes: List[pySHiELD.PHYSICS_PACKAGES],
     ) -> "DriverState":
         comm = driver_config.comm_config.get_comm()
         communicator = Communicator.from_layout(comm=comm, layout=driver_config.layout)
@@ -182,7 +182,7 @@ def _restart_driver_state(
     damping_coefficients: DampingCoefficients,
     driver_grid_data: DriverGridData,
     grid_data: GridData,
-    schemes: List[pace.physics.PHYSICS_PACKAGES],
+    schemes: List[pySHiELD.PHYSICS_PACKAGES],
 ):
     fs = get_fs(path)
 
@@ -204,7 +204,7 @@ def _restart_driver_state(
             "restart_dycore_state",
         )
 
-    physics_state = pace.physics.PhysicsState.init_zeros(
+    physics_state = pySHiELD.PhysicsState.init_zeros(
         quantity_factory=quantity_factory, schemes=schemes
     )
 

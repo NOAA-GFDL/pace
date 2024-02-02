@@ -3,7 +3,7 @@ import numpy as np
 from ndsl.constants import KAPPA
 from translate_physics import TranslatePhysicsFortranData2Py
 
-from pace.physics.stencils.physics import atmos_phys_driver_statein
+from pySHiELD.stencils.physics import atmos_phys_driver_statein
 
 
 class TranslateAtmosPhysDriverStatein(TranslatePhysicsFortranData2Py):

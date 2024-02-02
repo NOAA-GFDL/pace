@@ -14,7 +14,7 @@ from ndsl.initialization.allocator import QuantityFactory
 from ndsl.initialization.sizer import SubtileGridSizer
 from ndsl.stencils.testing import assert_same_temporaries, copy_temporaries
 
-import pace.physics
+import pySHiELD
 
 
 try:
@@ -26,7 +26,7 @@ except ImportError:
 def setup_physics():
     backend = "numpy"
     layout = (1, 1)
-    physics_config = pace.physics.PhysicsConfig(
+    physics_config = pySHiELD.PhysicsConfig(
         dt_atmos=225, hydrostatic=False, npx=13, npy=13, npz=79, nwat=6, do_qa=True
     )
     mpi_comm = NullComm(rank=0, total_ranks=6 * layout[0] * layout[1], fill_value=0.0)
@@ -69,17 +69,17 @@ def setup_physics():
         eta_file="tests/main/input/eta79.nc",
     )
     grid_data = GridData.new_from_metric_terms(metric_terms)
-    physics = pace.physics.Physics(
+    physics = pySHiELD.Physics(
         stencil_factory,
         quantity_factory,
         grid_data,
         physics_config,
     )
-    physics_state = pace.physics.PhysicsState.init_zeros(
-        quantity_factory, schemes=[pace.physics.PHYSICS_PACKAGES["GFS_microphysics"]]
+    physics_state = pySHiELD.PhysicsState.init_zeros(
+        quantity_factory, schemes=[pySHiELD.PHYSICS_PACKAGES["GFS_microphysics"]]
     )
     random = np.random.RandomState(0)
-    for field in fields(pace.physics.PhysicsState):
+    for field in fields(pySHiELD.PhysicsState):
         array = getattr(physics_state, field.name)
         # check that it's a storage this way, because Field is not a class
         if isinstance(array, (np.ndarray, cp.ndarray)):

@@ -3,7 +3,7 @@ from ndsl.comm.partitioner import TilePartitioner
 from ndsl.utils import safe_assign_array
 from translate_physics import TranslatePhysicsFortranData2Py
 
-from pace.physics.update.update_dwind_phys import AGrid2DGridPhysics
+from pySHiELD.update.update_dwind_phys import AGrid2DGridPhysics
 
 
 class TranslateUpdateDWindsPhys(TranslatePhysicsFortranData2Py):

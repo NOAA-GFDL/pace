@@ -30,12 +30,12 @@ from ndsl.performance.collector import PerformanceCollector
 from ndsl.performance.timer import Timer
 
 import pace.driver
-import pace.physics
+import pySHiELD
 import pyFV3
 from pace.driver.safety_checks import SafetyChecker
 
 # TODO: move update_atmos_state into pace.driver
-from pace.physics.update import update_atmos_state
+from pySHiELD.update import update_atmos_state
 
 from . import diagnostics
 from .comm import CreatesCommSelector
@@ -116,8 +116,8 @@ class DriverConfig:
     dycore_config: pyFV3.DynamicalCoreConfig = dataclasses.field(
         default_factory=pyFV3.DynamicalCoreConfig
     )
-    physics_config: pace.physics.PhysicsConfig = dataclasses.field(
-        default_factory=pace.physics.PhysicsConfig
+    physics_config: pySHiELD.PhysicsConfig = dataclasses.field(
+        default_factory=pySHiELD.PhysicsConfig
     )
 
     days: int = 0
@@ -250,7 +250,7 @@ class DriverConfig:
 
         if isinstance(kwargs["physics_config"], dict):
             kwargs["physics_config"] = dacite.from_dict(
-                data_class=pace.physics.PhysicsConfig,
+                data_class=pySHiELD.PhysicsConfig,
                 data=kwargs.get("physics_config", {}),
                 config=dacite.Config(strict=True),
             )
@@ -293,10 +293,10 @@ class DriverConfig:
             isinstance(kwargs["stencil_config"], dict)
             and "compilation_config" in kwargs["stencil_config"].keys()
         ):
-            kwargs["stencil_config"][
-                "compilation_config"
-            ] = CompilationConfig.from_dict(
-                data=kwargs["stencil_config"]["compilation_config"]
+            kwargs["stencil_config"]["compilation_config"] = (
+                CompilationConfig.from_dict(
+                    data=kwargs["stencil_config"]["compilation_config"]
+                )
             )
 
         return dacite.from_dict(
@@ -473,7 +473,11 @@ class Driver:
                 stencil_compare_comm=stencil_compare_comm,
             )
             ndsl_log.info("setting up grid started")
-            (damping_coefficients, driver_grid_data, grid_data,) = self.config.get_grid(
+            (
+                damping_coefficients,
+                driver_grid_data,
+                grid_data,
+            ) = self.config.get_grid(
                 quantity_factory=self.quantity_factory,
                 communicator=communicator,
             )
@@ -505,7 +509,7 @@ class Driver:
 
             ndsl_log.info("setting up physics object started")
             if not config.dycore_only and not config.disable_step_physics:
-                self.physics = pace.physics.Physics(
+                self.physics = pySHiELD.Physics(
                     stencil_factory=self.stencil_factory,
                     quantity_factory=self.quantity_factory,
                     grid_data=self.state.grid_data,

@@ -7,9 +7,9 @@ from ndsl.initialization.allocator import QuantityFactory
 from ndsl.initialization.sizer import SubtileGridSizer
 from translate_physics import TranslatePhysicsFortranData2Py
 
-from pace.physics import PHYSICS_PACKAGES
-from pace.physics.stencils.microphysics import Microphysics
-from pace.physics.stencils.physics import PhysicsState
+from pySHiELD import PHYSICS_PACKAGES
+from pySHiELD.stencils.microphysics import Microphysics
+from pySHiELD.stencils.physics import PhysicsState
 
 
 class TranslateMicroph(TranslatePhysicsFortranData2Py):

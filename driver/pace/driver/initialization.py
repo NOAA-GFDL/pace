@@ -17,7 +17,7 @@ from ndsl.namelist import Namelist
 from ndsl.stencils.testing import TranslateGrid, grid
 
 import pace.driver
-import pace.physics
+import pySHiELD
 import pyFV3
 import pyFV3.initialization.analytic_init as analytic_init
 from pyFV3.testing import TranslateFVDynamics
@@ -29,8 +29,7 @@ from .state import DriverState, TendencyState, _restart_driver_state
 class Initializer(abc.ABC):
     @property
     @abc.abstractmethod
-    def start_time(self) -> datetime:
-        ...
+    def start_time(self) -> datetime: ...
 
     @abc.abstractmethod
     def get_driver_state(
@@ -40,9 +39,8 @@ class Initializer(abc.ABC):
         damping_coefficients: DampingCoefficients,
         driver_grid_data: DriverGridData,
         grid_data: GridData,
-        schemes: List[pace.physics.PHYSICS_PACKAGES],
-    ) -> DriverState:
-        ...
+        schemes: List[pySHiELD.PHYSICS_PACKAGES],
+    ) -> DriverState: ...
 
 
 IT = TypeVar("IT", bound=Type[Initializer])
@@ -78,7 +76,7 @@ class InitializerSelector(Initializer):
         damping_coefficients: DampingCoefficients,
         driver_grid_data: DriverGridData,
         grid_data: GridData,
-        schemes: List[pace.physics.PHYSICS_PACKAGES],
+        schemes: List[pySHiELD.PHYSICS_PACKAGES],
     ) -> DriverState:
         return self.config.get_driver_state(
             quantity_factory=quantity_factory,
@@ -112,7 +110,7 @@ class AnalyticInit(Initializer):
         damping_coefficients: DampingCoefficients,
         driver_grid_data: DriverGridData,
         grid_data: GridData,
-        schemes: List[pace.physics.PHYSICS_PACKAGES],
+        schemes: List[pySHiELD.PHYSICS_PACKAGES],
     ) -> DriverState:
         dycore_state = analytic_init.init_analytic_state(
             analytic_init_case=self.case,
@@ -123,7 +121,7 @@ class AnalyticInit(Initializer):
             moist_phys=True,
             comm=communicator,
         )
-        physics_state = pace.physics.PhysicsState.init_zeros(
+        physics_state = pySHiELD.PhysicsState.init_zeros(
             quantity_factory=quantity_factory, schemes=schemes
         )
         tendency_state = TendencyState.init_zeros(
@@ -156,7 +154,7 @@ class RestartInit(Initializer):
         damping_coefficients: DampingCoefficients,
         driver_grid_data: DriverGridData,
         grid_data: GridData,
-        schemes: List[pace.physics.PHYSICS_PACKAGES],
+        schemes: List[pySHiELD.PHYSICS_PACKAGES],
     ) -> DriverState:
         state = _restart_driver_state(
             self.path,
@@ -207,7 +205,7 @@ class FortranRestartInit(Initializer):
         damping_coefficients: DampingCoefficients,
         driver_grid_data: DriverGridData,
         grid_data: GridData,
-        schemes: List[pace.physics.PHYSICS_PACKAGES],
+        schemes: List[pySHiELD.PHYSICS_PACKAGES],
     ) -> DriverState:
         state = _restart_driver_state(
             self.path,
@@ -280,14 +278,14 @@ class SerialboxInit(Initializer):
         damping_coefficients: DampingCoefficients,
         driver_grid_data: DriverGridData,
         grid_data: GridData,
-        schemes: List[pace.physics.PHYSICS_PACKAGES],
+        schemes: List[pySHiELD.PHYSICS_PACKAGES],
     ) -> DriverState:
         backend = quantity_factory.zeros(
             dims=[X_DIM, Y_DIM], units="unknown"
         ).gt4py_backend
 
         dycore_state = self._initialize_dycore_state(communicator, backend)
-        physics_state = pace.physics.PhysicsState.init_zeros(
+        physics_state = pySHiELD.PhysicsState.init_zeros(
             quantity_factory=quantity_factory,
             schemes=schemes,
         )
@@ -344,7 +342,7 @@ class PredefinedStateInit(Initializer):
     """
 
     dycore_state: pyFV3.DycoreState
-    physics_state: pace.physics.PhysicsState
+    physics_state: pySHiELD.PhysicsState
     tendency_state: TendencyState
     grid_data: GridData
     damping_coefficients: DampingCoefficients
@@ -358,7 +356,7 @@ class PredefinedStateInit(Initializer):
         damping_coefficients: DampingCoefficients,
         driver_grid_data: DriverGridData,
         grid_data: GridData,
-        schemes: List[pace.physics.PHYSICS_PACKAGES],
+        schemes: List[pySHiELD.PHYSICS_PACKAGES],
     ) -> DriverState:
         return DriverState(
             dycore_state=self.dycore_state,

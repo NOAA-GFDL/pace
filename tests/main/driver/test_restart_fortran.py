@@ -11,7 +11,7 @@ from ndsl.initialization.sizer import SubtileGridSizer
 
 import pace.driver
 from pace.driver.initialization import FortranRestartInit
-from pace.physics import PHYSICS_PACKAGES
+from pySHiELD import PHYSICS_PACKAGES
 
 
 DIR = os.path.dirname(os.path.abspath(__file__))
