@@ -1,4 +1,5 @@
 import gt4py.cartesian.gtscript as gtscript
+import ndsl.stencils.corners as corners
 from gt4py.cartesian.gtscript import (
     __INLINED,
     PARALLEL,
@@ -8,20 +9,20 @@ from gt4py.cartesian.gtscript import (
     region,
     sqrt,
 )
+from ndsl.constants import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_DIM
+from ndsl.dsl.dace.orchestration import dace_inhibitor, orchestrate
+from ndsl.dsl.stencil import StencilFactory, get_stencils_with_varied_bounds
+from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ, FloatFieldK
+from ndsl.grid import DampingCoefficients, GridData
+from ndsl.initialization.allocator import QuantityFactory
+from ndsl.quantity import Quantity
 
 import pace.fv3core.stencils.basic_operations as basic
-import pace.stencils.corners as corners
-import pace.util
-from pace.dsl.dace.orchestration import dace_inhibitor, orchestrate
-from pace.dsl.stencil import StencilFactory, get_stencils_with_varied_bounds
-from pace.dsl.typing import Float, FloatField, FloatFieldIJ, FloatFieldK
 from pace.fv3core.stencils.a2b_ord4 import (
     AGrid2BGridFourthOrder,
     doubly_periodic_a2b_ord4,
 )
 from pace.fv3core.stencils.d2a2c_vect import contravariant
-from pace.util import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_DIM
-from pace.util.grid import DampingCoefficients, GridData
 
 
 @gtscript.function
@@ -307,7 +308,7 @@ class DivergenceDamping:
     def __init__(
         self,
         stencil_factory: StencilFactory,
-        quantity_factory: pace.util.QuantityFactory,
+        quantity_factory: QuantityFactory,
         grid_data: GridData,
         damping_coefficients: DampingCoefficients,
         nested: bool,
@@ -316,7 +317,7 @@ class DivergenceDamping:
         d4_bg,
         nord: int,
         grid_type,
-        nord_col: pace.util.Quantity,
+        nord_col: Quantity,
         d2_bg: FloatFieldK,
     ):
         orchestrate(

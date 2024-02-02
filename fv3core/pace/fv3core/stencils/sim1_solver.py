@@ -1,5 +1,6 @@
 import typing
 
+import ndsl.constants as constants
 from gt4py.cartesian.gtscript import (
     BACKWARD,
     FORWARD,
@@ -9,11 +10,9 @@ from gt4py.cartesian.gtscript import (
     interval,
     log,
 )
-
-import pace.util.constants as constants
-from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import Float, FloatField, FloatFieldIJ
-from pace.util import X_DIM, Y_DIM, Z_INTERFACE_DIM
+from ndsl.constants import X_DIM, Y_DIM, Z_INTERFACE_DIM
+from ndsl.dsl.stencil import StencilFactory
+from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ
 
 
 @typing.no_type_check

@@ -2,14 +2,19 @@ import dataclasses
 from dataclasses import fields
 from typing import List
 
+import ndsl.dsl.gt4py_utils as gt_utils
 import xarray as xr
+from ndsl.comm.communicator import Communicator
+from ndsl.constants import N_HALO_DEFAULT, X_DIM, Y_DIM, Z_DIM
+from ndsl.dsl.typing import Float
+from ndsl.filesystem import get_fs
+from ndsl.grid import DampingCoefficients, DriverGridData, GridData
+from ndsl.initialization.allocator import QuantityFactory
+from ndsl.initialization.sizer import SubtileGridSizer
+from ndsl.quantity import Quantity
 
-import pace.dsl.gt4py_utils as gt_utils
 import pace.physics
-import pace.util
-import pace.util.grid
 from pace import fv3core
-from pace.dsl.typing import Float
 
 
 @dataclasses.dataclass()
@@ -19,33 +24,33 @@ class TendencyState:
     to the dynamical core model state.
     """
 
-    u_dt: pace.util.Quantity = dataclasses.field(
+    u_dt: Quantity = dataclasses.field(
         metadata={
             "name": "eastward_wind_tendency_due_to_physics",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM],
+            "dims": [X_DIM, Y_DIM, Z_DIM],
             "units": "m/s**2",
             "intent": "inout",
         }
     )
-    v_dt: pace.util.Quantity = dataclasses.field(
+    v_dt: Quantity = dataclasses.field(
         metadata={
             "name": "northward_wind_tendency_due_to_physics",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM],
+            "dims": [X_DIM, Y_DIM, Z_DIM],
             "units": "m/s**2",
             "intent": "inout",
         }
     )
-    pt_dt: pace.util.Quantity = dataclasses.field(
+    pt_dt: Quantity = dataclasses.field(
         metadata={
             "name": "temperature_tendency_due_to_physics",
-            "dims": [pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM],
+            "dims": [X_DIM, Y_DIM, Z_DIM],
             "units": "K/s",
             "intent": "inout",
         }
     )
 
     @classmethod
-    def init_zeros(cls, quantity_factory: pace.util.QuantityFactory) -> "TendencyState":
+    def init_zeros(cls, quantity_factory: QuantityFactory) -> "TendencyState":
         initial_quantities = {}
         for _field in dataclasses.fields(cls):
             initial_quantities[_field.name] = quantity_factory.zeros(
@@ -61,9 +66,9 @@ class DriverState:
     dycore_state: fv3core.DycoreState
     physics_state: pace.physics.PhysicsState
     tendency_state: TendencyState
-    grid_data: pace.util.grid.GridData
-    damping_coefficients: pace.util.grid.DampingCoefficients
-    driver_grid_data: pace.util.grid.DriverGridData
+    grid_data: GridData
+    damping_coefficients: DampingCoefficients
+    driver_grid_data: DriverGridData
 
     # TODO: the driver_config argument here isn't type hinted from
     # import due to a circular dependency. This can be fixed by refactoring
@@ -73,26 +78,24 @@ class DriverState:
         cls,
         restart_path: str,
         driver_config,
-        damping_coefficients: pace.util.grid.DampingCoefficients,
-        driver_grid_data: pace.util.grid.DriverGridData,
-        grid_data: pace.util.grid.GridData,
+        damping_coefficients: DampingCoefficients,
+        driver_grid_data: DriverGridData,
+        grid_data: GridData,
         schemes: List[pace.physics.PHYSICS_PACKAGES],
     ) -> "DriverState":
         comm = driver_config.comm_config.get_comm()
-        communicator = pace.util.Communicator.from_layout(
-            comm=comm, layout=driver_config.layout
-        )
-        sizer = pace.util.SubtileGridSizer.from_tile_params(
+        communicator = Communicator.from_layout(comm=comm, layout=driver_config.layout)
+        sizer = SubtileGridSizer.from_tile_params(
             nx_tile=driver_config.nx_tile,
             ny_tile=driver_config.nx_tile,
             nz=driver_config.nz,
-            n_halo=pace.util.N_HALO_DEFAULT,
+            n_halo=N_HALO_DEFAULT,
             extra_dim_lengths={},
             layout=driver_config.layout,
             tile_partitioner=communicator.partitioner.tile,
             tile_rank=communicator.tile.rank,
         )
-        quantity_factory = pace.util.QuantityFactory.from_backend(
+        quantity_factory = QuantityFactory.from_backend(
             sizer, backend=driver_config.stencil_config.compilation_config.backend
         )
 
@@ -174,14 +177,14 @@ def _overwrite_state_from_restart(
 def _restart_driver_state(
     path: str,
     rank: int,
-    quantity_factory: pace.util.QuantityFactory,
-    communicator: pace.util.Communicator,
-    damping_coefficients: pace.util.grid.DampingCoefficients,
-    driver_grid_data: pace.util.grid.DriverGridData,
-    grid_data: pace.util.grid.GridData,
+    quantity_factory: QuantityFactory,
+    communicator: Communicator,
+    damping_coefficients: DampingCoefficients,
+    driver_grid_data: DriverGridData,
+    grid_data: GridData,
     schemes: List[pace.physics.PHYSICS_PACKAGES],
 ):
-    fs = pace.util.get_fs(path)
+    fs = get_fs(path)
 
     restart_files = fs.ls(path)
     is_fortran_restart = any(

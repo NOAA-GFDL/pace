@@ -2,11 +2,11 @@ import inspect
 from typing import Callable, Mapping, Tuple
 
 import numpy as np
+from ndsl.constants import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_DIM
+from ndsl.quantity import Quantity
 
 import pace.fv3core.stencils.divergence_damping
 import pace.fv3core.stencils.updatedzd
-from pace.util.constants import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_DIM
-from pace.util.quantity import Quantity
 
 
 def get_selective_class(
@@ -30,7 +30,6 @@ def get_selective_class(
         """
 
         def __init__(self, *args, **kwargs):
-
             self.wrapped = cls(*args, **kwargs)
             self._validation_slice = {}
 

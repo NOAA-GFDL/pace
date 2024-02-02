@@ -1,6 +1,7 @@
 import math
 
 import gt4py.cartesian.gtscript as gtscript
+import ndsl.constants as constants
 from gt4py.cartesian.gtscript import (
     __INLINED,
     PARALLEL,
@@ -10,10 +11,9 @@ from gt4py.cartesian.gtscript import (
     interval,
     log,
 )
+from ndsl.dsl.stencil import StencilFactory
+from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ
 
-import pace.util.constants as constants
-from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import Float, FloatField, FloatFieldIJ
 from pace.fv3core._config import SatAdjustConfig
 from pace.fv3core.stencils.basic_operations import dim
 from pace.fv3core.stencils.moist_cv import compute_pkz_func

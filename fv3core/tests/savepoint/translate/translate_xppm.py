@@ -1,17 +1,18 @@
-import pace.dsl
-import pace.dsl.gt4py_utils as utils
-import pace.util
+import ndsl.dsl.gt4py_utils as utils
+from ndsl.dsl.stencil import StencilFactory
+from ndsl.namelist import Namelist
+from ndsl.stencils.testing import TranslateGrid
+
 from pace.fv3core.stencils import xppm
 from pace.fv3core.testing import TranslateDycoreFortranData2Py
-from pace.stencils.testing import TranslateGrid
 
 
 class TranslateXPPM(TranslateDycoreFortranData2Py):
     def __init__(
         self,
         grid,
-        namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        namelist: Namelist,
+        stencil_factory: StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
         self.in_vars["data_vars"] = {
@@ -62,8 +63,8 @@ class TranslateXPPM_2(TranslateXPPM):
     def __init__(
         self,
         grid,
-        namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        namelist: Namelist,
+        stencil_factory: StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
         self.in_vars["data_vars"]["q"]["serialname"] = "q"

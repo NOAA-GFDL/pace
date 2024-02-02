@@ -8,9 +8,9 @@ from gt4py.cartesian.gtscript import (
     interval,
     region,
 )
+from ndsl.dsl.stencil import StencilFactory
+from ndsl.dsl.typing import FloatField, FloatFieldIJ, Index3D
 
-from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import FloatField, FloatFieldIJ, Index3D
 from pace.fv3core.stencils import ppm
 from pace.fv3core.stencils.basic_operations import sign
 

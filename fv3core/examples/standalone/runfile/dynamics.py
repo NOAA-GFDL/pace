@@ -9,26 +9,27 @@ from datetime import datetime, timedelta
 from typing import Any, Dict, List, Tuple
 
 import f90nml
+
+# NOTE: we need to import dsl.stencil prior to
+# ndsl.util, otherwise xarray precedes gt4py, causing
+# very strange errors on some systems (e.g. daint)
+import ndsl.dsl.stencil
+import ndsl.util as util
 import numpy as np
 import xarray as xr
 import yaml
 from mpi4py import MPI
+from ndsl.comm.null_comm import NullComm
+from ndsl.dsl import StencilFactory
+from ndsl.dsl.dace.orchestration import DaceConfig
+from ndsl.grid import DampingCoefficients, GridData, MetricTerms
+from ndsl.stencils.testing import dataset_to_dict
+from ndsl.stencils.testing.grid import Grid
 
-# NOTE: we need to import dsl.stencil prior to
-# pace.util, otherwise xarray precedes gt4py, causing
-# very strange errors on some systems (e.g. daint)
-import pace.dsl.stencil
-import pace.util as util
-from pace.dsl import StencilFactory
-from pace.dsl.dace.orchestration import DaceConfig
 from pace.fv3core import DynamicalCore, DynamicalCoreConfig
 from pace.fv3core.dycore_state import DycoreState
 from pace.fv3core.initialization.baroclinic import init_baroclinic_state
 from pace.fv3core.testing import TranslateFVDynamics
-from pace.stencils.testing import dataset_to_dict
-from pace.stencils.testing.grid import Grid
-from pace.util.grid import DampingCoefficients, GridData, MetricTerms
-from pace.util.null_comm import NullComm
 
 
 def parse_args() -> Namespace:
@@ -222,8 +223,8 @@ def setup_dycore(
         tile_nx=dycore_config.npx,
         tile_nz=dycore_config.npz,
     )
-    stencil_config = pace.dsl.stencil.StencilConfig(
-        compilation_config=pace.dsl.stencil.CompilationConfig(
+    stencil_config = ndsl.dsl.stencil.StencilConfig(
+        compilation_config=ndsl.dsl.stencil.CompilationConfig(
             backend=backend, rebuild=False, validate_args=False
         ),
         dace_config=dace_config,

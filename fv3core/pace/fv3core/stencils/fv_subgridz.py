@@ -2,6 +2,7 @@
 import collections
 
 import gt4py.cartesian.gtscript as gtscript
+import ndsl.dsl.gt4py_utils as utils
 from gt4py.cartesian.gtscript import (
     __INLINED,
     BACKWARD,
@@ -9,15 +10,7 @@ from gt4py.cartesian.gtscript import (
     computation,
     interval,
 )
-
-import pace.dsl.gt4py_utils as utils
-import pace.util
-from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import Float, FloatField
-from pace.fv3core.dycore_state import DycoreState
-from pace.fv3core.stencils.basic_operations import dim
-from pace.util import X_DIM, Y_DIM, Z_DIM
-from pace.util.constants import (
+from ndsl.constants import (
     C_ICE,
     C_LIQ,
     CP_AIR,
@@ -26,8 +19,18 @@ from pace.util.constants import (
     CV_VAP,
     GRAV,
     RDGAS,
+    X_DIM,
+    Y_DIM,
+    Z_DIM,
     ZVIR,
 )
+from ndsl.dsl.stencil import StencilFactory
+from ndsl.dsl.typing import Float, FloatField
+from ndsl.initialization.allocator import QuantityFactory
+from ndsl.quantity import Quantity
+
+from pace.fv3core.dycore_state import DycoreState
+from pace.fv3core.stencils.basic_operations import dim
 
 
 RK = CP_AIR / RDGAS + 1.0
@@ -776,7 +779,7 @@ class DryConvectiveAdjustment:
     def __init__(
         self,
         stencil_factory: StencilFactory,
-        quantity_factory: pace.util.QuantityFactory,
+        quantity_factory: QuantityFactory,
         nwat: int,
         fv_sg_adj: Float,
         n_sponge: int,
@@ -855,8 +858,8 @@ class DryConvectiveAdjustment:
     def __call__(
         self,
         state: DycoreState,
-        u_dt: pace.util.Quantity,
-        v_dt: pace.util.Quantity,
+        u_dt: Quantity,
+        v_dt: Quantity,
         timestep: Float,
     ):
         """

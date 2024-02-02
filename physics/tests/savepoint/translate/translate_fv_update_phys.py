@@ -1,17 +1,19 @@
 import dataclasses
 
+import ndsl.dsl.gt4py_utils as utils
 import numpy as np
-
-import pace.dsl
-import pace.dsl.gt4py_utils as utils
-import pace.util
-from pace.dsl.typing import FloatField, FloatFieldIJ
-from pace.stencils.fv_update_phys import ApplyPhysicsToDycore
-from pace.stencils.testing.translate_physics import (
+from ndsl.constants import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_DIM
+from ndsl.dsl.stencil import StencilFactory
+from ndsl.dsl.typing import FloatField, FloatFieldIJ
+from ndsl.namelist import Namelist
+from ndsl.quantity import Quantity
+from ndsl.utils import safe_assign_array
+from translate_physics import (
     ParallelPhysicsTranslate2Py,
     transform_dwind_serialized_data,
 )
-from pace.util.utils import safe_assign_array
+
+from pace.physics.update.fv_update_phys import ApplyPhysicsToDycore
 
 
 try:
@@ -53,8 +55,8 @@ class TranslateFVUpdatePhys(ParallelPhysicsTranslate2Py):
     def __init__(
         self,
         grid,
-        namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        namelist: Namelist,
+        stencil_factory: StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
         self.stencil_factory = stencil_factory
@@ -173,9 +175,9 @@ class TranslateFVUpdatePhys(ParallelPhysicsTranslate2Py):
         tendencies = {}
         for key in ["u_dt", "v_dt", "t_dt"]:
             storage = inputs.pop(key)
-            tendencies[key] = pace.util.Quantity(
+            tendencies[key] = Quantity(
                 storage,
-                dims=[pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM],
+                dims=[X_DIM, Y_DIM, Z_DIM],
                 units="test",
                 origin=(0, 0, 0),
                 extent=storage.shape,
@@ -192,14 +194,14 @@ class TranslateFVUpdatePhys(ParallelPhysicsTranslate2Py):
             tendencies["u_dt"],
             tendencies["v_dt"],
         )
-        dims_u = [pace.util.X_DIM, pace.util.Y_INTERFACE_DIM, pace.util.Z_DIM]
+        dims_u = [X_DIM, Y_INTERFACE_DIM, Z_DIM]
         u_quantity = self.grid.make_quantity(
             state.u,
             dims=dims_u,
             origin=self.grid.sizer.get_origin(dims_u),
             extent=self.grid.sizer.get_extent(dims_u),
         )
-        dims_v = [pace.util.X_INTERFACE_DIM, pace.util.Y_DIM, pace.util.Z_DIM]
+        dims_v = [X_INTERFACE_DIM, Y_DIM, Z_DIM]
         v_quantity = self.grid.make_quantity(
             state.v,
             dims=dims_v,

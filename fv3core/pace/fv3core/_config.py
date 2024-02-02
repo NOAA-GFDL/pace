@@ -2,8 +2,7 @@ import dataclasses
 from typing import Optional, Tuple
 
 import f90nml
-
-from pace.util import Namelist, NamelistDefaults
+from ndsl.namelist import Namelist, NamelistDefaults
 
 
 DEFAULT_INT = 0
@@ -65,7 +64,6 @@ class RiemannConfig:
 
 @dataclasses.dataclass(frozen=True)
 class DGridShallowWaterLagrangianDynamicsConfig:
-
     dddmp: float
     d2_bg: float
     d2_bg_k1: float
@@ -92,7 +90,6 @@ class DGridShallowWaterLagrangianDynamicsConfig:
 
 @dataclasses.dataclass(frozen=True)
 class AcousticDynamicsConfig:
-
     tau: float
     k_split: int
     n_split: int

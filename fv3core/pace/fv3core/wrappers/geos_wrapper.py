@@ -8,17 +8,28 @@ import f90nml
 import numpy as np
 from gt4py.cartesian.config import build_settings as gt_build_settings
 from mpi4py import MPI
+from ndsl.comm.comm_abc import Comm
+from ndsl.comm.communicator import CubedSphereCommunicator
+from ndsl.comm.null_comm import NullComm
+from ndsl.comm.partitioner import CubedSpherePartitioner, TilePartitioner
+from ndsl.dsl.dace import orchestrate
+from ndsl.dsl.dace.build import set_distributed_caches
+from ndsl.dsl.dace.dace_config import DaceConfig, DaCeOrchestration
+from ndsl.dsl.gt4py_utils import is_gpu_backend
+from ndsl.dsl.stencil import GridIndexing, StencilFactory
+from ndsl.dsl.stencil_config import CompilationConfig, StencilConfig
+from ndsl.dsl.typing import floating_point_precision
+from ndsl.grid import GridData
+from ndsl.grid.generation import MetricTerms
+from ndsl.grid.helper import DampingCoefficients
+from ndsl.initialization.allocator import QuantityFactory
+from ndsl.initialization.sizer import SubtileGridSizer
+from ndsl.logging import ndsl_log
+from ndsl.optional_imports import cupy as cp
+from ndsl.performance.collector import PerformanceCollector
+from ndsl.utils import safe_assign_array
 
-import pace.util
 from pace import fv3core
-from pace.driver.performance.collector import PerformanceCollector
-from pace.dsl.dace import orchestrate
-from pace.dsl.dace.build import set_distributed_caches
-from pace.dsl.dace.dace_config import DaceConfig, DaCeOrchestration
-from pace.dsl.gt4py_utils import is_gpu_backend
-from pace.dsl.typing import floating_point_precision
-from pace.util._optional_imports import cupy as cp
-from pace.util.logging import pace_log
 
 
 class StencilBackendCompilerOverride:
@@ -48,7 +59,7 @@ class StencilBackendCompilerOverride:
 
         # We remove warnings from the stencils compiling when in critical and/or
         # error
-        if pace_log.level > logging.WARNING:
+        if ndsl_log.level > logging.WARNING:
             gt_build_settings["extra_compile_args"]["cxx"].append("-w")
             gt_build_settings["extra_compile_args"]["cuda"].append("-w")
 
@@ -56,18 +67,18 @@ class StencilBackendCompilerOverride:
         if self.no_op:
             return
         if self.config.do_compile:
-            pace_log.info(f"Stencil backend compiles on {self.comm.Get_rank()}")
+            ndsl_log.info(f"Stencil backend compiles on {self.comm.Get_rank()}")
         else:
-            pace_log.info(f"Stencil backend waits on {self.comm.Get_rank()}")
+            ndsl_log.info(f"Stencil backend waits on {self.comm.Get_rank()}")
             self.comm.Barrier()
 
     def __exit__(self, type, value, traceback):
         if self.no_op:
             return
         if not self.config.do_compile:
-            pace_log.info(f"Stencil backend read cache on {self.comm.Get_rank()}")
+            ndsl_log.info(f"Stencil backend read cache on {self.comm.Get_rank()}")
         else:
-            pace_log.info(f"Stencil backend compiled on {self.comm.Get_rank()}")
+            ndsl_log.info(f"Stencil backend compiled on {self.comm.Get_rank()}")
             self.comm.Barrier()
 
 
@@ -87,14 +98,14 @@ class GeosDycoreWrapper:
         self,
         namelist: f90nml.Namelist,
         bdt: int,
-        comm: pace.util.Comm,
+        comm: Comm,
         backend: str,
         fortran_mem_space: MemorySpace = MemorySpace.HOST,
     ):
         # Look for an override to run on a single node
         gtfv3_single_rank_override = int(os.getenv("GTFV3_SINGLE_RANK_OVERRIDE", -1))
         if gtfv3_single_rank_override >= 0:
-            comm = pace.util.NullComm(gtfv3_single_rank_override, 6, 42)
+            comm = NullComm(gtfv3_single_rank_override, 6, 42)
 
         # Make a custom performance collector for the GEOS wrapper
         self.perf_collector = PerformanceCollector("GEOS wrapper", comm)
@@ -106,32 +117,28 @@ class GeosDycoreWrapper:
         assert self.dycore_config.dt_atmos != 0
 
         self.layout = self.dycore_config.layout
-        partitioner = pace.util.CubedSpherePartitioner(
-            pace.util.TilePartitioner(self.layout)
-        )
-        self.communicator = pace.util.CubedSphereCommunicator(
+        partitioner = CubedSpherePartitioner(TilePartitioner(self.layout))
+        self.communicator = CubedSphereCommunicator(
             comm,
             partitioner,
             timer=self.perf_collector.timestep_timer,
         )
 
-        sizer = pace.util.SubtileGridSizer.from_namelist(
+        sizer = SubtileGridSizer.from_namelist(
             self.namelist, partitioner.tile, self.communicator.tile.rank
         )
-        quantity_factory = pace.util.QuantityFactory.from_backend(
-            sizer=sizer, backend=backend
-        )
+        quantity_factory = QuantityFactory.from_backend(sizer=sizer, backend=backend)
 
         # set up the metric terms and grid data
-        metric_terms = pace.util.grid.MetricTerms(
+        metric_terms = MetricTerms(
             quantity_factory=quantity_factory,
             communicator=self.communicator,
             eta_file=namelist["grid_config"]["config"]["eta_file"],
         )
-        grid_data = pace.util.grid.GridData.new_from_metric_terms(metric_terms)
+        grid_data = GridData.new_from_metric_terms(metric_terms)
 
-        stencil_config = pace.dsl.stencil.StencilConfig(
-            compilation_config=pace.dsl.stencil.CompilationConfig(
+        stencil_config = StencilConfig(
+            compilation_config=CompilationConfig(
                 backend=backend, rebuild=False, validate_args=False
             ),
         )
@@ -154,10 +161,10 @@ class GeosDycoreWrapper:
             method_to_orchestrate="_critical_path",
         )
 
-        self._grid_indexing = pace.dsl.stencil.GridIndexing.from_sizer_and_communicator(
+        self._grid_indexing = GridIndexing.from_sizer_and_communicator(
             sizer=sizer, comm=self.communicator
         )
-        stencil_factory = pace.dsl.StencilFactory(
+        stencil_factory = StencilFactory(
             config=stencil_config, grid_indexing=self._grid_indexing
         )
 
@@ -166,9 +173,7 @@ class GeosDycoreWrapper:
         )
         self.dycore_state.bdt = self.dycore_config.dt_atmos
 
-        damping_coefficients = pace.util.grid.DampingCoefficients.new_from_metric_terms(
-            metric_terms
-        )
+        damping_coefficients = DampingCoefficients.new_from_metric_terms(metric_terms)
 
         with StencilBackendCompilerOverride(MPI.COMM_WORLD, stencil_config.dace_config):
             self.dynamical_core = fv3core.DynamicalCore(
@@ -203,7 +208,7 @@ class GeosDycoreWrapper:
             and is_gpu_backend(backend)
             and os.path.exists(f"{MPS_pipe_directory}/log")
         )
-        pace_log.info(
+        ndsl_log.info(
             "Pace GEOS wrapper initialized: \n"
             f"             dt : {self.dycore_state.bdt}\n"
             f"         bridge : {self._fortran_mem_space} > {self._pace_mem_space}\n"
@@ -332,62 +337,42 @@ class GeosDycoreWrapper:
         state = self.dycore_state
 
         # Assign compute domain:
-        pace.util.utils.safe_assign_array(state.u.view[:], u[isc:iec, jsc : jec + 1, :])
-        pace.util.utils.safe_assign_array(state.v.view[:], v[isc : iec + 1, jsc:jec, :])
-        pace.util.utils.safe_assign_array(state.w.view[:], w[isc:iec, jsc:jec, :])
-        pace.util.utils.safe_assign_array(state.ua.view[:], ua[isc:iec, jsc:jec, :])
-        pace.util.utils.safe_assign_array(state.va.view[:], va[isc:iec, jsc:jec, :])
-        pace.util.utils.safe_assign_array(
-            state.uc.view[:], uc[isc : iec + 1, jsc:jec, :]
-        )
-        pace.util.utils.safe_assign_array(
-            state.vc.view[:], vc[isc:iec, jsc : jec + 1, :]
-        )
+        safe_assign_array(state.u.view[:], u[isc:iec, jsc : jec + 1, :])
+        safe_assign_array(state.v.view[:], v[isc : iec + 1, jsc:jec, :])
+        safe_assign_array(state.w.view[:], w[isc:iec, jsc:jec, :])
+        safe_assign_array(state.ua.view[:], ua[isc:iec, jsc:jec, :])
+        safe_assign_array(state.va.view[:], va[isc:iec, jsc:jec, :])
+        safe_assign_array(state.uc.view[:], uc[isc : iec + 1, jsc:jec, :])
+        safe_assign_array(state.vc.view[:], vc[isc:iec, jsc : jec + 1, :])
 
-        pace.util.utils.safe_assign_array(state.delz.view[:], delz[isc:iec, jsc:jec, :])
-        pace.util.utils.safe_assign_array(state.pt.view[:], pt[isc:iec, jsc:jec, :])
-        pace.util.utils.safe_assign_array(state.delp.view[:], delp[isc:iec, jsc:jec, :])
+        safe_assign_array(state.delz.view[:], delz[isc:iec, jsc:jec, :])
+        safe_assign_array(state.pt.view[:], pt[isc:iec, jsc:jec, :])
+        safe_assign_array(state.delp.view[:], delp[isc:iec, jsc:jec, :])
 
-        pace.util.utils.safe_assign_array(state.mfxd.view[:], mfxd)
-        pace.util.utils.safe_assign_array(state.mfyd.view[:], mfyd)
-        pace.util.utils.safe_assign_array(state.cxd.view[:], cxd[:, jsc:jec, :])
-        pace.util.utils.safe_assign_array(state.cyd.view[:], cyd[isc:iec, :, :])
+        safe_assign_array(state.mfxd.view[:], mfxd)
+        safe_assign_array(state.mfyd.view[:], mfyd)
+        safe_assign_array(state.cxd.view[:], cxd[:, jsc:jec, :])
+        safe_assign_array(state.cyd.view[:], cyd[isc:iec, :, :])
 
-        pace.util.utils.safe_assign_array(state.ps.view[:], ps[isc:iec, jsc:jec])
-        pace.util.utils.safe_assign_array(
-            state.pe.data[isc - 1 : iec + 1, jsc - 1 : jec + 1, :], pe
-        )
-        pace.util.utils.safe_assign_array(state.pk.view[:], pk)
-        pace.util.utils.safe_assign_array(state.peln.view[:], peln)
-        pace.util.utils.safe_assign_array(state.pkz.view[:], pkz)
-        pace.util.utils.safe_assign_array(state.phis.view[:], phis[isc:iec, jsc:jec])
-        pace.util.utils.safe_assign_array(
-            state.q_con.view[:], q_con[isc:iec, jsc:jec, :]
-        )
-        pace.util.utils.safe_assign_array(state.omga.view[:], omga[isc:iec, jsc:jec, :])
-        pace.util.utils.safe_assign_array(
-            state.diss_estd.view[:], diss_estd[isc:iec, jsc:jec, :]
-        )
+        safe_assign_array(state.ps.view[:], ps[isc:iec, jsc:jec])
+        safe_assign_array(state.pe.data[isc - 1 : iec + 1, jsc - 1 : jec + 1, :], pe)
+        safe_assign_array(state.pk.view[:], pk)
+        safe_assign_array(state.peln.view[:], peln)
+        safe_assign_array(state.pkz.view[:], pkz)
+        safe_assign_array(state.phis.view[:], phis[isc:iec, jsc:jec])
+        safe_assign_array(state.q_con.view[:], q_con[isc:iec, jsc:jec, :])
+        safe_assign_array(state.omga.view[:], omga[isc:iec, jsc:jec, :])
+        safe_assign_array(state.diss_estd.view[:], diss_estd[isc:iec, jsc:jec, :])
 
         # tracer quantities should be a 4d array in order:
         # vapor, liquid, ice, rain, snow, graupel, cloud
-        pace.util.utils.safe_assign_array(
-            state.qvapor.view[:], q[isc:iec, jsc:jec, :, 0]
-        )
-        pace.util.utils.safe_assign_array(
-            state.qliquid.view[:], q[isc:iec, jsc:jec, :, 1]
-        )
-        pace.util.utils.safe_assign_array(state.qice.view[:], q[isc:iec, jsc:jec, :, 2])
-        pace.util.utils.safe_assign_array(
-            state.qrain.view[:], q[isc:iec, jsc:jec, :, 3]
-        )
-        pace.util.utils.safe_assign_array(
-            state.qsnow.view[:], q[isc:iec, jsc:jec, :, 4]
-        )
-        pace.util.utils.safe_assign_array(
-            state.qgraupel.view[:], q[isc:iec, jsc:jec, :, 5]
-        )
-        pace.util.utils.safe_assign_array(state.qcld.view[:], q[isc:iec, jsc:jec, :, 6])
+        safe_assign_array(state.qvapor.view[:], q[isc:iec, jsc:jec, :, 0])
+        safe_assign_array(state.qliquid.view[:], q[isc:iec, jsc:jec, :, 1])
+        safe_assign_array(state.qice.view[:], q[isc:iec, jsc:jec, :, 2])
+        safe_assign_array(state.qrain.view[:], q[isc:iec, jsc:jec, :, 3])
+        safe_assign_array(state.qsnow.view[:], q[isc:iec, jsc:jec, :, 4])
+        safe_assign_array(state.qgraupel.view[:], q[isc:iec, jsc:jec, :, 5])
+        safe_assign_array(state.qcld.view[:], q[isc:iec, jsc:jec, :, 6])
 
         return state
 
@@ -399,102 +384,90 @@ class GeosDycoreWrapper:
         jec = self._grid_indexing.jec + 1
 
         if self._fortran_mem_space != self._pace_mem_space:
-            pace.util.utils.safe_assign_array(
-                output_dict["u"], self.dycore_state.u.data[:-1, :, :-1]
-            )
-            pace.util.utils.safe_assign_array(
-                output_dict["v"], self.dycore_state.v.data[:, :-1, :-1]
-            )
-            pace.util.utils.safe_assign_array(
-                output_dict["w"], self.dycore_state.w.data[:-1, :-1, :-1]
-            )
-            pace.util.utils.safe_assign_array(
+            safe_assign_array(output_dict["u"], self.dycore_state.u.data[:-1, :, :-1])
+            safe_assign_array(output_dict["v"], self.dycore_state.v.data[:, :-1, :-1])
+            safe_assign_array(output_dict["w"], self.dycore_state.w.data[:-1, :-1, :-1])
+            safe_assign_array(
                 output_dict["ua"], self.dycore_state.ua.data[:-1, :-1, :-1]
             )
-            pace.util.utils.safe_assign_array(
+            safe_assign_array(
                 output_dict["va"], self.dycore_state.va.data[:-1, :-1, :-1]
             )
-            pace.util.utils.safe_assign_array(
-                output_dict["uc"], self.dycore_state.uc.data[:, :-1, :-1]
-            )
-            pace.util.utils.safe_assign_array(
-                output_dict["vc"], self.dycore_state.vc.data[:-1, :, :-1]
-            )
+            safe_assign_array(output_dict["uc"], self.dycore_state.uc.data[:, :-1, :-1])
+            safe_assign_array(output_dict["vc"], self.dycore_state.vc.data[:-1, :, :-1])
 
-            pace.util.utils.safe_assign_array(
+            safe_assign_array(
                 output_dict["delz"], self.dycore_state.delz.data[:-1, :-1, :-1]
             )
-            pace.util.utils.safe_assign_array(
+            safe_assign_array(
                 output_dict["pt"], self.dycore_state.pt.data[:-1, :-1, :-1]
             )
-            pace.util.utils.safe_assign_array(
+            safe_assign_array(
                 output_dict["delp"], self.dycore_state.delp.data[:-1, :-1, :-1]
             )
 
-            pace.util.utils.safe_assign_array(
+            safe_assign_array(
                 output_dict["mfxd"],
                 self.dycore_state.mfxd.data[isc : iec + 1, jsc:jec, :-1],
             )
-            pace.util.utils.safe_assign_array(
+            safe_assign_array(
                 output_dict["mfyd"],
                 self.dycore_state.mfyd.data[isc:iec, jsc : jec + 1, :-1],
             )
-            pace.util.utils.safe_assign_array(
+            safe_assign_array(
                 output_dict["cxd"], self.dycore_state.cxd.data[isc : iec + 1, :-1, :-1]
             )
-            pace.util.utils.safe_assign_array(
+            safe_assign_array(
                 output_dict["cyd"], self.dycore_state.cyd.data[:-1, jsc : jec + 1, :-1]
             )
 
-            pace.util.utils.safe_assign_array(
-                output_dict["ps"], self.dycore_state.ps.data[:-1, :-1]
-            )
-            pace.util.utils.safe_assign_array(
+            safe_assign_array(output_dict["ps"], self.dycore_state.ps.data[:-1, :-1])
+            safe_assign_array(
                 output_dict["pe"],
                 self.dycore_state.pe.data[isc - 1 : iec + 1, jsc - 1 : jec + 1, :],
             )
-            pace.util.utils.safe_assign_array(
+            safe_assign_array(
                 output_dict["pk"], self.dycore_state.pk.data[isc:iec, jsc:jec, :]
             )
-            pace.util.utils.safe_assign_array(
+            safe_assign_array(
                 output_dict["peln"], self.dycore_state.peln.data[isc:iec, jsc:jec, :]
             )
-            pace.util.utils.safe_assign_array(
+            safe_assign_array(
                 output_dict["pkz"], self.dycore_state.pkz.data[isc:iec, jsc:jec, :-1]
             )
-            pace.util.utils.safe_assign_array(
+            safe_assign_array(
                 output_dict["phis"], self.dycore_state.phis.data[:-1, :-1]
             )
-            pace.util.utils.safe_assign_array(
+            safe_assign_array(
                 output_dict["q_con"], self.dycore_state.q_con.data[:-1, :-1, :-1]
             )
-            pace.util.utils.safe_assign_array(
+            safe_assign_array(
                 output_dict["omga"], self.dycore_state.omga.data[:-1, :-1, :-1]
             )
-            pace.util.utils.safe_assign_array(
+            safe_assign_array(
                 output_dict["diss_estd"],
                 self.dycore_state.diss_estd.data[:-1, :-1, :-1],
             )
 
-            pace.util.utils.safe_assign_array(
+            safe_assign_array(
                 output_dict["qvapor"], self.dycore_state.qvapor.data[:-1, :-1, :-1]
             )
-            pace.util.utils.safe_assign_array(
+            safe_assign_array(
                 output_dict["qliquid"], self.dycore_state.qliquid.data[:-1, :-1, :-1]
             )
-            pace.util.utils.safe_assign_array(
+            safe_assign_array(
                 output_dict["qice"], self.dycore_state.qice.data[:-1, :-1, :-1]
             )
-            pace.util.utils.safe_assign_array(
+            safe_assign_array(
                 output_dict["qrain"], self.dycore_state.qrain.data[:-1, :-1, :-1]
             )
-            pace.util.utils.safe_assign_array(
+            safe_assign_array(
                 output_dict["qsnow"], self.dycore_state.qsnow.data[:-1, :-1, :-1]
             )
-            pace.util.utils.safe_assign_array(
+            safe_assign_array(
                 output_dict["qgraupel"], self.dycore_state.qgraupel.data[:-1, :-1, :-1]
             )
-            pace.util.utils.safe_assign_array(
+            safe_assign_array(
                 output_dict["qcld"], self.dycore_state.qcld.data[:-1, :-1, :-1]
             )
         else:

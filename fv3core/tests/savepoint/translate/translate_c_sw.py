@@ -1,14 +1,16 @@
-import pace.dsl
-import pace.util
+from ndsl.dsl.stencil import StencilFactory
+from ndsl.initialization.allocator import QuantityFactory
+from ndsl.namelist import Namelist
+
 from pace.fv3core.stencils.c_sw import CGridShallowWaterDynamics
 from pace.fv3core.testing import TranslateDycoreFortranData2Py
 
 
 def get_c_sw_instance(
     grid,
-    namelist: pace.util.Namelist,
-    stencil_factory: pace.dsl.StencilFactory,
-    quantity_factory: pace.util.QuantityFactory,
+    namelist: Namelist,
+    stencil_factory: StencilFactory,
+    quantity_factory: QuantityFactory,
 ):
     return CGridShallowWaterDynamics(
         stencil_factory,
@@ -71,8 +73,8 @@ class TranslateC_SW(TranslateDycoreFortranData2Py):
     def __init__(
         self,
         grid,
-        namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        namelist: Namelist,
+        stencil_factory: StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
         cgrid_shallow_water_lagrangian_dynamics = get_c_sw_instance(
@@ -117,8 +119,8 @@ class TranslateDivergenceCorner(TranslateDycoreFortranData2Py):
     def __init__(
         self,
         grid,
-        namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        namelist: Namelist,
+        stencil_factory: StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
         self.max_error = 9e-10
@@ -175,8 +177,8 @@ class TranslateCirculation_Cgrid(TranslateDycoreFortranData2Py):
     def __init__(
         self,
         grid,
-        namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        namelist: Namelist,
+        stencil_factory: StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
         self.max_error = 5e-9
@@ -217,8 +219,8 @@ class TranslateVorticityTransport_Cgrid(TranslateDycoreFortranData2Py):
     def __init__(
         self,
         grid,
-        namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        namelist: Namelist,
+        stencil_factory: StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
         cgrid_sw_lagrangian_dynamics = get_c_sw_instance(

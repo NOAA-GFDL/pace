@@ -1,6 +1,7 @@
-import pace.dsl
+from ndsl.dsl.stencil import StencilFactory
+from ndsl.namelist import Namelist
+
 import pace.fv3core
-import pace.util
 from pace.fv3core import DynamicalCoreConfig
 from pace.fv3core.stencils.saturation_adjustment import SatAdjust3d
 from pace.fv3core.testing import TranslateDycoreFortranData2Py
@@ -10,8 +11,8 @@ class TranslateSatAdjust3d(TranslateDycoreFortranData2Py):
     def __init__(
         self,
         grid,
-        namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        namelist: Namelist,
+        stencil_factory: StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
         self.in_vars["data_vars"] = {

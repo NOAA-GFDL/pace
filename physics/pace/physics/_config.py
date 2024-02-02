@@ -3,8 +3,8 @@ from enum import Enum, unique
 from typing import List, Optional, Tuple
 
 import f90nml
-
-from pace.util import MetaEnumStr, Namelist, NamelistDefaults
+from ndsl.namelist import Namelist, NamelistDefaults
+from ndsl.utils import MetaEnumStr
 
 
 DEFAULT_INT = 0

@@ -1,12 +1,12 @@
 from gt4py.cartesian.gtscript import PARALLEL, computation, interval
+from ndsl.constants import X_DIM, Y_DIM, Z_INTERFACE_DIM
+from ndsl.dsl.dace import orchestrate
+from ndsl.dsl.stencil import StencilFactory
+from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ
+from ndsl.grid import GridData
+from ndsl.initialization.allocator import QuantityFactory
 
-import pace.util
-from pace.dsl.dace import orchestrate
-from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import Float, FloatField, FloatFieldIJ
 from pace.fv3core.stencils.a2b_ord4 import AGrid2BGridFourthOrder
-from pace.util import X_DIM, Y_DIM, Z_INTERFACE_DIM
-from pace.util.grid import GridData
 
 
 def set_k0_and_calc_wk(
@@ -127,7 +127,7 @@ class NonHydrostaticPressureGradient:
     def __init__(
         self,
         stencil_factory: StencilFactory,
-        quantity_factory: pace.util.QuantityFactory,
+        quantity_factory: QuantityFactory,
         grid_data: GridData,
         grid_type,
     ):

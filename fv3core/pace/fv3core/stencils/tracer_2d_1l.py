@@ -3,15 +3,23 @@ from typing import Dict
 
 import gt4py.cartesian.gtscript as gtscript
 from gt4py.cartesian.gtscript import PARALLEL, computation, horizontal, interval, region
+from ndsl.comm.communicator import Communicator
+from ndsl.constants import (
+    N_HALO_DEFAULT,
+    X_DIM,
+    X_INTERFACE_DIM,
+    Y_DIM,
+    Y_INTERFACE_DIM,
+    Z_DIM,
+)
+from ndsl.dsl.dace.orchestration import orchestrate
+from ndsl.dsl.dace.wrapped_halo_exchange import WrappedHaloUpdater
+from ndsl.dsl.stencil import StencilFactory
+from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ
+from ndsl.initialization.allocator import QuantityFactory
+from ndsl.quantity import Quantity
 
-import pace.dsl.gt4py_utils as utils
-import pace.util
-from pace.dsl.dace.orchestration import orchestrate
-from pace.dsl.dace.wrapped_halo_exchange import WrappedHaloUpdater
-from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import Float, FloatField, FloatFieldIJ
 from pace.fv3core.stencils.fvtp2d import FiniteVolumeTransport
-from pace.util import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_DIM
 
 
 @gtscript.function
@@ -178,11 +186,11 @@ class TracerAdvection:
     def __init__(
         self,
         stencil_factory: StencilFactory,
-        quantity_factory: pace.util.QuantityFactory,
+        quantity_factory: QuantityFactory,
         transport: FiniteVolumeTransport,
         grid_data,
-        comm: pace.util.Communicator,
-        tracers: Dict[str, pace.util.Quantity],
+        comm: Communicator,
+        tracers: Dict[str, Quantity],
     ):
         orchestrate(
             obj=self,
@@ -268,8 +276,8 @@ class TracerAdvection:
 
         # Setup halo updater for tracers
         tracer_halo_spec = quantity_factory.get_quantity_halo_spec(
-            dims=[pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM],
-            n_halo=utils.halo,
+            dims=[X_DIM, Y_DIM, Z_DIM],
+            n_halo=N_HALO_DEFAULT,
             dtype=Float,
         )
         self._tracers_halo_updater = WrappedHaloUpdater(
@@ -280,7 +288,7 @@ class TracerAdvection:
 
     def __call__(
         self,
-        tracers: Dict[str, pace.util.Quantity],
+        tracers: Dict[str, Quantity],
         dp1,
         x_mass_flux,
         y_mass_flux,

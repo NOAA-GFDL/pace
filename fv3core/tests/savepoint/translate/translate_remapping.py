@@ -1,18 +1,19 @@
-import pace.dsl
-import pace.dsl.gt4py_utils as utils
-import pace.util
+import ndsl.dsl.gt4py_utils as utils
+from ndsl.constants import Z_DIM
+from ndsl.dsl.stencil import StencilFactory
+from ndsl.namelist import Namelist
+
 from pace.fv3core import DynamicalCoreConfig
 from pace.fv3core.stencils.remapping import LagrangianToEulerian
 from pace.fv3core.testing import TranslateDycoreFortranData2Py
-from pace.util import Z_DIM
 
 
 class TranslateRemapping(TranslateDycoreFortranData2Py):
     def __init__(
         self,
         grid,
-        namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        namelist: Namelist,
+        stencil_factory: StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
         self.in_vars["data_vars"] = {

@@ -3,17 +3,16 @@ from datetime import datetime, timedelta
 from typing import Literal, Tuple
 
 import pytest
-
-import pace.driver
-import pace.dsl
-from pace.driver import CreatesCommSelector, DriverConfig, NullCommConfig
-from pace.driver.performance.report import (
+from ndsl.comm.null_comm import NullComm
+from ndsl.dsl.stencil import StencilConfig
+from ndsl.performance.report import (
     TimeReport,
     gather_hit_counts,
     gather_timing_data,
     get_sypd,
 )
-from pace.util.null_comm import NullComm
+
+from pace.driver import CreatesCommSelector, DriverConfig, NullCommConfig
 
 
 def get_driver_config(
@@ -35,7 +34,7 @@ def get_driver_config(
     else:
         initialization_config.start_time = datetime(2000, 1, 1)
     return DriverConfig(
-        stencil_config=pace.dsl.StencilConfig(),
+        stencil_config=StencilConfig(),
         nx_tile=nx_tile,
         nz=nz,
         dt_atmos=dt_atmos,

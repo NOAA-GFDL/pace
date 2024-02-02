@@ -1,9 +1,8 @@
 from gt4py.cartesian.gtscript import FORWARD, computation, horizontal, interval, region
-
-import pace.util
-from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import Float, FloatField, FloatFieldIJ
-from pace.util import X_DIM, Y_DIM
+from ndsl.constants import X_DIM, Y_DIM
+from ndsl.dsl.stencil import StencilFactory
+from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ
+from ndsl.initialization.allocator import QuantityFactory
 
 
 # TODO merge with pe_halo? reuse partials?
@@ -41,7 +40,7 @@ class PK3Halo:
     def __init__(
         self,
         stencil_factory: StencilFactory,
-        quantity_factory: pace.util.QuantityFactory,
+        quantity_factory: QuantityFactory,
     ):
         grid_indexing = stencil_factory.grid_indexing
         origin = grid_indexing.origin_full()

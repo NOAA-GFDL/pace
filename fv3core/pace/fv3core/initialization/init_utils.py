@@ -2,14 +2,13 @@ import math
 from dataclasses import fields
 from types import SimpleNamespace
 
+import ndsl.constants as constants
 import numpy as np
+from ndsl.dsl.typing import Float
+from ndsl.grid import lon_lat_midpoint
+from ndsl.grid.gnomonic import get_lonlat_vect, get_unit_vector_direction
 
-import pace.util as fv3util
-import pace.util.constants as constants
-from pace.dsl.typing import Float
 from pace.fv3core.dycore_state import DycoreState
-from pace.util.grid import lon_lat_midpoint
-from pace.util.grid.gnomonic import get_lonlat_vect, get_unit_vector_direction
 
 
 # maximum windspeed amplitude - close to windspeed of zonal-mean time-mean
@@ -29,7 +28,7 @@ LAPSE_RATE = 0.005  # From Table VI of DCMIP2016
 SURFACE_PRESSURE = 1.0e5  # units of (Pa), from Table VI of DCMIP2016
 # NOTE RADIUS = 6.3712e6 in FV3 vs Jabowski paper 6.371229e6
 R = constants.RADIUS / 10.0  # Perturbation radiusfor test case 13
-NHALO = fv3util.N_HALO_DEFAULT
+NHALO = constants.N_HALO_DEFAULT
 
 
 def cell_average_nine_components(
@@ -128,7 +127,6 @@ def empty_numpy_dycore_state(shape):
 
 
 def _find_midpoint_unit_vectors(p1, p2):
-
     midpoint = np.array(
         lon_lat_midpoint(p1[:, :, 0], p2[:, :, 0], p1[:, :, 1], p2[:, :, 1], np)
     ).transpose([1, 2, 0])

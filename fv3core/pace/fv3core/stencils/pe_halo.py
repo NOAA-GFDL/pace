@@ -1,6 +1,5 @@
 from gt4py.cartesian.gtscript import FORWARD, computation, horizontal, interval, region
-
-from pace.dsl.typing import Float, FloatField
+from ndsl.dsl.typing import Float, FloatField
 
 
 def edge_pe(pe: FloatField, delp: FloatField, ptop: Float):

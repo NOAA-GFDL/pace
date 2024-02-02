@@ -1,16 +1,25 @@
 from datetime import timedelta
 from typing import Mapping, Optional
 
+import ndsl.dsl.gt4py_utils as utils
 from dace.frontend.python.interface import nounroll as dace_no_unroll
 from gt4py.cartesian.gtscript import PARALLEL, computation, interval
+from ndsl.checkpointer import Checkpointer, NullCheckpointer
+from ndsl.comm.communicator import Communicator
+from ndsl.comm.mpi import MPI
+from ndsl.constants import KAPPA, NQ, X_DIM, Y_DIM, Z_DIM, Z_INTERFACE_DIM, ZVIR
+from ndsl.dsl.dace.orchestration import dace_inhibitor, orchestrate
+from ndsl.dsl.dace.wrapped_halo_exchange import WrappedHaloUpdater
+from ndsl.dsl.stencil import StencilFactory
+from ndsl.dsl.typing import Float, FloatField
+from ndsl.grid import DampingCoefficients, GridData
+from ndsl.initialization.allocator import QuantityFactory
+from ndsl.logging import ndsl_log
+from ndsl.performance.timer import NullTimer, Timer
+from ndsl.quantity import Quantity
+from ndsl.stencils.c2l_ord import CubedToLatLon
 
-import pace.dsl.gt4py_utils as utils
 import pace.fv3core.stencils.moist_cv as moist_cv
-import pace.util
-from pace.dsl.dace.orchestration import dace_inhibitor, orchestrate
-from pace.dsl.dace.wrapped_halo_exchange import WrappedHaloUpdater
-from pace.dsl.stencil import StencilFactory
-from pace.dsl.typing import Float, FloatField
 from pace.fv3core._config import DynamicalCoreConfig
 from pace.fv3core.dycore_state import DycoreState
 from pace.fv3core.stencils import fvtp2d, tracer_2d_1l
@@ -19,11 +28,6 @@ from pace.fv3core.stencils.del2cubed import HyperdiffusionDamping
 from pace.fv3core.stencils.dyn_core import AcousticDynamics
 from pace.fv3core.stencils.neg_adj3 import AdjustNegativeTracerMixingRatio
 from pace.fv3core.stencils.remapping import LagrangianToEulerian
-from pace.stencils.c2l_ord import CubedToLatLon
-from pace.util import X_DIM, Y_DIM, Z_INTERFACE_DIM, Timer, constants
-from pace.util.grid import DampingCoefficients, GridData
-from pace.util.logging import pace_log
-from pace.util.mpi import MPI
 
 
 def pt_to_potential_density_pt(
@@ -55,19 +59,19 @@ def omega_from_w(delp: FloatField, delz: FloatField, w: FloatField, omega: Float
 
 
 def fvdyn_temporaries(
-    quantity_factory: pace.util.QuantityFactory,
-) -> Mapping[str, pace.util.Quantity]:
+    quantity_factory: QuantityFactory,
+) -> Mapping[str, Quantity]:
     tmps = {}
     for name in ["te_2d", "te0_2d", "wsd"]:
         quantity = quantity_factory.zeros(
-            dims=[pace.util.X_DIM, pace.util.Y_DIM],
+            dims=[X_DIM, Y_DIM],
             units="unknown",
             dtype=Float,
         )
         tmps[name] = quantity
     for name in ["dp1", "cvm"]:
         quantity = quantity_factory.zeros(
-            dims=[pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM],
+            dims=[X_DIM, Y_DIM, Z_DIM],
             units="unknown",
             dtype=Float,
         )
@@ -79,7 +83,7 @@ def fvdyn_temporaries(
 def log_on_rank_0(msg: str):
     """Print when rank is 0 - outside of DaCe critical path"""
     if not MPI or MPI.COMM_WORLD.Get_rank() == 0:
-        pace_log.info(msg)
+        ndsl_log.info(msg)
 
 
 class DynamicalCore:
@@ -89,16 +93,16 @@ class DynamicalCore:
 
     def __init__(
         self,
-        comm: pace.util.Communicator,
+        comm: Communicator,
         grid_data: GridData,
         stencil_factory: StencilFactory,
-        quantity_factory: pace.util.QuantityFactory,
+        quantity_factory: QuantityFactory,
         damping_coefficients: DampingCoefficients,
         config: DynamicalCoreConfig,
-        phis: pace.util.Quantity,
+        phis: Quantity,
         state: DycoreState,
         timestep: timedelta,
-        checkpointer: Optional[pace.util.Checkpointer] = None,
+        checkpointer: Optional[Checkpointer] = None,
     ):
         """
         Args:
@@ -180,7 +184,7 @@ class DynamicalCore:
         # have not implemented, so they are hard-coded here.
         self.call_checkpointer = checkpointer is not None
         if checkpointer is None:
-            self.checkpointer: pace.util.Checkpointer = pace.util.NullCheckpointer()
+            self.checkpointer: Checkpointer = NullCheckpointer()
         else:
             self.checkpointer = checkpointer
         nested = False
@@ -213,7 +217,7 @@ class DynamicalCore:
         )
 
         self.tracers = {}
-        for name in utils.tracer_variables[0 : constants.NQ]:
+        for name in utils.tracer_variables[0:NQ]:
             self.tracers[name] = state.__dict__[name]
 
         temporaries = fvdyn_temporaries(quantity_factory)
@@ -294,7 +298,7 @@ class DynamicalCore:
         )
         self._cappa = self.acoustic_dynamics.cappa
 
-        if not (not self.config.inline_q and constants.NQ != 0):
+        if not (not self.config.inline_q and NQ != 0):
             raise NotImplementedError(
                 "Dynamical core (fv_dynamics):"
                 "tracer_2d not implemented. z_tracer available"
@@ -311,14 +315,14 @@ class DynamicalCore:
             quantity_factory=quantity_factory,
             config=config.remapping,
             area_64=grid_data.area_64,
-            nq=constants.NQ,
+            nq=NQ,
             pfull=self._pfull,
             tracers=self.tracers,
             checkpointer=checkpointer,
         )
 
         full_xyz_spec = quantity_factory.get_quantity_halo_spec(
-            dims=[pace.util.X_DIM, pace.util.Y_DIM, pace.util.Z_DIM],
+            dims=[X_DIM, Y_DIM, Z_DIM],
             n_halo=grid_indexing.n_halo,
             dtype=Float,
         )
@@ -441,7 +445,7 @@ class DynamicalCore:
     def step_dynamics(
         self,
         state: DycoreState,
-        timer: Timer = pace.util.NullTimer(),
+        timer: Timer = NullTimer(),
     ):
         """
         Step the model state forward by one timestep.
@@ -506,7 +510,7 @@ class DynamicalCore:
     def __call__(self, *args, **kwargs):
         return self.step_dynamics(*args, **kwargs)
 
-    def _compute(self, state: DycoreState, timer: pace.util.Timer):
+    def _compute(self, state: DycoreState, timer: Timer):
         last_step = False
         self.compute_preamble(
             state,
@@ -593,8 +597,8 @@ class DynamicalCore:
                         self._bk,
                         self._dp_initial,
                         self._ptop,
-                        constants.KAPPA,
-                        constants.ZVIR,
+                        KAPPA,
+                        ZVIR,
                         last_step,
                         self._conserve_total_energy,
                         self._timestep / self._k_split,

@@ -1,7 +1,8 @@
 from typing import Any, Dict
 
-import pace.dsl
-import pace.util
+from ndsl.dsl.stencil import StencilFactory
+from ndsl.namelist import Namelist
+
 from pace.fv3core.stencils.del2cubed import HyperdiffusionDamping
 from pace.fv3core.testing import TranslateDycoreFortranData2Py
 
@@ -10,8 +11,8 @@ class TranslateDel2Cubed(TranslateDycoreFortranData2Py):
     def __init__(
         self,
         grid,
-        namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        namelist: Namelist,
+        stencil_factory: StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
         self.in_vars["data_vars"] = {"qdel": {}}

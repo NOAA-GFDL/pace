@@ -1,5 +1,6 @@
-import pace.dsl
-import pace.util
+from ndsl.dsl.stencil import StencilFactory
+from ndsl.namelist import Namelist
+
 from pace.fv3core.stencils import pe_halo
 from pace.fv3core.testing import TranslateDycoreFortranData2Py
 
@@ -26,10 +27,9 @@ class TranslatePE_Halo(TranslateDycoreFortranData2Py):
     def __init__(
         self,
         grid,
-        namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        namelist: Namelist,
+        stencil_factory: StencilFactory,
     ):
-
         super().__init__(grid, namelist, stencil_factory)
         self.in_vars["data_vars"] = {
             "pe": {

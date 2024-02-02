@@ -1,6 +1,8 @@
-import pace.dsl
+from ndsl.constants import Z_DIM
+from ndsl.dsl.stencil import StencilFactory
+from ndsl.namelist import Namelist
+
 import pace.fv3core.stencils.delnflux as delnflux
-import pace.util
 from pace.fv3core.testing import TranslateDycoreFortranData2Py
 
 
@@ -8,8 +10,8 @@ class TranslateDelnFlux(TranslateDycoreFortranData2Py):
     def __init__(
         self,
         grid,
-        namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        namelist: Namelist,
+        stencil_factory: StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
         self.in_vars["data_vars"] = {
@@ -29,13 +31,9 @@ class TranslateDelnFlux(TranslateDycoreFortranData2Py):
         if "mass" not in inputs:
             inputs["mass"] = None
         self.make_storage_data_input_vars(inputs)
-        nord_col = self.grid.quantity_factory.zeros(
-            dims=[pace.util.Z_DIM], units="unknown"
-        )
+        nord_col = self.grid.quantity_factory.zeros(dims=[Z_DIM], units="unknown")
         nord_col.data[:] = nord_col.np.asarray(inputs.pop("nord_column"))
-        damp_c = self.grid.quantity_factory.zeros(
-            dims=[pace.util.Z_DIM], units="unknown"
-        )
+        damp_c = self.grid.quantity_factory.zeros(dims=[Z_DIM], units="unknown")
         damp_c.data[:] = damp_c.np.asarray(inputs.pop("damp_c"))
         self.compute_func = delnflux.DelnFlux(  # type: ignore
             self.stencil_factory,
@@ -53,8 +51,8 @@ class TranslateDelnFlux_2(TranslateDelnFlux):
     def __init__(
         self,
         grid,
-        namelist: pace.util.Namelist,
-        stencil_factory: pace.dsl.StencilFactory,
+        namelist: Namelist,
+        stencil_factory: StencilFactory,
     ):
         super().__init__(grid, namelist, stencil_factory)
         del self.in_vars["data_vars"]["mass"]

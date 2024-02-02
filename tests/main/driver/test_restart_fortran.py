@@ -2,18 +2,16 @@ import os
 
 import numpy as np
 import xarray as xr
+from ndsl.comm.communicator import CubedSphereCommunicator
+from ndsl.comm.local_comm import LocalComm
+from ndsl.comm.null_comm import NullComm
+from ndsl.comm.partitioner import CubedSpherePartitioner, TilePartitioner
+from ndsl.initialization.allocator import QuantityFactory
+from ndsl.initialization.sizer import SubtileGridSizer
 
 import pace.driver
-import pace.util
 from pace.driver.initialization import FortranRestartInit
 from pace.physics import PHYSICS_PACKAGES
-from pace.util import (
-    CubedSphereCommunicator,
-    CubedSpherePartitioner,
-    QuantityFactory,
-    SubtileGridSizer,
-    TilePartitioner,
-)
 
 
 DIR = os.path.dirname(os.path.abspath(__file__))
@@ -25,8 +23,8 @@ def test_state_from_fortran_restart():
     partitioner = CubedSpherePartitioner(TilePartitioner(layout))
     # need a local communicator to mock "scatter" for the restart data,
     # but need null communicator to handle grid initialization
-    local_comm = pace.util.LocalComm(rank=0, total_ranks=6, buffer_dict={})
-    null_comm = pace.util.NullComm(rank=0, total_ranks=6)
+    local_comm = LocalComm(rank=0, total_ranks=6, buffer_dict={})
+    null_comm = NullComm(rank=0, total_ranks=6)
     local_communicator = CubedSphereCommunicator(local_comm, partitioner)
     null_communicator = CubedSphereCommunicator(null_comm, partitioner)
 
@@ -42,7 +40,7 @@ def test_state_from_fortran_restart():
     )
 
     quantity_factory = QuantityFactory.from_backend(sizer=sizer, backend="numpy")
-    restart_dir = os.path.join(PACE_DIR, "util/tests/data/c12_restart")
+    restart_dir = os.path.join(PACE_DIR, "tests/main/data/c12_restart")
 
     (
         damping_coefficients,

@@ -3,10 +3,7 @@ from typing import Sequence
 import numpy as np
 import pytest
 from gt4py.cartesian import gtscript
-
-import pace.dsl.stencil
-from pace.dsl.typing import Index3D
-from pace.util import (
+from ndsl.constants import (
     X_DIM,
     X_INTERFACE_DIM,
     Y_DIM,
@@ -14,6 +11,8 @@ from pace.util import (
     Z_DIM,
     Z_INTERFACE_DIM,
 )
+from ndsl.dsl.stencil import GridIndexing
+from ndsl.dsl.typing import Index3D
 
 
 @pytest.mark.parametrize("domain, n_halo", [pytest.param((4, 4, 4), 3, id="3_halo")])
@@ -67,7 +66,7 @@ def test_axis_offsets(
     j_start,
     j_end,
 ):
-    grid = pace.dsl.stencil.GridIndexing(
+    grid = GridIndexing(
         domain=domain,
         n_halo=n_halo,
         south_edge=south_edge,
@@ -137,7 +136,7 @@ def test_origin_full(
     add: Index3D,
     origin_full: Index3D,
 ):
-    grid = pace.dsl.stencil.GridIndexing(
+    grid = GridIndexing(
         domain=domain,
         n_halo=n_halo,
         south_edge=south_edge,
@@ -185,7 +184,7 @@ def test_origin_compute(
     add: Index3D,
     origin_compute: Index3D,
 ):
-    grid = pace.dsl.stencil.GridIndexing(
+    grid = GridIndexing(
         domain=domain,
         n_halo=n_halo,
         south_edge=south_edge,
@@ -223,7 +222,7 @@ def test_domain_full(
     add: Index3D,
     domain_full: Index3D,
 ):
-    grid = pace.dsl.stencil.GridIndexing(
+    grid = GridIndexing(
         domain=domain,
         n_halo=n_halo,
         south_edge=south_edge,
@@ -262,7 +261,7 @@ def test_domain_compute(
     add: Index3D,
     domain_compute: Index3D,
 ):
-    grid = pace.dsl.stencil.GridIndexing(
+    grid = GridIndexing(
         domain=domain,
         n_halo=n_halo,
         south_edge=south_edge,
@@ -437,7 +436,7 @@ def test_get_origin_domain(
     origin_expected: Sequence[int],
     domain_expected: Sequence[int],
 ):
-    grid = pace.dsl.stencil.GridIndexing(
+    grid = GridIndexing(
         domain=domain,
         n_halo=n_halo,
         south_edge=south_edge,
@@ -496,7 +495,7 @@ def test_get_origin_domain_restricted_vertical(
     domain_expected: Sequence[int],
 ):
     k_start = 2
-    grid = pace.dsl.stencil.GridIndexing(
+    grid = GridIndexing(
         domain=domain,
         n_halo=n_halo,
         south_edge=south_edge,
@@ -610,7 +609,7 @@ def test_get_shape(
     halos: Sequence[int],
     shape_expected: Sequence[int],
 ):
-    grid = pace.dsl.stencil.GridIndexing(
+    grid = GridIndexing(
         domain=domain,
         n_halo=n_halo,
         south_edge=south_edge,
@@ -637,7 +636,7 @@ def test_restrict_vertical_defaults(
     n_halo, south_edge, north_edge, west_edge, east_edge
 ):
     domain = (3, 4, 10)
-    grid = pace.dsl.stencil.GridIndexing(
+    grid = GridIndexing(
         domain=domain,
         n_halo=n_halo,
         south_edge=south_edge,
@@ -665,7 +664,7 @@ def test_restrict_vertical_default_domain(
     n_halo, south_edge, north_edge, west_edge, east_edge
 ):
     domain = (3, 4, 10)
-    grid = pace.dsl.stencil.GridIndexing(
+    grid = GridIndexing(
         domain=domain,
         n_halo=n_halo,
         south_edge=south_edge,
@@ -693,7 +692,7 @@ def test_restrict_vertical_max_shape(
     n_halo, south_edge, north_edge, west_edge, east_edge
 ):
     domain = (3, 4, 10)
-    grid = pace.dsl.stencil.GridIndexing(
+    grid = GridIndexing(
         domain=domain,
         n_halo=n_halo,
         south_edge=south_edge,
@@ -722,7 +721,7 @@ def test_restrict_vertical(
     n_halo, south_edge, north_edge, west_edge, east_edge, k_start, nk
 ):
     domain = (3, 4, 10)
-    grid = pace.dsl.stencil.GridIndexing(
+    grid = GridIndexing(
         domain=domain,
         n_halo=n_halo,
         south_edge=south_edge,
@@ -760,7 +759,7 @@ def test_restrict_vertical_twice(
     second_nk,
 ):
     domain = (3, 4, 10)
-    grid = pace.dsl.stencil.GridIndexing(
+    grid = GridIndexing(
         domain=domain,
         n_halo=n_halo,
         south_edge=south_edge,
@@ -792,7 +791,7 @@ def test_restrict_vertical_raises(
     n_halo, south_edge, north_edge, west_edge, east_edge, k_start, nk
 ):
     domain = (3, 4, 10)
-    grid = pace.dsl.stencil.GridIndexing(
+    grid = GridIndexing(
         domain=domain,
         n_halo=n_halo,
         south_edge=south_edge,

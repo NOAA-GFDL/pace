@@ -1,6 +1,5 @@
 from gt4py.cartesian import gtscript
-
-from pace.dsl.typing import FloatField
+from ndsl.dsl.typing import FloatField
 
 
 # volume-conserving cubic with 2nd drv=0 at end point:

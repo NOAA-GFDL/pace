@@ -1,5 +1,6 @@
 from typing import Dict, Mapping, Optional
 
+import ndsl.constants as constants
 from dace.frontend.python.interface import nounroll as dace_nounroll
 from gt4py.cartesian.gtscript import (
     __INLINED,
@@ -11,6 +12,23 @@ from gt4py.cartesian.gtscript import (
     interval,
     region,
 )
+from ndsl.checkpointer import Checkpointer, NullCheckpointer
+from ndsl.comm.communicator import Communicator
+from ndsl.constants import (
+    X_DIM,
+    X_INTERFACE_DIM,
+    Y_DIM,
+    Y_INTERFACE_DIM,
+    Z_DIM,
+    Z_INTERFACE_DIM,
+)
+from ndsl.dsl.dace.orchestration import dace_inhibitor, orchestrate
+from ndsl.dsl.dace.wrapped_halo_exchange import WrappedHaloUpdater
+from ndsl.dsl.stencil import GridIndexing, StencilFactory
+from ndsl.dsl.typing import Float, FloatField, FloatFieldIJ
+from ndsl.grid import DampingCoefficients, GridData
+from ndsl.initialization.allocator import QuantityFactory
+from ndsl.quantity import Quantity
 
 import pace.fv3core.stencils.basic_operations as basic
 import pace.fv3core.stencils.d_sw as d_sw
@@ -20,13 +38,6 @@ import pace.fv3core.stencils.ray_fast as ray_fast
 import pace.fv3core.stencils.temperature_adjust as temperature_adjust
 import pace.fv3core.stencils.updatedzc as updatedzc
 import pace.fv3core.stencils.updatedzd as updatedzd
-import pace.util
-import pace.util as fv3util
-import pace.util.constants as constants
-from pace.dsl.dace.orchestration import dace_inhibitor, orchestrate
-from pace.dsl.dace.wrapped_halo_exchange import WrappedHaloUpdater
-from pace.dsl.stencil import GridIndexing, StencilFactory
-from pace.dsl.typing import Float, FloatField, FloatFieldIJ
 from pace.fv3core._config import AcousticDynamicsConfig
 from pace.fv3core.dycore_state import DycoreState
 from pace.fv3core.stencils.c_sw import CGridShallowWaterDynamics
@@ -34,15 +45,6 @@ from pace.fv3core.stencils.del2cubed import HyperdiffusionDamping
 from pace.fv3core.stencils.pk3_halo import PK3Halo
 from pace.fv3core.stencils.riem_solver3 import NonhydrostaticVerticalSolver
 from pace.fv3core.stencils.riem_solver_c import NonhydrostaticVerticalSolverCGrid
-from pace.util import (
-    X_DIM,
-    X_INTERFACE_DIM,
-    Y_DIM,
-    Y_INTERFACE_DIM,
-    Z_DIM,
-    Z_INTERFACE_DIM,
-)
-from pace.util.grid import DampingCoefficients, GridData
 
 
 HUGE_R = 1.0e40
@@ -190,9 +192,9 @@ def get_nk_heat_dissipation(
 
 
 def dyncore_temporaries(
-    quantity_factory: pace.util.QuantityFactory,
-) -> Mapping[str, pace.util.Quantity]:
-    temporaries: Dict[str, pace.util.Quantity] = {}
+    quantity_factory: QuantityFactory,
+) -> Mapping[str, Quantity]:
+    temporaries: Dict[str, Quantity] = {}
     for name in ["ut", "vt", "gz", "zh", "pem", "pkc", "pk3", "heat_source", "cappa"]:
         # TODO: the dimensions of ut and vt may not be correct,
         #       because they are not used. double-check and correct as needed.
@@ -243,41 +245,41 @@ class AcousticDynamics:
 
         def __init__(
             self,
-            comm: pace.util.Communicator,
+            comm: Communicator,
             grid_indexing: GridIndexing,
-            quantity_factory: pace.util.QuantityFactory,
+            quantity_factory: QuantityFactory,
             state: DycoreState,
-            cappa: pace.util.Quantity,
-            gz: pace.util.Quantity,
-            zh: pace.util.Quantity,
-            divgd: pace.util.Quantity,
-            heat_source: pace.util.Quantity,
-            pkc: pace.util.Quantity,
+            cappa: Quantity,
+            gz: Quantity,
+            zh: Quantity,
+            divgd: Quantity,
+            heat_source: Quantity,
+            pkc: Quantity,
         ):
             # Define the memory specification required
             # Those can be re-used as they are read-only descriptors
             full_size_xyz_halo_spec = quantity_factory.get_quantity_halo_spec(
-                dims=[fv3util.X_DIM, fv3util.Y_DIM, fv3util.Z_DIM],
+                dims=[X_DIM, Y_DIM, Z_DIM],
                 n_halo=grid_indexing.n_halo,
                 dtype=Float,
             )
             full_size_xyiz_halo_spec = quantity_factory.get_quantity_halo_spec(
-                dims=[fv3util.X_DIM, fv3util.Y_INTERFACE_DIM, fv3util.Z_DIM],
+                dims=[X_DIM, Y_INTERFACE_DIM, Z_DIM],
                 n_halo=grid_indexing.n_halo,
                 dtype=Float,
             )
             full_size_xiyz_halo_spec = quantity_factory.get_quantity_halo_spec(
-                dims=[fv3util.X_INTERFACE_DIM, fv3util.Y_DIM, fv3util.Z_DIM],
+                dims=[X_INTERFACE_DIM, Y_DIM, Z_DIM],
                 n_halo=grid_indexing.n_halo,
                 dtype=Float,
             )
             full_size_xyzi_halo_spec = quantity_factory.get_quantity_halo_spec(
-                dims=[fv3util.X_DIM, fv3util.Y_DIM, fv3util.Z_INTERFACE_DIM],
+                dims=[X_DIM, Y_DIM, Z_INTERFACE_DIM],
                 n_halo=grid_indexing.n_halo,
                 dtype=Float,
             )
             full_size_xiyiz_halo_spec = quantity_factory.get_quantity_halo_spec(
-                dims=[fv3util.X_INTERFACE_DIM, fv3util.Y_INTERFACE_DIM, fv3util.Z_DIM],
+                dims=[X_INTERFACE_DIM, Y_INTERFACE_DIM, Z_DIM],
                 n_halo=grid_indexing.n_halo,
                 dtype=Float,
             )
@@ -339,7 +341,7 @@ class AcousticDynamics:
             )
             if grid_indexing.domain[0] == grid_indexing.domain[1]:
                 full_3Dfield_2pts_halo_spec = quantity_factory.get_quantity_halo_spec(
-                    dims=[fv3util.X_DIM, fv3util.Y_DIM, fv3util.Z_INTERFACE_DIM],
+                    dims=[X_DIM, Y_DIM, Z_INTERFACE_DIM],
                     n_halo=2,
                     dtype=Float,
                 )
@@ -364,9 +366,9 @@ class AcousticDynamics:
 
     def __init__(
         self,
-        comm: pace.util.Communicator,
+        comm: Communicator,
         stencil_factory: StencilFactory,
-        quantity_factory: pace.util.QuantityFactory,
+        quantity_factory: QuantityFactory,
         grid_data: GridData,
         damping_coefficients: DampingCoefficients,
         grid_type,
@@ -376,7 +378,7 @@ class AcousticDynamics:
         phis: FloatFieldIJ,
         wsd: FloatFieldIJ,
         state,  # [DaCe] hack to get around quantity as parameters for halo updates
-        checkpointer: Optional[pace.util.Checkpointer] = None,
+        checkpointer: Optional[Checkpointer] = None,
     ):
         """
         Args:
@@ -424,7 +426,7 @@ class AcousticDynamics:
 
         self.call_checkpointer = checkpointer is not None
         if checkpointer is None:
-            self.checkpointer: pace.util.Checkpointer = pace.util.NullCheckpointer()
+            self.checkpointer: Checkpointer = NullCheckpointer()
         else:
             self.checkpointer = checkpointer
         grid_indexing = stencil_factory.grid_indexing

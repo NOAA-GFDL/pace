@@ -4,24 +4,29 @@ from dataclasses import fields
 from datetime import timedelta
 from typing import Tuple
 
-import pace.dsl.stencil
+import ndsl.dsl.stencil
+import ndsl.stencils.testing
+from ndsl.comm.communicator import CubedSphereCommunicator
+from ndsl.comm.null_comm import NullComm
+from ndsl.comm.partitioner import CubedSpherePartitioner, TilePartitioner
+from ndsl.dsl.dace.dace_config import DaceConfig
+from ndsl.dsl.stencil import GridIndexing
+from ndsl.grid import DampingCoefficients, GridData, MetricTerms
+from ndsl.initialization.allocator import QuantityFactory
+from ndsl.initialization.sizer import SubtileGridSizer
+from ndsl.performance.timer import NullTimer, Timer
+from ndsl.quantity import Quantity
+from ndsl.stencils.testing import assert_same_temporaries, copy_temporaries
+
 import pace.fv3core.initialization.analytic_init as ai
-import pace.stencils.testing
-import pace.util
 from pace import fv3core
-from pace.dsl.dace.dace_config import DaceConfig
 from pace.fv3core.dycore_state import DycoreState
-from pace.stencils.testing import assert_same_temporaries, copy_temporaries
-from pace.util.grid import DampingCoefficients, GridData, MetricTerms
-from pace.util.null_comm import NullComm
 
 
 DIR = os.path.abspath(os.path.dirname(__file__))
 
 
-def setup_dycore() -> (
-    Tuple[fv3core.DynamicalCore, fv3core.DycoreState, pace.util.Timer]
-):
+def setup_dycore() -> Tuple[fv3core.DynamicalCore, fv3core.DycoreState, Timer]:
     backend = "numpy"
     config = fv3core.DynamicalCoreConfig(
         layout=(1, 1),
@@ -70,18 +75,16 @@ def setup_dycore() -> (
     mpi_comm = NullComm(
         rank=0, total_ranks=6 * config.layout[0] * config.layout[1], fill_value=0.0
     )
-    partitioner = pace.util.CubedSpherePartitioner(
-        pace.util.TilePartitioner(config.layout)
-    )
-    communicator = pace.util.CubedSphereCommunicator(mpi_comm, partitioner)
+    partitioner = CubedSpherePartitioner(TilePartitioner(config.layout))
+    communicator = CubedSphereCommunicator(mpi_comm, partitioner)
     dace_config = DaceConfig(communicator=communicator, backend=backend)
-    stencil_config = pace.dsl.stencil.StencilConfig(
-        compilation_config=pace.dsl.stencil.CompilationConfig(
+    stencil_config = ndsl.dsl.stencil.StencilConfig(
+        compilation_config=ndsl.dsl.stencil.CompilationConfig(
             backend=backend, rebuild=False, validate_args=True
         ),
         dace_config=dace_config,
     )
-    sizer = pace.util.SubtileGridSizer.from_tile_params(
+    sizer = SubtileGridSizer.from_tile_params(
         nx_tile=config.npx - 1,
         ny_tile=config.npy - 1,
         nz=config.npz,
@@ -91,12 +94,10 @@ def setup_dycore() -> (
         tile_partitioner=partitioner.tile,
         tile_rank=communicator.tile.rank,
     )
-    grid_indexing = pace.dsl.stencil.GridIndexing.from_sizer_and_communicator(
+    grid_indexing = GridIndexing.from_sizer_and_communicator(
         sizer=sizer, comm=communicator
     )
-    quantity_factory = pace.util.QuantityFactory.from_backend(
-        sizer=sizer, backend=backend
-    )
+    quantity_factory = QuantityFactory.from_backend(sizer=sizer, backend=backend)
     eta_file = "tests/main/input/eta79.nc"
     metric_terms = MetricTerms(
         quantity_factory=quantity_factory,
@@ -116,7 +117,7 @@ def setup_dycore() -> (
         moist_phys=config.moist_phys,
         comm=communicator,
     )
-    stencil_factory = pace.dsl.stencil.StencilFactory(
+    stencil_factory = ndsl.dsl.stencil.StencilFactory(
         config=stencil_config,
         grid_indexing=grid_indexing,
     )
@@ -133,16 +134,16 @@ def setup_dycore() -> (
         state=state,
     )
 
-    return dycore, state, pace.util.NullTimer()
+    return dycore, state, NullTimer()
 
 
 def copy_state(state1: DycoreState, state2: DycoreState):
     # copy all attributes of state1 to state2
     for attr_name in dir(state1):
         for _field in fields(type(state1)):
-            if issubclass(_field.type, pace.util.Quantity):
+            if issubclass(_field.type, Quantity):
                 attr = getattr(state1, attr_name)
-                if isinstance(attr, pace.util.Quantity):
+                if isinstance(attr, Quantity):
                     getattr(state2, attr_name).data[:] = attr.data
 
 

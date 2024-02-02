@@ -1,13 +1,19 @@
 from datetime import timedelta
 from typing import Any, List, Tuple, cast
 
-import pace.dsl.stencil
+import ndsl.dsl.stencil
+import ndsl.stencils.testing
+from ndsl.comm.communicator import CubedSphereCommunicator, TileCommunicator
+from ndsl.comm.mpi import MPIComm
+from ndsl.comm.partitioner import TilePartitioner
+from ndsl.dsl.stencil import GridIndexing
+from ndsl.grid import DampingCoefficients, GridData, MetricTerms
+from ndsl.initialization.allocator import QuantityFactory
+from ndsl.initialization.sizer import SubtileGridSizer
+
 import pace.fv3core
 import pace.fv3core._config
 import pace.fv3core.initialization.baroclinic as baroclinic_init
-import pace.stencils.testing
-import pace.util
-from pace.util.grid import DampingCoefficients, GridData, MetricTerms
 
 
 def setup_dycore() -> Tuple[pace.fv3core.DynamicalCore, List[Any]]:
@@ -57,26 +63,26 @@ def setup_dycore() -> Tuple[pace.fv3core.DynamicalCore, List[Any]]:
         z_tracer=True,
         do_qa=True,
     )
-    mpi_comm = pace.util.MPIComm()
-    partitioner = pace.util.TilePartitioner(config.layout)
+    mpi_comm = MPIComm()
+    partitioner = TilePartitioner(config.layout)
     # TODO: cleanup typing of tile vs cubed sphere communicators,
     # currently both have a .tile attribute that reference a TileCommunicator
     # instead both should have the methods specific to a TileCommunicator
     # (to be put on the Communicator abstract base class) and
     # the CubedSphere implementation should defer to the tile.
     communicator = cast(
-        pace.util.CubedSphereCommunicator,
-        pace.util.TileCommunicator(mpi_comm, partitioner),
+        CubedSphereCommunicator,
+        TileCommunicator(mpi_comm, partitioner),
     )
-    stencil_config = pace.dsl.stencil.StencilConfig(
-        compilation_config=pace.dsl.stencil.CompilationConfig(
+    stencil_config = ndsl.dsl.stencil.StencilConfig(
+        compilation_config=ndsl.dsl.stencil.CompilationConfig(
             communicator=communicator,
             backend=backend,
             rebuild=False,
             validate_args=True,
         )
     )
-    sizer = pace.util.SubtileGridSizer.from_tile_params(
+    sizer = SubtileGridSizer.from_tile_params(
         nx_tile=config.npx - 1,
         ny_tile=config.npy - 1,
         nz=config.npz,
@@ -86,12 +92,10 @@ def setup_dycore() -> Tuple[pace.fv3core.DynamicalCore, List[Any]]:
         tile_partitioner=partitioner,
         tile_rank=communicator.rank,
     )
-    grid_indexing = pace.dsl.stencil.GridIndexing.from_sizer_and_communicator(
+    grid_indexing = GridIndexing.from_sizer_and_communicator(
         sizer=sizer, comm=communicator
     )
-    quantity_factory = pace.util.QuantityFactory.from_backend(
-        sizer=sizer, backend=backend
-    )
+    quantity_factory = QuantityFactory.from_backend(sizer=sizer, backend=backend)
     metric_terms = MetricTerms(
         quantity_factory=quantity_factory,
         communicator=communicator,
@@ -108,7 +112,7 @@ def setup_dycore() -> Tuple[pace.fv3core.DynamicalCore, List[Any]]:
         moist_phys=config.moist_phys,
         comm=communicator,
     )
-    stencil_factory = pace.dsl.stencil.StencilFactory(
+    stencil_factory = ndsl.dsl.stencil.StencilFactory(
         config=stencil_config,
         grid_indexing=grid_indexing,
     )

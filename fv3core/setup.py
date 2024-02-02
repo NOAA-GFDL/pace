@@ -11,11 +11,8 @@ with open("README.md", encoding="utf-8") as readme_file:
 
 requirements = [
     "f90nml>=1.1.0",
-    "gt4py",
     "numpy",
-    "pace-util>=0.4.3",
-    "pace-stencils",
-    "pace-dsl",
+    "ndsl",
     "xarray",
 ]
 
