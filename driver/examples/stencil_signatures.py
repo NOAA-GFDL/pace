@@ -2,10 +2,10 @@ import collections
 import inspect
 from typing import Optional, TextIO
 
-import ndsl.dsl
-import ndsl.util
 import yaml
 
+import ndsl.dsl
+import ndsl.util
 import pace.driver
 
 

@@ -7,6 +7,8 @@ import dacite
 import f90nml
 import xarray as xr
 import yaml
+
+import pyFV3
 from ndsl.checkpointer import ValidationCheckpointer
 from ndsl.checkpointer.thresholds import (
     SavepointThresholds,
@@ -30,8 +32,6 @@ from ndsl.quantity import Quantity
 from ndsl.stencils.testing import TranslateGrid, dataset_to_dict
 from ndsl.stencils.testing.grid import Grid
 from ndsl.testing import perturb
-
-import pyFV3
 from pyFV3.initialization.dycore_state import DycoreState
 from pyFV3.testing.translate_fvdynamics import TranslateFVDynamics
 

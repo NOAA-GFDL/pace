@@ -7,8 +7,6 @@ setup_requirements: List[str] = []
 
 requirements = [
     "ndsl",
-    "pyFV3",
-    "pace-physics",
     "dacite",
     "pyyaml",
     "mpi4py",
@@ -41,7 +39,7 @@ setup(
     license="BSD license",
     packages=find_namespace_packages(include=["pace.*"]),
     include_package_data=True,
-    url="https://github.com/ai2cm/pace",
+    url="https://github.com/NOAA-GFDL/pace",
     version="0.2.0",
     zip_safe=False,
 )

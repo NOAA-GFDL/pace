@@ -8,6 +8,9 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 import dace
 import dacite
 import yaml
+
+import pyFV3
+import pySHiELD
 from ndsl.comm.comm_abc import Comm
 from ndsl.comm.communicator import (
     Communicator,
@@ -28,14 +31,10 @@ from ndsl.logging import ndsl_log
 from ndsl.performance import PerformanceConfig
 from ndsl.performance.collector import PerformanceCollector
 from ndsl.performance.timer import Timer
-
-import pace.driver
-import pace.physics
-import pyFV3
 from pace.driver.safety_checks import SafetyChecker
 
 # TODO: move update_atmos_state into pace.driver
-from pace.physics.update import update_atmos_state
+from pySHiELD.update import update_atmos_state
 
 from . import diagnostics
 from .comm import CreatesCommSelector
@@ -116,8 +115,8 @@ class DriverConfig:
     dycore_config: pyFV3.DynamicalCoreConfig = dataclasses.field(
         default_factory=pyFV3.DynamicalCoreConfig
     )
-    physics_config: pace.physics.PhysicsConfig = dataclasses.field(
-        default_factory=pace.physics.PhysicsConfig
+    physics_config: pySHiELD.PhysicsConfig = dataclasses.field(
+        default_factory=pySHiELD.PhysicsConfig
     )
 
     days: int = 0
@@ -250,7 +249,7 @@ class DriverConfig:
 
         if isinstance(kwargs["physics_config"], dict):
             kwargs["physics_config"] = dacite.from_dict(
-                data_class=pace.physics.PhysicsConfig,
+                data_class=pySHiELD.PhysicsConfig,
                 data=kwargs.get("physics_config", {}),
                 config=dacite.Config(strict=True),
             )
@@ -505,7 +504,7 @@ class Driver:
 
             ndsl_log.info("setting up physics object started")
             if not config.dycore_only and not config.disable_step_physics:
-                self.physics = pace.physics.Physics(
+                self.physics = pySHiELD.Physics(
                     stencil_factory=self.stencil_factory,
                     quantity_factory=self.quantity_factory,
                     grid_data=self.state.grid_data,

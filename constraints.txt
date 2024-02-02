@@ -74,8 +74,6 @@ coverage==5.5
     # via pytest-cov
 cytoolz==0.12.1
     # via gt4py
-dace
-    # via ndsl
 dacite==1.6.0
     # via
     #   fv3config
@@ -113,8 +111,8 @@ f90nml==1.3.1
     # via
     #   -r requirements_dev.txt
     #   fv3config
-    #   pace-physics
     #   pyfv3
+    #   pyshield
 fasteners==0.16.3
     # via zarr
 fastjsonschema==2.16.2
@@ -147,8 +145,6 @@ gprof2dot==2021.2.21
     # via pytest-profiling
 gridtools-cpp==2.3.1
     # via gt4py
-gt4py
-    # via ndsl
 h5netcdf==1.1.0
     # via ndsl
 h5py==3.10.0
@@ -257,9 +253,9 @@ numpy==1.21.2
     #   netcdf4
     #   numcodecs
     #   pace-driver
-    #   pace-physics
     #   pandas
     #   pyfv3
+    #   pyshield
     #   scipy
     #   xarray
     #   zarr
@@ -477,8 +473,8 @@ xarray==0.19.0
     #   -r requirements_dev.txt
     #   ndsl
     #   pace-driver
-    #   pace-physics
     #   pyfv3
+    #   pyshield
 xxhash==2.0.2
     # via gt4py
 yarl==1.6.3
