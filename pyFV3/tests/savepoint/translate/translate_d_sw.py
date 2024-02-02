@@ -3,8 +3,8 @@ from ndsl.dsl.stencil import StencilFactory
 from ndsl.dsl.typing import FloatField, FloatFieldIJ
 from ndsl.namelist import Namelist
 
-import pyFV3.stencils.d_sw as d_sw
 import pyFV3
+import pyFV3.stencils.d_sw as d_sw
 from pyFV3.testing import TranslateDycoreFortranData2Py
 
 

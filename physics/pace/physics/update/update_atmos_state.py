@@ -9,8 +9,8 @@ from ndsl.dsl.typing import Float, FloatField
 from ndsl.grid import DriverGridData, GridData
 from ndsl.initialization.allocator import QuantityFactory
 
-import pyFV3.stencils.fv_subgridz as fv_subgridz
 import pyFV3
+import pyFV3.stencils.fv_subgridz as fv_subgridz
 from pace.physics.update.fv_update_phys import ApplyPhysicsToDycore
 
 

@@ -79,9 +79,9 @@ class TranslateTracer2D1L(ParallelTranslate):
         inputs["mfyd"] = inputs.pop("y_mass_flux")
         inputs["cxd"] = inputs.pop("x_courant")
         inputs["cyd"] = inputs.pop("y_courant")
-        inputs["tracers"] = (
-            all_tracers  # some aren't advected, still need to be validated
-        )
+        inputs[
+            "tracers"
+        ] = all_tracers  # some aren't advected, still need to be validated
         # need to convert tracers dict to [x, y, z, n_tracer] array before subsetting
         outputs = self._base.slice_output(inputs)
         outputs["tracers"] = self.subset_output("tracers", outputs["tracers"])

@@ -11,9 +11,7 @@ from ndsl.initialization.sizer import SubtileGridSizer
 from ndsl.quantity import Quantity
 
 import pyFV3
-from pyFV3.initialization.test_cases.initialize_baroclinic import (
-    init_baroclinic_state,
-)
+from pyFV3.initialization.test_cases.initialize_baroclinic import init_baroclinic_state
 
 
 def get_cube_comm(layout, comm: MPIComm):

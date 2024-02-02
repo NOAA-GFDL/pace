@@ -18,8 +18,8 @@ from ndsl.performance.timer import NullTimer, Timer
 from ndsl.quantity import Quantity
 from ndsl.stencils.testing import assert_same_temporaries, copy_temporaries
 
-import pyFV3.initialization.analytic_init as ai
 import pyFV3
+import pyFV3.initialization.analytic_init as ai
 from pyFV3.dycore_state import DycoreState
 
 

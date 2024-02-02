@@ -262,7 +262,7 @@ def heterogeneous_freezing(
 ):
     tc = constants.TICE0 - pt1
     if ql > 0.0 and tc > 0.0:
-        sink = 3.3333e-10 * dt_bigg * (exptc - 1.0) * den * ql**2
+        sink = 3.3333e-10 * dt_bigg * (exptc - 1.0) * den * ql ** 2
         sink = min(ql, sink)
         sink = min(sink, tc / icp2)
         ql = ql - sink
@@ -360,7 +360,10 @@ def sublimation(
                 * 349138.78
                 * expsubl
                 / (
-                    iqs2 * den * constants.LAT2 / (0.0243 * constants.RVGAS * pt1**2.0)
+                    iqs2
+                    * den
+                    * constants.LAT2
+                    / (0.0243 * constants.RVGAS * pt1 ** 2.0)
                     + 4.42478e4
                 )
             )
@@ -895,7 +898,7 @@ def satadjust(
             mindw = min(1.0, abs(hs) / (10.0 * constants.GRAV))
             dw = dw_ocean + (dw_land - dw_ocean) * mindw
             # "scale - aware" subgrid variability: 100 - km as the base
-            dbl_sqrt_area = dw * (area**0.5 / 100.0e3) ** 0.5
+            dbl_sqrt_area = dw * (area ** 0.5 / 100.0e3) ** 0.5
             maxtmp = max(0.01, dbl_sqrt_area)
             hvar = min(0.2, maxtmp)
             # partial cloudiness by pdf:

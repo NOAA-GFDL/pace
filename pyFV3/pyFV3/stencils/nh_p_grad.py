@@ -228,7 +228,7 @@ class NonHydrostaticPressureGradient:
         # Fortran names:
         # u=u v=v pp=pkc gz=gz pk3=pk3 delp=delp dt=dt
 
-        ptk = ptop**akap
+        ptk = ptop ** akap
         top_value = ptk  # = peln1 if spec.namelist.use_logp else ptk
 
         # TODO: make it clearer that each of these a2b outputs is updated

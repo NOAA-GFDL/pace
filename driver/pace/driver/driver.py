@@ -293,10 +293,10 @@ class DriverConfig:
             isinstance(kwargs["stencil_config"], dict)
             and "compilation_config" in kwargs["stencil_config"].keys()
         ):
-            kwargs["stencil_config"]["compilation_config"] = (
-                CompilationConfig.from_dict(
-                    data=kwargs["stencil_config"]["compilation_config"]
-                )
+            kwargs["stencil_config"][
+                "compilation_config"
+            ] = CompilationConfig.from_dict(
+                data=kwargs["stencil_config"]["compilation_config"]
             )
 
         return dacite.from_dict(
@@ -473,11 +473,7 @@ class Driver:
                 stencil_compare_comm=stencil_compare_comm,
             )
             ndsl_log.info("setting up grid started")
-            (
-                damping_coefficients,
-                driver_grid_data,
-                grid_data,
-            ) = self.config.get_grid(
+            (damping_coefficients, driver_grid_data, grid_data,) = self.config.get_grid(
                 quantity_factory=self.quantity_factory,
                 communicator=communicator,
             )
