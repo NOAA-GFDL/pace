@@ -31,7 +31,7 @@ from ndsl.performance.timer import Timer
 
 import pace.driver
 import pace.physics
-from pace import fv3core
+import pyFV3
 from pace.driver.safety_checks import SafetyChecker
 
 # TODO: move update_atmos_state into pace.driver
@@ -113,8 +113,8 @@ class DriverConfig:
     comm_config: CreatesCommSelector = dataclasses.field(
         default_factory=CreatesCommSelector
     )
-    dycore_config: fv3core.DynamicalCoreConfig = dataclasses.field(
-        default_factory=fv3core.DynamicalCoreConfig
+    dycore_config: pyFV3.DynamicalCoreConfig = dataclasses.field(
+        default_factory=pyFV3.DynamicalCoreConfig
     )
     physics_config: pace.physics.PhysicsConfig = dataclasses.field(
         default_factory=pace.physics.PhysicsConfig
@@ -243,7 +243,7 @@ class DriverConfig:
                     )
 
             kwargs["dycore_config"] = dacite.from_dict(
-                data_class=fv3core.DynamicalCoreConfig,
+                data_class=pyFV3.DynamicalCoreConfig,
                 data=kwargs.get("dycore_config", {}),
                 config=dacite.Config(strict=True),
             )
@@ -490,7 +490,7 @@ class Driver:
 
             self._start_time = self.config.initialization.start_time
             ndsl_log.info("setting up dycore object started")
-            self.dycore = fv3core.DynamicalCore(
+            self.dycore = pyFV3.DynamicalCore(
                 comm=communicator,
                 grid_data=self.state.grid_data,
                 stencil_factory=self.stencil_factory,

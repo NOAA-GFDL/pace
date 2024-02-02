@@ -12,11 +12,11 @@ from ndsl.initialization.allocator import QuantityFactory
 from ndsl.quantity import Quantity
 from ndsl.stencils.c2l_ord import CubedToLatLon
 
-from pace import fv3core
+import pyFV3
 from pace.physics.update.update_dwind_phys import AGrid2DGridPhysics
 
 
-# TODO: This is the same as moist_cv.py in fv3core, should move to integration dir
+# TODO: This is the same as moist_cv.py in pyFV3, should move to integration dir
 @gtscript.function
 def moist_cvm(qvapor, gz, ql, qs):
     cvm = (
@@ -28,7 +28,7 @@ def moist_cvm(qvapor, gz, ql, qs):
     return cvm
 
 
-# This is based off of moist_cv_nwat6_fn gt4py function in moist_cv.py in fv3core
+# This is based off of moist_cv_nwat6_fn gt4py function in moist_cv.py in pyFV3
 def moist_cv(
     qvapor: FloatField,
     qliquid: FloatField,
@@ -90,7 +90,7 @@ class ApplyPhysicsToDycore:
         namelist,
         comm: Communicator,
         grid_info: DriverGridData,
-        state: fv3core.DycoreState,
+        state: pyFV3.DycoreState,
         u_dt: Quantity,
         v_dt: Quantity,
     ):

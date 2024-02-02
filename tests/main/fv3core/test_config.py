@@ -4,15 +4,15 @@ import typing
 
 import pytest
 
-import pace.fv3core._config
+import pyFV3._config
 
 
 CONFIG_CLASSES = [
-    pace.fv3core._config.SatAdjustConfig,
-    pace.fv3core._config.AcousticDynamicsConfig,
-    pace.fv3core._config.RiemannConfig,
-    pace.fv3core._config.DGridShallowWaterLagrangianDynamicsConfig,
-    pace.fv3core._config.DynamicalCoreConfig,
+    pyFV3._config.SatAdjustConfig,
+    pyFV3._config.AcousticDynamicsConfig,
+    pyFV3._config.RiemannConfig,
+    pyFV3._config.DGridShallowWaterLagrangianDynamicsConfig,
+    pyFV3._config.DynamicalCoreConfig,
 ]
 
 

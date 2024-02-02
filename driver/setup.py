@@ -6,7 +6,8 @@ from setuptools import find_namespace_packages, setup
 setup_requirements: List[str] = []
 
 requirements = [
-    "pace-fv3core",
+    "ndsl",
+    "pyFV3",
     "pace-physics",
     "dacite",
     "pyyaml",

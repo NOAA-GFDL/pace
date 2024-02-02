@@ -29,9 +29,9 @@ from ndsl.initialization.sizer import SubtileGridSizer
 from ndsl.quantity import Quantity
 from units_config import units
 
-from pace.fv3core.stencils.fvtp2d import FiniteVolumeTransport
-from pace.fv3core.stencils.fxadv import FiniteVolumeFluxPrep
-from pace.fv3core.stencils.tracer_2d_1l import TracerAdvection
+from pyFV3.stencils.fvtp2d import FiniteVolumeTransport
+from pyFV3.stencils.fxadv import FiniteVolumeFluxPrep
+from pyFV3.stencils.tracer_2d_1l import TracerAdvection
 
 
 class GridType(enum.Enum):

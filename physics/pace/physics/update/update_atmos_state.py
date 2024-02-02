@@ -9,12 +9,12 @@ from ndsl.dsl.typing import Float, FloatField
 from ndsl.grid import DriverGridData, GridData
 from ndsl.initialization.allocator import QuantityFactory
 
-import pace.fv3core.stencils.fv_subgridz as fv_subgridz
-from pace import fv3core
+import pyFV3
+import pyFV3.stencils.fv_subgridz as fv_subgridz
 from pace.physics.update.fv_update_phys import ApplyPhysicsToDycore
 
 
-# TODO: when this file is not importable from physics or fv3core, import
+# TODO: when this file is not importable from physics or pyFV3, import
 #       PhysicsState and DycoreState and use them to type hint below
 
 
@@ -150,7 +150,7 @@ class DycoreToPhysics:
         self,
         stencil_factory: StencilFactory,
         quantity_factory: QuantityFactory,
-        dycore_config: fv3core.DynamicalCoreConfig,
+        dycore_config: pyFV3.DynamicalCoreConfig,
         do_dry_convective_adjust: bool,
         dycore_only: bool,
     ):
@@ -244,7 +244,7 @@ class UpdateAtmosphereState:
         namelist,
         comm: Communicator,
         grid_info: DriverGridData,
-        state: fv3core.DycoreState,
+        state: pyFV3.DycoreState,
         quantity_factory: QuantityFactory,
         dycore_only: bool,
         apply_tendencies: bool,

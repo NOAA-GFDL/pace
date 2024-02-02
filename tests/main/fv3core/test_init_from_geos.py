@@ -3,7 +3,7 @@ import numpy as np
 import pytest  # noqa
 from ndsl.comm.null_comm import NullComm
 
-from pace import fv3core
+import pyFV3
 
 
 def test_geos_wrapper():
@@ -84,7 +84,7 @@ def test_geos_wrapper():
     comm = NullComm(rank=0, total_ranks=6, fill_value=0.0)
     backend = "numpy"
 
-    wrapper = fv3core.GeosDycoreWrapper(
+    wrapper = pyFV3.GeosDycoreWrapper(
         namelist=namelist,
         comm=comm,
         backend=backend,
@@ -122,8 +122,8 @@ def test_geos_wrapper():
         7,
     )
 
-    assert isinstance(wrapper, fv3core.GeosDycoreWrapper)
-    assert isinstance(wrapper.dynamical_core, fv3core.DynamicalCore)
+    assert isinstance(wrapper, pyFV3.GeosDycoreWrapper)
+    assert isinstance(wrapper.dynamical_core, pyFV3.DynamicalCore)
 
     u = np.ones(shape_y_interface)
     v = np.ones(shape_x_interface)

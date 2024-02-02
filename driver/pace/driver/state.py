@@ -14,7 +14,7 @@ from ndsl.initialization.sizer import SubtileGridSizer
 from ndsl.quantity import Quantity
 
 import pace.physics
-from pace import fv3core
+import pyFV3
 
 
 @dataclasses.dataclass()
@@ -63,7 +63,7 @@ class TendencyState:
 
 @dataclasses.dataclass
 class DriverState:
-    dycore_state: fv3core.DycoreState
+    dycore_state: pyFV3.DycoreState
     physics_state: pace.physics.PhysicsState
     tendency_state: TendencyState
     grid_data: GridData
@@ -155,7 +155,7 @@ class DriverState:
 def _overwrite_state_from_restart(
     path: str,
     rank: int,
-    state: fv3core.DycoreState,
+    state: pyFV3.DycoreState,
     restart_file_prefix: str,
 ):
     """
@@ -192,11 +192,11 @@ def _restart_driver_state(
     )
 
     if is_fortran_restart:
-        dycore_state = fv3core.DycoreState.from_fortran_restart(
+        dycore_state = pyFV3.DycoreState.from_fortran_restart(
             quantity_factory=quantity_factory, communicator=communicator, path=path
         )
     else:
-        dycore_state = fv3core.DycoreState.init_zeros(quantity_factory=quantity_factory)
+        dycore_state = pyFV3.DycoreState.init_zeros(quantity_factory=quantity_factory)
         _overwrite_state_from_restart(
             path,
             rank,

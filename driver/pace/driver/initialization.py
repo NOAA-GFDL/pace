@@ -17,10 +17,10 @@ from ndsl.namelist import Namelist
 from ndsl.stencils.testing import TranslateGrid, grid
 
 import pace.driver
-import pace.fv3core.initialization.analytic_init as analytic_init
 import pace.physics
-from pace import fv3core
-from pace.fv3core.testing import TranslateFVDynamics
+import pyFV3
+import pyFV3.initialization.analytic_init as analytic_init
+from pyFV3.testing import TranslateFVDynamics
 
 from .registry import Registry
 from .state import DriverState, TendencyState, _restart_driver_state
@@ -306,7 +306,7 @@ class SerialboxInit(Initializer):
         self,
         communicator: Communicator,
         backend: str,
-    ) -> fv3core.DycoreState:
+    ) -> pyFV3.DycoreState:
         grid = self._get_serialized_grid(communicator=communicator, backend=backend)
 
         ser = self._serializer(communicator)
@@ -343,7 +343,7 @@ class PredefinedStateInit(Initializer):
     used to construct the class.
     """
 
-    dycore_state: fv3core.DycoreState
+    dycore_state: pyFV3.DycoreState
     physics_state: pace.physics.PhysicsState
     tendency_state: TendencyState
     grid_data: GridData
@@ -370,7 +370,7 @@ class PredefinedStateInit(Initializer):
         )
 
 
-# TODO: refactor fv3core so that pe and peln are internal temporaries
+# TODO: refactor pyFV3 so that pe and peln are internal temporaries
 # of the dynamical core, computed automatically, so that this helper
 # can be eliminated from initialization
 def _update_fortran_restart_pe_peln(state: DriverState) -> None:
