@@ -143,7 +143,7 @@ google-auth-oauthlib==0.4.5
     # via gcsfs
 gprof2dot==2021.2.21
     # via pytest-profiling
-gridtools-cpp==2.3.1
+gridtools-cpp
     # via gt4py
 h5netcdf==1.1.0
     # via ndsl
