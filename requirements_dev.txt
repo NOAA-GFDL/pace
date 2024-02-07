@@ -14,11 +14,7 @@ cftime
 fv3config>=0.9.0
 f90nml>=1.1.0
 numpy>=1.15
--e external/gt4py
--e external/dace
--e stencils
--e dsl
--e physics
--e fv3core
+-e NDSL
+-e pySHiELD
+-e pyFV3
 -e driver
--e util

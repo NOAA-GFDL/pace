@@ -5,12 +5,9 @@ from typing import Any, ClassVar, List
 
 import dacite
 
-import pace.driver
-import pace.dsl
-import pace.stencils
-import pace.util
-import pace.util.grid
-from pace.util.caching_comm import CachingCommReader, CachingCommWriter
+from ndsl.comm.caching_comm import CachingCommReader, CachingCommWriter
+from ndsl.comm.mpi import MPIComm
+from ndsl.comm.null_comm import NullComm
 
 
 class CreatesComm(abc.ABC):
@@ -85,7 +82,7 @@ class MPICommConfig(CreatesComm):
     """
 
     def get_comm(self):
-        return pace.util.MPIComm()
+        return MPIComm()
 
     def cleanup(self, comm):
         pass
@@ -112,7 +109,7 @@ class NullCommConfig(CreatesComm):
     fill_value: float
 
     def get_comm(self):
-        return pace.util.NullComm(
+        return NullComm(
             rank=self.rank, total_ranks=self.total_ranks, fill_value=self.fill_value
         )
 
@@ -143,7 +140,7 @@ class WriterCommConfig(CreatesComm):
     def get_comm(self) -> CachingCommWriter:
         underlying = MPICommConfig().get_comm()
         if underlying.Get_rank() in self.ranks:
-            return pace.util.CachingCommWriter(underlying)
+            return CachingCommWriter(underlying)
         else:
             return underlying
 
@@ -180,7 +177,7 @@ class ReaderCommConfig(CreatesComm):
 
     def get_comm(self) -> CachingCommReader:
         with open(os.path.join(self.path, f"comm_{self.rank}.pkl"), "rb") as f:
-            return pace.util.CachingCommReader.load(f)
+            return CachingCommReader.load(f)
 
     def cleanup(self, comm: CachingCommWriter):
         pass

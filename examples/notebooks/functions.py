@@ -10,22 +10,13 @@ from IPython.display import HTML, display
 from matplotlib import animation
 from units_config import units
 
-from pace.dsl.dace.dace_config import DaceConfig, DaCeOrchestration
-from pace.dsl.stencil import GridIndexing, StencilConfig, StencilFactory
-from pace.dsl.stencil_config import CompilationConfig, RunMode
-from pace.fv3core.stencils.fvtp2d import FiniteVolumeTransport
-from pace.fv3core.stencils.fxadv import FiniteVolumeFluxPrep
-from pace.fv3core.stencils.tracer_2d_1l import TracerAdvection
-from pace.util import (
-    CubedSphereCommunicator,
-    CubedSpherePartitioner,
-    Quantity,
-    QuantityFactory,
-    SubtileGridSizer,
-    TilePartitioner,
-)
-from pace.util.constants import RADIUS
-from pace.util.grid import (
+from ndsl.comm.communicator import CubedSphereCommunicator
+from ndsl.comm.partitioner import CubedSpherePartitioner, TilePartitioner
+from ndsl.constants import RADIUS
+from ndsl.dsl.dace.dace_config import DaceConfig, DaCeOrchestration
+from ndsl.dsl.stencil import GridIndexing, StencilConfig, StencilFactory
+from ndsl.dsl.stencil_config import CompilationConfig, RunMode
+from ndsl.grid import (
     AngleGridData,
     ContravariantGridData,
     DampingCoefficients,
@@ -34,7 +25,13 @@ from pace.util.grid import (
     MetricTerms,
     VerticalGridData,
 )
-from pace.util.grid.gnomonic import great_circle_distance_lon_lat
+from ndsl.grid.gnomonic import great_circle_distance_lon_lat
+from ndsl.initialization.allocator import QuantityFactory
+from ndsl.initialization.sizer import SubtileGridSizer
+from ndsl.quantity import Quantity
+from pyFV3.stencils.fvtp2d import FiniteVolumeTransport
+from pyFV3.stencils.fxadv import FiniteVolumeFluxPrep
+from pyFV3.stencils.tracer_2d_1l import TracerAdvection
 
 
 class GridType(enum.Enum):
@@ -504,7 +501,6 @@ def create_initial_tracer(
 
     for jj in range(tracer_input.shape[1] - 1):
         for ii in range(tracer_input.shape[0] - 1):
-
             p_dist = [lon[ii, jj], lat[ii, jj]]
             r = great_circle_distance_lon_lat(
                 p_center[0], p_dist[0], p_center[1], p_dist[1], RADIUS, np

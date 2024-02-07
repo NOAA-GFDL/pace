@@ -7,20 +7,19 @@ from typing import Callable, ClassVar, List, Type, TypeVar
 
 import f90nml
 
-import pace.driver
-import pace.dsl
-import pace.fv3core.initialization.analytic_init as analytic_init
-import pace.physics
-import pace.stencils
-import pace.util
-import pace.util.grid
-from pace import fv3core
-from pace.dsl.dace.orchestration import DaceConfig
-from pace.dsl.stencil import StencilFactory
-from pace.dsl.stencil_config import CompilationConfig
-from pace.fv3core.testing import TranslateFVDynamics
-from pace.stencils.testing import TranslateGrid
-from pace.util.namelist import Namelist
+import pyFV3
+import pyFV3.initialization.analytic_init as analytic_init
+import pySHiELD
+from ndsl.comm.communicator import Communicator
+from ndsl.constants import X_DIM, Y_DIM
+from ndsl.dsl.dace.orchestration import DaceConfig
+from ndsl.dsl.stencil import StencilConfig, StencilFactory
+from ndsl.dsl.stencil_config import CompilationConfig
+from ndsl.grid import DampingCoefficients, DriverGridData, GridData
+from ndsl.initialization.allocator import QuantityFactory
+from ndsl.namelist import Namelist
+from ndsl.stencils.testing import TranslateGrid, grid
+from pyFV3.testing import TranslateFVDynamics
 
 from .registry import Registry
 from .state import DriverState, TendencyState, _restart_driver_state
@@ -35,12 +34,12 @@ class Initializer(abc.ABC):
     @abc.abstractmethod
     def get_driver_state(
         self,
-        quantity_factory: pace.util.QuantityFactory,
-        communicator: pace.util.Communicator,
-        damping_coefficients: pace.util.grid.DampingCoefficients,
-        driver_grid_data: pace.util.grid.DriverGridData,
-        grid_data: pace.util.grid.GridData,
-        schemes: List[pace.physics.PHYSICS_PACKAGES],
+        quantity_factory: QuantityFactory,
+        communicator: Communicator,
+        damping_coefficients: DampingCoefficients,
+        driver_grid_data: DriverGridData,
+        grid_data: GridData,
+        schemes: List[pySHiELD.PHYSICS_PACKAGES],
     ) -> DriverState:
         ...
 
@@ -73,12 +72,12 @@ class InitializerSelector(Initializer):
 
     def get_driver_state(
         self,
-        quantity_factory: pace.util.QuantityFactory,
-        communicator: pace.util.Communicator,
-        damping_coefficients: pace.util.grid.DampingCoefficients,
-        driver_grid_data: pace.util.grid.DriverGridData,
-        grid_data: pace.util.grid.GridData,
-        schemes: List[pace.physics.PHYSICS_PACKAGES],
+        quantity_factory: QuantityFactory,
+        communicator: Communicator,
+        damping_coefficients: DampingCoefficients,
+        driver_grid_data: DriverGridData,
+        grid_data: GridData,
+        schemes: List[pySHiELD.PHYSICS_PACKAGES],
     ) -> DriverState:
         return self.config.get_driver_state(
             quantity_factory=quantity_factory,
@@ -107,12 +106,12 @@ class AnalyticInit(Initializer):
 
     def get_driver_state(
         self,
-        quantity_factory: pace.util.QuantityFactory,
-        communicator: pace.util.Communicator,
-        damping_coefficients: pace.util.grid.DampingCoefficients,
-        driver_grid_data: pace.util.grid.DriverGridData,
-        grid_data: pace.util.grid.GridData,
-        schemes: List[pace.physics.PHYSICS_PACKAGES],
+        quantity_factory: QuantityFactory,
+        communicator: Communicator,
+        damping_coefficients: DampingCoefficients,
+        driver_grid_data: DriverGridData,
+        grid_data: GridData,
+        schemes: List[pySHiELD.PHYSICS_PACKAGES],
     ) -> DriverState:
         dycore_state = analytic_init.init_analytic_state(
             analytic_init_case=self.case,
@@ -123,7 +122,7 @@ class AnalyticInit(Initializer):
             moist_phys=True,
             comm=communicator,
         )
-        physics_state = pace.physics.PhysicsState.init_zeros(
+        physics_state = pySHiELD.PhysicsState.init_zeros(
             quantity_factory=quantity_factory, schemes=schemes
         )
         tendency_state = TendencyState.init_zeros(
@@ -151,12 +150,12 @@ class RestartInit(Initializer):
 
     def get_driver_state(
         self,
-        quantity_factory: pace.util.QuantityFactory,
-        communicator: pace.util.Communicator,
-        damping_coefficients: pace.util.grid.DampingCoefficients,
-        driver_grid_data: pace.util.grid.DriverGridData,
-        grid_data: pace.util.grid.GridData,
-        schemes: List[pace.physics.PHYSICS_PACKAGES],
+        quantity_factory: QuantityFactory,
+        communicator: Communicator,
+        damping_coefficients: DampingCoefficients,
+        driver_grid_data: DriverGridData,
+        grid_data: GridData,
+        schemes: List[pySHiELD.PHYSICS_PACKAGES],
     ) -> DriverState:
         state = _restart_driver_state(
             self.path,
@@ -202,12 +201,12 @@ class FortranRestartInit(Initializer):
 
     def get_driver_state(
         self,
-        quantity_factory: pace.util.QuantityFactory,
-        communicator: pace.util.Communicator,
-        damping_coefficients: pace.util.grid.DampingCoefficients,
-        driver_grid_data: pace.util.grid.DriverGridData,
-        grid_data: pace.util.grid.GridData,
-        schemes: List[pace.physics.PHYSICS_PACKAGES],
+        quantity_factory: QuantityFactory,
+        communicator: Communicator,
+        damping_coefficients: DampingCoefficients,
+        driver_grid_data: DriverGridData,
+        grid_data: GridData,
+        schemes: List[pySHiELD.PHYSICS_PACKAGES],
     ) -> DriverState:
         state = _restart_driver_state(
             self.path,
@@ -254,16 +253,16 @@ class SerialboxInit(Initializer):
 
     def _get_serialized_grid(
         self,
-        communicator: pace.util.Communicator,
+        communicator: Communicator,
         backend: str,
-    ) -> pace.stencils.testing.grid.Grid:  # type: ignore
+    ) -> grid.Grid:  # type: ignore
         ser = self._serializer(communicator)
         grid = TranslateGrid.new_from_serialized_data(
             ser, communicator.rank, self._namelist.layout, backend
         ).python_grid()
         return grid
 
-    def _serializer(self, communicator: pace.util.Communicator):
+    def _serializer(self, communicator: Communicator):
         import serialbox
 
         serializer = serialbox.Serializer(
@@ -275,19 +274,19 @@ class SerialboxInit(Initializer):
 
     def get_driver_state(
         self,
-        quantity_factory: pace.util.QuantityFactory,
-        communicator: pace.util.Communicator,
-        damping_coefficients: pace.util.grid.DampingCoefficients,
-        driver_grid_data: pace.util.grid.DriverGridData,
-        grid_data: pace.util.grid.GridData,
-        schemes: List[pace.physics.PHYSICS_PACKAGES],
+        quantity_factory: QuantityFactory,
+        communicator: Communicator,
+        damping_coefficients: DampingCoefficients,
+        driver_grid_data: DriverGridData,
+        grid_data: GridData,
+        schemes: List[pySHiELD.PHYSICS_PACKAGES],
     ) -> DriverState:
         backend = quantity_factory.zeros(
-            dims=[pace.util.X_DIM, pace.util.Y_DIM], units="unknown"
+            dims=[X_DIM, Y_DIM], units="unknown"
         ).gt4py_backend
 
         dycore_state = self._initialize_dycore_state(communicator, backend)
-        physics_state = pace.physics.PhysicsState.init_zeros(
+        physics_state = pySHiELD.PhysicsState.init_zeros(
             quantity_factory=quantity_factory,
             schemes=schemes,
         )
@@ -304,9 +303,9 @@ class SerialboxInit(Initializer):
 
     def _initialize_dycore_state(
         self,
-        communicator: pace.util.Communicator,
+        communicator: Communicator,
         backend: str,
-    ) -> fv3core.DycoreState:
+    ) -> pyFV3.DycoreState:
         grid = self._get_serialized_grid(communicator=communicator, backend=backend)
 
         ser = self._serializer(communicator)
@@ -317,7 +316,7 @@ class SerialboxInit(Initializer):
             tile_nx=self._namelist.npx,
             tile_nz=self._namelist.npz,
         )
-        stencil_config = pace.dsl.stencil.StencilConfig(
+        stencil_config = StencilConfig(
             compilation_config=CompilationConfig(
                 backend=backend, communicator=communicator
             ),
@@ -343,22 +342,22 @@ class PredefinedStateInit(Initializer):
     used to construct the class.
     """
 
-    dycore_state: fv3core.DycoreState
-    physics_state: pace.physics.PhysicsState
+    dycore_state: pyFV3.DycoreState
+    physics_state: pySHiELD.PhysicsState
     tendency_state: TendencyState
-    grid_data: pace.util.grid.GridData
-    damping_coefficients: pace.util.grid.DampingCoefficients
-    driver_grid_data: pace.util.grid.DriverGridData
+    grid_data: GridData
+    damping_coefficients: DampingCoefficients
+    driver_grid_data: DriverGridData
     start_time: datetime = datetime(2016, 8, 1)
 
     def get_driver_state(
         self,
-        quantity_factory: pace.util.QuantityFactory,
-        communicator: pace.util.Communicator,
-        damping_coefficients: pace.util.grid.DampingCoefficients,
-        driver_grid_data: pace.util.grid.DriverGridData,
-        grid_data: pace.util.grid.GridData,
-        schemes: List[pace.physics.PHYSICS_PACKAGES],
+        quantity_factory: QuantityFactory,
+        communicator: Communicator,
+        damping_coefficients: DampingCoefficients,
+        driver_grid_data: DriverGridData,
+        grid_data: GridData,
+        schemes: List[pySHiELD.PHYSICS_PACKAGES],
     ) -> DriverState:
         return DriverState(
             dycore_state=self.dycore_state,
@@ -370,7 +369,7 @@ class PredefinedStateInit(Initializer):
         )
 
 
-# TODO: refactor fv3core so that pe and peln are internal temporaries
+# TODO: refactor pyFV3 so that pe and peln are internal temporaries
 # of the dynamical core, computed automatically, so that this helper
 # can be eliminated from initialization
 def _update_fortran_restart_pe_peln(state: DriverState) -> None:

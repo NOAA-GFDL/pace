@@ -3,8 +3,8 @@ import unittest.mock
 import numpy as np
 import pytest
 
+from ndsl.quantity import Quantity
 from pace.driver.safety_checks import SafetyChecker
-from pace.util import Quantity
 
 
 def test_register_variable():

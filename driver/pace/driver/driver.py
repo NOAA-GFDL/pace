@@ -9,34 +9,37 @@ import dace
 import dacite
 import yaml
 
-import pace.driver
-import pace.dsl
-import pace.physics
-import pace.stencils
-import pace.util
-import pace.util.grid
-from pace import fv3core
-from pace.driver.safety_checks import SafetyChecker
-from pace.dsl.dace.dace_config import DaceConfig
-from pace.dsl.dace.orchestration import dace_inhibitor, orchestrate
-from pace.dsl.stencil_config import CompilationConfig, RunMode
-from pace.dsl.typing import Float
-
-# TODO: move update_atmos_state into pace.driver
-from pace.stencils import update_atmos_state
-from pace.util.communicator import (
+import pyFV3
+import pySHiELD
+from ndsl.comm.comm_abc import Comm
+from ndsl.comm.communicator import (
     Communicator,
     CubedSphereCommunicator,
     TileCommunicator,
 )
-from pace.util.logging import pace_log
+from ndsl.comm.partitioner import TilePartitioner
+from ndsl.constants import N_HALO_DEFAULT
+from ndsl.dsl.dace.dace_config import DaceConfig
+from ndsl.dsl.dace.orchestration import dace_inhibitor, orchestrate
+from ndsl.dsl.stencil import GridIndexing, StencilFactory
+from ndsl.dsl.stencil_config import CompilationConfig, RunMode, StencilConfig
+from ndsl.dsl.typing import Float
+from ndsl.grid import DampingCoefficients, DriverGridData, GridData
+from ndsl.initialization.allocator import QuantityFactory
+from ndsl.initialization.sizer import SubtileGridSizer
+from ndsl.logging import ndsl_log
+from ndsl.performance import PerformanceConfig
+from ndsl.performance.collector import PerformanceCollector
+from ndsl.performance.timer import Timer
+from pace.driver.safety_checks import SafetyChecker
+
+# TODO: move update_atmos_state into pace.driver
+from pySHiELD.update import update_atmos_state
 
 from . import diagnostics
 from .comm import CreatesCommSelector
 from .grid import GeneratedGridConfig, GridInitializerSelector
 from .initialization import InitializerSelector
-from .performance import PerformanceConfig
-from .performance.collector import PerformanceCollector
 from .state import DriverState
 
 
@@ -88,7 +91,7 @@ class DriverConfig:
             defaults to every timestep
     """
 
-    stencil_config: pace.dsl.StencilConfig
+    stencil_config: StencilConfig
     initialization: InitializerSelector
     nx_tile: int
     nz: int
@@ -109,11 +112,11 @@ class DriverConfig:
     comm_config: CreatesCommSelector = dataclasses.field(
         default_factory=CreatesCommSelector
     )
-    dycore_config: fv3core.DynamicalCoreConfig = dataclasses.field(
-        default_factory=fv3core.DynamicalCoreConfig
+    dycore_config: pyFV3.DynamicalCoreConfig = dataclasses.field(
+        default_factory=pyFV3.DynamicalCoreConfig
     )
-    physics_config: pace.physics.PhysicsConfig = dataclasses.field(
-        default_factory=pace.physics.PhysicsConfig
+    physics_config: pySHiELD.PhysicsConfig = dataclasses.field(
+        default_factory=pySHiELD.PhysicsConfig
     )
 
     days: int = 0
@@ -163,25 +166,21 @@ class DriverConfig:
 
     def get_grid(
         self,
-        communicator: pace.util.Communicator,
-        quantity_factory: Optional[pace.util.QuantityFactory] = None,
-    ) -> Tuple[
-        pace.util.grid.DampingCoefficients,
-        pace.util.grid.DriverGridData,
-        pace.util.grid.GridData,
-    ]:
+        communicator: Communicator,
+        quantity_factory: Optional[QuantityFactory] = None,
+    ) -> Tuple[DampingCoefficients, DriverGridData, GridData]:
         if quantity_factory is None:
-            sizer = pace.util.SubtileGridSizer.from_tile_params(
+            sizer = SubtileGridSizer.from_tile_params(
                 nx_tile=self.nx_tile,
                 ny_tile=self.nx_tile,
                 nz=self.nz,
-                n_halo=pace.util.N_HALO_DEFAULT,
+                n_halo=N_HALO_DEFAULT,
                 extra_dim_lengths={},
                 layout=self.layout,
                 tile_partitioner=communicator.partitioner.tile,
                 tile_rank=communicator.tile.rank,
             )
-            quantity_factory = pace.util.QuantityFactory.from_backend(
+            quantity_factory = QuantityFactory.from_backend(
                 sizer, backend=self.stencil_config.compilation_config.backend
             )
 
@@ -192,36 +191,34 @@ class DriverConfig:
 
     def get_driver_state(
         self,
-        communicator: pace.util.Communicator,
-        damping_coefficients: pace.util.grid.DampingCoefficients,
-        driver_grid_data: pace.util.grid.DriverGridData,
-        grid_data: pace.util.grid.GridData,
-        quantity_factory: Optional[pace.util.QuantityFactory] = None,
-        stencil_factory: Optional[pace.dsl.StencilFactory] = None,
+        communicator: Communicator,
+        damping_coefficients: DampingCoefficients,
+        driver_grid_data: DriverGridData,
+        grid_data: GridData,
+        quantity_factory: Optional[QuantityFactory] = None,
+        stencil_factory: Optional[StencilFactory] = None,
     ) -> DriverState:
         """Load the initial state of the driver."""
         if quantity_factory is None or stencil_factory is None:
-            sizer = pace.util.SubtileGridSizer.from_tile_params(
+            sizer = SubtileGridSizer.from_tile_params(
                 nx_tile=self.nx_tile,
                 ny_tile=self.nx_tile,
                 nz=self.nz,
-                n_halo=pace.util.N_HALO_DEFAULT,
+                n_halo=N_HALO_DEFAULT,
                 extra_dim_lengths={},
                 layout=self.layout,
                 tile_partitioner=communicator.partitioner.tile,
                 tile_rank=communicator.tile.rank,
             )
             if quantity_factory is None:
-                quantity_factory = pace.util.QuantityFactory.from_backend(
+                quantity_factory = QuantityFactory.from_backend(
                     sizer, backend=self.stencil_config.compilation_config.backend
                 )
             if stencil_factory is None:
-                grid_indexing = (
-                    pace.dsl.stencil.GridIndexing.from_sizer_and_communicator(
-                        sizer=sizer, comm=communicator
-                    )
+                grid_indexing = GridIndexing.from_sizer_and_communicator(
+                    sizer=sizer, comm=communicator
                 )
-                stencil_factory = pace.dsl.StencilFactory(
+                stencil_factory = StencilFactory(
                     config=self.stencil_config, grid_indexing=grid_indexing
                 )
 
@@ -245,14 +242,14 @@ class DriverConfig:
                     )
 
             kwargs["dycore_config"] = dacite.from_dict(
-                data_class=fv3core.DynamicalCoreConfig,
+                data_class=pyFV3.DynamicalCoreConfig,
                 data=kwargs.get("dycore_config", {}),
                 config=dacite.Config(strict=True),
             )
 
         if isinstance(kwargs["physics_config"], dict):
             kwargs["physics_config"] = dacite.from_dict(
-                data_class=pace.physics.PhysicsConfig,
+                data_class=pySHiELD.PhysicsConfig,
                 data=kwargs.get("physics_config", {}),
                 config=dacite.Config(strict=True),
             )
@@ -352,7 +349,7 @@ class RestartConfig:
         self,
         state: DriverState,
         *,
-        comm: pace.util.Comm,
+        comm: Comm,
         time: datetime,
         driver_config: DriverConfig,
         restart_path: str,
@@ -370,7 +367,7 @@ class RestartConfig:
         state: DriverState,
         *,
         step: int,
-        comm: pace.util.Comm,
+        comm: Comm,
         time: Union[datetime, timedelta],
         driver_config: DriverConfig,
         restart_path: str,
@@ -396,7 +393,7 @@ class Driver:
             config: driver configuration
             comm: communication object behaving like mpi4py.Comm
         """
-        pace_log.info("initializing driver")
+        ndsl_log.info("initializing driver")
         self.config: DriverConfig = config
         self.time = self.config.start_time
         self.comm_config = config.comm_config
@@ -474,13 +471,13 @@ class Driver:
                 communicator=communicator,
                 stencil_compare_comm=stencil_compare_comm,
             )
-            pace_log.info("setting up grid started")
+            ndsl_log.info("setting up grid started")
             (damping_coefficients, driver_grid_data, grid_data,) = self.config.get_grid(
                 quantity_factory=self.quantity_factory,
                 communicator=communicator,
             )
-            pace_log.info("setting up grid done")
-            pace_log.info("setting up state started")
+            ndsl_log.info("setting up grid done")
+            ndsl_log.info("setting up state started")
             self.state = self.config.get_driver_state(
                 quantity_factory=self.quantity_factory,
                 communicator=communicator,
@@ -488,11 +485,11 @@ class Driver:
                 driver_grid_data=driver_grid_data,
                 grid_data=grid_data,
             )
-            pace_log.info("setting up state done")
+            ndsl_log.info("setting up state done")
 
             self._start_time = self.config.initialization.start_time
-            pace_log.info("setting up dycore object started")
-            self.dycore = fv3core.DynamicalCore(
+            ndsl_log.info("setting up dycore object started")
+            self.dycore = pyFV3.DynamicalCore(
                 comm=communicator,
                 grid_data=self.state.grid_data,
                 stencil_factory=self.stencil_factory,
@@ -503,11 +500,11 @@ class Driver:
                 phis=self.state.dycore_state.phis,
                 state=self.state.dycore_state,
             )
-            pace_log.info("setting up dycore object done")
+            ndsl_log.info("setting up dycore object done")
 
-            pace_log.info("setting up physics object started")
+            ndsl_log.info("setting up physics object started")
             if not config.dycore_only and not config.disable_step_physics:
-                self.physics = pace.physics.Physics(
+                self.physics = pySHiELD.Physics(
                     stencil_factory=self.stencil_factory,
                     quantity_factory=self.quantity_factory,
                     grid_data=self.state.grid_data,
@@ -540,12 +537,12 @@ class Driver:
                 # Make sure those are set to None to raise any issues
                 self.dycore_to_physics = None
                 self.end_of_step_update = None
-            pace_log.info("setting up physics object done")
-            pace_log.info("setting up diagnostics factory started")
+            ndsl_log.info("setting up physics object done")
+            ndsl_log.info("setting up diagnostics factory started")
             self.diagnostics = config.diagnostics_config.diagnostics_factory(
                 communicator=communicator
             )
-            pace_log.info("setting up diagnostics factory done")
+            ndsl_log.info("setting up diagnostics factory done")
         log_subtile_location(
             partitioner=communicator.partitioner.tile, rank=communicator.rank
         )
@@ -553,14 +550,14 @@ class Driver:
             self.diagnostics.store(time=self.time, state=self.state)
 
         self._time_run = self.config.start_time
-        pace_log.info("setting up safety checkers started")
+        ndsl_log.info("setting up safety checkers started")
         self.safety_checker = SafetyChecker()
         SafetyChecker.register_variable("ua", -200, 200, compute_domain_only=True)
         SafetyChecker.register_variable("va", -200, 200, compute_domain_only=True)
         SafetyChecker.register_variable("delp", -1.0, 4000, compute_domain_only=True)
         SafetyChecker.register_variable("pt", 100, 380, compute_domain_only=True)
-        pace_log.info("setting up safety checkers done")
-        pace_log.info("initialization of the object done")
+        ndsl_log.info("setting up safety checkers done")
+        ndsl_log.info("initialization of the object done")
 
     def _update_driver_config_with_communicator(
         self, communicator: Communicator
@@ -597,11 +594,11 @@ class Driver:
         Using a method allows those actions to be removed from the orchestration path.
         """
         if __debug__:
-            pace_log.info(f"Finished stepping {step}")
+            ndsl_log.info(f"Finished stepping {step}")
         self.performance_collector.collect_performance()
         self.time += self.config.timestep
         if ((step + 1) % self.config.output_frequency) == 0:
-            pace_log.info(f"diagnostics for step {self.time} started")
+            ndsl_log.info(f"diagnostics for step {self.time} started")
             self.performance_collector.write_out_rank_0(
                 self.config.stencil_config.compilation_config.backend,
                 self.config.stencil_config.dace_config.is_dace_orchestrated(),
@@ -609,13 +606,13 @@ class Driver:
                 "Ongoing",
             )
             self.diagnostics.store(time=self.time, state=self.state)
-            pace_log.info(f"diagnostics for step {self.time} finished")
+            ndsl_log.info(f"diagnostics for step {self.time} finished")
         if (
             self.config.safety_check_frequency
             and ((step + 1) % self.config.safety_check_frequency) == 0
         ):
             self.safety_checker.check_state(self.state.dycore_state)
-            pace_log.info(f"checking state for for step {step+1} finished")
+            ndsl_log.info(f"checking state for for step {step+1} finished")
         self.config.restart_config.write_intermediate_if_enabled(
             state=self.state,
             step=step,
@@ -628,7 +625,7 @@ class Driver:
     def _critical_path_step_all(
         self,
         steps_count: int,
-        timer: pace.util.Timer,
+        timer: Timer,
         dt: Float,
     ):
         """Start of code path where performance is critical.
@@ -663,7 +660,7 @@ class Driver:
             self._end_of_step_actions(step)
 
     def step_all(self):
-        pace_log.info("integrating driver forward in time")
+        ndsl_log.info("integrating driver forward in time")
         with self.performance_collector.total_timer.clock("total"):
             self.profiler.enable()
             PerformanceCollector.mark_cuda_profiler("Begin integration")
@@ -688,7 +685,7 @@ class Driver:
 
     @dace_inhibitor
     def cleanup(self):
-        pace_log.info("cleaning up driver")
+        ndsl_log.info("cleaning up driver")
         self.performance_collector.write_out_rank_0(
             self.config.stencil_config.compilation_config.backend,
             self.config.stencil_config.dace_config.is_dace_orchestrated(),
@@ -714,21 +711,21 @@ class Driver:
         self.comm_config.cleanup(self.comm)
 
 
-def log_subtile_location(partitioner: pace.util.TilePartitioner, rank: int):
+def log_subtile_location(partitioner: TilePartitioner, rank: int):
     location_info = {
         "north": partitioner.on_tile_top(rank),
         "south": partitioner.on_tile_bottom(rank),
         "east": partitioner.on_tile_right(rank),
         "west": partitioner.on_tile_left(rank),
     }
-    pace_log.info(f"running on rank {rank} with subtile location {location_info}")
+    ndsl_log.info(f"running on rank {rank} with subtile location {location_info}")
 
 
 def _setup_factories(
     config: DriverConfig,
-    communicator: pace.util.Communicator,
+    communicator: Communicator,
     stencil_compare_comm,
-) -> Tuple[pace.util.QuantityFactory, pace.dsl.StencilFactory]:
+) -> Tuple[QuantityFactory, StencilFactory]:
     """
     Args:
         config: configuration of driver
@@ -742,24 +739,24 @@ def _setup_factories(
         stencil_factory: creates Stencils
     """
 
-    sizer = pace.util.SubtileGridSizer.from_tile_params(
+    sizer = SubtileGridSizer.from_tile_params(
         nx_tile=config.nx_tile,
         ny_tile=config.nx_tile,
         nz=config.nz,
-        n_halo=pace.util.N_HALO_DEFAULT,
+        n_halo=N_HALO_DEFAULT,
         extra_dim_lengths={},
         layout=config.layout,
         tile_partitioner=communicator.partitioner.tile,
         tile_rank=communicator.tile.rank,
     )
 
-    grid_indexing = pace.dsl.stencil.GridIndexing.from_sizer_and_communicator(
+    grid_indexing = GridIndexing.from_sizer_and_communicator(
         sizer=sizer, comm=communicator
     )
-    quantity_factory = pace.util.QuantityFactory.from_backend(
+    quantity_factory = QuantityFactory.from_backend(
         sizer, backend=config.stencil_config.compilation_config.backend
     )
-    stencil_factory = pace.dsl.StencilFactory(
+    stencil_factory = StencilFactory(
         config=config.stencil_config,
         grid_indexing=grid_indexing,
         comm=stencil_compare_comm,

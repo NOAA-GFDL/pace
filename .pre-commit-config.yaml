@@ -18,45 +18,12 @@ repos:
     rev: v0.812
     hooks:
     - id: mypy
-      name: mypy-fv3core
-      args: [--config-file, setup.cfg]
-      files: fv3core
-      exclude: |
-        (?x)^(
-        fv3core/pace/fv3core/stencils/fv_subgridz.py |
-        fv3core/tests/conftest.py
-        )$
-    - id: mypy
-      name: mypy-util
-      args: [--config-file, setup.cfg]
-      files: ^util
-    - id: mypy
-      name: mypy-stencils
-      args: [--config-file, setup.cfg]
-      files: stencils
-      exclude: |
-        (?x)^(
-        stencils/pace/stencils/testing/grid.py |
-        )$
-    - id: mypy
       name: mypy-driver
       args: [--config-file, setup.cfg]
       files: driver
       exclude: |
         (?x)^(
         tests/main/driver/__init__.py |
-        )$
-    - id: mypy
-      name: mypy-physics
-      args: [--config-file, setup.cfg]
-      files: physics
-    - id: mypy
-      name: mypy-dsl
-      args: [--config-file, setup.cfg]
-      files: dsl
-      exclude: |
-        (?x)^(
-        dsl/pace/dsl/gt4py_utils.py |
         )$
 -   repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v2.3.0

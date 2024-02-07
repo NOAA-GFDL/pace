@@ -5,7 +5,7 @@ from typing import Optional
 import click
 import yaml
 
-from pace.util import AVAILABLE_LOG_LEVELS, pace_log
+from ndsl.logging import AVAILABLE_LOG_LEVELS, ndsl_log
 
 from .driver import Driver, DriverConfig
 
@@ -33,12 +33,12 @@ def command_line(config_path: str, log_rank: Optional[int], log_level: str):
     CONFIG_PATH is the path to a DriverConfig yaml file.
     """
     level = AVAILABLE_LOG_LEVELS[log_level.lower()]
-    pace_log.setLevel(level)
-    pace_log.info("loading DriverConfig from yaml")
+    ndsl_log.setLevel(level)
+    ndsl_log.info("loading DriverConfig from yaml")
     with open(config_path, "r") as f:
         config = yaml.safe_load(f)
         driver_config = DriverConfig.from_dict(config)
-    pace_log.info(
+    ndsl_log.info(
         f"DriverConfig loaded: {yaml.dump(dataclasses.asdict(driver_config))}"
     )
     main(driver_config=driver_config)
