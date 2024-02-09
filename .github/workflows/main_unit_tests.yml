@@ -10,10 +10,9 @@ jobs:
     container:
       image: ghcr.io/mlee03/testing_push:latest
     steps:
-        - name: cd to home
-          run: cd /home
         - name: Checkout Pace repository
-          uses: actions/checkout@v4.1.1
+          uses: actions/checkout@v4
+          env: /home
           with:
             submodules: 'recursive'
         - name: setup environment
