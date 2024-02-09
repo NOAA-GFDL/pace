@@ -13,10 +13,10 @@ jobs:
         - name: cd to home
           run: cd /home
         - name: Checkout Pace repository
-          uses: actions/checkout@v3.5.2
+          uses: actions/checkout@v4.1.1
           with:
             submodules: 'recursive'
-        - name: setup conda environment
+        - name: setup environment
           run: |
             python -m pip install --upgrade pip setuptools wheel
             pip install -r requirements_dev.txt -c constraints.txt
