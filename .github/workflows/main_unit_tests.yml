@@ -10,6 +10,8 @@ jobs:
     container:
       image: ghcr.io/mlee03/testing_push:latest
     steps:
+        - name: cd home
+          run: cd /home
         - name:  oops no git
           run: echo "y" | dnf install git
         - name: Checkout Pace repository
