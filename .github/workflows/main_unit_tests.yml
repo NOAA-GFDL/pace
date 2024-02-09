@@ -8,7 +8,7 @@ jobs:
   main_unit_tests:
     runs-on: ubuntu-latest    
     container:
-      image: mlee03/pace/testing_push:latest
+      image: ghcr.io/mlee03/testing_push:latest
     steps:
         - name: cd to home
           run: cd /home
