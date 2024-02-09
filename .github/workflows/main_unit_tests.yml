@@ -17,7 +17,9 @@ jobs:
         - name: Checkout Pace repository
           uses: actions/checkout@v4
         - name: get submodules
-          run: git submodule update --recursive
+          run: |
+             git config --global --add safe.directory /home/pace
+             git submodule update --recursive
         - name: setup environment
           run: |
             python -m pip install --upgrade pip setuptools wheel
