@@ -10,6 +10,8 @@ jobs:
     container:
       image: ghcr.io/mlee03/testing_push:latest
     steps:
+        - name:  oops no git
+           run: dnf install git
         - name: Checkout Pace repository
           uses: actions/checkout@v4
           env:
