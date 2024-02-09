@@ -17,7 +17,7 @@ jobs:
         - name: setup environment
           run: |
             conda create -y --name pace python=3.8
-            conda init
+            conda init bash
             bash
             conda activate pace
             python -m pip install --upgrade pip setuptools wheel
