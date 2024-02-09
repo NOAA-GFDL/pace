@@ -20,10 +20,7 @@ jobs:
             conda env list
             pip3 install --upgrade pip setuptools wheel
             pip3 install -r requirements_dev.txt -c constraints.txt
-        - name: Clone datafiles
-          run: |
             mkdir -p tests/main/input && cd tests/main/input
             git clone -b store_files https://github.com/mlee03/pace.git tmp && mv tmp/*.nc . && rm -rf tmp
-        - name: Run all main tests
-          run: |
+	    cd /home/pace
             pytest -x tests/main
