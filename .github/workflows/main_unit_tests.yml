@@ -16,8 +16,6 @@ jobs:
             submodules: 'recursive'
         - name: setup environment
           run: |
-            conda create -y --name pace python=3.8
-            conda activate pace
             python -m pip install --upgrade pip setuptools wheel
             pip install -r requirements_dev.txt -c constraints.txt
         - name: Clone datafiles
