@@ -12,8 +12,8 @@ jobs:
     steps:
         - name: checkout
           uses: actions/checkout@v4
-        - name:  recursive
-          run: git submodule update --init --recursive
+            with:
+              submodules: 'recursive'
         - name: setup environment
           run: |
             python -m pip install --upgrade pip setuptools wheel
