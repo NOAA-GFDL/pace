@@ -7,11 +7,8 @@ on:
 jobs:
   main_unit_tests:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: /home
     container:
-      image: ghcr.io/mlee03/with_git:latest
+      image: ghcr.io/mlee03/test:test
     steps:
         - name: checkout
           uses: actions/checkout@v4
