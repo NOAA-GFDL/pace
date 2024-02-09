@@ -15,7 +15,8 @@ jobs:
         - name:  oops no git
           run: echo "y" | dnf install git
         - name: Checkout Pace repository
-          run: git clone -b ci-testing --recursive https://github.com/mlee03/pace.git && cd pace
+          run: git clone -b ci-testing --recursive https://github.com/mlee03/pace.git
+          run: cd pace && pwd
         - name: setup environment
           run: |
             python -m pip install --upgrade pip setuptools wheel
