@@ -11,7 +11,7 @@ jobs:
       image: ghcr.io/mlee03/test:test
     steps:
         - name: get git
-          run: dnf install git
+          run: echo "y" | dnf install git
         - name: checkout
           uses: actions/checkout@v4
         - name:  recursive
