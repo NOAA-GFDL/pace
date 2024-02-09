@@ -14,8 +14,6 @@ jobs:
           run: echo "y" | dnf install git
         - name: Checkout Pace repository
           uses: actions/checkout@v4
-          env:
-            PATH: /home
         - name: get submodules
           run: git submodule update --init --recursive
         - name: setup environment
