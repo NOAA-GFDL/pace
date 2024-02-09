@@ -8,7 +8,7 @@ jobs:
   main_unit_tests:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/mlee03/test:test
+      image: ghcr.io/mlee03/test2:test2
     steps:
         - name: checkout
           uses: actions/checkout@v4
