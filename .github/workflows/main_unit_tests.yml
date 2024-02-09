@@ -17,8 +17,8 @@ jobs:
         - name: setup environment
           run: |
             conda env list
-            python -m pip install --upgrade pip setuptools wheel
-            pip install -r requirements_dev.txt -c constraints.txt
+            pip3 install --upgrade pip setuptools wheel
+            pip3 install -r requirements_dev.txt -c constraints.txt
         - name: Clone datafiles
           run: |
             mkdir -p tests/main/input && cd tests/main/input
