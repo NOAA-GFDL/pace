@@ -22,5 +22,5 @@ jobs:
             pip3 install -r requirements_dev.txt -c constraints.txt
             mkdir -p tests/main/input && cd tests/main/input
             git clone -b store_files https://github.com/mlee03/pace.git tmp && mv tmp/*.nc . && rm -rf tmp
-	    cd /home/pace
+            cd /home/pace
             pytest -x tests/main
