@@ -6,7 +6,10 @@ on:
 
 jobs:
   main_unit_tests:
-    runs-on: ubuntu-latest    
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: /home
     container:
       image: ghcr.io/mlee03/with_git:latest
     steps:
