@@ -17,9 +17,10 @@ jobs:
         - name: Checkout Pace repository
           run: |
             git clone -b ci-testing --recursive https://github.com/mlee03/pace.git
-            cd pace && pwd && ls
+            cd pace
         - name: setup environment
           run: |
+            pwd && ls
             python -m pip install --upgrade pip setuptools wheel
             pip install -r requirements_dev.txt -c constraints.txt
         - name: Clone datafiles
