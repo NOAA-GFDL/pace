@@ -10,10 +10,12 @@ jobs:
     container:
       image: ghcr.io/mlee03/test:test
     steps:
+        - name: get git
+          run: dnf install git
         - name: checkout
           uses: actions/checkout@v4
-          with:
-            submodules: 'recursive'
+        - name:  recursive
+          run: git submodule update --init --recursive
         - name: setup environment
           run: |
             python -m pip install --upgrade pip setuptools wheel
