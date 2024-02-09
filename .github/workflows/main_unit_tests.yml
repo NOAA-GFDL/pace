@@ -8,19 +8,14 @@ jobs:
   main_unit_tests:
     runs-on: ubuntu-latest    
     container:
-      image: ghcr.io/mlee03/testing_push:latest
+      image: ghcr.io/mlee03/with_git:latest
     steps:
-        - name: cd home
-          run: cd /home
-        - name:  oops no git
-          run: echo "y" | dnf install git
-        - name: Checkout Pace repository
-          run: |
-            git clone -b ci-testing --recursive https://github.com/mlee03/pace.git
-            cd pace
+        - name: checkout
+          uses: actions/checkout@v4
+          with:
+            submodules: 'recursive'
         - name: setup environment
           run: |
-            pwd && ls
             python -m pip install --upgrade pip setuptools wheel
             pip install -r requirements_dev.txt -c constraints.txt
         - name: Clone datafiles
