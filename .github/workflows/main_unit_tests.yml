@@ -16,6 +16,7 @@ jobs:
             submodules: 'recursive'
         - name: setup environment
           run: |
+            conda env list
             python -m pip install --upgrade pip setuptools wheel
             pip install -r requirements_dev.txt -c constraints.txt
         - name: Clone datafiles
