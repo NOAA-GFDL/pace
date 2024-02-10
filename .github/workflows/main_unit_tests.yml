@@ -17,9 +17,9 @@ jobs:
         - name: generate input files
           run: |
             chmod +x /home/test_scripts
-            mkdir /_w/pace/pace/tests/main/input
-            test_scripts/create_eta79.py && mv eta79.nc /_w/pace/pace/tests/main/input
-            test_scripts/create_eta91.py && mv eta91.nc /_w//pace/pace/tests/main/input
+            mkdir tests/main/input
+            /home/test_scripts/create_eta79.py && mv eta79.nc tests/main/input
+            /home/test_scripts/create_eta91.py && mv eta91.nc tests/main/input
         - name: setup environment and run
           run: |
             source /root/.bashrc
