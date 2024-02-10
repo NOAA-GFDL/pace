@@ -14,13 +14,12 @@ jobs:
           uses: actions/checkout@v4
           with:
             submodules: 'recursive'
-            path: /home
         - name: generate input files
           run: |
             chmod +x /home/test_scripts
-            mkdir /home/pace/tests/main/input
-            test_scripts/create_eta79.py && mv eta79.nc /home/pace/tests/main/input
-            test_scripts/create_eta91.py && mv eta91.nc /home/pace/tests/main/input
+            mkdir /_w/pace/tests/main/input
+            test_scripts/create_eta79.py && mv eta79.nc /_w/pace/tests/main/input
+            test_scripts/create_eta91.py && mv eta91.nc /_w//pace/tests/main/input
         - name: setup environment and run
           run: |
             source /root/.bashrc
