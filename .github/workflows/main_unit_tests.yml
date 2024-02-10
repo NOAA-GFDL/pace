@@ -8,17 +8,21 @@ jobs:
   main_unit_tests:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/mlee03/test2:test2
+      image: ghcr.io/mlee03/pace:test
     steps:
         - name: checkout
           uses: actions/checkout@v4
           with:
             submodules: 'recursive'
-        - name: setup environment
+        - name: generate input files
+            run: |
+              chmod +x /home/test_scripts
+              mkdir /home/pace/tests/main/input
+              test_scripts/create_eta79.py && mv eta79.nc /home/pace/tests/main/input
+              test_scripts/create_eta91.py && mv eta91.nc /home/pace/tests/main/input
+        - name: setup environment and run
           run: |
             source /root/.bashrc
-            conda env list
             pip3 install --upgrade pip setuptools wheel
-            pip3 install -r requirements_dev.txt -c constraints.txt
-            git clone -b store_files https://github.com/mlee03/pace.git tests/main/input
+            pip3 install -r requirements_dev.txt -c constraints.txt	    
             pytest -x tests/main
