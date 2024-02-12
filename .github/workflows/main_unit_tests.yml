@@ -14,11 +14,18 @@ jobs:
           uses: actions/checkout@v4
           with:
             submodules: 'recursive'
-        - name: setup environment 
+        - name: setup environment and run
           run: |
             source /root/.bashrc
             pip3 install --upgrade pip setuptools wheel
             pip3 install -r requirements_dev.txt -c constraints.txt	    
+        - name: generate input files
+          run: |
+            source /root/.bashrc
+            chmod +x /home/test_scripts
+            mkdir tests/main/input
+            /home/test_scripts/create_eta79.py && mv eta79.nc tests/main/input
+            /home/test_scripts/create_eta91.py && mv eta91.nc tests/main/input
         - name: run tests
           run: |
             source /root/.bashrc
