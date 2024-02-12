@@ -213,7 +213,8 @@ def test_set_hybrid_pressure_coefficients_correct(km):
         raise ValueError("Unexpected value of bk")
 
     driver.safety_checker.clear_all_checks()
-
+    if os.path.isfile( eta_file ) : os.remove(eta_file)
+    
 
 @pytest.mark.parametrize( "eta_file",["file_is_not_here",
                                       f"{input_dir}/eta_not_mono.nc"])
@@ -240,10 +241,16 @@ def test_set_hybrid_pressure_coefficients_fail(eta_file):
     yaml_config["grid_config"]["config"]["eta_file"] = eta_file
     if "not_mono" in eta_file :
         in_eta_file= f"{input_dir}/eta79.nc"
-        if not os.path.isfile(in_eta_file) : write_eta_79_file(in_eta_file)
+        write_eta_79_file(in_eta_file)
         write_non_mono_eta_file( in_eta_file, eta_file )
 
-    driver_config = pace.driver.DriverConfig.from_dict(yaml_config)
-    driver_config.comm_config = pace.driver.NullCommConfig(rank=0, total_ranks=6)
-    driver = pace.driver.Driver(config=driver_config)
+    try: 
+        driver_config = pace.driver.DriverConfig.from_dict(yaml_config)
+        driver_config.comm_config = pace.driver.NullCommConfig(rank=0, total_ranks=6)
+        driver = pace.driver.Driver(config=driver_config)
+    except :
+        if os.path.isfile(in_eta_file) : os.remove(in_eta_file)
+        if os.path.isfile(eta_file) : os.remove(eta_file)
+        raise 
+
 
