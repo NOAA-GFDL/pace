@@ -17,5 +17,5 @@ jobs:
         - name: run build_and_test
           run: |
             cp /home/test_scripts/build_and_test.sh .
-            chmod + x build_and_test.sh
+            chmod +x build_and_test.sh
             ./build_and_test.sh
