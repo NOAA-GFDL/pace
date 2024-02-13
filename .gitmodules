@@ -1,4 +1,3 @@
-
 [submodule "NDSL"]
 	path = NDSL
 	url = https://github.com/NOAA-GFDL/NDSL.git
