@@ -48,9 +48,9 @@ RUN mkdir /opt/spack-environment \
 # Install the software, remove unnecessary deps
 RUN cd /opt/spack-environment \
     && spack env activate -d . \
-    && spack install --fail-fast 
+    && spack install --fail-fast
 
-RUN dnf install -y autoconf make automake m4 libtool pkg-config 
+RUN dnf install -y autoconf make automake m4 libtool pkg-config
 RUN cd /home \
     && git clone https://github.com/NOAA-GFDL/FRE-NCTOOLS.git \
     && cd FRE-NCTOOLS \
@@ -75,13 +75,11 @@ COPY test_scripts /home/test_scripts
 
 WORKDIR /home
 
-RUN dnf install -y libtool pkg-config 
+RUN dnf install -y libtool pkg-config
 
 ENV LD_LIBRARY_PATH="/opt/view/lib:/opt/view/lib64:/usr/local/lib:/usr/local/lib64"
 ENV PATH="/opt/view/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/opt/view/fre-nctools/bin"
 
-RUN conda init bash && source /root/.bashrc 
+RUN conda init bash && source /root/.bashrc
 
 ENTRYPOINT [ "/bin/bash" ]
-
-

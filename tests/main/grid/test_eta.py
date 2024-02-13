@@ -41,10 +41,11 @@ def write_non_mono_eta_file(in_eta_file, out_eta_file):
     """
 
     data = xr.open_dataset(in_eta_file)
-    data["ak"].values[10]=data["ak"].values[0]
-    data["bk"].values[20]=0.0
-    
+    data["ak"].values[10] = data["ak"].values[0]
+    data["bk"].values[20] = 0.0
+
     data.to_netcdf(out_eta_file)
+
 
 @pytest.mark.parametrize("km", [79, 91])
 def test_set_hybrid_pressure_coefficients_correct(km):
@@ -117,17 +118,15 @@ def test_set_hybrid_pressure_coefficients_fail(cfile):
     with open(config_file, "r") as f:
         yaml_config = yaml.safe_load(f)
 
-    in_eta_file="tests/main/input/eta79.nc"
+    in_eta_file = "tests/main/input/eta79.nc"
     write_non_mono_eta_file(in_eta_file, cfile)
     yaml_config["grid_config"]["config"]["eta_file"] = cfile
 
-    try: 
+    try:
         driver_config = pace.driver.DriverConfig.from_dict(yaml_config)
         driver_config.comm_config = pace.driver.NullCommConfig(rank=0, total_ranks=6)
         driver = pace.driver.Driver(config=driver_config)
-    except:
-        if os.path.isfile(cfile) : os.remove(cfile)
+    except Exception as error:
+        if os.path.isfile(cfile):
+            os.remove(cfile)
         raise
-
-
-    
