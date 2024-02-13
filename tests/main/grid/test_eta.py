@@ -91,15 +91,39 @@ def test_set_hybrid_pressure_coefficients_correct(km):
     driver.safety_checker.clear_all_checks()
 
 
-@pytest.mark.parametrize(
-    "cfile",
-    [
-        "file_is_not_here",
-        "tests/main/grid/input/eta_not_mono.nc",
-    ],
-)
-@pytest.mark.xfail
-def test_set_hybrid_pressure_coefficients_fail(cfile):
+def test_set_hybrid_pressure_coefficients_nofile():
+
+    """This test checks to see that the program
+    fails when (1) the eta_file is not specified in the yaml
+    configuration file; and (2), the computed eta values
+    increase non-monotonically.  For the latter test, the eta_file
+    is specified in test_config_not_mono.yaml file and
+    the ak and bk values in the eta_file have been changed nonsensically
+    to result in erronenous eta values.
+    """
+
+    dirname = os.path.dirname(os.path.abspath(__file__))
+    config_file = os.path.join(
+        dirname, "../../../driver/examples/configs/baroclinic_c12.yaml"
+    )
+
+    with open(config_file, "r") as f:
+        yaml_config = yaml.safe_load(f)
+
+    del yaml_config["grid_config"]["config"]["eta_file"]
+
+    try:
+        driver_config = pace.driver.DriverConfig.from_dict(yaml_config)
+        driver_config.comm_config = pace.driver.NullCommConfig(rank=0, total_ranks=6)
+        driver = pace.driver.Driver(config=driver_config)
+    except Exception as error:
+        if str(error) == "eta file not specified":
+            pytest.xfail("testing eta file not specified")
+        else:
+            pytest.fail(f"ERROR {error}")
+
+
+def test_set_hybrid_pressure_coefficients_not_mono():
 
     """This test checks to see that the program
     fails when (1) the eta_file is not specified in the yaml
@@ -119,14 +143,20 @@ def test_set_hybrid_pressure_coefficients_fail(cfile):
         yaml_config = yaml.safe_load(f)
 
     in_eta_file = "tests/main/input/eta79.nc"
-    write_non_mono_eta_file(in_eta_file, cfile)
-    yaml_config["grid_config"]["config"]["eta_file"] = cfile
+    out_eta_file = "eta_not_mono_79.nc"
+    write_non_mono_eta_file(in_eta_file, out_eta_file)
+    yaml_config["grid_config"]["config"]["eta_file"] = out_eta_file
 
     try:
         driver_config = pace.driver.DriverConfig.from_dict(yaml_config)
         driver_config.comm_config = pace.driver.NullCommConfig(rank=0, total_ranks=6)
         driver = pace.driver.Driver(config=driver_config)
     except Exception as error:
-        if os.path.isfile(cfile):
-            os.remove(cfile)
-        raise
+        if os.path.isfile(out_eta_file):
+            os.remove(out_eta_file)
+        if str(error) == "ETA values are not monotonically increasing":
+            pytest.xfail("testing eta values are not monotomincally increasing")
+        else:
+            pytest.fail(
+                "ERROR in testing etav values not are not monotonically increasing"
+            )
