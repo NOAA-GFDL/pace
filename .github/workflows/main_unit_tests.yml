@@ -16,6 +16,6 @@ jobs:
             submodules: 'recursive'
         - name: run build_and_test
           run: |
-            cp /home/test_scripts/build_and_tests.sh .
-            chmod + x build_and_tests.sh
-            ./build_and_tests.sh
+            cp /home/test_scripts/build_and_test.sh .
+            chmod + x build_and_test.sh
+            ./build_and_test.sh
