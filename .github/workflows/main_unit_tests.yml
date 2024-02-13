@@ -5,9 +5,9 @@ on:
       types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
 
 # cancel running jobs if theres a newer push
-  concurrency:
-    group: ${{ github.workflow }}-${{ github.ref }}
-    cancel-in-progress: true
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   main_unit_tests:
