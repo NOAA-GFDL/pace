@@ -80,11 +80,7 @@ RUN dnf install -y libtool pkg-config
 ENV LD_LIBRARY_PATH="/opt/view/lib:/opt/view/lib64:/usr/local/lib:/usr/local/lib64"
 ENV PATH="/opt/view/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/opt/view/fre-nctools/bin"
 
-RUN conda init bash \
-    && source /root/.bashrc \
-    && conda create --name pace python=3.8 \
-    && conda init bash \
-    && echo "conda activate pace" >> /root/.bashrc
+RUN conda init bash && source /root/.bashrc 
 
 ENTRYPOINT [ "/bin/bash" ]
 
