@@ -8,7 +8,7 @@ jobs:
   main_unit_tests:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/mlee03/pace:test
+      image: ghcr.io/noaa-gfdl/pace:test
     steps:
         - name: checkout
           uses: actions/checkout@v4
