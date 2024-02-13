@@ -14,7 +14,7 @@ jobs:
     container:
       image: ghcr.io/noaa-gfdl/pace:test
     steps:
-        - name: checkout
+        - name: Checkout Pace repository
           uses: actions/checkout@v4
           with:
             submodules: 'recursive'
