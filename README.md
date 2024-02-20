@@ -130,33 +130,39 @@ An example of integration of an ML model replacing the microphysics parametrizat
 
 ## Running pace in containers
 A Docker image exists in the Github Container Registry associated with the NOAA-GFDL organization.
-This image may be used to start a Docker container that can run on the machine of user's preference.
-The following are directions on how to setup the conda environment in the container for pace.
+This image is publicly accessible and can be used to run a Docker container to work with pace.
+The following are directions on how to setup the pace conda environment interactively in a container.
 
-The latest image can be pulled with the following commands such as shown below:
+The latest image can be pulled with the Docker command shown below or
+with any other container management tools:
 
 ```shell
-docker pull ghcr.io/noaa-gfdl/pace:test
-podman pull ghcr.io/noaa-gfdl/pace:test
-```
+docker pull ghcr.io/noaa-gfdl/pace:test`
+``
 
 If permission issues arise during the pull, a Github personal token
 may need to be created.  The steps to create a personal token is found
-(here)[https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens]
+[here](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)
 
-Pulling the image with a personal token can be done with podman via
+Once the token has been generated, the image can be pulled with:
 ```shell
-podman login --name GITHUB_USERNAME --password PERSONAL_TOKEN
-podman pull ghcr.io/noaa-gfdl/pace:test
+docker login --username GITHUB_USERNAME --password TOKEN
+docker pull ghcr.io/noaa-gfdl/pace:test
 ```
 
-Once the image is pulled and the container is running (e.g. with `podman run -it pace:test`),
-the `pace` conda environment is already activated with python version 3.8.  However, packages have
-not been installed.
+Any container management tools compatible with Docker images can be used
+to run the container interactively from the pace image.
+With Docker, the following command runs the container.
+```shell
+docker run -it pace:test
+```
 
-To install the requisite python packages, please follow the steps shown below:
+In the container, the `pace` conda environment using python version 3.8 is already activated.
+However, packages required by pace have not been installed yet and users can follow the steps shown below for installation:
+
 ```shell
 git clone --recursive -b develop https://github.com/NOAA-GFDL/pace.git pace
 cd pace
 cp /home/scripts/setup_env.sh . && chmod +x setup_env.sh
+source ./setup_env.sh
 ```
