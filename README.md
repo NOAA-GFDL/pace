@@ -127,3 +127,36 @@ An example of integration of an ML model replacing the microphysics parametrizat
 [issues-url]: https://github.com/ai2cm/pace/issues
 [license-shield]: https://img.shields.io/github/license/ai2cm/pace.svg
 [license-url]: https://github.com/ai2cm/pace/blob/main/LICENSE.md
+
+## Running pace in containers
+A Docker image exists in the Github Container Registry associated with the NOAA-GFDL organization.
+This image may be used to start a Docker container that can run on the machine of user's preference.
+The following are directions on how to setup the conda environment in the container for pace.
+
+The latest image can be pulled with the following commands such as shown below:
+
+```shell
+docker pull ghcr.io/noaa-gfdl/pace:test
+podman pull ghcr.io/noaa-gfdl/pace:test
+```
+
+If permission issues arise during the pull, a Github personal token
+may need to be created.  The steps to create a personal token is found
+(here)[https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens]
+
+Pulling the image with a personal token can be done with podman via
+```shell
+podman login --name GITHUB_USERNAME --password PERSONAL_TOKEN
+podman pull ghcr.io/noaa-gfdl/pace:test
+```
+
+Once the image is pulled and the container is running (e.g. with `podman run -it pace:test`),
+the `pace` conda environment is already activated with python version 3.8.  However, packages have
+not been installed.
+
+To install the requisite python packages, please follow the steps shown below:
+```shell
+git clone --recursive -b develop https://github.com/NOAA-GFDL/pace.git pace
+cd pace
+cp /home/scripts/setup_env.sh . && chmod +x setup_env.sh
+```
