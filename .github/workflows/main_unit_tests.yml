@@ -21,7 +21,6 @@ jobs:
             submodules: 'recursive'
         - name: setup env and run tests
           run: |
-            cd /home
             cp /home/scripts/setup_env.sh . && chmod +x setup_env.sh
             cp /home/scripts/run_tests.sh . && chmod +x run_tests.sh
             ./setup_env.sh
