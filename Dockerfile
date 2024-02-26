@@ -64,7 +64,7 @@ RUN cd /home \
     && mkdir build && cd build \
     && ../configure --with-mpi --prefix=/opt/view \
     && make install \
-    && cd .. && rm -rf FRE-NCTOOLS.git
+    && cd .. && rm -rf FRE-NCTOOLS
 
 
 # Bare OS image to run the installed executables
@@ -79,7 +79,7 @@ WORKDIR /home
 RUN dnf install -y libtool pkg-config
 
 ENV LD_LIBRARY_PATH="/opt/view/lib:/opt/view/lib64:/usr/local/lib:/usr/local/lib64"
-ENV PATH="/opt/view/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin:/opt/view/fre-nctools/bin"
+ENV PATH="/opt/view/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin"
 
 RUN conda init bash && source /root/.bashrc
 
