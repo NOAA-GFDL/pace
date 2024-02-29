@@ -280,6 +280,8 @@ class DriverConfig:
             # Copy grid_type to the DycoreConfig if it's not the default value
             if grid_type != 0:
                 kwargs["dycore_config"].grid_type = grid_type
+                if grid_type > 3:
+                    kwargs["dycore_config"].ntiles = 1
 
         if (
             isinstance(kwargs["stencil_config"], dict)
