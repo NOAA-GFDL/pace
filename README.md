@@ -124,10 +124,54 @@ mpirun --mca btl_vader_single_copy_mechanism none -n 6 python3 -m pace.driver.ru
 This repository was first developed at [AI2](https://github.com/ai2cm/pace) and the institute conserves an archived copy with the latest state before the NOAA took over.
 
 [contributors-shield]: https://img.shields.io/github/contributors/ai2cm/pace.svg
-[contributors-url]: https://github.com/NOAA-GFDL/pace/graphs/contributors
-[stars-shield]: https://img.shields.io/github/stars/NOAA-GFDL/pace.svg
-[stars-url]: https://github.com/NOAA-GFDL/pace/stargazers
-[issues-shield]: https://img.shields.io/github/issues/NOAA-GFDL/pace.svg
-[issues-url]: https://github.com/NOAA-GFDL/pace/issues
-[license-shield]: https://img.shields.io/github/license/NOAA-GFDL/pace.svg
-[license-url]: https://github.com/NOAA-GFDL/pace/blob/main/LICENSE.md
+[contributors-url]: https://github.com/ai2cm/pace/graphs/contributors
+[stars-shield]: https://img.shields.io/github/stars/ai2cm/pace.svg
+[stars-url]: https://github.com/ai2cm/pace/stargazers
+[issues-shield]: https://img.shields.io/github/issues/ai2cm/pace.svg
+[issues-url]: https://github.com/ai2cm/pace/issues
+[license-shield]: https://img.shields.io/github/license/ai2cm/pace.svg
+[license-url]: https://github.com/ai2cm/pace/blob/main/LICENSE.md
+
+## Running pace in containers
+A Docker image exists in the Github Container Registry associated with the NOAA-GFDL organization.
+This image is publicly accessible and can be used to run a Docker container to work with pace.
+The following are directions on how to setup the pace conda environment interactively in a container.
+
+The latest image can be pulled with the Docker as shown below or
+with any other container management tools:
+
+```shell
+docker pull ghcr.io/noaa-gfdl/pace_mpich:3.8
+```
+for MPICH installation of MPI; and
+```shell
+docker pull ghcr.io/noaa-gfdl/pace_openmpi:3.8
+```
+for OpenMPI installation of MPI.
+
+If permission issues arise during the pull, a Github personal token
+may be required.  The steps to create a personal token is found
+[here](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)
+
+Once the token has been generated, the image can be pulled for example with with:
+```shell
+docker login --username GITHUB_USERNAME --password TOKEN
+docker pull ghcr.io/noaa-gfdl/pace_mpich:3.8
+```
+
+Any container management tools compatible with Docker images can be used
+to run the container interactively from the pulled image.
+With Docker, the following command runs the container interactively.
+```shell
+docker run -it pace_mpich:3.8
+```
+
+In the container, the `pace` conda environment using python version 3.8 is already activated.
+However, packages required by pace have not been installed yet and users can follow the steps shown below for installation:
+
+```shell
+git clone --recursive -b develop https://github.com/NOAA-GFDL/pace.git pace
+cd pace
+cp /home/scripts/setup_env.sh . && chmod +x setup_env.sh
+source ./setup_env.sh
+```
