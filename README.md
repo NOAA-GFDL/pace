@@ -137,28 +137,33 @@ A Docker image exists in the Github Container Registry associated with the NOAA-
 This image is publicly accessible and can be used to run a Docker container to work with pace.
 The following are directions on how to setup the pace conda environment interactively in a container.
 
-The latest image can be pulled with the Docker command shown below or
+The latest image can be pulled with the Docker as shown below or
 with any other container management tools:
 
 ```shell
-docker pull ghcr.io/noaa-gfdl/pace:test`
-``
+docker pull ghcr.io/noaa-gfdl/pace_mpich:3.8
+```
+for MPICH installation of MPI; and
+```shell
+docker pull ghcr.io/noaa-gfdl/pace_openmpi:3.8
+```
+for OpenMPI installation of MPI.
 
 If permission issues arise during the pull, a Github personal token
-may need to be created.  The steps to create a personal token is found
+may be required.  The steps to create a personal token is found
 [here](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)
 
-Once the token has been generated, the image can be pulled with:
+Once the token has been generated, the image can be pulled for example with with:
 ```shell
 docker login --username GITHUB_USERNAME --password TOKEN
-docker pull ghcr.io/noaa-gfdl/pace:test
+docker pull ghcr.io/noaa-gfdl/pace_mpich:3.8
 ```
 
 Any container management tools compatible with Docker images can be used
-to run the container interactively from the pace image.
-With Docker, the following command runs the container.
+to run the container interactively from the pulled image.
+With Docker, the following command runs the container interactively.
 ```shell
-docker run -it pace:test
+docker run -it pace_mpich:3.8
 ```
 
 In the container, the `pace` conda environment using python version 3.8 is already activated.
