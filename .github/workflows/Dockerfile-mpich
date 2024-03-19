@@ -20,14 +20,15 @@
 # From rem1776
 FROM spack/rockylinux9:latest as builder
 
+ARG gcc_version=12.3.0
 
 # What we want to install and how we want to install it
 # is specified in a manifest file (spack.yaml)
 RUN mkdir /opt/spack-environment \
     &&  (echo 'spack:' \
     &&   echo '  specs:' \
-    &&   echo '  - gcc@13.2.0' \
-    &&   echo '  - mpich@4.1.2' \
+    &&   echo "  - gcc@${gcc_version}" \
+    &&   echo '  - mpich@4.0.2' \
     &&   echo '  - netcdf-c@4.9.2 ^hdf5@1.14.2' \
     &&   echo '  - netcdf-fortran@4.6.1' \
     &&   echo '  - git@2.42.0' \
@@ -37,7 +38,7 @@ RUN mkdir /opt/spack-environment \
     &&   echo '    reuse: true' \
     &&   echo '  packages:' \
     &&   echo '    all:' \
-    &&   echo '      compiler: [gcc@13.2.0]' \
+    &&   echo "      compiler: [gcc@${gcc_version}]" \
     &&   echo '  # template file for any extra steps' \
     &&   echo '  config:' \
     &&   echo '    template_dirs:' \
@@ -46,8 +47,13 @@ RUN mkdir /opt/spack-environment \
     &&   echo '  view: /opt/view') > /opt/spack-environment/spack.yaml
 
 # Install the software, remove unnecessary deps
-RUN cd /opt/spack-environment \
+RUN spack install gcc@${gcc_version}
+RUN source /opt/spack/share/spack/setup-env.sh \
+    && spack load gcc@${gcc_version} \
+    && spack compiler find \
+    && cd /opt/spack-environment \
     && spack env activate -d . \
+    && spack -e . concretize -f \
     && spack install --fail-fast
 
 RUN dnf install -y autoconf make automake m4 libtool pkg-config
@@ -80,9 +86,11 @@ RUN dnf install -y libtool pkg-config
 
 ENV LD_LIBRARY_PATH="/opt/view/lib:/opt/view/lib64:/usr/local/lib:/usr/local/lib64"
 ENV PATH="/opt/view/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin"
+ENV MPICH_FC="/opt/view/bin/gfortran"
+ENV MPICH_CC="/opt/view/bin/gcc"
 
 RUN conda init bash && source /root/.bashrc
 
 ENTRYPOINT [ "/bin/bash" ]
 
-LABEL version=3.8
+LABEL version=3.
