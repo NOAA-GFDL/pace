@@ -1,4 +1,3 @@
-[![CircleCI][circleci-shield]][circleci-url]
 [![Contributors][contributors-shield]][contributors-url]
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
@@ -6,17 +5,36 @@
 
 # Pace
 
-Pace is an implementation of the FV3GFS / SHiELD atmospheric model developed by NOAA/GFDL using the GT4Py domain-specific language in Python. The model can be run on a laptop using Python-based backend or on thousands of heterogeneous compute nodes of a large supercomputer.
+Pace is an implementation of the FV3GFS / SHiELD atmospheric model developed by NOAA/GFDL using the [NDSL](https://github.com/NOAA-GFDL/NDSL) middleware in Python, itself based on [GT4Py](https://github.com/GridTools/gt4py) and [DaCe](https://github.com/spcl/dace). The model can be run on a laptop using Python-based backend or on thousands of heterogeneous compute nodes of a large supercomputer.
 
-Full Sphinx documentation can be found at [https://ai2cm.github.io/pace/](https://ai2cm.github.io/pace/).
+🚧 **WARNING** This repo is under active development - supported features and procedures can change rapidly and without notice. 🚧
 
-**WARNING** This repo is under active development - supported features and procedures can change rapidly and without notice.
+The repository model code is split between [pyFV3](https://github.com/NOAA-GFDL/pyFV3) for the dynamical core and [pySHiELD](https://github.com/NOAA-GFDL/pySHiELD) for the physics parametrization. A full depencies looks like the following:
+
+```mermaid
+flowchart TD
+GT4Py.cartesian --> |Stencil DSL|NDSL
+DaCe  --> |Full program opt|NDSL
+NDSL --> pyFV3
+NDSL --> pySHiELD
+pyFV3 --> |Dynamics|Pace
+pySHiELD --> |Physics|Pace
+
+```
 
 ## Quickstart - bare metal
 
 ### Build
 
-Pace requires GCC > 9.2, MPI, and Python 3.8 on your system, and CUDA is required to run with a GPU backend. You will also need the headers of the boost libraries in your `$PATH` (boost itself does not need to be installed).
+Pace requires:
+
+- GCC > 9.2
+- MPI
+- Python 3.8.
+
+For GPU backends CUDA and/or ROCm is required depending on the targeted hardware.
+
+For GT stencils backends, you will also need the headers of the boost libraries in your `$PATH`. This could be down like this.
 
 ```shell
 cd BOOST/ROOT
@@ -30,7 +48,7 @@ export BOOST_ROOT=BOOST/ROOT/boost_1_79_0
 When cloning Pace you will need to update the repository's submodules as well:
 
 ```shell
-git clone --recursive https://github.com/ai2cm/pace.git
+git clone --recursive https://github.com/NOAA-GFDL/pace.git
 ```
 
 or if you have already cloned the repository:
@@ -39,7 +57,7 @@ or if you have already cloned the repository:
 git submodule update --init --recursive
 ```
 
-We recommend creating a python `venv` or conda environment specifically for Pace.
+We recommend creating a python `venv` or `conda` environment specifically for Pace.
 
 ```shell
 python3 -m venv venv_name
@@ -69,7 +87,7 @@ After the run completes, you will see an output direcotry `output.zarr`. An exam
 
 ### Environment variable configuration
 
-- `PACE_CONSTANTS`: Pace is bundled with various constants (see _util/pace/util/constants.py_).
+- `PACE_CONSTANTS`: Pace is bundled with various constants.
   - `GFDL` NOAA's FV3 dynamical core constants (original port)
   - `GFS` Constant as defined in NOAA GFS
   - `GEOS`  Constant as defined in GEOS v13
@@ -101,24 +119,10 @@ make dev
 mpirun --mca btl_vader_single_copy_mechanism none -n 6 python3 -m pace.driver.run /pace/driver/examples/configs/baroclinic_c12.yaml
 ```
 
-## Running translate tests
+## History
 
-See the [translate tests](stencils/pace/stencils/testing/README.md) section for more information.
+This repository was first developed at [AI2](https://github.com/ai2cm/pace) and the institute conserves an archived copy with the latest state before the NOAA took over.
 
-## Repository structure
-
-The top-level directory contains the main components of pace such as the dynamical core, the physical parameterizations and utilities.
-
-This git repository is laid out as a mono-repo, containing multiple independent projects. Because of this, it is important not to introduce unintended dependencies between projects. The graph below indicates a project depends on another by an arrow pointing from the parent project to its dependency. For example, the tests for fv3core should be able to run with only files contained under the fv3core and util projects, and should not access any files in the driver or physics packages. Only the top-level tests in Pace are allowed to read all files.
-
-![Graph of interdependencies of Pace modules, generated from dependences.dot](./dependencies.svg)
-
-## ML emulation
-
-An example of integration of an ML model replacing the microphysics parametrization is available on the `feature/microphysics-emulator` branch.
-
-[circleci-shield]: https://dl.circleci.com/status-badge/img/gh/ai2cm/pace/tree/main.svg?style=svg
-[circleci-url]: https://dl.circleci.com/status-badge/redirect/gh/ai2cm/pace/tree/main
 [contributors-shield]: https://img.shields.io/github/contributors/ai2cm/pace.svg
 [contributors-url]: https://github.com/ai2cm/pace/graphs/contributors
 [stars-shield]: https://img.shields.io/github/stars/ai2cm/pace.svg
