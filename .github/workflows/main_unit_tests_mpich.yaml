@@ -1,4 +1,4 @@
-name: "Main unit tests"
+name: "Main unit tests with mpich"
 on:
   push:
   pull_request:
