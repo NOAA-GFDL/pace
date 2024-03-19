@@ -13,7 +13,7 @@ jobs:
   main_unit_tests:
     runs-on: ubuntu-latest
     container:
-      image: ghcr.io/noaa-gfdl/pace:3.8
+      image: ghcr.io/noaa-gfdl/pace_openmpi:3.8
     steps:
         - name: Checkout Pace repository
           uses: actions/checkout@v4

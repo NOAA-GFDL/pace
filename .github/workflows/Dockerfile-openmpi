@@ -86,6 +86,9 @@ RUN dnf install -y libtool pkg-config
 
 ENV LD_LIBRARY_PATH="/opt/view/lib:/opt/view/lib64:/usr/local/lib:/usr/local/lib64"
 ENV PATH="/opt/view/bin:/usr/local/bin:/usr/bin:/usr/local/sbin:/usr/sbin"
+ENV OMPI_FC="/opt/view/bin/gfortran"
+ENV OMPI_CC="/opt/view/bin/gcc"
+ENV OMPI_CXX="/opt/view/bin/g++"
 
 RUN conda init bash && source /root/.bashrc
 

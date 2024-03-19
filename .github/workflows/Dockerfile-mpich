@@ -28,7 +28,7 @@ RUN mkdir /opt/spack-environment \
     &&  (echo 'spack:' \
     &&   echo '  specs:' \
     &&   echo "  - gcc@${gcc_version}" \
-    &&   echo '  - mpich@4.0.2 ^gcc@12.3.0' \
+    &&   echo '  - mpich@4.0.2' \
     &&   echo '  - netcdf-c@4.9.2 ^hdf5@1.14.2' \
     &&   echo '  - netcdf-fortran@4.6.1' \
     &&   echo '  - git@2.42.0' \
