@@ -19,7 +19,7 @@ jobs:
           uses: actions/checkout@v4
           with:
             submodules: 'recursive'
-        - name: setup env and run tests
+        - name: setup env and run tests (test)
           run: |
             cp /home/scripts/setup_env.sh . && chmod +x setup_env.sh
             cp /home/scripts/run_tests.sh . && chmod +x run_tests.sh
