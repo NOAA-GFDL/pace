@@ -4,14 +4,15 @@ import warnings
 from datetime import datetime, timedelta
 from typing import List, Optional, Union
 
-from ndsl.comm.communicator import Communicator
+from ndsl import Quantity
 from ndsl.constants import RGRAV, Z_DIM, Z_INTERFACE_DIM
 from ndsl.dsl.dace.orchestration import dace_inhibitor
 from ndsl.filesystem import get_fs
 from ndsl.grid import GridData
-from ndsl.monitor import Monitor, NetCDFMonitor, ZarrMonitor
-from ndsl.quantity import Quantity
-from pyFV3.dycore_state import DycoreState
+from ndsl.monitor import Monitor, ZarrMonitor
+from ndsl.monitor.netcdf_monitor import NetCDFMonitor
+from ndsl.typing import Communicator
+from pyFV3 import DycoreState
 
 from .state import DriverState
 

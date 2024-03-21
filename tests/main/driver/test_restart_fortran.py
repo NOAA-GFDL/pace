@@ -4,12 +4,15 @@ import numpy as np
 import xarray as xr
 
 import pace.driver
-from ndsl.comm.communicator import CubedSphereCommunicator
-from ndsl.comm.local_comm import LocalComm
-from ndsl.comm.null_comm import NullComm
-from ndsl.comm.partitioner import CubedSpherePartitioner, TilePartitioner
-from ndsl.initialization.allocator import QuantityFactory
-from ndsl.initialization.sizer import SubtileGridSizer
+from ndsl import (
+    CubedSphereCommunicator,
+    CubedSpherePartitioner,
+    LocalComm,
+    NullComm,
+    QuantityFactory,
+    SubtileGridSizer,
+    TilePartitioner,
+)
 from pace.driver.initialization import FortranRestartInit
 from pySHiELD import PHYSICS_PACKAGES
 

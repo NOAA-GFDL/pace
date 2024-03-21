@@ -7,10 +7,13 @@ import yaml
 import zarr
 from mpi4py import MPI
 
-from ndsl.comm.communicator import CubedSphereCommunicator
-from ndsl.comm.null_comm import NullComm
-from ndsl.comm.partitioner import CubedSpherePartitioner, TilePartitioner
-from ndsl.quantity import Quantity
+from ndsl import (
+    CubedSphereCommunicator,
+    CubedSpherePartitioner,
+    NullComm,
+    Quantity,
+    TilePartitioner,
+)
 from pace.driver import DriverConfig
 from pace.driver.state import DriverState
 from pySHiELD import PHYSICS_PACKAGES

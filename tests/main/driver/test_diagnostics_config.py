@@ -4,9 +4,8 @@ import pytest
 
 import pace.driver
 import pace.driver.diagnostics
-from ndsl.initialization.allocator import QuantityFactory
-from ndsl.initialization.sizer import SubtileGridSizer
-from pyFV3.dycore_state import DycoreState
+from ndsl import QuantityFactory, SubtileGridSizer
+from pyFV3 import DycoreState
 
 
 def test_returns_null_diagnostics_if_no_path_given():

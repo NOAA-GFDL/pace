@@ -5,26 +5,22 @@ from typing import ClassVar, Optional, Tuple
 import f90nml
 import xarray as xr
 
-from ndsl.comm.communicator import Communicator
+from ndsl import Namelist, QuantityFactory, ndsl_log
 from ndsl.comm.partitioner import get_tile_index
 from ndsl.constants import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM
 from ndsl.grid import (
+    AngleGridData,
+    ContravariantGridData,
     DampingCoefficients,
     DriverGridData,
     GridData,
-    MetricTerms,
-    direct_transform,
-)
-from ndsl.grid.helper import (
-    AngleGridData,
-    ContravariantGridData,
     HorizontalGridData,
+    MetricTerms,
     VerticalGridData,
 )
-from ndsl.initialization.allocator import QuantityFactory
-from ndsl.logging import ndsl_log
-from ndsl.namelist import Namelist
+from ndsl.grid.stretch_transformation import direct_transform
 from ndsl.stencils.testing import TranslateGrid, grid
+from ndsl.typing import Communicator
 
 from .registry import Registry
 

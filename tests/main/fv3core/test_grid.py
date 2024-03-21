@@ -4,6 +4,7 @@ import numpy as np
 import pytest
 from gt4py.cartesian import gtscript
 
+from ndsl import GridIndexing
 from ndsl.constants import (
     X_DIM,
     X_INTERFACE_DIM,
@@ -12,7 +13,6 @@ from ndsl.constants import (
     Z_DIM,
     Z_INTERFACE_DIM,
 )
-from ndsl.dsl.stencil import GridIndexing
 from ndsl.dsl.typing import Index3D
 
 
