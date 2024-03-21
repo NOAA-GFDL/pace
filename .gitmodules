@@ -1,10 +1,13 @@
 
 [submodule "NDSL"]
 	path = NDSL
-	url = git@github.com:NOAA-GFDL/NDSL.git
+	url = https://github.com/NOAA-GFDL/NDSL.git
+	branch = develop
 [submodule "pyFV3"]
 	path = pyFV3
-	url = git@github.com:NOAA-GFDL/PyFV3.git
+	url = https://github.com/NOAA-GFDL/PyFV3.git
+	branch = develop
 [submodule "pySHiELD"]
 	path = pySHiELD
-	url = git@github.com:NOAA-GFDL/PySHiELD.git
+	url = https://github.com/NOAA-GFDL/PySHiELD.git
+	branch = develop
