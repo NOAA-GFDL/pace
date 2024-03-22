@@ -149,7 +149,7 @@ gprof2dot==2021.2.21
     # via pytest-profiling
 gridtools-cpp==2.3.2
     # via gt4py
-gt4py @ file:///home/Frank.Malatino/pace_sub/NDSL/external/gt4py
+gt4py
     # via ndsl
 h5netcdf==1.1.0
     # via ndsl
