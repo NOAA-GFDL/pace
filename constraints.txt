@@ -73,7 +73,7 @@ coverage==5.5
     # via pytest-cov
 cytoolz==0.12.1
     # via gt4py
-dace @ file:///home/Frank.Malatino/pace_sub/NDSL/external/dace
+dace
     # via ndsl
 dacite==1.6.0
     # via
