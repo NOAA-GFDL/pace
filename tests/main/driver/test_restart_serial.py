@@ -6,16 +6,22 @@ import numpy as np
 import xarray as xr
 import yaml
 
-import pace.driver
-from ndsl.comm.communicator import CubedSphereCommunicator
-from ndsl.comm.null_comm import NullComm
-from ndsl.comm.partitioner import CubedSpherePartitioner, TilePartitioner
-from ndsl.initialization.allocator import QuantityFactory
-from ndsl.initialization.sizer import SubtileGridSizer
-from ndsl.quantity import Quantity
-from pace.driver import CreatesComm, DriverConfig
-from pace.driver.driver import RestartConfig
-from pace.driver.initialization import AnalyticInit
+from ndsl import (
+    CubedSphereCommunicator,
+    CubedSpherePartitioner,
+    NullComm,
+    Quantity,
+    QuantityFactory,
+    SubtileGridSizer,
+    TilePartitioner,
+)
+from pace.driver import (
+    AnalyticInit,
+    CreatesComm,
+    DriverConfig,
+    GeneratedGridConfig,
+    RestartConfig,
+)
 from pySHiELD import PHYSICS_PACKAGES
 
 
@@ -69,13 +75,9 @@ def test_restart_save_to_disk():
         quantity_factory = QuantityFactory.from_backend(sizer=sizer, backend=backend)
 
         eta_file = driver_config.grid_config.config.eta_file
-        (
-            damping_coefficients,
-            driver_grid_data,
-            grid_data,
-        ) = pace.driver.GeneratedGridConfig(eta_file=eta_file).get_grid(
-            quantity_factory, communicator
-        )
+        (damping_coefficients, driver_grid_data, grid_data,) = GeneratedGridConfig(
+            eta_file=eta_file
+        ).get_grid(quantity_factory, communicator)
         init = AnalyticInit()
         driver_state = init.get_driver_state(
             quantity_factory=quantity_factory,

@@ -4,8 +4,7 @@ from typing import Literal, Tuple
 
 import pytest
 
-from ndsl.comm.null_comm import NullComm
-from ndsl.dsl.stencil import StencilConfig
+from ndsl import NullComm, StencilConfig
 from ndsl.performance.report import (
     TimeReport,
     gather_hit_counts,

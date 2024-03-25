@@ -7,22 +7,24 @@ from typing import Callable, ClassVar, List, Type, TypeVar
 
 import f90nml
 
-import pyFV3
 import pyFV3.initialization.analytic_init as analytic_init
-import pySHiELD
-from ndsl.comm.communicator import Communicator
+from ndsl import (
+    CompilationConfig,
+    DaceConfig,
+    Namelist,
+    QuantityFactory,
+    StencilConfig,
+    StencilFactory,
+)
 from ndsl.constants import X_DIM, Y_DIM
-from ndsl.dsl.dace.orchestration import DaceConfig
-from ndsl.dsl.stencil import StencilConfig, StencilFactory
-from ndsl.dsl.stencil_config import CompilationConfig
 from ndsl.grid import DampingCoefficients, DriverGridData, GridData
-from ndsl.initialization.allocator import QuantityFactory
-from ndsl.namelist import Namelist
 from ndsl.stencils.testing import TranslateGrid, grid
+from ndsl.typing import Communicator
+from pace.driver.registry import Registry
+from pace.driver.state import DriverState, TendencyState, _restart_driver_state
+from pyFV3 import DycoreState
 from pyFV3.testing import TranslateFVDynamics
-
-from .registry import Registry
-from .state import DriverState, TendencyState, _restart_driver_state
+from pySHiELD import PHYSICS_PACKAGES, PhysicsState
 
 
 class Initializer(abc.ABC):
@@ -39,7 +41,7 @@ class Initializer(abc.ABC):
         damping_coefficients: DampingCoefficients,
         driver_grid_data: DriverGridData,
         grid_data: GridData,
-        schemes: List[pySHiELD.PHYSICS_PACKAGES],
+        schemes: List[PHYSICS_PACKAGES],
     ) -> DriverState:
         ...
 
@@ -77,7 +79,7 @@ class InitializerSelector(Initializer):
         damping_coefficients: DampingCoefficients,
         driver_grid_data: DriverGridData,
         grid_data: GridData,
-        schemes: List[pySHiELD.PHYSICS_PACKAGES],
+        schemes: List[PHYSICS_PACKAGES],
     ) -> DriverState:
         return self.config.get_driver_state(
             quantity_factory=quantity_factory,
@@ -111,7 +113,7 @@ class AnalyticInit(Initializer):
         damping_coefficients: DampingCoefficients,
         driver_grid_data: DriverGridData,
         grid_data: GridData,
-        schemes: List[pySHiELD.PHYSICS_PACKAGES],
+        schemes: List[PHYSICS_PACKAGES],
     ) -> DriverState:
         dycore_state = analytic_init.init_analytic_state(
             analytic_init_case=self.case,
@@ -122,7 +124,7 @@ class AnalyticInit(Initializer):
             moist_phys=True,
             comm=communicator,
         )
-        physics_state = pySHiELD.PhysicsState.init_zeros(
+        physics_state = PhysicsState.init_zeros(
             quantity_factory=quantity_factory, schemes=schemes
         )
         tendency_state = TendencyState.init_zeros(
@@ -155,7 +157,7 @@ class RestartInit(Initializer):
         damping_coefficients: DampingCoefficients,
         driver_grid_data: DriverGridData,
         grid_data: GridData,
-        schemes: List[pySHiELD.PHYSICS_PACKAGES],
+        schemes: List[PHYSICS_PACKAGES],
     ) -> DriverState:
         state = _restart_driver_state(
             self.path,
@@ -206,7 +208,7 @@ class FortranRestartInit(Initializer):
         damping_coefficients: DampingCoefficients,
         driver_grid_data: DriverGridData,
         grid_data: GridData,
-        schemes: List[pySHiELD.PHYSICS_PACKAGES],
+        schemes: List[PHYSICS_PACKAGES],
     ) -> DriverState:
         state = _restart_driver_state(
             self.path,
@@ -279,14 +281,14 @@ class SerialboxInit(Initializer):
         damping_coefficients: DampingCoefficients,
         driver_grid_data: DriverGridData,
         grid_data: GridData,
-        schemes: List[pySHiELD.PHYSICS_PACKAGES],
+        schemes: List[PHYSICS_PACKAGES],
     ) -> DriverState:
         backend = quantity_factory.zeros(
             dims=[X_DIM, Y_DIM], units="unknown"
         ).gt4py_backend
 
         dycore_state = self._initialize_dycore_state(communicator, backend)
-        physics_state = pySHiELD.PhysicsState.init_zeros(
+        physics_state = PhysicsState.init_zeros(
             quantity_factory=quantity_factory,
             schemes=schemes,
         )
@@ -305,7 +307,7 @@ class SerialboxInit(Initializer):
         self,
         communicator: Communicator,
         backend: str,
-    ) -> pyFV3.DycoreState:
+    ) -> DycoreState:
         grid = self._get_serialized_grid(communicator=communicator, backend=backend)
 
         ser = self._serializer(communicator)
@@ -342,8 +344,8 @@ class PredefinedStateInit(Initializer):
     used to construct the class.
     """
 
-    dycore_state: pyFV3.DycoreState
-    physics_state: pySHiELD.PhysicsState
+    dycore_state: DycoreState
+    physics_state: PhysicsState
     tendency_state: TendencyState
     grid_data: GridData
     damping_coefficients: DampingCoefficients
@@ -357,7 +359,7 @@ class PredefinedStateInit(Initializer):
         damping_coefficients: DampingCoefficients,
         driver_grid_data: DriverGridData,
         grid_data: GridData,
-        schemes: List[pySHiELD.PHYSICS_PACKAGES],
+        schemes: List[PHYSICS_PACKAGES],
     ) -> DriverState:
         return DriverState(
             dycore_state=self.dycore_state,

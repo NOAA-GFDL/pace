@@ -3,12 +3,9 @@ import dataclasses
 import os
 from typing import Any, ClassVar, List
 
-from ndsl.comm.caching_comm import CachingCommReader, CachingCommWriter
-from ndsl.comm.comm_abc import Comm
-from ndsl.comm.mpi import MPIComm
-from ndsl.comm.null_comm import NullComm
-
-from .registry import Registry
+from ndsl import MPIComm, NullComm
+from ndsl.comm import CachingCommReader, CachingCommWriter, Comm
+from pace.driver.registry import Registry
 
 
 class CreatesComm(abc.ABC):
