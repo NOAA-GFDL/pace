@@ -4,7 +4,7 @@ from typing import List
 import pytest
 import yaml
 
-import pace.driver
+from pace.driver import DriverConfig
 
 
 dirname = os.path.dirname(os.path.abspath(__file__))
@@ -88,5 +88,5 @@ def test_all_configs_tested_or_excluded(
 def test_example_config_can_initialize(path: str, file_list: List[str]):
     for file_name in file_list:
         with open(os.path.join(path, file_name), "r") as f:
-            config = pace.driver.DriverConfig.from_dict(yaml.safe_load(f))
-        assert isinstance(config, pace.driver.DriverConfig)
+            config = DriverConfig.from_dict(yaml.safe_load(f))
+        assert isinstance(config, DriverConfig)

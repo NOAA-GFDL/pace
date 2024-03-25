@@ -14,7 +14,7 @@ from ndsl import (
     Quantity,
     TilePartitioner,
 )
-from pace.driver import DriverConfig
+from pace.driver.driver import DriverConfig
 from pace.driver.state import DriverState
 from pySHiELD import PHYSICS_PACKAGES
 

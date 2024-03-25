@@ -21,8 +21,7 @@ from ndsl.grid import (
 from ndsl.grid.stretch_transformation import direct_transform
 from ndsl.stencils.testing import TranslateGrid, grid
 from ndsl.typing import Communicator
-
-from .registry import Registry
+from pace.driver.registry import Registry
 
 
 class GridInitializer(abc.ABC):

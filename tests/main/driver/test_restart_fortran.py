@@ -3,7 +3,6 @@ import os
 import numpy as np
 import xarray as xr
 
-import pace.driver
 from ndsl import (
     CubedSphereCommunicator,
     CubedSpherePartitioner,
@@ -13,7 +12,7 @@ from ndsl import (
     SubtileGridSizer,
     TilePartitioner,
 )
-from pace.driver.initialization import FortranRestartInit
+from pace.driver import FortranRestartInit, GeneratedGridConfig
 from pySHiELD import PHYSICS_PACKAGES
 
 
@@ -45,15 +44,9 @@ def test_state_from_fortran_restart():
     quantity_factory = QuantityFactory.from_backend(sizer=sizer, backend="numpy")
     restart_dir = os.path.join(PACE_DIR, "tests/main/data/c12_restart")
 
-    (
-        damping_coefficients,
-        driver_grid_data,
-        grid_data,
-    ) = pace.driver.GeneratedGridConfig(
+    (damping_coefficients, driver_grid_data, grid_data,) = GeneratedGridConfig(
         restart_path=restart_dir, eta_file=restart_dir + "/fv_core.res.nc"
-    ).get_grid(
-        quantity_factory, null_communicator
-    )
+    ).get_grid(quantity_factory, null_communicator)
 
     restart_config = FortranRestartInit(path=restart_dir)
     driver_state = restart_config.get_driver_state(

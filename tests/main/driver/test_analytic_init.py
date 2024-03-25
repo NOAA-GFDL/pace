@@ -4,7 +4,7 @@ from typing import List
 import pytest
 import yaml
 
-import pace.driver
+from pace.driver import DriverConfig
 
 
 DIR = os.path.dirname(os.path.abspath(__file__))
@@ -27,5 +27,5 @@ def test_analytic_init_config(tested_configs: List[str]):
     for config_file in tested_configs:
         with open(os.path.join(DIR, config_file), "r") as f:
             config = yaml.safe_load(f)
-        driver_config = pace.driver.DriverConfig.from_dict(config)
+        driver_config = DriverConfig.from_dict(config)
         assert driver_config.initialization.type == "analytic"

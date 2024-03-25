@@ -1,7 +1,6 @@
 from ndsl import Namelist, QuantityFactory, SubtileGridSizer
 from ndsl.constants import N_HALO_DEFAULT
-from pace.driver.run import Driver, DriverConfig
-from pace.driver.state import TendencyState
+from pace.driver import Driver, DriverConfig, TendencyState
 from pyFV3 import DynamicalCoreConfig
 
 # TODO physics should not depend on pyFV3

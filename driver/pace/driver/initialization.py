@@ -20,12 +20,11 @@ from ndsl.constants import X_DIM, Y_DIM
 from ndsl.grid import DampingCoefficients, DriverGridData, GridData
 from ndsl.stencils.testing import TranslateGrid, grid
 from ndsl.typing import Communicator
+from pace.driver.registry import Registry
+from pace.driver.state import DriverState, TendencyState, _restart_driver_state
 from pyFV3 import DycoreState
 from pyFV3.testing import TranslateFVDynamics
 from pySHiELD import PHYSICS_PACKAGES, PhysicsState
-
-from .registry import Registry
-from .state import DriverState, TendencyState, _restart_driver_state
 
 
 class Initializer(abc.ABC):
