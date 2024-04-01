@@ -3,7 +3,8 @@ import unittest.mock
 import pytest
 
 from ndsl import QuantityFactory, SubtileGridSizer
-from pace.driver import DiagnosticsConfig, MonitorDiagnostics, NullDiagnostics, ZSelect
+from pace.driver import DiagnosticsConfig
+from pace.driver.diagnostics import MonitorDiagnostics, NullDiagnostics, ZSelect
 from pyFV3 import DycoreState
 
 
