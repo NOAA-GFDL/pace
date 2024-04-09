@@ -166,8 +166,8 @@ With Docker, the following command runs the container interactively.
 docker run -it pace_mpich:3.8
 ```
 
-In the container, the `pace` conda environment using python version 3.8 is already activated.
-However, packages required by pace have not been installed yet and users can follow the steps shown below for installation:
+In the container, the default `base` conda environment is already activated.
+The `pace` conda environment can be created by following the steps below:
 
 ```shell
 git clone --recursive -b develop https://github.com/NOAA-GFDL/pace.git pace
