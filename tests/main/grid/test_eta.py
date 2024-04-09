@@ -112,7 +112,6 @@ def test_set_hybrid_pressure_coefficients_nofile():
 
     del yaml_config["grid_config"]["config"]["eta_file"]
 
-
     try:
         driver_config = DriverConfig.from_dict(yaml_config)
         driver_config.comm_config = NullCommConfig(rank=0, total_ranks=6)
@@ -149,9 +148,9 @@ def test_set_hybrid_pressure_coefficients_not_mono():
     yaml_config["grid_config"]["config"]["eta_file"] = out_eta_file
 
     try:
-        driver_config = pace.driver.DriverConfig.from_dict(yaml_config)
-        driver_config.comm_config = pace.driver.NullCommConfig(rank=0, total_ranks=6)
-        driver = pace.driver.Driver(config=driver_config)
+        driver_config = DriverConfig.from_dict(yaml_config)
+        driver_config.comm_config = NullCommConfig(rank=0, total_ranks=6)
+        driver = Driver(config=driver_config)
     except Exception as error:
         if os.path.isfile(out_eta_file):
             os.remove(out_eta_file)
@@ -161,4 +160,3 @@ def test_set_hybrid_pressure_coefficients_not_mono():
             pytest.fail(
                 "ERROR in testing etav values not are not monotonically increasing"
             )
-
