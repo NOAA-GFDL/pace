@@ -1,4 +1,4 @@
-[![Contributors][contributors-shield]][contributors-url]
+![Contributors][contributors-shield]][contributors-url]
 [![Stargazers][stars-shield]][stars-url]
 [![Issues][issues-shield]][issues-url]
 [![Apache License][license-shield]][license-url]
@@ -123,21 +123,21 @@ mpirun --mca btl_vader_single_copy_mechanism none -n 6 python3 -m pace.driver.ru
 
 This repository was first developed at [AI2](https://github.com/ai2cm/pace) and the institute conserves an archived copy with the latest state before the NOAA took over.
 
-[contributors-shield]: https://img.shields.io/github/contributors/ai2cm/pace.svg
-[contributors-url]: https://github.com/ai2cm/pace/graphs/contributors
-[stars-shield]: https://img.shields.io/github/stars/ai2cm/pace.svg
-[stars-url]: https://github.com/ai2cm/pace/stargazers
-[issues-shield]: https://img.shields.io/github/issues/ai2cm/pace.svg
-[issues-url]: https://github.com/ai2cm/pace/issues
-[license-shield]: https://img.shields.io/github/license/ai2cm/pace.svg
-[license-url]: https://github.com/ai2cm/pace/blob/main/LICENSE.md
+[contributors-shield]: https://img.shields.io/github/contributors/NOAA-GFDL/pace.svg
+[contributors-url]: https://github.com/NOAA-GFDL/pace/graphs/contributors
+[stars-shield]: https://img.shields.io/github/stars/NOAA-GFDL/pace.svg
+[stars-url]: https://github.com/NOAA-GFDL/pace/stargazers
+[issues-shield]: https://img.shields.io/github/issues/NOAA-GFDL/pace.svg
+[issues-url]: https://github.com/NOAA-GFDL/pace/issues
+[license-shield]: https://img.shields.io/github/license/NOAA-GFDL/pace.svg
+[license-url]: https://github.com/NOAA-GFDL/pace/blob/main/LICENSE.md
 
 ## Running pace in containers
-A Docker image exists in the Github Container Registry associated with the NOAA-GFDL organization.
-This image is publicly accessible and can be used to run a Docker container to work with pace.
+Docker images exist in the Github Container Registry associated with the NOAA-GFDL organization.
+These images are publicly accessible and can be used to run a Docker container to work with pace.
 The following are directions on how to setup the pace conda environment interactively in a container.
 
-The latest image can be pulled with the Docker as shown below or
+The latest images can be pulled with the Docker as shown below or
 with any other container management tools:
 
 ```shell
