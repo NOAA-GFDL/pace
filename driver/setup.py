@@ -10,6 +10,7 @@ def local_pkg(name: str, relative_path: str) -> str:
     path = f"{name} @ file://{Path(os.path.abspath(__file__)).parent / relative_path}"
     return path
 
+
 requirements: List[str] = [
     "dacite",
     "pyyaml",
@@ -19,7 +20,6 @@ requirements: List[str] = [
     "xarray",
     "zarr",
 ]
-
 
 
 setup(
