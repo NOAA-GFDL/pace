@@ -123,7 +123,7 @@ mpirun --mca btl_vader_single_copy_mechanism none -n 6 python3 -m pace.run /exam
 
 This repository was first developed at [AI2](https://github.com/ai2cm/pace) and the institute conserves an archived copy with the latest state before the NOAA took over.
 
-[contributors-shield]: https://img.shields.io/github/contributors/ai2cm/pace.svg
+[contributors-shield]: https://img.shields.io/github/contributors/NOAA-GFDL/pace.svg
 [contributors-url]: https://github.com/NOAA-GFDL/pace/graphs/contributors
 [stars-shield]: https://img.shields.io/github/stars/NOAA-GFDL/pace.svg
 [stars-url]: https://github.com/NOAA-GFDL/pace/stargazers
@@ -131,3 +131,47 @@ This repository was first developed at [AI2](https://github.com/ai2cm/pace) and 
 [issues-url]: https://github.com/NOAA-GFDL/pace/issues
 [license-shield]: https://img.shields.io/github/license/NOAA-GFDL/pace.svg
 [license-url]: https://github.com/NOAA-GFDL/pace/blob/main/LICENSE.md
+
+## Running pace in containers
+Docker images exist in the Github Container Registry associated with the NOAA-GFDL organization.
+These images are publicly accessible and can be used to run a Docker container to work with pace.
+The following are directions on how to setup the pace conda environment interactively in a container.
+
+The latest images can be pulled with the Docker as shown below or
+with any other container management tools:
+
+```shell
+docker pull ghcr.io/noaa-gfdl/pace_mpich:3.8
+```
+for MPICH installation of MPI; and
+```shell
+docker pull ghcr.io/noaa-gfdl/pace_openmpi:3.8
+```
+for OpenMPI installation of MPI.
+
+If permission issues arise during the pull, a Github personal token
+may be required.  The steps to create a personal token is found
+[here](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)
+
+Once the token has been generated, the image can be pulled for example with with:
+```shell
+docker login --username GITHUB_USERNAME --password TOKEN
+docker pull ghcr.io/noaa-gfdl/pace_mpich:3.8
+```
+
+Any container management tools compatible with Docker images can be used
+to run the container interactively from the pulled image.
+With Docker, the following command runs the container interactively.
+```shell
+docker run -it pace_mpich:3.8
+```
+
+In the container, the default `base` conda environment is already activated.
+The `pace` conda environment can be created by following the steps below:
+
+```shell
+git clone --recursive -b develop https://github.com/NOAA-GFDL/pace.git pace
+cd pace
+cp /home/scripts/setup_env.sh . && chmod +x setup_env.sh
+source ./setup_env.sh
+```
