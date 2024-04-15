@@ -44,7 +44,7 @@ Within the `build_scripts` directory are a couple scripts relevant for setting u
 
 ```
 $ ssh analysis
-$ git clone --recursive https://github.com/ai2cm/pace.git
+$ git clone --recursive https://github.com/NOAA-GFDL/pace.git
 $ cd pace/examples/build_scripts
 ```
 

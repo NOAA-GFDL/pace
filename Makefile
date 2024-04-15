@@ -115,7 +115,7 @@ dependencies.svg: dependencies.dot
 	dot -Tsvg $< -o $@
 
 .PHONY: constraints.txt
-constraints.txt: pace/setup.py dsl/setup.py fv3core/setup.py physics/setup.py util/setup.py stencils/setup.py util/requirements.txt requirements_docs.txt requirements_lint.txt external/gt4py/setup.cfg requirements_dev.txt
+constraints.txt: driver/setup.py ndsl/setup.py pyFV3/setup.py pySHiELD/setup.py requirements_docs.txt requirements_lint.txt external/gt4py/setup.cfg requirements_dev.txt
 	pip-compile $^ --output-file constraints.txt
 	sed -i.bak '/\@ git+https/d' constraints.txt
 	rm -f constraints.txt.bak

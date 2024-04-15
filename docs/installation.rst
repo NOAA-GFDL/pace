@@ -10,7 +10,7 @@ When cloning Pace you will need to update the repository's submodules as well:
 
 .. code-block:: console
 
-    $ git clone --recursive https://github.com/ai2cm/pace.git
+    $ git clone --recursive https://github.com/NOAA-GFDL/pace.git
 
 or if you have already cloned the repository:
 
