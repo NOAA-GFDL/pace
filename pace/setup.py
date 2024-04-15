@@ -10,10 +10,7 @@ def local_pkg(name: str, relative_path: str) -> str:
     path = f"{name} @ file://{Path(os.path.abspath(__file__)).parent / relative_path}"
     return path
 
-
-setup_requirements: List[str] = []
-
-requirements = [
+requirements: List[str] = [
     "ndsl",
     "dacite",
     "pyyaml",
@@ -24,7 +21,6 @@ requirements = [
     "zarr",
 ]
 
-test_requirements: List[str] = []
 
 
 setup(
@@ -41,8 +37,6 @@ setup(
         "Programming Language :: Python :: 3.9",
     ],
     install_requires=requirements,
-    setup_requires=setup_requirements,
-    tests_require=test_requirements,
     name="pace",
     license="BSD license",
     packages=find_namespace_packages(include=["pace", "pace.*"]),
