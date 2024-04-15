@@ -62,7 +62,7 @@ export VIRTUALENV=${JENKINS_DIR}/../venv_driver
 ${JENKINS_DIR}/install_virtualenv.sh ${VIRTUALENV}
 source ${VIRTUALENV}/bin/activate
 
-CMD="srun python3 ${PACE_DIR}/driver/examples/baroclinic_init.py ${JENKINS_DIR}/driver_configs/${experiment}.yaml"
+CMD="srun python3 ${PACE_DIR}/examples/baroclinic_init.py ${JENKINS_DIR}/driver_configs/${experiment}.yaml"
 run_command "${CMD}" Job${action} ${scheduler_script} $minutes
 if [ $? -ne 0 ] ; then
   exitError 1510 ${LINENO} "problem while executing script ${script}"
@@ -71,7 +71,7 @@ fi
 module load sarus
 sarus pull elynnwu/pace:latest
 echo "####### generating figures..."
-srun -C gpu --partition=debug --account=go31 --time=00:05:00 sarus run --mount=type=bind,source=${PACE_DIR},destination=/work elynnwu/pace:latest python /work/driver/examples/plot_baroclinic_init.py /work/output.zarr ${experiment} pt -1
+srun -C gpu --partition=debug --account=go31 --time=00:05:00 sarus run --mount=type=bind,source=${PACE_DIR},destination=/work elynnwu/pace:latest python /work/examples/plot_baroclinic_init.py /work/output.zarr ${experiment} pt -1
 mkdir -p ${ARTIFACT_ROOT}/${experiment}
 echo "####### moving figures..."
 cp *.png ${ARTIFACT_ROOT}/${experiment}/.

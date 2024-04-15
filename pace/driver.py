@@ -31,18 +31,15 @@ from ndsl.dsl.typing import Float
 from ndsl.grid import DampingCoefficients, DriverGridData, GridData
 from ndsl.performance import PerformanceConfig, Timer
 from ndsl.typing import Communicator
-from pace.driver.safety_checks import SafetyChecker
+from pace.comm import CreatesCommSelector
+from pace.diagnostics import DiagnosticsConfig
+from pace.grid import GeneratedGridConfig, GridInitializerSelector
+from pace.initialization import InitializerSelector
+from pace.safety_checks import SafetyChecker
+from pace.state import DriverState
 from pyFV3 import DynamicalCore, DynamicalCoreConfig
 from pySHiELD import Physics, PhysicsConfig
-
-# TODO: move update_atmos_state into pace.driver
 from pySHiELD.update import update_atmos_state
-
-from . import diagnostics
-from .comm import CreatesCommSelector
-from .grid import GeneratedGridConfig, GridInitializerSelector
-from .initialization import InitializerSelector
-from .state import DriverState
 
 
 try:
@@ -105,8 +102,8 @@ class DriverConfig:
             type="generated", config=GeneratedGridConfig()
         )
     )
-    diagnostics_config: diagnostics.DiagnosticsConfig = dataclasses.field(
-        default_factory=diagnostics.DiagnosticsConfig
+    diagnostics_config: DiagnosticsConfig = dataclasses.field(
+        default_factory=DiagnosticsConfig
     )
     performance_config: PerformanceConfig = dataclasses.field(
         default_factory=PerformanceConfig

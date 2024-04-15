@@ -3,8 +3,8 @@ import os
 import xarray as xr
 import yaml
 
-from pace.driver import DiagnosticsConfig, DriverConfig, NullCommConfig
-from pace.driver.run import main
+from pace import DiagnosticsConfig, DriverConfig, NullCommConfig
+from pace.run import main
 
 
 DIR = os.path.dirname(os.path.abspath(__file__))
@@ -12,7 +12,7 @@ DIR = os.path.dirname(os.path.abspath(__file__))
 
 def test_diagnostics_can_be_opened(tmpdir):
     with open(
-        os.path.join(DIR, "../../../driver/examples/configs/baroclinic_c12.yaml"), "r"
+        os.path.join(DIR, "../../../examples/configs/baroclinic_c12.yaml"), "r"
     ) as f:
         driver_config = DriverConfig.from_dict(yaml.safe_load(f))
     diagnostics_path = os.path.join(tmpdir, "output.zarr")

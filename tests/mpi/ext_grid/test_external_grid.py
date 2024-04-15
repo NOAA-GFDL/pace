@@ -14,11 +14,11 @@ from ndsl import (
 )
 from ndsl.comm.partitioner import get_tile_number
 from ndsl.constants import PI, RADIUS, X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM
-from pace.driver import Driver, DriverConfig
+from pace import Driver, DriverConfig
 
 
 DIR = os.path.dirname(os.path.abspath(__file__))
-TEST_CONFIGS_DIR = os.path.join(DIR, "../../../driver/examples/configs/")
+TEST_CONFIGS_DIR = os.path.join(DIR, "../../../examples/configs/")
 TEST_DATA_DIR = os.path.join(DIR, "../../../test_input/")
 
 TEST_CONFIG_FILE_RANKS = [

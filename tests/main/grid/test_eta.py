@@ -7,7 +7,7 @@ import pytest
 import xarray as xr
 import yaml
 
-from pace.driver import Driver, DriverConfig, NullCommConfig
+from pace import Driver, DriverConfig, NullCommConfig
 
 
 """
@@ -59,9 +59,7 @@ def test_set_hybrid_pressure_coefficients_correct(km):
     """
 
     dirname = os.path.dirname(os.path.abspath(__file__))
-    config_file = os.path.join(
-        dirname, "../../../driver/examples/configs/baroclinic_c12.yaml"
-    )
+    config_file = os.path.join(dirname, "../../../examples/configs/baroclinic_c12.yaml")
 
     with open(config_file, "r") as f:
         yaml_config = yaml.safe_load(f)
@@ -103,9 +101,7 @@ def test_set_hybrid_pressure_coefficients_nofile():
     """
 
     dirname = os.path.dirname(os.path.abspath(__file__))
-    config_file = os.path.join(
-        dirname, "../../../driver/examples/configs/baroclinic_c12.yaml"
-    )
+    config_file = os.path.join(dirname, "../../../examples/configs/baroclinic_c12.yaml")
 
     with open(config_file, "r") as f:
         yaml_config = yaml.safe_load(f)
@@ -135,9 +131,7 @@ def test_set_hybrid_pressure_coefficients_not_mono():
     """
 
     dirname = os.path.dirname(os.path.abspath(__file__))
-    config_file = os.path.join(
-        dirname, "../../../driver/examples/configs/baroclinic_c12.yaml"
-    )
+    config_file = os.path.join(dirname, "../../../examples/configs/baroclinic_c12.yaml")
 
     with open(config_file, "r") as f:
         yaml_config = yaml.safe_load(f)

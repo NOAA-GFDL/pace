@@ -28,4 +28,4 @@ jobs:
             git clone -b store_files https://github.com/mlee03/pace.git tmp && mv tmp/*.nc . && rm -rf tmp
         - name: Run all main tests
           run: |
-            pytest -x tests/main
+            python -m pytest -x tests/main

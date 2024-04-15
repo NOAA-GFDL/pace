@@ -5,7 +5,7 @@ from typing import Any, ClassVar, List
 
 from ndsl import MPIComm, NullComm
 from ndsl.comm import CachingCommReader, CachingCommWriter, Comm
-from pace.driver.registry import Registry
+from pace.registry import Registry
 
 
 class CreatesComm(abc.ABC):

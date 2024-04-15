@@ -12,7 +12,7 @@ from ndsl import (
     SubtileGridSizer,
     TilePartitioner,
 )
-from pace.driver import FortranRestartInit, GeneratedGridConfig
+from pace import FortranRestartInit, GeneratedGridConfig
 from pySHiELD import PHYSICS_PACKAGES
 
 

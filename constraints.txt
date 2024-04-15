@@ -78,7 +78,7 @@ dace
 dacite==1.6.0
     # via
     #   fv3config
-    #   pace-driver
+    #   pace
 dask==2021.12.0
     # via
     #   -r requirements_dev.txt
@@ -208,7 +208,7 @@ mpi4py==3.1.4
     # via
     #   -r requirements_dev.txt
     #   ndsl
-    #   pace-driver
+    #   pace
 mpmath==1.2.1
     # via sympy
 multidict==5.1.0
@@ -236,7 +236,7 @@ netcdf4==1.6.4
     # via
     #   -r requirements_dev.txt
     #   ndsl
-    #   pace-driver
+    #   pace
 networkx==2.6.3
     # via dace
 ninja==1.11.1
@@ -254,7 +254,7 @@ numpy==1.23.3
     #   h5py
     #   netcdf4
     #   numcodecs
-    #   pace-driver
+    #   pace
     #   pandas
     #   pyfv3
     #   pyshield
@@ -288,7 +288,7 @@ pickleshare==0.7.5
     # via ipython
 pkgutil-resolve-name==1.3.10
     # via jsonschema
-platformdirs==2.2.0
+platformdirs==3.9.1
     # via
     #   black
     #   virtualenv
@@ -360,7 +360,7 @@ pyyaml==5.4.1
     #   dace
     #   dask
     #   fv3config
-    #   pace-driver
+    #   pace
     #   pre-commit
     #   pytest-regressions
 pyzmq==24.0.1
@@ -473,7 +473,7 @@ xarray==0.19.0
     # via
     #   -r requirements_dev.txt
     #   ndsl
-    #   pace-driver
+    #   pace
     #   pyfv3
     #   pyshield
 xxhash==2.0.2
@@ -483,7 +483,7 @@ yarl==1.6.3
 zarr==2.9.2
     # via
     #   -r requirements_dev.txt
-    #   pace-driver
+    #   pace
 zipp==3.8.0
     # via importlib-resources
 

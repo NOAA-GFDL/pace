@@ -77,13 +77,13 @@ Shell scripts to install Pace on specific machines such as Gaea can be found in 
 With the environment activated, you can run an example baroclinic test case with the following command:
 
 ```shell
-mpirun -n 6 python3 -m pace.driver.run driver/examples/configs/baroclinic_c12.yaml
+mpirun -n 6 python3 -m pace.run examples/configs/baroclinic_c12.yaml
 
 # or with oversubscribe if you do not have at least 6 cores
-mpirun -n 6 --oversubscribe python3 -m pace.driver.run driver/examples/configs/baroclinic_c12.yaml
+mpirun -n 6 --oversubscribe python3 -m pace.run examples/configs/baroclinic_c12.yaml
 ```
 
-After the run completes, you will see an output direcotry `output.zarr`. An example to visualize the output is provided in `driver/examples/plot_output.py`. See the [driver example](driver/examples/README.md) section for more details.
+After the run completes, you will see an output direcotry `output.zarr`. An example to visualize the output is provided in `examples/plot_output.py`. See the [driver example](examples/README.md) section for more details.
 
 ### Environment variable configuration
 
@@ -116,7 +116,7 @@ make build
 
 ```shell
 make dev
-mpirun --mca btl_vader_single_copy_mechanism none -n 6 python3 -m pace.driver.run /pace/driver/examples/configs/baroclinic_c12.yaml
+mpirun --mca btl_vader_single_copy_mechanism none -n 6 python3 -m pace.run /examples/configs/baroclinic_c12.yaml
 ```
 
 ## History

@@ -2,9 +2,9 @@
 # Test outputs
 results.xml
 *.zarr
-driver/examples/*.json
-driver/examples/**/*.json
-driver/examples/comm
+examples/*.json
+examples/**/*.json
+examples/comm
 20*-*-*-*-*-*.json
 *.pkl
 

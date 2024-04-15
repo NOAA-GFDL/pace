@@ -55,7 +55,7 @@ cat << EOF > run.daint.slurm
 ########################################################
 set -x
 export OMP_NUM_THREADS=12
-srun python -m pace.driver.run ${JENKINS_DIR}/driver_configs/${NAMELIST}.yaml
+srun python -m pace.run ${JENKINS_DIR}/driver_configs/${NAMELIST}.yaml
 EOF
 
 launch_job run.daint.slurm 2400

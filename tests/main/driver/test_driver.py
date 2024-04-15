@@ -11,7 +11,7 @@ from ndsl.performance.report import (
     gather_timing_data,
     get_sypd,
 )
-from pace.driver import CreatesCommSelector, DriverConfig, NullCommConfig
+from pace import CreatesCommSelector, DriverConfig, NullCommConfig
 
 
 def get_driver_config(

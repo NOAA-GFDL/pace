@@ -4,12 +4,12 @@ from typing import List
 import pytest
 import yaml
 
-from pace.driver import DriverConfig
+from pace import DriverConfig
 
 
 dirname = os.path.dirname(os.path.abspath(__file__))
 
-EXAMPLE_CONFIGS_DIR = os.path.join(dirname, "../../../driver/examples/configs/")
+EXAMPLE_CONFIGS_DIR = os.path.join(dirname, "../../../examples/configs/")
 
 TESTED_CONFIGS: List[str] = [
     "baroclinic_c12.yaml",

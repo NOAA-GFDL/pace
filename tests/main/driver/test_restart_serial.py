@@ -15,7 +15,7 @@ from ndsl import (
     SubtileGridSizer,
     TilePartitioner,
 )
-from pace.driver import (
+from pace import (
     AnalyticInit,
     CreatesComm,
     DriverConfig,
@@ -53,7 +53,7 @@ def test_restart_save_to_disk():
         with open(
             os.path.join(
                 DIR,
-                "../../../driver/examples/configs/baroclinic_c12_write_restart.yaml",
+                "../../../examples/configs/baroclinic_c12_write_restart.yaml",
             ),
             "r",
         ) as f:

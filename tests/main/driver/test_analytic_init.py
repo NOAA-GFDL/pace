@@ -4,7 +4,7 @@ from typing import List
 import pytest
 import yaml
 
-from pace.driver import DriverConfig
+from pace import DriverConfig
 
 
 DIR = os.path.dirname(os.path.abspath(__file__))
@@ -13,7 +13,7 @@ DIR = os.path.dirname(os.path.abspath(__file__))
 #       need to update after
 
 TESTED_CONFIGS: List[str] = [
-    "../../../driver/examples/configs/analytic_test.yaml",
+    "../../../examples/configs/analytic_test.yaml",
 ]
 
 

@@ -6,7 +6,7 @@ import click
 import yaml
 
 from ndsl.logging import AVAILABLE_LOG_LEVELS, ndsl_log
-from pace.driver.driver import Driver, DriverConfig
+from pace.driver import Driver, DriverConfig
 
 
 @click.command()
