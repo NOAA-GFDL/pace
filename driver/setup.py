@@ -11,7 +11,6 @@ def local_pkg(name: str, relative_path: str) -> str:
     return path
 
 requirements: List[str] = [
-    "ndsl",
     "dacite",
     "pyyaml",
     "mpi4py",
