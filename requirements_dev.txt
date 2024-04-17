@@ -17,4 +17,4 @@ numpy>=1.15
 -e NDSL
 -e pySHiELD
 -e pyFV3
--e driver
+-e .
