@@ -4,11 +4,11 @@ This directory serves as a demo of how you can develop and run individual compon
 
 ## Getting started
 
-The easiest way of running these demos is using a Docker container. If you do not already have Docker installed, it can be downloaded directly from [Docker](https://www.docker.com/). Once Docker is set up, you can build and run the container:
+The easiest way of running these demos is using a Docker container. If you do not already have Docker installed, it can be downloaded directly from [Docker](https://www.docker.com/). Once Docker is set up, you can build and run the container from the root Pace directory:
 
 ```
 make build
-make run
+make notebook
 ```
 
 Once the docker container is running, you can connect to the Jupyter notebook server by copying and pasting the URLs into any browser on your machine. An example output is shown below:

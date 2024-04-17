@@ -20,11 +20,15 @@ BROWSER := python -c "$$BROWSER_PYSCRIPT"
 DOCKER_BUILDKIT=1
 SHELL=/bin/bash
 CWD=$(shell pwd)
+CMD ?=bash
 PULL ?=True
 DEV ?=y
 CHECK_CHANGED_SCRIPT=$(CWD)/changed_from_main.py
 CONTAINER_CMD?=docker
 SAVEPOINT_SETUP=pip3 list
+
+PORT ?=8888
+APP_NAME ?=Pace_dev
 
 VOLUMES ?=
 BUILD_FLAGS ?=
@@ -91,12 +95,18 @@ _force_build:
 
 enter:
 	docker run --rm -it \
-		--network host \
 		$(VOLUMES) \
-	$(PACE_IMAGE) bash
+		-p=$(PORT):$(PORT) \
+		--name="$(APP_NAME)" \
+	$(PACE_IMAGE) $(CMD)
 
 dev:
 	DEV=y $(MAKE) enter
+
+notebook:
+	CMD="jupyter notebook --ip 0.0.0.0 --no-browser --allow-root --notebook-dir=/pace/examples/notebooks" \
+	DEV=y \
+	$(MAKE) enter
 
 test_util:
 	if [ $(shell $(CHECK_CHANGED_SCRIPT) util) != false ]; then \
