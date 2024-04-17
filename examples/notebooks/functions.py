@@ -267,7 +267,7 @@ def configure_domain(
     quantity_factory = QuantityFactory.from_backend(sizer=sizer, backend=backend)
 
     metric_terms = MetricTerms(
-        quantity_factory=quantity_factory, communicator=communicator
+        quantity_factory=quantity_factory, communicator=communicator, eta_file="eta79.nc"
     )
 
     # workaround for single layer
