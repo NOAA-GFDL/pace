@@ -2,15 +2,18 @@ from typing import Dict
 
 import numpy as np
 
-import pyFV3
-from ndsl.comm.communicator import CubedSphereCommunicator, TileCommunicator
-from ndsl.comm.mpi import MPIComm
-from ndsl.comm.partitioner import CubedSpherePartitioner, TilePartitioner
-from ndsl.grid import MetricTerms
-from ndsl.grid.helper import GridData
-from ndsl.initialization.allocator import QuantityFactory
-from ndsl.initialization.sizer import SubtileGridSizer
-from ndsl.quantity import Quantity
+from ndsl import (
+    CubedSphereCommunicator,
+    CubedSpherePartitioner,
+    MPIComm,
+    Quantity,
+    QuantityFactory,
+    SubtileGridSizer,
+    TileCommunicator,
+    TilePartitioner,
+)
+from ndsl.grid import GridData, MetricTerms
+from pyFV3 import DycoreState
 from pyFV3.initialization.test_cases.initialize_baroclinic import init_baroclinic_state
 
 
@@ -121,7 +124,7 @@ def metric_terms_to_quantity_dict(metric_terms: MetricTerms) -> Dict[str, Quanti
 
 
 def dycore_state_to_quantity_dict(
-    dycore_state: pyFV3.DycoreState,
+    dycore_state: DycoreState,
 ) -> Dict[str, Quantity]:
     return {
         "u": dycore_state.u,

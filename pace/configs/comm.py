@@ -3,12 +3,10 @@ import dataclasses
 import os
 from typing import Any, ClassVar, List
 
-from ndsl.comm.caching_comm import CachingCommReader, CachingCommWriter
-from ndsl.comm.comm_abc import Comm
-from ndsl.comm.mpi import MPIComm
-from ndsl.comm.null_comm import NullComm
+import dacite
 
-from .registry import Registry
+from ndsl import MPIComm, NullComm
+from ndsl.comm import CachingCommReader, CachingCommWriter
 
 
 class CreatesComm(abc.ABC):
@@ -32,14 +30,9 @@ class CreatesComm(abc.ABC):
 
 
 @dataclasses.dataclass(frozen=True)
-class CreatesCommSelector(CreatesComm):
+class CommConfig:
     """
-    Dataclass for selecting the CreatesComm implementation to use.
-
-    Used to circumvent the issue that dacite expects static class definitions,
-    but we would like to dynamically define which CreatesComm to use. Does this
-    by representing the part of the yaml specification that asks which comm creator
-    to use, but deferring to the implementation in that selected type when called.
+    Configuration for a mpi4py-style Comm object.
 
     Attributes:
         config: type-specific configuration
@@ -47,21 +40,19 @@ class CreatesCommSelector(CreatesComm):
             "write", "read", or "null_comm"
     """
 
-    config: CreatesComm = dataclasses.field(default_factory=lambda: MPICommConfig())
+    config: CreatesComm
     type: str = "mpi"
-    registry: ClassVar[Registry] = Registry(default_type="mpi")
+    registry: ClassVar = {}
 
     @classmethod
     def register(cls, type_name):
-        return cls.registry.register(type_name)
+        def register_func(func):
+            cls.registry[type_name] = func
+            return func
 
-    def get_comm(self) -> Comm:
-        """
-        Get an mpi4py-style Comm object.
+        return register_func
 
-        Returns:
-            comm: an mpi4py-style Comm object
-        """
+    def get_comm(self):
         return self.config.get_comm()
 
     def cleanup(self, comm):
@@ -69,13 +60,20 @@ class CreatesCommSelector(CreatesComm):
 
     @classmethod
     def from_dict(cls, config: dict):
-        creates_comm = cls.registry.from_dict(config)
-        return cls(
-            config=creates_comm, type=config.get("type", cls.registry.default_type)
-        )
+        config.setdefault("config", {})
+        comm_type = config.get("type", "mpi")
+        if comm_type not in cls.registry:
+            raise ValueError(f"Unknown comm type: {comm_type}")
+        else:
+            creates_comm: CreatesComm = dacite.from_dict(
+                data_class=cls.registry[comm_type],
+                data=config["config"],
+                config=dacite.Config(strict=True),
+            )
+            return cls(config=creates_comm, type=comm_type)
 
 
-@CreatesCommSelector.register("mpi")
+@CommConfig.register("mpi")
 @dataclasses.dataclass
 class MPICommConfig(CreatesComm):
     """
@@ -89,7 +87,7 @@ class MPICommConfig(CreatesComm):
         pass
 
 
-@CreatesCommSelector.register("null_comm")
+@CommConfig.register("null_comm")
 @dataclasses.dataclass
 class NullCommConfig(CreatesComm):
     """
@@ -107,7 +105,7 @@ class NullCommConfig(CreatesComm):
 
     rank: int
     total_ranks: int
-    fill_value: float = 0.0
+    fill_value: float
 
     def get_comm(self):
         return NullComm(
@@ -118,7 +116,7 @@ class NullCommConfig(CreatesComm):
         pass
 
 
-@CreatesCommSelector.register("write")
+@CommConfig.register("write")
 @dataclasses.dataclass
 class WriterCommConfig(CreatesComm):
     """
@@ -154,7 +152,7 @@ class WriterCommConfig(CreatesComm):
                 comm.dump(f)
 
 
-@CreatesCommSelector.register("read")
+@CommConfig.register("read")
 @dataclasses.dataclass
 class ReaderCommConfig(CreatesComm):
     """

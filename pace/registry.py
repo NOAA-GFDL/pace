@@ -32,7 +32,7 @@ class Registry(Generic[T]):
         "my_type" and then initialize it. First we import the required symbols:
 
         >>> import dataclasses
-        >>> from pace.driver.registry import Registry
+        >>> from pace.registry import Registry
 
         Then we define a registry and register a class MyConfig:
 

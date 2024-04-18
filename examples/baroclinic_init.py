@@ -2,7 +2,7 @@ from argparse import ArgumentParser
 
 import yaml
 
-from pace.driver.run import Driver, DriverConfig
+from pace import Driver, DriverConfig
 
 
 def parse_args():

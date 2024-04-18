@@ -4,15 +4,14 @@ from typing import Optional, TextIO
 
 import yaml
 
-import ndsl.dsl
-import ndsl.util
-import pace.driver
+import pace
+from ndsl import FrozenStencil
 
 
 def has_stencils(object):
     for name in dir(object):
         try:
-            stencil_found = isinstance(getattr(object, name), ndsl.dsl.FrozenStencil)
+            stencil_found = isinstance(getattr(object, name), FrozenStencil)
         except (AttributeError, RuntimeError):
             stencil_found = False
         if stencil_found:
@@ -26,7 +25,7 @@ def report_stencils(obj, file: Optional[TextIO]):
     print(f"module {module.__name__}, class {obj.__class__.__name__}:", file=file)
     all_access_names = collections.defaultdict(list)
     for name, value in obj.__dict__.items():
-        if isinstance(value, ndsl.dsl.FrozenStencil):
+        if isinstance(value, FrozenStencil):
             print(f"    stencil {name}:", file=file)
             for arg_name, field_info in value.stencil_object.field_info.items():
                 if field_info is None:
@@ -52,10 +51,10 @@ def report_stencils(obj, file: Optional[TextIO]):
 
 if __name__ == "__main__":
     with open("configs/baroclinic_c12.yaml", "r") as f:
-        driver_config = pace.driver.DriverConfig.from_dict(yaml.safe_load(f))
-    driver_config.comm_config = pace.driver.CreatesCommSelector(
-        config=pace.driver.NullCommConfig(rank=0, total_ranks=6), type="null"
+        driver_config = pace.DriverConfig.from_dict(yaml.safe_load(f))
+    driver_config.comm_config = pace.CreatesCommSelector(
+        config=pace.NullCommConfig(rank=0, total_ranks=6), type="null"
     )
-    driver = pace.driver.Driver(config=driver_config)
+    driver = pace.Driver(config=driver_config)
     with open("stencil_report.txt", "w") as f:
         report_stencils(driver.dycore, file=f)

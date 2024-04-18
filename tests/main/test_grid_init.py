@@ -1,13 +1,16 @@
 import numpy as np
 import pytest
 
-from ndsl.comm.communicator import CubedSphereCommunicator
-from ndsl.comm.null_comm import NullComm
-from ndsl.comm.partitioner import CubedSpherePartitioner, TilePartitioner
+from ndsl import (
+    CubedSphereCommunicator,
+    CubedSpherePartitioner,
+    NullComm,
+    Quantity,
+    QuantityFactory,
+    SubtileGridSizer,
+    TilePartitioner,
+)
 from ndsl.grid import MetricTerms
-from ndsl.initialization.allocator import QuantityFactory
-from ndsl.initialization.sizer import SubtileGridSizer
-from ndsl.quantity import Quantity
 
 
 def get_cube_comm(layout, rank: int):

@@ -29,7 +29,7 @@ DaCe needs to be described all memory so it can interface it in the C code that 
 File structure
 --------------
 
-`pace.dsl.dace.*` carries the structure for orchestration.
+`ndsl.dsl.dace.*` carries the structure for orchestration.
 
 - `build.py`: tooling for distributed build & SDFG load.
 - `dace_config.py`: DaCeConfig & DaCeOrchestration enum.
@@ -43,7 +43,7 @@ DaCe Config
 
 DaCe has many configuration options. When executing, it drops or reads a `dace.conf` to get/set options for execution. Because this is a performance-portable model and not a DaCe model, decision has been taken to freeze the options.
 
-`pace.dsl.dace.dace_config` carries a set of tested options for DaCe, with doc. It also takes care of removing the `dace.conf` that will be generated automatically when using DaCe.
+`ndsl.dsl.dace.dace_config` carries a set of tested options for DaCe, with doc. It also takes care of removing the `dace.conf` that will be generated automatically when using DaCe.
 
 Orchestration can be debugged by using the env var `PACE_DACE_DEBUG`.
 When set to `True`, this will drop a few checks:
@@ -54,7 +54,7 @@ When set to `True`, this will drop a few checks:
 - `trace_all_outputs_at_index` drops a print on every variable at a given index to track numerical protection,
 - `sdfg_execution_progress`, drops a print after each kernel. Useful when encurring bad crash with no stacktrace,
 - insert a CUDA_ERROR_CHECK in C after each kernel.
-See `dsl/pace/dsl/dace/utils.py` for details.
+See `ndsl/dsl/dace/utils.py` for details.
 
 Build
 -----

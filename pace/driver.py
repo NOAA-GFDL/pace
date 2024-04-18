@@ -9,38 +9,37 @@ import dace
 import dacite
 import yaml
 
-import pyFV3
-import pySHiELD
-from ndsl.comm.comm_abc import Comm
-from ndsl.comm.communicator import (
-    Communicator,
+from ndsl import (
+    CompilationConfig,
     CubedSphereCommunicator,
+    DaceConfig,
+    GridIndexing,
+    PerformanceCollector,
+    QuantityFactory,
+    RunMode,
+    StencilConfig,
+    StencilFactory,
+    SubtileGridSizer,
     TileCommunicator,
+    TilePartitioner,
+    ndsl_log,
 )
-from ndsl.comm.partitioner import TilePartitioner
+from ndsl.comm import Comm
 from ndsl.constants import N_HALO_DEFAULT
-from ndsl.dsl.dace.dace_config import DaceConfig
 from ndsl.dsl.dace.orchestration import dace_inhibitor, orchestrate
-from ndsl.dsl.stencil import GridIndexing, StencilFactory
-from ndsl.dsl.stencil_config import CompilationConfig, RunMode, StencilConfig
 from ndsl.dsl.typing import Float
 from ndsl.grid import DampingCoefficients, DriverGridData, GridData
-from ndsl.initialization.allocator import QuantityFactory
-from ndsl.initialization.sizer import SubtileGridSizer
-from ndsl.logging import ndsl_log
-from ndsl.performance import PerformanceConfig
-from ndsl.performance.collector import PerformanceCollector
-from ndsl.performance.timer import Timer
-from pace.driver.safety_checks import SafetyChecker
-
-# TODO: move update_atmos_state into pace.driver
+from ndsl.performance import PerformanceConfig, Timer
+from ndsl.typing import Communicator
+from pace.comm import CreatesCommSelector
+from pace.diagnostics import DiagnosticsConfig
+from pace.grid import GeneratedGridConfig, GridInitializerSelector
+from pace.initialization import InitializerSelector
+from pace.safety_checks import SafetyChecker
+from pace.state import DriverState
+from pyFV3 import DynamicalCore, DynamicalCoreConfig
+from pySHiELD import Physics, PhysicsConfig
 from pySHiELD.update import update_atmos_state
-
-from . import diagnostics
-from .comm import CreatesCommSelector
-from .grid import GeneratedGridConfig, GridInitializerSelector
-from .initialization import InitializerSelector
-from .state import DriverState
 
 
 try:
@@ -103,8 +102,8 @@ class DriverConfig:
             type="generated", config=GeneratedGridConfig()
         )
     )
-    diagnostics_config: diagnostics.DiagnosticsConfig = dataclasses.field(
-        default_factory=diagnostics.DiagnosticsConfig
+    diagnostics_config: DiagnosticsConfig = dataclasses.field(
+        default_factory=DiagnosticsConfig
     )
     performance_config: PerformanceConfig = dataclasses.field(
         default_factory=PerformanceConfig
@@ -112,12 +111,10 @@ class DriverConfig:
     comm_config: CreatesCommSelector = dataclasses.field(
         default_factory=CreatesCommSelector
     )
-    dycore_config: pyFV3.DynamicalCoreConfig = dataclasses.field(
-        default_factory=pyFV3.DynamicalCoreConfig
+    dycore_config: DynamicalCoreConfig = dataclasses.field(
+        default_factory=DynamicalCoreConfig
     )
-    physics_config: pySHiELD.PhysicsConfig = dataclasses.field(
-        default_factory=pySHiELD.PhysicsConfig
-    )
+    physics_config: PhysicsConfig = dataclasses.field(default_factory=PhysicsConfig)
 
     days: int = 0
     hours: int = 0
@@ -242,14 +239,14 @@ class DriverConfig:
                     )
 
             kwargs["dycore_config"] = dacite.from_dict(
-                data_class=pyFV3.DynamicalCoreConfig,
+                data_class=DynamicalCoreConfig,
                 data=kwargs.get("dycore_config", {}),
                 config=dacite.Config(strict=True),
             )
 
         if isinstance(kwargs["physics_config"], dict):
             kwargs["physics_config"] = dacite.from_dict(
-                data_class=pySHiELD.PhysicsConfig,
+                data_class=PhysicsConfig,
                 data=kwargs.get("physics_config", {}),
                 config=dacite.Config(strict=True),
             )
@@ -491,7 +488,7 @@ class Driver:
 
             self._start_time = self.config.initialization.start_time
             ndsl_log.info("setting up dycore object started")
-            self.dycore = pyFV3.DynamicalCore(
+            self.dycore = DynamicalCore(
                 comm=communicator,
                 grid_data=self.state.grid_data,
                 stencil_factory=self.stencil_factory,
@@ -506,7 +503,7 @@ class Driver:
 
             ndsl_log.info("setting up physics object started")
             if not config.dycore_only and not config.disable_step_physics:
-                self.physics = pySHiELD.Physics(
+                self.physics = Physics(
                     stencil_factory=self.stencil_factory,
                     quantity_factory=self.quantity_factory,
                     grid_data=self.state.grid_data,

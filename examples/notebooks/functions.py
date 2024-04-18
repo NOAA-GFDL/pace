@@ -10,12 +10,22 @@ from IPython.display import HTML, display
 from matplotlib import animation
 from units_config import units
 
-from ndsl.comm.communicator import CubedSphereCommunicator
-from ndsl.comm.partitioner import CubedSpherePartitioner, TilePartitioner
+from ndsl import (
+    CompilationConfig,
+    CubedSphereCommunicator,
+    CubedSpherePartitioner,
+    DaceConfig,
+    DaCeOrchestration,
+    GridIndexing,
+    Quantity,
+    QuantityFactory,
+    RunMode,
+    StencilConfig,
+    StencilFactory,
+    SubtileGridSizer,
+    TilePartitioner,
+)
 from ndsl.constants import RADIUS
-from ndsl.dsl.dace.dace_config import DaceConfig, DaCeOrchestration
-from ndsl.dsl.stencil import GridIndexing, StencilConfig, StencilFactory
-from ndsl.dsl.stencil_config import CompilationConfig, RunMode
 from ndsl.grid import (
     AngleGridData,
     ContravariantGridData,
@@ -26,12 +36,7 @@ from ndsl.grid import (
     VerticalGridData,
 )
 from ndsl.grid.gnomonic import great_circle_distance_lon_lat
-from ndsl.initialization.allocator import QuantityFactory
-from ndsl.initialization.sizer import SubtileGridSizer
-from ndsl.quantity import Quantity
-from pyFV3.stencils.fvtp2d import FiniteVolumeTransport
-from pyFV3.stencils.fxadv import FiniteVolumeFluxPrep
-from pyFV3.stencils.tracer_2d_1l import TracerAdvection
+from pyFV3.stencils import FiniteVolumeFluxPrep, FiniteVolumeTransport, TracerAdvection
 
 
 class GridType(enum.Enum):

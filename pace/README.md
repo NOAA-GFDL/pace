@@ -1,8 +1,8 @@
-# pace-driver
+# pace
 
 This package provides command-line routines to run the Pace model, and utilities to write model driver scripts.
 
-We suggest reading the code in the examples directory, or taking a look at `pace/driver/run.py` to see how the main entrypoint for this package works.
+We suggest reading the code in the examples directory, or taking a look at `pace/run.py` to see how the main entrypoint for this package works.
 
 # Usage
 
@@ -10,8 +10,8 @@ Usage examples exist in the examples directory.
 The command-line interface may be run in certain debugging modes in serial, but usually you will want to run it using an mpi executor such as mpirun.
 
 ```bash
-$ python3 -m pace.driver.run --help
-Usage: python -m pace.driver.run [OPTIONS] CONFIG_PATH
+$ python3 -m pace.run --help
+Usage: python -m pace.run [OPTIONS] CONFIG_PATH
 
   Run the driver.
 

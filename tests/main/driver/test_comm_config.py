@@ -1,7 +1,7 @@
 import dataclasses
 import unittest.mock
 
-from pace.driver import CreatesComm, CreatesCommSelector, WriterCommConfig
+from pace import CreatesComm, CreatesCommSelector, WriterCommConfig
 
 
 @CreatesCommSelector.register("mock")

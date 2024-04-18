@@ -33,7 +33,7 @@ cat << EOF > run.daint.slurm
 set -x
 export OMP_NUM_THREADS=12
 export FV3_DACEMODE=BuildAndRun
-srun python -m pace.driver.run ${JENKINS_DIR}/driver_configs/baroclinic_c192_6ranks.yaml
+srun python -m pace.run ${JENKINS_DIR}/driver_configs/baroclinic_c192_6ranks.yaml
 EOF
 launch_job run.daint.slurm 3600
 

@@ -8,32 +8,31 @@ import f90nml
 import xarray as xr
 import yaml
 
-import pyFV3
-from ndsl.checkpointer import ValidationCheckpointer
-from ndsl.checkpointer.thresholds import (
+from ndsl import (
+    CompilationConfig,
+    CubedSphereCommunicator,
+    CubedSpherePartitioner,
+    GridIndexing,
+    MPIComm,
+    Namelist,
+    Quantity,
+    QuantityFactory,
+    StencilConfig,
+    StencilFactory,
+    SubtileGridSizer,
+    TilePartitioner,
+)
+from ndsl.checkpointer import (
     SavepointThresholds,
     Threshold,
     ThresholdCalibrationCheckpointer,
-)
-from ndsl.comm.communicator import CubedSphereCommunicator
-from ndsl.comm.mpi import MPIComm
-from ndsl.comm.partitioner import CubedSpherePartitioner, TilePartitioner
-from ndsl.dsl.stencil import (
-    CompilationConfig,
-    GridIndexing,
-    StencilConfig,
-    StencilFactory,
+    ValidationCheckpointer,
 )
 from ndsl.grid import DampingCoefficients, GridData
-from ndsl.initialization.allocator import QuantityFactory
-from ndsl.initialization.sizer import SubtileGridSizer
-from ndsl.namelist import Namelist
-from ndsl.quantity import Quantity
-from ndsl.stencils.testing import TranslateGrid, dataset_to_dict
-from ndsl.stencils.testing.grid import Grid
+from ndsl.stencils.testing import Grid, TranslateGrid, dataset_to_dict
 from ndsl.testing import perturb
-from pyFV3.initialization.dycore_state import DycoreState
-from pyFV3.testing.translate_fvdynamics import TranslateFVDynamics
+from pyFV3 import DycoreState, DynamicalCore, DynamicalCoreConfig
+from pyFV3.testing import TranslateFVDynamics
 
 
 def get_grid(data_path: str, rank: int, layout: Tuple[int, int], backend: str) -> Grid:
@@ -110,7 +109,7 @@ def test_fv_dynamics(
     ds = xr.open_dataset(os.path.join(data_path, "FVDynamics-In.nc")).sel(
         savepoint=0, rank=communicator.rank
     )
-    dycore_config = pyFV3.DynamicalCoreConfig.from_namelist(namelist)
+    dycore_config = DynamicalCoreConfig.from_namelist(namelist)
     initializer = StateInitializer(
         ds,
         translate,
@@ -142,7 +141,7 @@ def test_fv_dynamics(
         savepoint_data_path=data_path, thresholds=thresholds, rank=communicator.rank
     )
     state, grid_data = initializer.new_state()
-    dycore = pyFV3.DynamicalCore(
+    dycore = DynamicalCore(
         comm=communicator,
         grid_data=grid_data,
         stencil_factory=stencil_factory,
@@ -164,7 +163,7 @@ def _calibrate_thresholds(
     stencil_factory: StencilFactory,
     quantity_factory: QuantityFactory,
     damping_coefficients: DampingCoefficients,
-    dycore_config: pyFV3.DynamicalCoreConfig,
+    dycore_config: DynamicalCoreConfig,
     n_trials: int,
     factor: float,
 ):
@@ -175,7 +174,7 @@ def _calibrate_thresholds(
         perturb(dycore_state_to_dict(trial_state))
         # we need to initialize new DynamicalCore because halo updates bind
         # to a particular state object, currently
-        dycore = pyFV3.DynamicalCore(
+        dycore = DynamicalCore(
             comm=communicator,
             grid_data=grid_data,
             stencil_factory=stencil_factory,

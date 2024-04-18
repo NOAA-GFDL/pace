@@ -7,7 +7,7 @@ import pytest
 import xarray as xr
 import yaml
 
-import pace.driver
+from pace import Driver, DriverConfig, NullCommConfig
 
 
 """
@@ -59,9 +59,7 @@ def test_set_hybrid_pressure_coefficients_correct(km):
     """
 
     dirname = os.path.dirname(os.path.abspath(__file__))
-    config_file = os.path.join(
-        dirname, "../../../driver/examples/configs/baroclinic_c12.yaml"
-    )
+    config_file = os.path.join(dirname, "../../../examples/configs/baroclinic_c12.yaml")
 
     with open(config_file, "r") as f:
         yaml_config = yaml.safe_load(f)
@@ -69,9 +67,9 @@ def test_set_hybrid_pressure_coefficients_correct(km):
     yaml_config["nz"] = km
     yaml_config["grid_config"]["config"]["eta_file"] = f"tests/main/input/eta{km}.nc"
 
-    driver_config = pace.driver.DriverConfig.from_dict(yaml_config)
-    driver_config.comm_config = pace.driver.NullCommConfig(rank=0, total_ranks=6)
-    driver = pace.driver.Driver(config=driver_config)
+    driver_config = DriverConfig.from_dict(yaml_config)
+    driver_config.comm_config = NullCommConfig(rank=0, total_ranks=6)
+    driver = Driver(config=driver_config)
 
     p_results = driver.state.grid_data.p.data
     ak_results = driver.state.grid_data.ak.data
@@ -103,9 +101,7 @@ def test_set_hybrid_pressure_coefficients_nofile():
     """
 
     dirname = os.path.dirname(os.path.abspath(__file__))
-    config_file = os.path.join(
-        dirname, "../../../driver/examples/configs/baroclinic_c12.yaml"
-    )
+    config_file = os.path.join(dirname, "../../../examples/configs/baroclinic_c12.yaml")
 
     with open(config_file, "r") as f:
         yaml_config = yaml.safe_load(f)
@@ -113,9 +109,9 @@ def test_set_hybrid_pressure_coefficients_nofile():
     del yaml_config["grid_config"]["config"]["eta_file"]
 
     try:
-        driver_config = pace.driver.DriverConfig.from_dict(yaml_config)
-        driver_config.comm_config = pace.driver.NullCommConfig(rank=0, total_ranks=6)
-        driver = pace.driver.Driver(config=driver_config)
+        driver_config = DriverConfig.from_dict(yaml_config)
+        driver_config.comm_config = NullCommConfig(rank=0, total_ranks=6)
+        driver = Driver(config=driver_config)
     except Exception as error:
         if str(error) == "eta file not specified":
             pytest.xfail("testing eta file not specified")
@@ -135,9 +131,7 @@ def test_set_hybrid_pressure_coefficients_not_mono():
     """
 
     dirname = os.path.dirname(os.path.abspath(__file__))
-    config_file = os.path.join(
-        dirname, "../../../driver/examples/configs/baroclinic_c12.yaml"
-    )
+    config_file = os.path.join(dirname, "../../../examples/configs/baroclinic_c12.yaml")
 
     with open(config_file, "r") as f:
         yaml_config = yaml.safe_load(f)
@@ -148,9 +142,9 @@ def test_set_hybrid_pressure_coefficients_not_mono():
     yaml_config["grid_config"]["config"]["eta_file"] = out_eta_file
 
     try:
-        driver_config = pace.driver.DriverConfig.from_dict(yaml_config)
-        driver_config.comm_config = pace.driver.NullCommConfig(rank=0, total_ranks=6)
-        driver = pace.driver.Driver(config=driver_config)
+        driver_config = DriverConfig.from_dict(yaml_config)
+        driver_config.comm_config = NullCommConfig(rank=0, total_ranks=6)
+        driver = Driver(config=driver_config)
     except Exception as error:
         if os.path.isfile(out_eta_file):
             os.remove(out_eta_file)

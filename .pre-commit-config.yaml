@@ -18,13 +18,10 @@ repos:
     rev: v0.812
     hooks:
     - id: mypy
-      name: mypy-driver
+      name: mypy-pace
+      files: pace
       args: [--config-file, setup.cfg]
-      files: driver
-      exclude: |
-        (?x)^(
-        tests/main/driver/__init__.py |
-        )$
+
 -   repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v2.3.0
     hooks:

@@ -4,30 +4,33 @@ from dataclasses import fields
 from datetime import timedelta
 from typing import Tuple
 
-import ndsl.dsl.stencil
-import ndsl.stencils.testing
-import pyFV3
 import pyFV3.initialization.analytic_init as ai
-from ndsl.comm.communicator import CubedSphereCommunicator
-from ndsl.comm.null_comm import NullComm
-from ndsl.comm.partitioner import CubedSpherePartitioner, TilePartitioner
-from ndsl.dsl.dace.dace_config import DaceConfig
-from ndsl.dsl.stencil import GridIndexing
+from ndsl import (
+    CompilationConfig,
+    CubedSphereCommunicator,
+    CubedSpherePartitioner,
+    DaceConfig,
+    GridIndexing,
+    NullComm,
+    Quantity,
+    QuantityFactory,
+    StencilConfig,
+    StencilFactory,
+    SubtileGridSizer,
+    TilePartitioner,
+)
 from ndsl.grid import DampingCoefficients, GridData, MetricTerms
-from ndsl.initialization.allocator import QuantityFactory
-from ndsl.initialization.sizer import SubtileGridSizer
 from ndsl.performance.timer import NullTimer, Timer
-from ndsl.quantity import Quantity
 from ndsl.stencils.testing import assert_same_temporaries, copy_temporaries
-from pyFV3.dycore_state import DycoreState
+from pyFV3 import DycoreState, DynamicalCore, DynamicalCoreConfig
 
 
 DIR = os.path.abspath(os.path.dirname(__file__))
 
 
-def setup_dycore() -> Tuple[pyFV3.DynamicalCore, pyFV3.DycoreState, Timer]:
+def setup_dycore() -> Tuple[DynamicalCore, DycoreState, Timer]:
     backend = "numpy"
-    config = pyFV3.DynamicalCoreConfig(
+    config = DynamicalCoreConfig(
         layout=(1, 1),
         npx=13,
         npy=13,
@@ -77,8 +80,8 @@ def setup_dycore() -> Tuple[pyFV3.DynamicalCore, pyFV3.DycoreState, Timer]:
     partitioner = CubedSpherePartitioner(TilePartitioner(config.layout))
     communicator = CubedSphereCommunicator(mpi_comm, partitioner)
     dace_config = DaceConfig(communicator=communicator, backend=backend)
-    stencil_config = ndsl.dsl.stencil.StencilConfig(
-        compilation_config=ndsl.dsl.stencil.CompilationConfig(
+    stencil_config = StencilConfig(
+        compilation_config=CompilationConfig(
             backend=backend, rebuild=False, validate_args=True
         ),
         dace_config=dace_config,
@@ -116,12 +119,12 @@ def setup_dycore() -> Tuple[pyFV3.DynamicalCore, pyFV3.DycoreState, Timer]:
         moist_phys=config.moist_phys,
         comm=communicator,
     )
-    stencil_factory = ndsl.dsl.stencil.StencilFactory(
+    stencil_factory = StencilFactory(
         config=stencil_config,
         grid_indexing=grid_indexing,
     )
 
-    dycore = pyFV3.DynamicalCore(
+    dycore = DynamicalCore(
         comm=communicator,
         grid_data=grid_data,
         stencil_factory=stencil_factory,

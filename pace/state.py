@@ -5,16 +5,14 @@ from typing import List
 import xarray as xr
 
 import ndsl.dsl.gt4py_utils as gt_utils
-import pyFV3
-import pySHiELD
-from ndsl.comm.communicator import Communicator
+from ndsl import Quantity, QuantityFactory, SubtileGridSizer
 from ndsl.constants import N_HALO_DEFAULT, X_DIM, Y_DIM, Z_DIM
 from ndsl.dsl.typing import Float
 from ndsl.filesystem import get_fs
 from ndsl.grid import DampingCoefficients, DriverGridData, GridData
-from ndsl.initialization.allocator import QuantityFactory
-from ndsl.initialization.sizer import SubtileGridSizer
-from ndsl.quantity import Quantity
+from ndsl.typing import Communicator
+from pyFV3 import DycoreState
+from pySHiELD import PHYSICS_PACKAGES, PhysicsState
 
 
 @dataclasses.dataclass()
@@ -63,8 +61,8 @@ class TendencyState:
 
 @dataclasses.dataclass
 class DriverState:
-    dycore_state: pyFV3.DycoreState
-    physics_state: pySHiELD.PhysicsState
+    dycore_state: DycoreState
+    physics_state: PhysicsState
     tendency_state: TendencyState
     grid_data: GridData
     damping_coefficients: DampingCoefficients
@@ -81,7 +79,7 @@ class DriverState:
         damping_coefficients: DampingCoefficients,
         driver_grid_data: DriverGridData,
         grid_data: GridData,
-        schemes: List[pySHiELD.PHYSICS_PACKAGES],
+        schemes: List[PHYSICS_PACKAGES],
     ) -> "DriverState":
         comm = driver_config.comm_config.get_comm()
         communicator = Communicator.from_layout(comm=comm, layout=driver_config.layout)
@@ -155,7 +153,7 @@ class DriverState:
 def _overwrite_state_from_restart(
     path: str,
     rank: int,
-    state: pyFV3.DycoreState,
+    state: DycoreState,
     restart_file_prefix: str,
 ):
     """
@@ -182,7 +180,7 @@ def _restart_driver_state(
     damping_coefficients: DampingCoefficients,
     driver_grid_data: DriverGridData,
     grid_data: GridData,
-    schemes: List[pySHiELD.PHYSICS_PACKAGES],
+    schemes: List[PHYSICS_PACKAGES],
 ):
     fs = get_fs(path)
 
@@ -192,11 +190,11 @@ def _restart_driver_state(
     )
 
     if is_fortran_restart:
-        dycore_state = pyFV3.DycoreState.from_fortran_restart(
+        dycore_state = DycoreState.from_fortran_restart(
             quantity_factory=quantity_factory, communicator=communicator, path=path
         )
     else:
-        dycore_state = pyFV3.DycoreState.init_zeros(quantity_factory=quantity_factory)
+        dycore_state = DycoreState.init_zeros(quantity_factory=quantity_factory)
         _overwrite_state_from_restart(
             path,
             rank,
@@ -204,7 +202,7 @@ def _restart_driver_state(
             "restart_dycore_state",
         )
 
-    physics_state = pySHiELD.PhysicsState.init_zeros(
+    physics_state = PhysicsState.init_zeros(
         quantity_factory=quantity_factory, schemes=schemes
     )
 

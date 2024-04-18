@@ -2,8 +2,8 @@ from typing import ClassVar, Dict, Optional
 
 import numpy as np
 
-from ndsl.quantity import Quantity
-from pyFV3.dycore_state import DycoreState
+from ndsl import Quantity
+from pyFV3 import DycoreState
 
 
 class VariableBounds:
