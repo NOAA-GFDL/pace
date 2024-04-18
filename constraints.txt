@@ -204,7 +204,7 @@ matplotlib-inline==0.1.6
     # via
     #   ipykernel
     #   ipython
-mpi4py==3.1.4
+mpi4py==3.1.5
     # via
     #   -r requirements_dev.txt
     #   ndsl
