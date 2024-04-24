@@ -17,6 +17,7 @@ requirements: List[str] = [
     "mpi4py",
     "netCDF4",
     "zarr",
+    "types-pyyaml",
 ]
 
 

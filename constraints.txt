@@ -461,6 +461,8 @@ traitlets==5.14.3
     #   matplotlib-inline
     #   nbclient
     #   nbformat
+types-pyyaml==6.0.12.20240311
+    # via pace
 typing-extensions==4.5.0
     # via
     #   gt4py
@@ -489,6 +491,10 @@ xxhash==3.0.0
     # via gt4py
 yarl==1.9.4
     # via aiohttp
+zarr==2.17.2
+    # via
+    #   -r requirements_dev.txt
+    #   pace
 zipp==3.18.1
     # via importlib-metadata
 
