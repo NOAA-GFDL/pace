@@ -18,7 +18,7 @@ repos:
     rev: v1.4.1
     hooks:
     - id: mypy
-      additional_dependencies: [types-pyyaml==6.0.12.20240311]
+      additional_dependencies: [types-pyyaml]
       name: mypy-pace
       files: pace
       args: [--config-file, setup.cfg]
