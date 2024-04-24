@@ -14,7 +14,7 @@ performance_config:
 nx_tile: 12
 nz: 79
 dt_atmos: 225
-minutes: 5
+seconds: 225
 layout:
   - 1
   - 1
@@ -73,3 +73,8 @@ physics_config:
   hydrostatic: false
   nwat: 6
   do_qa: true
+
+grid_config:
+  type:  generated
+  config:
+    eta_file: 'tests/main/input/eta79.nc'
