@@ -11,10 +11,10 @@ jobs:
           uses: actions/checkout@v3.5.2
           with:
             submodules: 'recursive'
-        - name: Step Python 3.8.12
+        - name: Step Python 3.11.9
           uses: actions/setup-python@v4.6.0
           with:
-            python-version: '3.8.12'
+            python-version: '3.11.9'
         - name: Install OpenMPI for gt4py
           run: |
             sudo apt-get install libopenmpi-dev
