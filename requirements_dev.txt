@@ -1,6 +1,7 @@
 pytest-regressions
 pytest-profiling
 pytest-cov
+pytest-subtests
 nbmake
 zarr
 fv3config
