@@ -15,10 +15,9 @@ requirements: List[str] = [
     "dacite",
     "pyyaml",
     "mpi4py",
-    "numpy",
     "netCDF4",
-    "xarray",
     "zarr",
+    "types-pyyaml",
 ]
 
 
