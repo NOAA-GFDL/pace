@@ -17,7 +17,7 @@ jobs:
     steps:
       - name: Checkout Pace repository
         uses: actions/checkout@v4
-          with:
+        with:
             submodules: 'recursive'
       - name: setup env and generate input files
         run: |
