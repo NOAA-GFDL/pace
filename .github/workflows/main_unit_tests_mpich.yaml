@@ -24,7 +24,7 @@ jobs:
           pip3 install --upgrade pip setuptools wheel
           pip3 install -r requirements_dev.txt -c constraints.txt
           cd tests/main && mkdir -p input && cd input
-          python3 ../../examples/generate_eta_files.py
+          python3 ../../../examples/generate_eta_files.py
           cd ../../../
       - name:
         run: pytest -x tests/main
