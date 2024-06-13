@@ -1,4 +1,4 @@
-FROM python:3.8.13-bullseye@sha256:2a01d88a1684e6d7f08030cf5ae73b536926c64076cab197e9e3d9f699255283
+FROM python:3.11.7-slim-bullseye@sha256:86cad05977011ea3c1b708e869057feb392eb99cb2b9f428d33bde6fe84c2288
 
 RUN apt-get update && apt-get install -y make \
     software-properties-common \
