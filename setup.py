@@ -12,12 +12,14 @@ def local_pkg(name: str, relative_path: str) -> str:
 
 
 requirements: List[str] = [
+    "ndsl",
     "dacite",
     "pyyaml",
     "mpi4py",
+    "numpy",
     "netCDF4",
+    "xarray",
     "zarr",
-    "types-pyyaml",
 ]
 
 
