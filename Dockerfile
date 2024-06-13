@@ -17,10 +17,6 @@ RUN apt-get update && apt-get install -y make \
 
 RUN pip3 install --upgrade setuptools wheel
 
-COPY constraints.txt /pace/constraints.txt
-
-RUN pip3 install -r /pace/constraints.txt
-
 COPY . /pace
 
 RUN cd /pace && \

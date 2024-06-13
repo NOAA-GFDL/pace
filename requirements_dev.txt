@@ -14,7 +14,7 @@ cftime
 fv3config
 f90nml
 numpy
--e NDSL
--e pySHiELD
--e pyFV3
+-e /home/Frank.Malatino/ndsl_fork
+-e /home/Frank.Malatino/pyshield_fork
+-e /home/Frank.Malatino/pyfv3_fork
 -e .
