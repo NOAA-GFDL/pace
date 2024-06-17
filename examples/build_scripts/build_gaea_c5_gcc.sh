@@ -26,7 +26,7 @@ git clone --recursive https://github.com/NOAA-GFDL/pace
 cd pace
 
 # create a conda environment for pace
-conda create -y --name my_name python=3.8
+conda create -y --name my_name python=3.11.9
 
 # enter the environment and update it
 conda activate my_name
