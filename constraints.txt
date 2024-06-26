@@ -297,7 +297,7 @@ pathspec==0.12.1
     # via black
 pexpect==4.9.0
     # via ipython
-platformdirs==2.6.2
+platformdirs==3.10.0
     # via
     #   black
     #   jupyter-core
