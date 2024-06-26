@@ -39,7 +39,7 @@ jobs:
             submodules: 'recursive'
             repository: NOAA-GFDL/pace
             path: pace
-            
+
         - name: Checkout repo that triggered the workflow
           uses: actions/checkout@v4
           with:
