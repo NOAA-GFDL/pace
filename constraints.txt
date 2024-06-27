@@ -251,7 +251,7 @@ nest-asyncio==1.6.0
     # via
     #   ipykernel
     #   nbclient
-netcdf4==1.7.1
+netcdf4==1.7.0
     # via
     #   -r requirements_dev.txt
     #   ndsl
@@ -271,6 +271,7 @@ numpy==1.26.4
     #   dace
     #   gt4py
     #   h5py
+    #   ndsl
     #   netcdf4
     #   numcodecs
     #   pace
@@ -306,7 +307,7 @@ pathspec==0.12.1
     # via black
 pexpect==4.9.0
     # via ipython
-platformdirs==3.10.0
+platformdirs==2.6.2
     # via
     #   black
     #   jupyter-core
@@ -476,7 +477,7 @@ traitlets==5.14.3
     #   matplotlib-inline
     #   nbclient
     #   nbformat
-typing-extensions==4.3
+typing-extensions==4.12.2
     # via
     #   gt4py
     #   ipython
