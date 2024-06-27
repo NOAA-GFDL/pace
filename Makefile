@@ -87,14 +87,14 @@ endif
 endif
 
 _force_build:
-	DOCKER_BUILDKIT=1 docker build \
+	DOCKER_BUILDKIT=1 podman build \
 		$(BUILD_FLAGS) \
 		-f $(CWD)/Dockerfile \
 		-t $(PACE_IMAGE) \
 		.
 
 enter:
-	docker run --rm -it \
+	podman run --rm -it \
 		$(VOLUMES) \
 		-p=$(PORT):$(PORT) \
 		--name="$(APP_NAME)" \

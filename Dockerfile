@@ -13,7 +13,8 @@ RUN apt-get update && apt-get install -y make \
     proj-bin \
     proj-data \
     python3 \
-    python3-pip
+    python3-pip \
+    git
 
 RUN pip3 install --upgrade setuptools wheel
 
@@ -32,7 +33,7 @@ RUN python3 -m pip install \
     ipyparallel==8.4.1 \
     jupyterlab==3.4.4 \
     shapely==1.8.5 \
-    cartopy==0.18.0 \
+    cartopy==0.23.0 \
     jupyterlab_code_formatter==1.5.2 \
     isort==5.10.1 \
     black==22.3.0 \

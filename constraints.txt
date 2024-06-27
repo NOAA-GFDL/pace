@@ -251,7 +251,7 @@ nest-asyncio==1.6.0
     # via
     #   ipykernel
     #   nbclient
-netcdf4==1.6.5
+netcdf4==1.7.1
     # via
     #   -r requirements_dev.txt
     #   ndsl
@@ -476,7 +476,7 @@ traitlets==5.14.3
     #   matplotlib-inline
     #   nbclient
     #   nbformat
-typing-extensions==4.12.1
+typing-extensions==4.3
     # via
     #   gt4py
     #   ipython
