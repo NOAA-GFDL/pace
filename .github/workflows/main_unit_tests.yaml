@@ -1,0 +1,82 @@
+name: "Pace main unit tests"
+on:
+  workflow_call:
+    inputs:
+      ndsl_trigger:
+        type: boolean
+        default: false
+        required: false
+      fv3_trigger:
+        type: boolean
+        default: false
+        required: false
+      shield_trigger:
+        type:  boolean
+        default: false
+        required: false
+  pull_request:
+      types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
+
+
+# cancel running jobs if theres a newer push
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+env:
+  github_repository: ${{github.event.repository.name}}
+
+jobs:
+  main_unit_tests:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/noaa-gfdl/miniforge:mpich
+    steps:
+        - name: Checkout pace if externally triggered
+          if:  ${{ inputs.fv3_trigger || inputs.ndsl_trigger || inputs.shield_trigger }}
+          uses: actions/checkout@v4
+          with:
+            submodules: 'recursive'
+            repository: NOAA-GFDL/pace
+            path: pace
+
+        - name: Checkout repo that triggered the workflow
+          uses: actions/checkout@v4
+          with:
+            submodules: 'recursive'
+            path: ${{ env.github_repository }}
+
+        - name: mv PyFV3 to pace
+          if: ${{inputs.fv3_trigger}}
+          run: |
+            rm -r ${GITHUB_WORKSPACE}/pace/pyFV3
+            mv ${GITHUB_WORKSPACE}/${{env.github_repository}} ${GITHUB_WORKSPACE}/pace/pyFV3
+
+        - name: mv NDSL to pace
+          if: ${{inputs.ndsl_trigger}}
+          run: |
+            rm -r ${GITHUB_WORKSPACE}/pace/NDSL
+            mv ${GITHUB_WORKSPACE}/${{env.github_repository}} ${GITHUB_WORKSPACE}/pace/NDSL
+
+        - name: mv pyShield to pace
+          if: ${{inputs.shield_trigger}}
+          run: |
+            rm -r ${GITHUB_WORKSPACE}/pace/pySHiELD
+            mv ${GITHUB_WORKSPACE}/${{env.github_repository}} ${GITHUB_WORKSPACE}/pace/pySHiELD
+
+        - name: install packages
+          run: |
+            cd ${GITHUB_WORKSPACE}/pace
+            pip3 install --upgrade pip setuptools wheel
+            pip3 install -r requirements_dev.txt -c constraints.txt
+
+        - name: prepare input files
+          run: |
+            cd ${GITHUB_WORKSPACE}/pace
+            python3 examples/generate_eta_files.py
+            mkdir tests/main/input && mv eta*.nc tests/main/input/.
+
+        - name: run tests
+          run: |
+            cd ${GITHUB_WORKSPACE}/pace
+            pytest -x tests/main
