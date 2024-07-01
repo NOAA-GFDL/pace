@@ -408,7 +408,7 @@ rpds-py==0.18.0
     #   referencing
 rsa==4.9
     # via google-auth
-scikit-build==0.17.6
+scikit-build==0.18.0
     # via dace
 scipy==1.13.0
     # via
