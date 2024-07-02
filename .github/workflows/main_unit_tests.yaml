@@ -26,7 +26,7 @@ jobs:
     container:
       image: ghcr.io/noaa-gfdl/miniforge:mpich
     steps:
-        - name: external trigger:  Checkout pace/develop
+        - name: external trigger Checkout pace/develop
           if:  ${{ inputs.component_trigger }}
           uses: actions/checkout@v4
           with:
@@ -35,7 +35,7 @@ jobs:
             path: pace
             ref: develop
 
-        - name: external trigger : Remove existing component in pace/develop
+        - name: external trigger Remove existing component in pace/develop
           if:  ${{ inputs.component_trigger }}
           run: rm -rf ${GITHUB_WORKSPACE}/pace/${{inputs.component_name}}
           
