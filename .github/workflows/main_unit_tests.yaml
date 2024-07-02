@@ -8,7 +8,7 @@ on:
         required: false
       component_name:
         type: string
-        default: 'None'
+        default: ''
         required: false
   pull_request:
       types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
@@ -25,7 +25,7 @@ jobs:
     container:
       image: ghcr.io/noaa-gfdl/miniforge:mpich
     steps:
-        - name: Checkout pace/develop if component triggered
+        - name: Checkout pace/develop if externally triggered
           if:  ${{ inputs.component_trigger }}
           uses: actions/checkout@v4
           with:
@@ -38,19 +38,12 @@ jobs:
           if:  ${{ inputs.component_trigger }}
           run: rm -rf ${GITHUB_WORKSPACE}/pace/${{inputs.component_name}}
           
-        - name: Checkout out pace or component that triggered CI
+        - name: Checkout out hash that triggered CI
           if: ${{inputs.component_trigger}}
           uses: actions/checkout@v4
           with:
             submodules: 'recursive'
             path: pace/${{inputs.component_name}}
-
-        - name: Checkout out pace or component that triggered CI
-          if: ${{!inputs.component_trigger}}
-          uses: actions/checkout@v4
-          with:
-            submodules: 'recursive'
-            path: pace
 
         - name: install packages
           run: |
@@ -61,8 +54,8 @@ jobs:
         - name: prepare input files
           run: |
             cd ${GITHUB_WORKSPACE}/pace
-            python3 examples/generate_eta_files.py
-            mkdir tests/main/input && mv eta*.nc tests/main/input/.
+            mkdir tests/main/input
+            python3 examples/generate_eta_files.py >> tests/main/input/.
 
         - name: run tests
           run: |
