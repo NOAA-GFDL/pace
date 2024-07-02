@@ -1,4 +1,4 @@
-name: "Pace main unit tests"
+name: "pace main unit tests"
 on:
   workflow_call:
     inputs:
@@ -10,7 +10,6 @@ on:
         type: string
         default: ''
         required: false
-  push:
   pull_request:
       types: [opened, synchronize, reopened, ready_for_review, labeled, unlabeled]
 
@@ -21,7 +20,7 @@ concurrency:
   cancel-in-progress: true
 
 jobs:
-  main_unit_tests:
+  pace_main_unit_tests:
     runs-on: ubuntu-latest
     container:
       image: ghcr.io/noaa-gfdl/miniforge:mpich
