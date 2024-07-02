@@ -35,7 +35,7 @@ jobs:
         - name: external trigger Remove existing component in pace/develop
           if:  ${{ inputs.component_trigger }}
           run: rm -rf ${GITHUB_WORKSPACE}/pace/${{inputs.component_name}}
-          
+
         - name: Checkout out hash that triggered CI
           uses: actions/checkout@v4
           with:
