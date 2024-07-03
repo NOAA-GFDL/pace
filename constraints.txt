@@ -62,9 +62,7 @@ click==8.1.7
 cloudpickle==3.0.0
     # via dask
 cmake==3.29.2
-    # via
-    #   dace
-    #   gt4py
+    # via gt4py
 comm==0.2.2
     # via ipykernel
 commonmark==0.9.1
@@ -95,8 +93,6 @@ dill==0.3.8
     # via dace
 distlib==0.3.2
     # via virtualenv
-distro==1.9.0
-    # via scikit-build
 docutils==0.16
     # via
     #   recommonmark
@@ -293,7 +289,6 @@ packaging==24.0
     #   h5netcdf
     #   ipykernel
     #   pytest
-    #   scikit-build
     #   setuptools-scm
     #   sphinx
     #   xarray
@@ -307,7 +302,7 @@ pathspec==0.12.1
     # via black
 pexpect==4.9.0
     # via ipython
-platformdirs==3.10.0
+platformdirs==2.6.2
     # via
     #   black
     #   jupyter-core
@@ -408,8 +403,6 @@ rpds-py==0.18.0
     #   referencing
 rsa==4.9
     # via google-auth
-scikit-build==0.18.0
-    # via dace
 scipy==1.13.0
     # via
     #   -r requirements_dev.txt
@@ -493,9 +486,7 @@ wcwidth==0.2.13
 websockets==12.0
     # via dace
 wheel==0.43.0
-    # via
-    #   astunparse
-    #   scikit-build
+    # via astunparse
 xarray==2024.3.0
     # via
     #   -r requirements_dev.txt
