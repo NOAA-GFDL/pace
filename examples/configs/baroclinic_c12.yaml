@@ -1,6 +1,6 @@
 stencil_config:
   compilation_config:
-    backend: dace:cpu
+    backend: numpy
     rebuild: false
     validate_args: true
     format_source: false
@@ -15,7 +15,7 @@ performance_config:
 nx_tile: 12
 nz: 79
 dt_atmos: 225
-seconds: 225
+minutes: 15
 layout:
   - 1
   - 1
