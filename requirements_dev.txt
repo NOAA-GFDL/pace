@@ -1,9 +1,19 @@
+pytest
+pytest-subtests
 pytest-regressions
 pytest-profiling
 pytest-cov
+scipy
 nbmake
+mpi4py
+xarray
 zarr
+dask
+netCDF4
+cftime
 fv3config
+f90nml
+numpy
 -e NDSL
 -e pySHiELD
 -e pyFV3

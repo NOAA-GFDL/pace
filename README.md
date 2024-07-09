@@ -116,7 +116,7 @@ make build
 
 ```shell
 make dev
-mpirun --mca btl_vader_single_copy_mechanism none -n 6 python3 -m pace.run /examples/configs/baroclinic_c12.yaml
+mpirun --mca btl_vader_single_copy_mechanism none -n 6 python -m pace.run /examples/configs/baroclinic_c12.yaml
 ```
 
 ## History
