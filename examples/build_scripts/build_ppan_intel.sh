@@ -29,7 +29,7 @@ conda config --add envs_dirs $CONDA_PREFIX/envs
 cd $PACE_DIR
 
 # create a conda environment with cartopy and its dependencies installed
-conda create -c conda-forge -y --name $ENVIRONMENT_NAME python=3.11.9 matplotlib==3.5.2 cartopy==0.18.0
+conda create -c conda-forge -y --name $ENVIRONMENT_NAME python=3.11.7 matplotlib==3.5.2 cartopy==0.18.0
 
 # enter the environment and update it
 conda activate $ENVIRONMENT_NAME

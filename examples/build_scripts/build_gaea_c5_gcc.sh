@@ -10,14 +10,14 @@ module load PrgEnv-gnu
 module rm gcc
 module load gcc/12.2.0
 module load boost/1.79.0
-module load python/3.9
+module load python/3.11.7
 
 export CC=`which gcc`
 export CXX=`which g++`
 export MPICC=`which mpicc`
 export MPICXX=`which mpicxx`
 export DACE_compiler_cpu_executable=${CXX}
-export GT4PY_EXTRA_COMPILE_ARGS="-O3 -ffast-math -fprefetch-loop-arrays -flto=thin -funroll-all-loops"
+export GT4PY_EXTRA_COMPILE_ARGS="-O3 -ffast-math -fprefetch-loop-arrays -funroll-all-loops"
 export OPENMP_CPPFLAGS="-fopenmp -fopenmp-simd"
 export OPENMP_LDFLAGS="-fopenmp -fopenmp-simd"
 
@@ -26,7 +26,7 @@ git clone --recursive https://github.com/NOAA-GFDL/pace
 cd pace
 
 # create a conda environment for pace
-conda create -y --name my_name python=3.11.9
+conda create -y --name my_name python=3.11.7
 
 # enter the environment and update it
 conda activate my_name
