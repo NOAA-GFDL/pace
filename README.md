@@ -74,7 +74,7 @@ Shell scripts to install Pace on specific machines such as Gaea can be found in 
 
 ### Run
 
-Located in the directory `examples/configs/` there are several example configurations to exhibit the current functionality of Pace. We suggest a new user start with the `baroclinic_c12.yaml` configuration. 
+Located in the directory `examples/configs/` there are several example configurations to exhibit the current functionality of Pace. We suggest a new user start with the `baroclinic_c12.yaml` configuration.
 
 Before starting any run, including unit tests, the user must ensure that the proper input files are available. For the `baroclinic_c12.yaml` configuration a script to generate these files and place them in the location referenced in the configuration file is available in the `examples/` directory; `generate_eta_files.py`. To generate the files use the following commands from the top level of the clone of Pace:
 
