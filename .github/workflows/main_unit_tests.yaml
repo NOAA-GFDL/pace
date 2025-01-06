@@ -1,0 +1,61 @@
+name: "pace main unit tests"
+on:
+  workflow_call:
+    inputs:
+      component_trigger:
+        type: boolean
+        default: false
+        required: false
+      component_name:
+        type: string
+        default: ''
+        required: false
+  pull_request:
+
+# cancel running jobs if theres a newer push
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  pace_main_unit_tests:
+    runs-on: ubuntu-latest
+    container:
+      image: ghcr.io/noaa-gfdl/miniforge:mpich
+    steps:
+        - name: external trigger Checkout pace/develop
+          if:  ${{ inputs.component_trigger }}
+          uses: actions/checkout@v4
+          with:
+            submodules: 'recursive'
+            repository: NOAA-GFDL/pace
+            path: pace
+            ref: develop
+
+        - name: external trigger Remove existing component in pace/develop
+          if:  ${{ inputs.component_trigger }}
+          run: rm -rf ${GITHUB_WORKSPACE}/pace/${{inputs.component_name}}
+
+        - name: Checkout out hash that triggered CI
+          uses: actions/checkout@v4
+          with:
+            submodules: 'recursive'
+            path: pace/${{inputs.component_name}}
+
+        - name: install packages
+          run: |
+            cd ${GITHUB_WORKSPACE}/pace
+            pip3 install --upgrade pip setuptools wheel
+            pip3 install -r requirements_dev.txt -c constraints.txt
+
+        - name: prepare input files
+          run: |
+            cd ${GITHUB_WORKSPACE}/pace
+            mkdir tests/main/input
+            python3 examples/generate_eta_files.py
+            mv *eta*.nc tests/main/input
+
+        - name: run tests
+          run: |
+            cd ${GITHUB_WORKSPACE}/pace
+            pytest -x tests/main

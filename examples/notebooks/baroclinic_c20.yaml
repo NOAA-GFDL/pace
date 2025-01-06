@@ -1,7 +1,7 @@
 stencil_config:
   compilation_config:
-    backend: dace:cpu
-    rebuild: false
+    backend: numpy
+    rebuild: true
     validate_args: true
     format_source: false
     device_sync: false
@@ -9,15 +9,40 @@ initialization:
   type: analytic
   config:
     case: baroclinic
+grid_config:
+  type: generated
+  config:
+    eta_file: 'eta79.nc'
 performance_config:
   collect_performance: false
-nx_tile: 12
+  experiment_name: c20_baroclinic
+nx_tile: 20
 nz: 79
 dt_atmos: 225
-seconds: 225
+minutes: 15
 layout:
   - 1
   - 1
+diagnostics_config:
+  path: output.zarr
+  names:
+    - u
+    - v
+    - ua
+    - va
+    - pt
+    - delp
+    - qvapor
+    - qliquid
+    - qice
+    - qrain
+    - qsnow
+    - qgraupel
+    - qcld
+  z_select:
+    - level: 30
+      names:
+        - pt
 dycore_config:
   a_imp: 1.0
   beta: 0.
@@ -73,8 +98,3 @@ physics_config:
   hydrostatic: false
   nwat: 6
   do_qa: true
-
-grid_config:
-  type:  generated
-  config:
-    eta_file: 'tests/main/input/eta79.nc'

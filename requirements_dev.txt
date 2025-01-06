@@ -8,12 +8,12 @@ nbmake
 mpi4py
 xarray
 zarr
-dask>=2021.10.0
+dask
 netCDF4
 cftime
-fv3config>=0.9.0
-f90nml>=1.1.0
-numpy>=1.15
+fv3config
+f90nml
+numpy
 -e NDSL
 -e pySHiELD
 -e pyFV3

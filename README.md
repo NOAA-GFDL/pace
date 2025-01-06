@@ -74,7 +74,16 @@ Shell scripts to install Pace on specific machines such as Gaea can be found in 
 
 ### Run
 
-With the environment activated, you can run an example baroclinic test case with the following command:
+Located in the directory `examples/configs/` there are several example configurations to exhibit the current functionality of Pace. We suggest a new user start with the `baroclinic_c12.yaml` configuration.
+
+Before starting any run, including unit tests, the user must ensure that the proper input files are available. For the `baroclinic_c12.yaml` configuration a script to generate these files and place them in the location referenced in the configuration file is available in the `examples/` directory; `generate_eta_files.py`. To generate the files use the following commands from the top level of the clone of Pace:
+
+```shell
+mkdir tests/main/input
+python3 examples/generate_eta_files.py
+mv *eta*.nc tests/main/input
+```
+These commands will generate the files necessary and place them in the `tests/main/input` directory. Once the files are generated the `baroclinic_c12.yaml` configuration can be used to generate a run:
 
 ```shell
 mpirun -n 6 python3 -m pace.run examples/configs/baroclinic_c12.yaml
@@ -116,7 +125,7 @@ make build
 
 ```shell
 make dev
-mpirun --mca btl_vader_single_copy_mechanism none -n 6 python3 -m pace.run /examples/configs/baroclinic_c12.yaml
+mpirun --mca btl_vader_single_copy_mechanism none -n 6 python -m pace.run /examples/configs/baroclinic_c12.yaml
 ```
 
 ## History

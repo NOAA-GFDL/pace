@@ -1,5 +1,5 @@
 recommonmark
-sphinx>=1.4
+sphinx
 sphinx-argparse
 sphinx_rtd_theme
 sphinx-gallery

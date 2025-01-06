@@ -1,4 +1,4 @@
-FROM python:3.8.13-bullseye@sha256:2a01d88a1684e6d7f08030cf5ae73b536926c64076cab197e9e3d9f699255283
+FROM python:3.11-slim-bookworm@sha256:7cd3fa11d619688317226bc93dc59bc8966e9aec6bc2a6abb847e8ab7d656706
 
 RUN apt-get update && apt-get install -y make \
     software-properties-common \
@@ -13,13 +13,10 @@ RUN apt-get update && apt-get install -y make \
     proj-bin \
     proj-data \
     python3 \
-    python3-pip
+    python3-pip \
+    git
 
 RUN pip3 install --upgrade setuptools wheel
-
-COPY constraints.txt /pace/constraints.txt
-
-RUN pip3 install -r /pace/constraints.txt
 
 COPY . /pace
 
@@ -32,14 +29,11 @@ RUN cd / && \
 ENV CFLAGS="-I/usr/include -DACCEPT_USE_OF_DEPRECATED_PROJ_API_H=1"
 
 RUN python3 -m pip install \
-    numpy==1.21.2 \
-    netCDF4==1.5.7 \
-    mpi4py==3.1.1 \
     matplotlib==3.5.2 \
     ipyparallel==8.4.1 \
     jupyterlab==3.4.4 \
     shapely==1.8.5 \
-    cartopy==0.18.0 \
+    cartopy==0.23.0 \
     jupyterlab_code_formatter==1.5.2 \
     isort==5.10.1 \
     black==22.3.0 \
