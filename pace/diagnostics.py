@@ -86,6 +86,7 @@ class DiagnosticsConfig:
     names: List[str] = dataclasses.field(default_factory=list)
     derived_names: List[str] = dataclasses.field(default_factory=list)
     z_select: List[ZSelect] = dataclasses.field(default_factory=list)
+    precision: str = "Float"
 
     def __post_init__(self):
         if (len(self.names) > 0 or len(self.derived_names) > 0) and self.path is None:
@@ -96,6 +97,11 @@ class DiagnosticsConfig:
             raise ValueError(
                 "output_format must be one of 'zarr' or 'netcdf', "
                 f"got {self.output_format}"
+            )
+        if self.precision not in ["Float", "float32", "float64"]:
+            raise ValueError(
+                "precision must be one of 'Float', 'float32', or 'float64"
+                f"got {self.precision}"
             )
 
     def diagnostics_factory(self, communicator: Communicator) -> Diagnostics:
@@ -124,6 +130,7 @@ class DiagnosticsConfig:
                     path=self.path,
                     communicator=communicator,
                     time_chunk_size=self.time_chunk_size,
+                    precision=self.precision,
                 )
             else:
                 raise ValueError(
