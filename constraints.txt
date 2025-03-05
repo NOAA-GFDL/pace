@@ -515,7 +515,7 @@ wheel==0.43.0
     # via
     #   astunparse
     #   scikit-build
-xarray==2024.3.0
+xarray==2025.01.2
     # via
     #   -r requirements_dev.txt
     #   ndsl
