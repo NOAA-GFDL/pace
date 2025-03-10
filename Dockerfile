@@ -16,7 +16,7 @@ RUN apt-get update && apt-get install -y make \
     python3-pip \
     git
 
-RUN pip3 install --upgrade setuptools wheel
+RUN pip3 install --upgrade pip setuptools wheel
 
 COPY . /pace
 
