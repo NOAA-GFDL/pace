@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 
-# Example bash script to install Pace to run bare-metal on Gaea's c4 cluster
+# Example bash script to install Pace to run bare-metal on Gaea's c5 cluster
 
 set -e -x
 
