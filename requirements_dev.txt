@@ -7,7 +7,7 @@ scipy
 nbmake
 mpi4py
 xarray
-zarr
+zarr <3.0.0
 dask
 netCDF4
 cftime
