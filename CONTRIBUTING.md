@@ -8,13 +8,13 @@ Contributors names will be added to [`CONTRIBUTORS.md`](https://github.com/Vulca
 Dependencies for linting are maintained in `requirements_lint.txt`, and can be installed with:
 
 ```shell
-$ pip install -c constraints.txt -r requirements_lint.txt
+pip install -c constraints.txt -r requirements_lint.txt
 ```
 
 Correcting and checking your code complies with all requirements can be run with:
 
 ```shell
-$ make lint
+make lint
 ```
 
 We manage the list of syntax requirements using [pre-commit](https://pre-commit.com/).
@@ -48,11 +48,13 @@ First, checking you are following the guidelines established at [Code Review Che
 ox.com/doc/Code-Review-Checklist--BD7zigBMAhMZAPkeNENeuU2UAg-IlsYffZgTwyKEylty7NhY) when writing new code.
 
 For code visited in refactors, we want to start adding the following where appropriate:
+
 - Type hints on Python functions (see [`fv3core/utils/typing.py`](https://github.com/VulcanClimateModeling/fv3core/blob/master/fv3core/utils/typing.py) and below)
 - More descriptive types on stencil definitions
 - Docstrings on outward facing Python functions: describe what methods are doing, describe the intent (*in*, *out*, or *inout*) of the function arguments
 
 ### Docstrings
+
 These should aid us in refactoring and understanding what a function is doing. If it is not completely understood yet what is happening, please consult other team members and GFDL as appropriate. If we still cannot tell what is happening, you can write what is known along with a `TODOC` to indicate it is incomplete.
 For example:
 
@@ -76,11 +78,12 @@ def stencil(...):
     """
 ```
 
-
 ### Type hinting Python functions
+
 These should mostly be lightweight workflow wrappers calling gt4py stencils, though currently exceptions exist where Python code does computations on data fields.
 
 New code should be type hinted making use of `fv3core/utils/typing.py` when typing gt4py fields. You may run into code in fv3core before we added this convention. An older code like:
+
 ```python
 def compute(var1, var2, var3, param1, param2, param3):
 ```
@@ -91,14 +94,17 @@ would become:
 def compute(var1: FloatField, var2:IntField, var3: BoolField,
             param1: float_type, param2: int_type, param3: bool_type):
 ```
+
 There is no determined convention for order of arguments, but the code generally follows the convention of listing 3d fields first followed by parameters, as is required by gt4py stencil functions.
 
 Another example
+
 ```python
 def make_storage_from_shape(shape, origin, dtype):
 ```
 
 Turns into
+
 ```python
     def make_storage_from_shape(
         shape: Tuple[int, int, int],
@@ -113,8 +119,8 @@ Turns into
 - Internal functions that are likely to be inlined into a larger stencil do not need this if it will just be removed in the near-term.
 
 ### GT4Py stencils
-We interface to `gt4py.cartesian.gtscript.stencil` through ndsl.dsl.stencil, specifically the FrozenStencil, that allows us to minimize runtime overhead in calling stencils.
 
+We interface to `gt4py.cartesian.gtscript.stencil` through ndsl.dsl.stencil, specifically the FrozenStencil, that allows us to minimize runtime overhead in calling stencils.
 
 ```python
 @gtstencil
@@ -125,20 +131,22 @@ def pt_adjust(pkz:FloatField, dp1: FloatField, q_con: FloatField, pt: FloatField
 [`fv3core/utils/typing.py`](https://github.com/VulcanClimateModeling/fv3core/blob/master/fv3core/utils/typing.py) defines various field types.
 For example, `FloatField[IJ]` for a 2D field of default floating point values.
 
-
 ### GTScript functions
+
 These use the `@gtscript.function` decorator and the arguments do not include type
-specifications. They will continue to not have type hinting.
+specifications. They will continue to not have type hinting, e.g.:
 
-e.g.:
-
+```python
     @gtscript.function
     def get_bl(al, q):
+```
 
 ### Assertions
+
 We can now include assertions of compile time variables inside of gtscript functions with the syntax `compile_assert(<expression>)`, for example `compile_assert(namelist.grid_type < 3)`.
 
 ### State
+
 Some outer functions include a 'state' object that is a SimpleNamespace of variables and a `comm` object that is the `CubedSphereCommunicator` object enabling halo updates.
 The `state` include pointers to gt4py storages for all variables used in the method.
 For fields that experience a halo update, the state includes pointers to Quantity objects named `<storage variable name>_quantity`, which is a lightweight wrapper around the storage.
@@ -147,8 +155,8 @@ A future refactor will simplify this convention, likely through the use of the d
 
 As we refactor, we may opt to use this convention more (or a similar one to avoid calling functions while relying on getting the order of a long list of variables correct), but should be considered as part of a refactor on a case-by-case basis.
 
-
 ### New styles
+
 Propose new style ideas in a meeting or github issue to the team (or subset) with examples and description of how data flow would be altered if relevant. Once an idea is accepted, open a PR with the idea applied to a sample if possible (if not, correct the whole model), and update this doc to reflect the new convention we all should incorporate as we refactor.
 Share news of this update when the PR is accepted and merged, including guidelines for using the new convention.
 Implementers and reviewers of new code changes should consider whether the new style should be applied at the same time so we can introduce this change in a piecemeal fashion rather than disrupting every active task.
