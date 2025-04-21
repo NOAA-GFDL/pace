@@ -41,41 +41,41 @@ def setup_dycore_state() -> DycoreState:
         ntiles=6,
         nwat=6,
         dt_atmos=225,
-        a_imp=1.0,         # TODO: What is fortran equiv?
+        a_imp=1.0,
         beta=0.0,
         consv_te=False,  # not implemented, needs allreduce
         d2_bg=0.0,
-        d2_bg_k1=0.2,      # TODO: What is fortran equiv?
-        d2_bg_k2=0.1,      # TODO: What is fortran equiv?
+        d2_bg_k1=0.2,
+        d2_bg_k2=0.1,
         d4_bg=0.15,
-        d_con=1.0,         # TODO: What is fortran equiv?
-        d_ext=0.0,         # TODO: What is fortran equiv?
+        d_con=1.0,
+        d_ext=0.0,
         dddmp=0.0,
-        delt_max=0.002,    # TODO: What is fortran equiv?
-        do_sat_adj=True,   # TODO: What is fortran equiv?
-        do_vort_damp=True, # TODO: What is fortran equiv?
-        fill=True,         # TODO: What is fortran equiv?
+        delt_max=0.002,
+        do_sat_adj=True,
+        do_vort_damp=True,
+        fill=True,
         hord_dp=6,
         hord_mt=6,
         hord_tm=6,
         hord_tr=8,
         hord_vt=6,
-        hydrostatic=False, # TODO: What is fortran equiv?
-        k_split=1,         # TODO: What is fortran equiv?
-        ke_bg=0.0,         # TODO: What is fortran equiv?
-        kord_mt=9,         # TODO: What is fortran equiv?
-        kord_tm=-9,        # TODO: What is fortran equiv?
-        kord_tr=9,         # TODO: What is fortran equiv?
-        kord_wz=9,         # TODO: What is fortran equiv?
+        hydrostatic=False,
+        k_split=1,
+        ke_bg=0.0,
+        kord_mt=9,
+        kord_tm=-9,
+        kord_tr=9,
+        kord_wz=9,
         n_split=1,
         nord=3,
-        p_fac=0.05,        # TODO: What is fortran equiv?
-        rf_fast=True,      # TODO: What is fortran equiv?
-        rf_cutoff=3000.0,  # TODO: What is fortran equiv?
-        tau=10.0,          # TODO: What is fortran equiv?
-        vtdm4=0.06,        # TODO: What is fortran equiv?
-        z_tracer=True,     # TODO: What is fortran equiv?
-        do_qa=True,        # TODO: What is fortran equiv?
+        p_fac=0.05,
+        rf_fast=True,
+        rf_cutoff=3000.0,
+        tau=10.0,
+        vtdm4=0.06,
+        z_tracer=True,
+        do_qa=True,
     )
     mpi_comm = NullComm(
         rank=0, total_ranks=6 * config.layout[0] * config.layout[1], fill_value=0.0
@@ -114,44 +114,26 @@ def setup_dycore_state() -> DycoreState:
     return state
 
 
-def plot_2d_diff(attribute, ds_values, state_values):
-    plt.title(f"Diff NetCDF vs Pace Dycore State '{attribute}'")
-    diff = ds_values - state_values
-    plt.imshow(diff, cmap='viridis')
-    plt.colorbar()
-    plt.savefig(f"rossby_diff_{attribute}.png") # TODO: directory somewhere?
-    plt.clf()
-    
-    
-def test_rossby_init_validation():
+def test_rossby_init():
     state = setup_dycore_state()
 
-    # Read in netcdf file as dataset
-    validation_dir = os.path.join(PACE_DIR, "tests", "main", "data", "rossby_validation", "zero_time_restart")
-    core1_ds = xr.open_dataset(os.path.join(validation_dir, "fv_core.res.tile1.nc"))
+    data_dir = os.path.join(PACE_DIR, "tests", "main", "data", "rossby_validation", "zero_time_restart")
+    core1_ds = xr.open_dataset(os.path.join(data_dir, "fv_core.res.tile1.nc"))
     
     max_eps_error = 1e-10
     
-    # Set to True to generate 2d heatmap, comparing dycore state values with dataset
-    plot = True 
-
     # 3D/2D Attributes
     for attribute in ["u", "v", "delp", "phis"]:
-        print(f"{attribute}:")
         state_values = getattr(state, attribute).view[:]
         state_ndims = len(getattr(state, attribute).dims)
 
-        if state_ndims == 2:
+        # Time 0 datastore values
+        if state_ndims == 2:  # 2D
             core1_ds_values = core1_ds[attribute].values[0, :].transpose(1, 0)
-            core1_ds_values_2d, state_values_2d = core1_ds_values, state_values
-        elif state_ndims == 3:
+        elif state_ndims == 3: # 3D
             core1_ds_values = core1_ds[attribute].values[0, :].transpose(2, 1, 0)
-            core1_ds_values_2d, state_values_2d = core1_ds_values[:,:,0], state_values[:,:,0]
         else:
             assert False, f"Unexpected number of dims in DycoreState {attribute}"
-        
-        if plot==True:
-            plot_2d_diff(attribute, core1_ds_values_2d, state_values_2d)
         
         max_error_diff = np.max(np.absolute(core1_ds_values - state_values))
         assert max_error_diff < max_eps_error
