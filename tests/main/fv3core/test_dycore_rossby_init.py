@@ -5,25 +5,19 @@ https://github.com/NOAA-GFDL/GFDL_atmos_cubed_sphere.git
 """
 
 import os
-import unittest.mock
-from dataclasses import fields
-from typing import Tuple
 import xarray as xr
 import numpy as np
-import matplotlib.pyplot as plt
 
-import pyFV3.initialization.analytic_init as ai
 from ndsl import (
     CubedSphereCommunicator,
     CubedSpherePartitioner,
     NullComm,
-    Quantity,
     QuantityFactory,
     SubtileGridSizer,
     TilePartitioner,
 )
 from ndsl.grid import GridData, MetricTerms
-from ndsl.performance.timer import NullTimer, Timer
+import pyFV3.initialization.analytic_init as ai
 from pyFV3 import DycoreState, DynamicalCoreConfig
 
 
@@ -32,6 +26,8 @@ PACE_DIR = os.path.join(DIR, "..", "..", "..")
 
 
 def setup_dycore_state() -> DycoreState:
+    """ Sets up Dycore state for Rossby analytic initialization
+    """
     backend = "numpy"
     config = DynamicalCoreConfig(
         layout=(1, 1),
@@ -115,26 +111,28 @@ def setup_dycore_state() -> DycoreState:
 
 
 def test_rossby_init():
-    state = setup_dycore_state()
+    """ Tests Rossby-Haurwitz wave 4 initialization 
+    """
 
-    data_dir = os.path.join(PACE_DIR, "tests", "main", "data", "rossby_validation", "zero_time_restart")
+    state = setup_dycore_state()
+    data_dir = os.path.join(PACE_DIR, "tests", "main", "data",
+                            "rossby_validation", "zero_time_restart")
     core1_ds = xr.open_dataset(os.path.join(data_dir, "fv_core.res.tile1.nc"))
-    
+
     max_eps_error = 1e-10
-    
-    # 3D/2D Attributes
     for attribute in ["u", "v", "delp", "phis"]:
+        # Dycore values/dimensions
         state_values = getattr(state, attribute).view[:]
         state_ndims = len(getattr(state, attribute).dims)
 
-        # Time 0 datastore values
+        # Dataset values for 3D/2D Attributes at time zero
         if state_ndims == 2:  # 2D
             core1_ds_values = core1_ds[attribute].values[0, :].transpose(1, 0)
         elif state_ndims == 3: # 3D
             core1_ds_values = core1_ds[attribute].values[0, :].transpose(2, 1, 0)
         else:
             assert False, f"Unexpected number of dims in DycoreState {attribute}"
-        
+
         max_error_diff = np.max(np.absolute(core1_ds_values - state_values))
         assert max_error_diff < max_eps_error
         # TODO: Use assert_almost_equal instead?
