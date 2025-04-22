@@ -1,13 +1,15 @@
 """ Unit test Rossby-Haurwitz wave 4 initialization
 
 Corresponds to Fortran shallow-water test #6 found in tools/test_cases.F90 of
-https://github.com/NOAA-GFDL/GFDL_atmos_cubed_sphere.git 
+https://github.com/NOAA-GFDL/GFDL_atmos_cubed_sphere.git
 """
 
 import os
-import xarray as xr
-import numpy as np
 
+import numpy as np
+import xarray as xr
+
+import pyFV3.initialization.analytic_init as ai
 from ndsl import (
     CubedSphereCommunicator,
     CubedSpherePartitioner,
@@ -17,7 +19,6 @@ from ndsl import (
     TilePartitioner,
 )
 from ndsl.grid import GridData, MetricTerms
-import pyFV3.initialization.analytic_init as ai
 from pyFV3 import DycoreState, DynamicalCoreConfig
 
 
@@ -26,8 +27,7 @@ PACE_DIR = os.path.join(DIR, "..", "..", "..")
 
 
 def setup_dycore_state(rank=0) -> DycoreState:
-    """ Sets up Dycore state for Rossby analytic initialization
-    """
+    """Sets up Dycore state for Rossby analytic initialization"""
     backend = "numpy"
     config = DynamicalCoreConfig(
         layout=(1, 1),
@@ -111,20 +111,21 @@ def setup_dycore_state(rank=0) -> DycoreState:
 
 
 def test_rossby_init():
-    """ Tests Rossby-Haurwitz wave 4 initialization
-        Compare initialized DycoreState values with ground truth net-cdf files.
+    """Tests Rossby-Haurwitz wave 4 initialization
+    Compare initialized DycoreState values with ground truth net-cdf files.
     """
-    data_dir = os.path.join(PACE_DIR, "tests", "main", "data",
-                            "rossby_validation", "zero_time_restart")
+    data_dir = os.path.join(
+        PACE_DIR, "tests", "main", "data", "rossby_validation", "zero_time_restart"
+    )
     attributes = ["u", "v", "delp", "phis"]
     max_eps_error = [1e-12, 1e-12, 1e-10, 1e-14]
-    for rank in range(0,6):
+    for rank in range(0, 6):
         fortran_rank = rank + 1
         state = setup_dycore_state(rank=rank)
-        core1_ds = xr.open_dataset(os.path.join(data_dir, f"fv_core.res.tile{fortran_rank}.nc"))
+        core1_ds = xr.open_dataset(
+            os.path.join(data_dir, f"fv_core.res.tile{fortran_rank}.nc")
+        )
         for attribute, max_eps in zip(attributes, max_eps_error):
-            print(f"rank: {rank}; attribute: {attribute}")
-
             # Dycore values/dimensions
             state_values = getattr(state, attribute).view[:]
             state_ndims = len(getattr(state, attribute).dims)
@@ -132,7 +133,7 @@ def test_rossby_init():
             # Dataset values for 3D/2D Attributes at time zero
             if state_ndims == 2:  # 2D
                 core1_ds_values = core1_ds[attribute].values[0, :].transpose(1, 0)
-            elif state_ndims == 3: # 3D
+            elif state_ndims == 3:  # 3D
                 core1_ds_values = core1_ds[attribute].values[0, :].transpose(2, 1, 0)
             else:
                 assert False, f"Unexpected number of dims in DycoreState {attribute}"
