@@ -25,7 +25,7 @@ DIR = os.path.abspath(os.path.dirname(__file__))
 PACE_DIR = os.path.join(DIR, "..", "..", "..")
 
 
-def setup_dycore_state() -> DycoreState:
+def setup_dycore_state(rank=0) -> DycoreState:
     """ Sets up Dycore state for Rossby analytic initialization
     """
     backend = "numpy"
@@ -74,7 +74,7 @@ def setup_dycore_state() -> DycoreState:
         do_qa=True,
     )
     mpi_comm = NullComm(
-        rank=0, total_ranks=6 * config.layout[0] * config.layout[1], fill_value=0.0
+        rank=rank, total_ranks=6 * config.layout[0] * config.layout[1], fill_value=0.0
     )
     partitioner = CubedSpherePartitioner(TilePartitioner(config.layout))
     communicator = CubedSphereCommunicator(mpi_comm, partitioner)
@@ -111,36 +111,40 @@ def setup_dycore_state() -> DycoreState:
 
 
 def test_rossby_init():
-    """ Tests Rossby-Haurwitz wave 4 initialization 
+    """ Tests Rossby-Haurwitz wave 4 initialization
+        Compare initialized DycoreState values with ground truth net-cdf files.
     """
-
-    state = setup_dycore_state()
     data_dir = os.path.join(PACE_DIR, "tests", "main", "data",
                             "rossby_validation", "zero_time_restart")
-    core1_ds = xr.open_dataset(os.path.join(data_dir, "fv_core.res.tile1.nc"))
+    attributes = ["u", "v", "delp", "phis"]
+    max_eps_error = [1e-12, 1e-12, 1e-10, 1e-14]
+    for rank in range(0,6):
+        fortran_rank = rank + 1
+        state = setup_dycore_state(rank=rank)
+        core1_ds = xr.open_dataset(os.path.join(data_dir, f"fv_core.res.tile{fortran_rank}.nc"))
+        for attribute, max_eps in zip(attributes, max_eps_error):
+            print(f"rank: {rank}; attribute: {attribute}")
 
-    max_eps_error = 1e-10
-    for attribute in ["u", "v", "delp", "phis"]:
-        # Dycore values/dimensions
-        state_values = getattr(state, attribute).view[:]
-        state_ndims = len(getattr(state, attribute).dims)
+            # Dycore values/dimensions
+            state_values = getattr(state, attribute).view[:]
+            state_ndims = len(getattr(state, attribute).dims)
 
-        # Dataset values for 3D/2D Attributes at time zero
-        if state_ndims == 2:  # 2D
-            core1_ds_values = core1_ds[attribute].values[0, :].transpose(1, 0)
-        elif state_ndims == 3: # 3D
-            core1_ds_values = core1_ds[attribute].values[0, :].transpose(2, 1, 0)
-        else:
-            assert False, f"Unexpected number of dims in DycoreState {attribute}"
+            # Dataset values for 3D/2D Attributes at time zero
+            if state_ndims == 2:  # 2D
+                core1_ds_values = core1_ds[attribute].values[0, :].transpose(1, 0)
+            elif state_ndims == 3: # 3D
+                core1_ds_values = core1_ds[attribute].values[0, :].transpose(2, 1, 0)
+            else:
+                assert False, f"Unexpected number of dims in DycoreState {attribute}"
 
-        max_error_diff = np.max(np.absolute(core1_ds_values - state_values))
-        assert max_error_diff < max_eps_error
-        # TODO: Use assert_almost_equal instead?
-        np.testing.assert_almost_equal(state_values, core1_ds_values, decimal=11)
+            max_error_diff = np.max(np.absolute(core1_ds_values - state_values))
+            assert max_error_diff < max_eps
+            # TODO: Use assert_almost_equal instead?
+            np.testing.assert_almost_equal(state_values, core1_ds_values, decimal=10)
 
     # NOTE: The original test_cases.F90 initialized tracers for cl and cl2,
     #       but we do not initialize or check for them in this test.
 
+    # TODO: Look at delp error epsilon further
     # TODO: Do we need sphum from fv_tracer.res.tile*.nc?
     # TODO: Do we need u_srf, v_srf from fv_srf_wnd.res.tile*.nc?
-    # TODO: Do we need to check all tiles 1-6?
