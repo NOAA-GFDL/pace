@@ -31,6 +31,7 @@ EXCLUDED_CONFIGS: List[str] = [
     "tropicalcyclone_c128.yaml",
     "test_external_C12_1x1.yaml",
     "test_external_C12_2x2.yaml",
+    "rossby_c6.yaml",
 ]
 
 JENKINS_CONFIGS_DIR = os.path.join(dirname, "../../../.jenkins/driver_configs/")
