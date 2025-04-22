@@ -16,8 +16,8 @@ class DummyClass:
 
 
 def check_selective_region_and_values(instance, name, array, domain):
-    validated_gridcells = np.product(domain)
-    total_gridcells = np.product(array.shape)
+    validated_gridcells = np.prod(domain)
+    total_gridcells = np.prod(array.shape)
     assert np.sum(np.isnan(array)) == total_gridcells - validated_gridcells
     validation_subset = instance.subset_output(name, array)
     assert validation_subset.shape == domain

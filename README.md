@@ -53,7 +53,7 @@ git clone --recursive https://github.com/NOAA-GFDL/pace.git
 
 or if you have already cloned the repository:
 
-```
+```shell
 git submodule update --init --recursive
 ```
 
@@ -83,6 +83,7 @@ mkdir tests/main/input
 python3 examples/generate_eta_files.py
 mv *eta*.nc tests/main/input
 ```
+
 These commands will generate the files necessary and place them in the `tests/main/input` directory. Once the files are generated the `baroclinic_c12.yaml` configuration can be used to generate a run:
 
 ```shell
@@ -142,6 +143,7 @@ This repository was first developed at [AI2](https://github.com/ai2cm/pace) and 
 [license-url]: https://github.com/NOAA-GFDL/pace/blob/main/LICENSE.md
 
 ## Running pace in containers
+
 Docker images exist in the Github Container Registry associated with the NOAA-GFDL organization.
 These images are publicly accessible and can be used to run a Docker container to work with pace.
 The following are directions on how to setup the pace conda environment interactively in a container.
@@ -152,10 +154,13 @@ with any other container management tools:
 ```shell
 docker pull ghcr.io/noaa-gfdl/pace_mpich:3.8
 ```
+
 for MPICH installation of MPI; and
+
 ```shell
 docker pull ghcr.io/noaa-gfdl/pace_openmpi:3.8
 ```
+
 for OpenMPI installation of MPI.
 
 If permission issues arise during the pull, a Github personal token
@@ -163,6 +168,7 @@ may be required.  The steps to create a personal token is found
 [here](https://docs.github.com/en/authentication/keeping-your-account-and-data-secure/managing-your-personal-access-tokens)
 
 Once the token has been generated, the image can be pulled for example with with:
+
 ```shell
 docker login --username GITHUB_USERNAME --password TOKEN
 docker pull ghcr.io/noaa-gfdl/pace_mpich:3.8
@@ -171,6 +177,7 @@ docker pull ghcr.io/noaa-gfdl/pace_mpich:3.8
 Any container management tools compatible with Docker images can be used
 to run the container interactively from the pulled image.
 With Docker, the following command runs the container interactively.
+
 ```shell
 docker run -it pace_mpich:3.8
 ```

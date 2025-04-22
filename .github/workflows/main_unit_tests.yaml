@@ -23,7 +23,7 @@ jobs:
     container:
       image: ghcr.io/noaa-gfdl/miniforge:mpich
     steps:
-        - name: external trigger Checkout pace/develop
+        - name: "External trigger: Checkout pace/develop"
           if:  ${{ inputs.component_trigger }}
           uses: actions/checkout@v4
           with:
@@ -32,7 +32,7 @@ jobs:
             path: pace
             ref: develop
 
-        - name: external trigger Remove existing component in pace/develop
+        - name: "External trigger: Remove existing component in pace/develop"
           if:  ${{ inputs.component_trigger }}
           run: rm -rf ${GITHUB_WORKSPACE}/pace/${{inputs.component_name}}
 
@@ -43,10 +43,20 @@ jobs:
             path: pace/${{inputs.component_name}}
 
         - name: install packages
+          if:  ${{ ! inputs.component_trigger }}
           run: |
             cd ${GITHUB_WORKSPACE}/pace
             pip3 install --upgrade pip setuptools wheel
             pip3 install -r requirements_dev.txt -c constraints.txt
+
+        - name: "External trigger: Install packages"
+          if:  ${{ inputs.component_trigger }}
+          # Ignore `constraints.txt` when running as part of the NDSL pipeline
+          # to avoid false positives in package dependency resolution.
+          run: |
+            cd ${GITHUB_WORKSPACE}/pace
+            pip3 install --upgrade pip setuptools wheel
+            pip3 install -r requirements_dev.txt
 
         - name: prepare input files
           run: |
