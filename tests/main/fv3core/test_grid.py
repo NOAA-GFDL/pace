@@ -2,7 +2,7 @@ from typing import Sequence
 
 import numpy as np
 import pytest
-from gt4py.cartesian import gtscript
+from ndsl.dsl.gt4py import I, J, K
 
 from ndsl import GridIndexing
 from ndsl.constants import (
@@ -27,28 +27,28 @@ from ndsl.dsl.typing import Index3D
         pytest.param(
             (0, 0),
             (0, 0),
-            gtscript.I[0],
-            gtscript.I[-1],
-            gtscript.J[0],
-            gtscript.J[-1],
+            I[0],
+            I[-1],
+            J[0],
+            J[-1],
             id="compute_domain",
         ),
         pytest.param(
             (-1, -1),
             (2, 2),
-            gtscript.I[0] + 1,
-            gtscript.I[-1] - 1,
-            gtscript.J[0] + 1,
-            gtscript.J[-1] - 1,
+            I[0] + 1,
+            I[-1] - 1,
+            J[0] + 1,
+            J[-1] - 1,
             id="compute_domain_plus_one_halo",
         ),
         pytest.param(
             (-1, 0),
             (2, 0),
-            gtscript.I[0] + 1,
-            gtscript.I[-1] - 1,
-            gtscript.J[0],
-            gtscript.J[-1],
+            I[0] + 1,
+            I[-1] - 1,
+            J[0],
+            J[-1],
             id="compute_domain_plus_one_x_halo",
         ),
     ],
@@ -86,19 +86,19 @@ def test_axis_offsets(
     if west_edge:
         assert axis_offsets["i_start"] == i_start
     else:
-        assert axis_offsets["i_start"] == gtscript.I[0] - np.iinfo(np.int16).max
+        assert axis_offsets["i_start"] == I[0] - np.iinfo(np.int16).max
     if east_edge:
         assert axis_offsets["i_end"] == i_end
     else:
-        assert axis_offsets["i_end"] == gtscript.I[-1] + np.iinfo(np.int16).max
+        assert axis_offsets["i_end"] == I[-1] + np.iinfo(np.int16).max
     if south_edge:
         assert axis_offsets["j_start"] == j_start
     else:
-        assert axis_offsets["j_start"] == gtscript.J[0] - np.iinfo(np.int16).max
+        assert axis_offsets["j_start"] == J[0] - np.iinfo(np.int16).max
     if north_edge:
         assert axis_offsets["j_end"] == j_end
     else:
-        assert axis_offsets["j_end"] == gtscript.J[-1] + np.iinfo(np.int16).max
+        assert axis_offsets["j_end"] == J[-1] + np.iinfo(np.int16).max
 
 
 @pytest.mark.parametrize(
