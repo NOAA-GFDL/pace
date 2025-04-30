@@ -46,32 +46,23 @@ jobs:
           run: |
             python --version
             pip --version
+            pip list
 
         - name: install packages
-          if:  ${{ ! inputs.component_trigger }}
           run: |
             cd ${GITHUB_WORKSPACE}/pace
-            pip3 install -r requirements_dev.txt -c constraints.txt
-
-        - name: "External trigger: Install packages"
-          if:  ${{ inputs.component_trigger }}
-          # Ignore `constraints.txt` when running as part of the NDSL pipeline
-          # to avoid false positives in package dependency resolution.
-          run: |
-            cd ${GITHUB_WORKSPACE}/pace
-            pip3 install -r requirements_dev.txt
+            pip install .[prod,test]
 
         - name: prepare input files
           run: |
             cd ${GITHUB_WORKSPACE}/pace
             mkdir tests/main/input
-            python3 examples/generate_eta_files.py
-            mv *eta*.nc tests/main/input
+            python examples/generate_eta_files.py tests/main/input
 
         - name: run tests
           run: |
             cd ${GITHUB_WORKSPACE}/pace
-            pytest -x tests/main
+            python -m pytest -x tests/main
 
         - name: run baroclinic
           run: |

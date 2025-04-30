@@ -60,14 +60,14 @@ git submodule update --init --recursive
 We recommend creating a python `venv` or `conda` environment specifically for Pace.
 
 ```shell
-python3 -m venv venv_name
-source venv_name/bin/activate
+python -m venv .venv
+source .venv/bin/activate
 ```
 
-Inside of your pace `venv` or conda environment pip install the Python requirements, GT4Py, and Pace:
+Inside of your pace `venv` or `conda` environment, pip install the Python requirements, GT4Py, and Pace:
 
 ```shell
-pip3 install -r requirements_dev.txt -c constraints.txt
+pip install -r requirements_dev.txt
 ```
 
 Shell scripts to install Pace on specific machines such as Gaea can be found in `examples/build_scripts/`.
@@ -80,8 +80,7 @@ Before starting any run, including unit tests, the user must ensure that the pro
 
 ```shell
 mkdir tests/main/input
-python3 examples/generate_eta_files.py
-mv *eta*.nc tests/main/input
+python examples/generate_eta_files.py tests/main/input
 ```
 
 These commands will generate the files necessary and place them in the `tests/main/input` directory. Once the files are generated the `baroclinic_c12.yaml` configuration can be used to generate a run:
@@ -93,7 +92,7 @@ mpirun -n 6 python3 -m pace.run examples/configs/baroclinic_c12.yaml
 mpirun -n 6 --oversubscribe python3 -m pace.run examples/configs/baroclinic_c12.yaml
 ```
 
-After the run completes, you will see an output direcotry `output.zarr`. An example to visualize the output is provided in `examples/plot_output.py`. See the [driver example](examples/README.md) section for more details.
+After the run completes, you will see an output directory `output.zarr`. An example to visualize the output is provided in `examples/plot_output.py`. See the [driver example](examples/README.md) section for more details.
 
 ### Environment variable configuration
 
