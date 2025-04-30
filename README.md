@@ -70,7 +70,7 @@ Inside of your pace `venv` or `conda` environment, install pace and its dependen
 pip install -e .[dev]
 ```
 
-For running tests, we recommend to install pace with pinned dependency versions of the test system to enable reproducibility:
+For running tests, we recommend to install pace with the `[test]` extra (avoid pulling other dev dependencies):
 
 ```shell
 pip install .[test]
