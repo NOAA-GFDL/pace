@@ -217,3 +217,5 @@ Don't forget to also update the extras
 pip-compile --extra test --output-file=constraints-test.txt setup.py
 pip-compile --extra dev --output-file=constraints-dev.txt setup.py
 ```
+
+Once updated, manually remove the packages with hard-coded paths (e.g. `dace`, `gt4py`, `ndsl`, `pyfv3`, and `pyshield`). CI won't run otherwise (because the paths are different) and since we are installing them from a submodule it is safe to not further pin them (they won't change unless the submodule changes, which - in turn - is versioned through `git`).

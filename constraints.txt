@@ -41,8 +41,6 @@ cycler==0.12.1
     # via matplotlib
 cytoolz==1.0.1
     # via gt4py
-dace @ file:///home/romanc/code/pace/NDSL/external/dace
-    # via ndsl
 dacite==1.9.2
     # via pace (setup.py)
 dask==2025.4.1
@@ -81,8 +79,6 @@ fsspec==2025.3.2
     #   ndsl
 gridtools-cpp==2.3.9
     # via gt4py
-gt4py @ file:///home/romanc/code/pace/NDSL/external/gt4py
-    # via ndsl
 h5netcdf==1.6.1
     # via ndsl
 h5py==3.13.0
@@ -113,8 +109,6 @@ mypy-extensions==1.1.0
     # via black
 nanobind==2.7.0
     # via gt4py
-ndsl @ file:///home/romanc/code/pace/NDSL
-    # via pace (setup.py)
 netcdf4==1.7.1
     # via ndsl
 networkx==3.4.2
@@ -167,14 +161,10 @@ ply==3.11
     # via dace
 pybind11==2.13.6
     # via gt4py
-pyfv3 @ file:///home/romanc/code/pace/pyFV3
-    # via pace (setup.py)
 pygments==2.19.1
     # via devtools
 pyparsing==3.2.3
     # via matplotlib
-pyshield @ file:///home/romanc/code/pace/pySHiELD
-    # via pace (setup.py)
 python-dateutil==2.9.0.post0
     # via
     #   matplotlib

@@ -48,8 +48,6 @@ cycler==0.12.1
     # via matplotlib
 cytoolz==1.0.1
     # via gt4py
-dace @ file:///home/romanc/code/pace/NDSL/external/dace
-    # via ndsl
 dacite==1.9.2
     # via pace (setup.py)
 dask==2025.4.1
@@ -96,8 +94,6 @@ fsspec==2025.3.2
     #   ndsl
 gridtools-cpp==2.3.9
     # via gt4py
-gt4py @ file:///home/romanc/code/pace/NDSL/external/gt4py
-    # via ndsl
 h5netcdf==1.6.1
     # via ndsl
 h5py==3.13.0
@@ -165,8 +161,6 @@ nbformat==5.10.4
     #   nbclient
     #   nbmake
 nbmake==1.5.5
-    # via pace (setup.py)
-ndsl @ file:///home/romanc/code/pace/NDSL
     # via pace (setup.py)
 nest-asyncio==1.6.0
     # via ipykernel
@@ -240,8 +234,6 @@ pure-eval==0.2.3
     # via stack-data
 pybind11==2.13.6
     # via gt4py
-pyfv3 @ file:///home/romanc/code/pace/pyFV3
-    # via pace (setup.py)
 pygments==2.19.1
     # via
     #   devtools
@@ -250,8 +242,6 @@ pygments==2.19.1
     #   nbmake
 pyparsing==3.2.3
     # via matplotlib
-pyshield @ file:///home/romanc/code/pace/pySHiELD
-    # via pace (setup.py)
 pytest==8.3.5
     # via
     #   nbmake
