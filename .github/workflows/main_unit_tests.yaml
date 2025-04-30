@@ -52,7 +52,7 @@ jobs:
           if: ${{ ! inputs.component_trigger }}
           run: |
             cd ${GITHUB_WORKSPACE}/pace
-            pip install -c constraints.txt .[test]
+            pip install -c constraints-test.txt .
 
         - name: "External trigger: Install packages"
           if:  ${{ inputs.component_trigger }}

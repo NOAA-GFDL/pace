@@ -28,7 +28,7 @@ conda create -c conda-forge -y --name $ENVIRONMENT_NAME python=3.8 matplotlib==3
 conda activate $ENVIRONMENT_NAME
 
 # install Pace dependencies and its dependencies
-pip3 install --no-cache-dir -c constraints.txt .[test]
+pip3 install --no-cache-dir -c constraints-test.txt .
 
 # clone fv3net
 git clone https://github.com/ai2cm/fv3net.git $FV3NET_DIR
