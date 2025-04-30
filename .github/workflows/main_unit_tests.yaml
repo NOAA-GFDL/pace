@@ -42,15 +42,16 @@ jobs:
             submodules: 'recursive'
             path: pace/${{inputs.component_name}}
 
-        - name: Print versions
-          run: |
-            python --version
-            pip --version
-
         - name: Install packages
           run: |
             cd ${GITHUB_WORKSPACE}/pace
             pip install .[test]
+
+        - name: Print versions
+          run: |
+            python --version
+            pip --version
+            pip list
 
         - name: Prepare input files
           run: |
