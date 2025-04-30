@@ -11,17 +11,14 @@ def local_pkg(name: str, relative_path: str) -> str:
 
 
 requirements: List[str] = [
+    local_pkg("NDSL", "NDSL"),
+    local_pkg("pyFV3", "pyFV3"),
+    local_pkg("pySHiELD", "pySHiELD"),
     "dacite",
     "f90nml",
     "numpy < 2.0.0",  # numpy 2.x has breaking API changes
     "xarray",
     "zarr < 3.0.0",  # zarr 3.x has breaking API changes
-]
-
-prod_requirements = [
-    local_pkg("NDSL", "NDSL"),
-    local_pkg("pyFV3", "pyFV3"),
-    local_pkg("pySHiELD", "pySHiELD"),
 ]
 
 test_requirements = [
@@ -34,7 +31,6 @@ lint_requirements = ["pre-commit"]
 
 extras_require = {
     "lint": lint_requirements,
-    "prod": prod_requirements,
     "test": test_requirements,
 }
 

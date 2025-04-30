@@ -1,4 +1,1 @@
--e NDSL
--e pyFV3
--e pySHiELD
 -e .[lint,test]

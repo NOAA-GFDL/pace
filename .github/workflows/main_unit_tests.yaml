@@ -51,7 +51,7 @@ jobs:
         - name: Install packages
           run: |
             cd ${GITHUB_WORKSPACE}/pace
-            pip install .[prod,test]
+            pip install .[test]
 
         - name: Prepare input files
           run: |
