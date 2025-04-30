@@ -23,4 +23,4 @@ conda create -y --name my_name python=3.8
 conda activate my_name
 
 # install Pace dependencies and its dependencies
-pip3 install -c constraints-test.txt .[test]
+pip3 install .[test]

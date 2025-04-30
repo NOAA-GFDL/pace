@@ -48,18 +48,9 @@ jobs:
             pip --version
 
         - name: Install packages
-          if: ${{ ! inputs.component_trigger }}
           run: |
             cd ${GITHUB_WORKSPACE}/pace
-            pip install -c constraints-test.txt .[test]
-
-        - name: "External trigger: Install packages"
-          if:  ${{ inputs.component_trigger }}
-          # Ignore `constraints.txt` when running as part of the NDSL pipeline
-          # to avoid false positives in package dependency resolution.
-          run: |
-            cd ${GITHUB_WORKSPACE}/pace
-            pip3 install .[test]
+            pip install .[test]
 
         - name: Prepare input files
           run: |

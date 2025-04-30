@@ -8,7 +8,7 @@ Contributors names will be added to [`CONTRIBUTORS.md`](https://github.com/NOAA-
 We rely on `pre-commit` for linting, which is included in the `[dev]` extra.
 
 ```shell
-pip install -c constraints-dev.txt -e .
+pip install -e .[dev]
 ```
 
 Correcting and checking your code complies with all requirements can be run with:

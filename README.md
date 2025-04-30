@@ -67,19 +67,19 @@ source .venv/bin/activate
 Inside of your pace `venv` or `conda` environment, install pace and its dependencies. For developers, we recommend an editable install with the `[dev]` extra:
 
 ```shell
-pip install -c constraints-dev.txt -e .[dev]
+pip install -e .[dev]
 ```
 
 For running tests, we recommend to install pace with pinned dependency versions of the test system to enable reproducibility:
 
 ```shell
-pip install -c constraints-test.txt .[test]
+pip install .[test]
 ```
 
 For just running pace, you don't need any extra:
 
 ```shell
-pip install -c constraints.txt .
+pip install .
 ```
 
 Shell scripts to install Pace on specific machines such as Gaea can be found in `examples/build_scripts/`.
@@ -202,20 +202,3 @@ cd pace
 cp /home/scripts/setup_env.sh . && chmod +x setup_env.sh
 source ./setup_env.sh
 ```
-
-## Updating constraints
-
-The `constraints.txt` file can be updated like this:
-
-```shell
-pip-compile --output-file=constraints.txt setup.py
-```
-
-Don't forget to also update the extras
-
-```shell
-pip-compile --extra test --output-file=constraints-test.txt setup.py
-pip-compile --extra dev --output-file=constraints-dev.txt setup.py
-```
-
-Once updated, manually remove the packages with hard-coded paths (e.g. `dace`, `gt4py`, `ndsl`, `pyfv3`, and `pyshield`). CI won't run otherwise (because the paths are different) and since we are installing them from a submodule it is safe to not further pin them (they won't change unless the submodule changes, which - in turn - is versioned through `git`).
