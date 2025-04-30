@@ -9,7 +9,7 @@ Pace is an implementation of the FV3GFS / SHiELD atmospheric model developed by 
 
 🚧 **WARNING** This repo is under active development - supported features and procedures can change rapidly and without notice. 🚧
 
-The repository model code is split between [pyFV3](https://github.com/NOAA-GFDL/pyFV3) for the dynamical core and [pySHiELD](https://github.com/NOAA-GFDL/pySHiELD) for the physics parametrization. A full depencies looks like the following:
+The repository model code is split between [pyFV3](https://github.com/NOAA-GFDL/pyFV3) for the dynamical core and [pySHiELD](https://github.com/NOAA-GFDL/pySHiELD) for the physics parametrization. A full dependencies looks like the following:
 
 ```mermaid
 flowchart TD

@@ -22,5 +22,5 @@ conda create -y --name my_name python=3.8
 # enter the environment
 conda activate my_name
 
-# install the Pace dependencies, GT4Py, and Pace
+# install Pace dependencies and its dependencies
 pip3 install .
