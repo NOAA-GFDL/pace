@@ -1,7 +1,8 @@
 import os
 from pathlib import Path
-from setuptools import find_namespace_packages, setup
 from typing import List
+
+from setuptools import find_namespace_packages, setup
 
 
 def local_pkg(name: str, relative_path: str) -> str:
@@ -12,9 +13,9 @@ def local_pkg(name: str, relative_path: str) -> str:
 requirements: List[str] = [
     "dacite",
     "f90nml",
-    "numpy < 2.0.0", # numpy 2.x has breaking API changes
+    "numpy < 2.0.0",  # numpy 2.x has breaking API changes
     "xarray",
-    "zarr < 3.0.0", # zarr 3.x has breaking API changes
+    "zarr < 3.0.0",  # zarr 3.x has breaking API changes
 ]
 
 prod_requirements = [
@@ -29,9 +30,7 @@ test_requirements = [
     "pytest",
 ]
 
-lint_requirements = [
-    "pre-commit"
-]
+lint_requirements = ["pre-commit"]
 
 extras_require = {
     "lint": lint_requirements,
