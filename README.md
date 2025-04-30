@@ -67,7 +67,7 @@ source .venv/bin/activate
 Inside of your pace `venv` or `conda` environment, install pace and its dependencies. For developers, we recommend an editable install with the `[dev]` extra:
 
 ```shell
-pip install -e -c constraints-dev .
+pip install -c constraints-dev.txt -e .
 ```
 
 For running tests, we recommend to install pace with pinned dependency versions of the test system to enable reproducibility:
