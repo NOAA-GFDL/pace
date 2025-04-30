@@ -64,10 +64,10 @@ python -m venv .venv
 source .venv/bin/activate
 ```
 
-Inside of your pace `venv` or `conda` environment, pip install the Python requirements, GT4Py, and Pace:
+Inside of your pace `venv` or `conda` environment, pip install pace (as editable install) with the `lint` and `test` extras:
 
 ```shell
-pip install -r requirements_dev.txt
+pip install -e .[lint,test]
 ```
 
 Shell scripts to install Pace on specific machines such as Gaea can be found in `examples/build_scripts/`.

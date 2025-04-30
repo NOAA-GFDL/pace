@@ -19,9 +19,8 @@ cd pace
 # create a conda environment for pace
 conda create -y --name my_name python=3.8
 
-# enter the environment and update it
+# enter the environment
 conda activate my_name
-pip3 install --upgrade pip setuptools wheel
 
 # install the Pace dependencies, GT4Py, and Pace
-pip3 install -r requirements_dev.txt -c constraints.txt
+pip3 install .
