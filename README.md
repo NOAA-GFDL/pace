@@ -64,10 +64,22 @@ python -m venv .venv
 source .venv/bin/activate
 ```
 
-Inside of your pace `venv` or `conda` environment, pip install pace (as editable install) with the `lint` and `test` extras:
+Inside of your pace `venv` or `conda` environment, install pace and its dependencies. For developers, we recommend an editable install with the `[dev]` extra:
 
 ```shell
-pip install -e .[lint,test]
+pip install -e .[dev]
+```
+
+For running tests, we recommend to install the `[test]` extra with pinned dependency versions to enable reproducibility:
+
+```shell
+pip install -c constraints.txt .[test]
+```
+
+For running pace, you don't need any extra:
+
+```shell
+pip install -c constraints.txt .
 ```
 
 Shell scripts to install Pace on specific machines such as Gaea can be found in `examples/build_scripts/`.
@@ -189,4 +201,12 @@ git clone --recursive -b develop https://github.com/NOAA-GFDL/pace.git pace
 cd pace
 cp /home/scripts/setup_env.sh . && chmod +x setup_env.sh
 source ./setup_env.sh
+```
+
+## Updating constraints
+
+The `constraints.txt` file can be updated like this:
+
+```shell
+pip-compile --output-file=constraints.txt setup.py
 ```

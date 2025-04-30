@@ -27,10 +27,14 @@ test_requirements = [
     "pytest",
 ]
 
-lint_requirements = ["pre-commit"]
+dev_requirements = [
+    *test_requirements,
+    "pip-tools",  # for pip-compile
+    "pre-commit",
+]
 
 extras_require = {
-    "lint": lint_requirements,
+    "dev": dev_requirements,
     "test": test_requirements,
 }
 

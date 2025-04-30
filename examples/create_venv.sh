@@ -12,7 +12,7 @@ python3 -m venv venv
 rundir=$(pwd)
 cd ${SCRIPT_DIR}/../
 
-pip3 install -e .[test,lint]
+pip3 install -e .[dev]
 
 deactivate
 cd $rundir
