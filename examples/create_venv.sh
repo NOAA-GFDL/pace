@@ -12,7 +12,7 @@ python3 -m venv venv
 rundir=$(pwd)
 cd ${SCRIPT_DIR}/../
 
-pip3 install -e .[dev]
+pip install -c constraints-dev.txt -e .
 
 deactivate
 cd $rundir
