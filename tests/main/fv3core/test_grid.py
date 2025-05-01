@@ -2,7 +2,6 @@ from typing import Sequence
 
 import numpy as np
 import pytest
-from ndsl.dsl.gt4py import I, J, K
 
 from ndsl import GridIndexing
 from ndsl.constants import (
@@ -13,6 +12,7 @@ from ndsl.constants import (
     Z_DIM,
     Z_INTERFACE_DIM,
 )
+from ndsl.dsl.gt4py import I, J, K
 from ndsl.dsl.typing import Index3D
 
 
