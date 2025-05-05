@@ -21,7 +21,7 @@ RUN pip3 install --upgrade pip setuptools wheel
 COPY . /pace
 
 RUN cd /pace && \
-    pip3 install -r /pace/requirements_dev.txt -c /pace/constraints.txt
+    pip3 install .
 
 RUN cd / && \
     git clone https://github.com/ai2cm/fv3net
