@@ -133,11 +133,11 @@ For example, `FloatField[IJ]` for a 2D field of default floating point values.
 
 ### GTScript functions
 
-These use the `@function` decorator and the arguments do not include type
+These use the `@gtfunction` decorator and the arguments do not include type
 specifications. They will continue to not have type hinting, e.g.:
 
 ```python
-    @function
+    @gtfunction
     def get_bl(al, q):
 ```
 
