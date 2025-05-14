@@ -42,35 +42,29 @@ jobs:
             submodules: 'recursive'
             path: pace/${{inputs.component_name}}
 
-        - name: install packages
-          if:  ${{ ! inputs.component_trigger }}
+        - name: Install packages
           run: |
             cd ${GITHUB_WORKSPACE}/pace
-            pip3 install --upgrade pip setuptools wheel
-            pip3 install -r requirements_dev.txt -c constraints.txt
+            pip install .[test]
 
-        - name: "External trigger: Install packages"
-          if:  ${{ inputs.component_trigger }}
-          # Ignore `constraints.txt` when running as part of the NDSL pipeline
-          # to avoid false positives in package dependency resolution.
+        - name: Print versions
           run: |
-            cd ${GITHUB_WORKSPACE}/pace
-            pip3 install --upgrade pip setuptools wheel
-            pip3 install -r requirements_dev.txt
+            python --version
+            pip --version
+            pip list
 
-        - name: prepare input files
+        - name: Prepare input files
           run: |
             cd ${GITHUB_WORKSPACE}/pace
             mkdir tests/main/input
-            python3 examples/generate_eta_files.py
-            mv *eta*.nc tests/main/input
+            python examples/generate_eta_files.py tests/main/input
 
-        - name: run tests
+        - name: Run tests
           run: |
             cd ${GITHUB_WORKSPACE}/pace
-            pytest -x tests/main
+            python -m pytest -x tests/main
 
-        - name: run baroclinic
+        - name: Run baroclinic test case
           run: |
             cd ${GITHUB_WORKSPACE}/pace
             mpiexec -np 6 --oversubscribe python -m pace.run examples/configs/baroclinic_c12.yaml

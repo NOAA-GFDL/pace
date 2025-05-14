@@ -89,12 +89,14 @@ Another example is `baroclinic_init.py`, which initializes a barcolinic wave and
 ```bash
 $ mpirun -n 6 python3 baroclinic_init.py ./configs/baroclinic_c12.yaml
 ```
+
 ## Docker
 
 To run a baroclinic c12 case with Docker in a single command, run `run_docker.sh`.
 This example will start from the Python 3.8 docker image, install extra dependencies and Python packages, and execute the example, leaving the output in this directory.
 
 To visualize the output, two example scripts are provided:
+
 1. `plot_output.py`: To use it, you must install matplotlib (e.g. with `pip install matplotlib`).
 2. `plot_cube.py`: this uses plotting tools in [fv3viz](https://github.com/ai2cm/fv3net/tree/master/external/fv3viz). Note the requirements aren't part of pace by default and need to be installed accordingly. It is recommended to use the post processing docker provided at the top level `docker/postprocessing.Dockerfile`.
 

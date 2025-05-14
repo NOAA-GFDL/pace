@@ -31,12 +31,11 @@ cd $PACE_DIR
 # create a conda environment with cartopy and its dependencies installed
 conda create -c conda-forge -y --name $ENVIRONMENT_NAME python=3.11.7 matplotlib==3.5.2 cartopy==0.18.0
 
-# enter the environment and update it
+# enter the environment
 conda activate $ENVIRONMENT_NAME
-pip3 install --upgrade --no-cache-dir pip setuptools wheel
 
-# install the Pace dependencies, GT4Py, and Pace
-pip3 install --no-cache-dir -r requirements_dev.txt -c constraints.txt
+# install Pace dependencies and its dependencies
+pip3 install --no-cache-dir .[test]
 
 # clone fv3net
 git clone https://github.com/ai2cm/fv3net.git $FV3NET_DIR
