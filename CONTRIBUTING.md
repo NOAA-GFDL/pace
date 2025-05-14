@@ -1,23 +1,22 @@
 # Contributing
 
-pace is actively developed by AI2, so please contact us if there is interest in making contributions in the near-term.
-Contributors names will be added to [`CONTRIBUTORS.md`](https://github.com/VulcanClimateModeling/fv3core/blob/master/CONTRIBUTORS.md).
+pace is actively developed by NOAA/NASA, so please contact us if there is interest in making contributions in the near-term.
+Contributors names will be added to [`CONTRIBUTORS.md`](https://github.com/NOAA-GFDL/pace/blob/develop/CONTRIBUTORS.md).
 
 ## Linting
 
-Dependencies for linting are maintained in `requirements_lint.txt`, and can be installed with:
+We rely on `pre-commit` for linting, which is included in the `[dev]` extra.
 
 ```shell
-pip install -c constraints.txt -r requirements_lint.txt
+pip install -e .[dev]
 ```
 
 Correcting and checking your code complies with all requirements can be run with:
 
 ```shell
-make lint
+pre-commit run --all-files
 ```
 
-We manage the list of syntax requirements using [pre-commit](https://pre-commit.com/).
 **This runs all checks and is required to pass as one of the continuous integration tests.**
 
 The list of checkes includes `black`, `isort`, and `flake8`, among a few others, found in `.pre-commit-config.yaml`.
