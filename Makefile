@@ -124,12 +124,6 @@ savepoint_tests_mpi: build
 dependencies.svg: dependencies.dot
 	dot -Tsvg $< -o $@
 
-.PHONY: constraints.txt
-constraints.txt: driver/setup.py ndsl/setup.py pyFV3/setup.py pySHiELD/setup.py requirements_docs.txt requirements_lint.txt external/gt4py/setup.cfg requirements_dev.txt
-	pip-compile $^ --output-file constraints.txt
-	sed -i.bak '/\@ git+https/d' constraints.txt
-	rm -f constraints.txt.bak
-
 physics_savepoint_tests: build
 	TARGET=physics $(MAKE) get_test_data
 	$(CONTAINER_CMD) $(CONTAINER_FLAGS) bash -c "$(SAVEPOINT_SETUP) && cd $(PACE_PATH) && pytest --data_path=$(EXPERIMENT_DATA_RUN)/physics/ $(TEST_ARGS) $(PHYSICS_THRESH_ARGS) $(PACE_PATH)/physics/tests/savepoint"
