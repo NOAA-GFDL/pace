@@ -29,7 +29,7 @@ RUN cd / && \
 ENV CFLAGS="-I/usr/include -DACCEPT_USE_OF_DEPRECATED_PROJ_API_H=1"
 
 RUN python3 -m pip install \
-    matplotlib \
+    matplotlib==3.10.0 \
     ipyparallel==8.4.1 \
     jupyterlab==3.4.4 \
     shapely==1.8.5 \
