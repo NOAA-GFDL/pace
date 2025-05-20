@@ -1,3 +1,53 @@
+[build-system]
+requires = ["setuptools >= 64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "pace"
+version = "0.2.0"
+dependencies = [
+    "ndsl @ git+https://github.com/NOAA-GFDL/NDSL.git@develop",
+    "pyFV3 @ git+https://github.com/NOAA-GFDL/PyFV3.git@develop",
+    "pySHiELD @ git+https://github.com/NOAA-GFDL/PySHiELD.git@develop",
+    "dacite",
+    "f90nml",
+    "numpy < 2.0.0",  
+    "xarray",
+    "zarr < 3.0.0",
+]
+requires-python = ">=3.8,<3.12"
+authors = [{name = "Allen Institute for AI", email = "oliver.elbert@noaa.gov"}]
+readme = "README.md"
+license = {file = "LICENSE.md"}
+classifiers = [
+        "Development Status :: 2 - Pre-Alpha",
+        "Intended Audience :: Developers",
+        "License :: OSI Approved :: BSD License",
+        "Natural Language :: English",
+        "Programming Language :: Python :: 3",
+        "Programming Language :: Python :: 3.8",
+        "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
+]
+
+[project.optional-dependencies]
+test = [
+    "mpi4py",
+    "nbmake",
+    "pytest",
+]
+dev = ["precommit"]
+
+[project.urls]
+Repository = "https://github.com/NOAA-GFDL/pace"
+
+[tool.setuptools.packages.find]
+include = ["pace", "pace.*"]
+
+[tool.setuptools]
+include-package-data = true
+
 [tool.black]
 line-length = 88
 target_version = ['py38']
