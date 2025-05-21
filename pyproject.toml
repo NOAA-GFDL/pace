@@ -11,7 +11,7 @@ dependencies = [
     "pySHiELD @ git+https://github.com/NOAA-GFDL/PySHiELD.git@develop",
     "dacite",
     "f90nml",
-    "numpy < 2.0.0",  
+    "numpy < 2.0.0",
     "xarray",
     "zarr < 3.0.0",
 ]
@@ -37,7 +37,10 @@ test = [
     "nbmake",
     "pytest",
 ]
-dev = ["precommit"]
+dev = [
+    "pace[test]",
+    "pre-commit"
+]
 
 [project.urls]
 Repository = "https://github.com/NOAA-GFDL/pace"
