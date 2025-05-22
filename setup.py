@@ -8,7 +8,7 @@ from setuptools import setup
 def find_pkg(name: str, relative_path: str) -> str:
     """
     Returns an absolute path to a local package or
-    checks out repository from GitHub.
+    provides location of Github repository.
     """
     dependecy_path = f"{Path(os.path.abspath(__file__)).parent / relative_path}"
     if os.path.isdir(dependecy_path):
