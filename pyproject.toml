@@ -5,16 +5,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "pace"
 version = "0.2.0"
-dependencies = [
-    "ndsl @ git+https://github.com/NOAA-GFDL/NDSL.git@develop",
-    "pyFV3 @ git+https://github.com/NOAA-GFDL/PyFV3.git@develop",
-    "pySHiELD @ git+https://github.com/NOAA-GFDL/PySHiELD.git@develop",
-    "dacite",
-    "f90nml",
-    "numpy < 2.0.0",
-    "xarray",
-    "zarr < 3.0.0",
-]
+dynamic = ["dependencies"]
 requires-python = ">=3.8,<3.12"
 authors = [{name = "Allen Institute for AI", email = "oliver.elbert@noaa.gov"}]
 readme = "README.md"
