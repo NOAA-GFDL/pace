@@ -7,7 +7,7 @@ name = "pace"
 version = "0.2.0"
 dynamic = ["dependencies"]
 requires-python = ">=3.8,<3.12"
-authors = [{name = "Allen Institute for AI", email = "oliver.elbert@noaa.gov"}]
+authors = [{name = "NOAA", email = "oliver.elbert@noaa.gov"}]
 readme = "README.md"
 license = {file = "LICENSE.md"}
 classifiers = [
