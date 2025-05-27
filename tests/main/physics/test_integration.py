@@ -1,5 +1,6 @@
 from dataclasses import fields
 from datetime import timedelta
+from pathlib import Path
 
 import numpy as np
 
@@ -71,7 +72,7 @@ def setup_physics():
     metric_terms = MetricTerms(
         quantity_factory=quantity_factory,
         communicator=communicator,
-        eta_file="tests/main/input/eta79.nc",
+        eta_file=Path("tests/main/input/eta79.nc"),
     )
     grid_data = GridData.new_from_metric_terms(metric_terms)
     physics = Physics(

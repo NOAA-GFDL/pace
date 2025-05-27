@@ -1,6 +1,7 @@
 import os
 import shutil
 from datetime import datetime
+from pathlib import Path
 
 import numpy as np
 import xarray as xr
@@ -74,7 +75,7 @@ def test_restart_save_to_disk():
         )
         quantity_factory = QuantityFactory.from_backend(sizer=sizer, backend=backend)
 
-        eta_file = driver_config.grid_config.config.eta_file
+        eta_file = Path(driver_config.grid_config.config.eta_file)
         (damping_coefficients, driver_grid_data, grid_data,) = GeneratedGridConfig(
             eta_file=eta_file
         ).get_grid(quantity_factory, communicator)

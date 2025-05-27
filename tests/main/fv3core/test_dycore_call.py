@@ -2,6 +2,7 @@ import os
 import unittest.mock
 from dataclasses import fields
 from datetime import timedelta
+from pathlib import Path
 from typing import Tuple
 
 import pyFV3.initialization.analytic_init as ai
@@ -100,7 +101,7 @@ def setup_dycore() -> Tuple[DynamicalCore, DycoreState, Timer]:
         sizer=sizer, comm=communicator
     )
     quantity_factory = QuantityFactory.from_backend(sizer=sizer, backend=backend)
-    eta_file = "tests/main/input/eta79.nc"
+    eta_file = Path("tests/main/input/eta79.nc")
     metric_terms = MetricTerms(
         quantity_factory=quantity_factory,
         communicator=communicator,
