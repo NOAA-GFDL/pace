@@ -34,17 +34,6 @@ Pace requires:
 
 For GPU backends CUDA and/or ROCm is required depending on the targeted hardware.
 
-For GT stencils backends, you will also need the headers of the boost libraries in your `$PATH`. This could be down like this.
-
-```shell
-cd BOOST/ROOT
-wget https://boostorg.jfrog.io/artifactory/main/release/1.79.0/source/boost_1_79_0.tar.gz
-tar -xzf boost_1_79_0.tar.gz
-mkdir -p boost_1_79_0/include
-mv boost_1_79_0/boost boost_1_79_0/include/
-export BOOST_ROOT=BOOST/ROOT/boost_1_79_0
-```
-
 When cloning Pace you will need to update the repository's submodules as well:
 
 ```shell
