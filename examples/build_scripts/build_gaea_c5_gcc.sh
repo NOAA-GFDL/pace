@@ -9,7 +9,6 @@ module rm PrgEnv-intel
 module load PrgEnv-gnu
 module rm gcc
 module load gcc/12.2.0
-module load boost/1.79.0
 module load python/3.11.7
 
 export CC=`which gcc`
