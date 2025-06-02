@@ -1,4 +1,3 @@
-import os
 from pathlib import Path
 from typing import List
 
@@ -7,7 +6,7 @@ from setuptools import find_namespace_packages, setup
 
 def local_pkg(name: str, relative_path: str) -> str:
     """Returns an absolute path to a local package."""
-    return f"{name} @ file://{Path(os.path.abspath(__file__)).parent / relative_path} "
+    return f"{name} @ file://{Path(__file__).parent / relative_path} "
 
 
 requirements: List[str] = [

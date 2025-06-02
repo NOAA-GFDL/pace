@@ -1,9 +1,6 @@
-import os
+from pathlib import Path
 
 import pytest
-
-
-DIR = os.path.dirname(os.path.realpath(__file__))
 
 
 @pytest.fixture()
@@ -22,7 +19,7 @@ def data_path(pytestconfig):
 def threshold_path(pytestconfig):
     threshold_path = pytestconfig.getoption("threshold_path")
     if threshold_path is None:
-        threshold_path = os.path.join(DIR, "thresholds")
+        threshold_path = Path(__file__).parent / "thresholds"
     return threshold_path
 
 

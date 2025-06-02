@@ -1,4 +1,3 @@
-import os
 import unittest.mock
 from dataclasses import fields
 from datetime import timedelta
@@ -24,9 +23,6 @@ from ndsl.grid import DampingCoefficients, GridData, MetricTerms
 from ndsl.performance.timer import NullTimer, Timer
 from ndsl.stencils.testing import assert_same_temporaries, copy_temporaries
 from pyFV3 import DycoreState, DynamicalCore, DynamicalCoreConfig
-
-
-DIR = os.path.abspath(os.path.dirname(__file__))
 
 
 def setup_dycore() -> Tuple[DynamicalCore, DycoreState, Timer]:

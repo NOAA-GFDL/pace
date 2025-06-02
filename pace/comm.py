@@ -1,6 +1,7 @@
 import abc
 import dataclasses
 import os
+from pathlib import Path
 from typing import Any, ClassVar, List
 
 from ndsl import MPIComm, NullComm
@@ -133,7 +134,7 @@ class WriterCommConfig(CreatesComm):
     """
 
     ranks: List[int]
-    path: str = "."
+    path = Path(".")
 
     def get_comm(self) -> CachingCommWriter:
         underlying = MPICommConfig().get_comm()
@@ -145,9 +146,7 @@ class WriterCommConfig(CreatesComm):
     def cleanup(self, comm: CachingCommWriter):
         os.makedirs(self.path, exist_ok=True)
         if comm.Get_rank() in self.ranks:
-            with open(
-                os.path.join(self.path, f"comm_{comm.Get_rank()}.pkl"), "wb"
-            ) as f:
+            with open(self.path / f"comm_{comm.Get_rank()}.pkl", "wb") as f:
                 comm.dump(f)
 
 
@@ -171,10 +170,10 @@ class ReaderCommConfig(CreatesComm):
     """
 
     rank: int
-    path: str = "."
+    path = Path(".")
 
     def get_comm(self) -> CachingCommReader:
-        with open(os.path.join(self.path, f"comm_{self.rank}.pkl"), "rb") as f:
+        with open(self.path / f"comm_{self.rank}.pkl", "rb") as f:
             return CachingCommReader.load(f)
 
     def cleanup(self, comm: CachingCommWriter):

@@ -1,21 +1,17 @@
-import os
+from pathlib import Path
 
 import xarray as xr
 import yaml
 
 from pace import DiagnosticsConfig, DriverConfig, NullCommConfig
 from pace.run import main
+from tests.paths import EXAMPLE_CONFIGS_DIR
 
 
-DIR = os.path.dirname(os.path.abspath(__file__))
-
-
-def test_diagnostics_can_be_opened(tmpdir):
-    with open(
-        os.path.join(DIR, "../../../examples/configs/baroclinic_c12.yaml"), "r"
-    ) as f:
+def test_diagnostics_can_be_opened(tmpdir: Path):
+    with open(EXAMPLE_CONFIGS_DIR / "baroclinic_c12.yaml", "r") as f:
         driver_config = DriverConfig.from_dict(yaml.safe_load(f))
-    diagnostics_path = os.path.join(tmpdir, "output.zarr")
+    diagnostics_path = tmpdir / "output.zarr"
     driver_config.diagnostics_config = DiagnosticsConfig(
         path=diagnostics_path,
         names=["u", "v", "ua", "va", "w", "delp", "pt", "qvapor"],

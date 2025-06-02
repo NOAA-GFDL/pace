@@ -24,9 +24,7 @@ from pace import (
     RestartConfig,
 )
 from pySHiELD import PHYSICS_PACKAGES
-
-
-DIR = os.path.dirname(os.path.abspath(__file__))
+from tests.paths import EXAMPLE_CONFIGS_DIR
 
 
 class NullCommConfig(CreatesComm):
@@ -51,13 +49,7 @@ def test_default_save_restart():
 
 def test_restart_save_to_disk():
     try:
-        with open(
-            os.path.join(
-                DIR,
-                "../../../examples/configs/baroclinic_c12_write_restart.yaml",
-            ),
-            "r",
-        ) as f:
+        with open(EXAMPLE_CONFIGS_DIR / "baroclinic_c12_write_restart.yaml", "r") as f:
             driver_config = DriverConfig.from_dict(yaml.safe_load(f))
         backend = "numpy"
         mpi_comm = NullComm(rank=0, total_ranks=6, fill_value=0.0)
@@ -99,7 +91,7 @@ def test_restart_save_to_disk():
         )
 
         restart_dycore = xr.open_dataset(
-            f"RESTART/restart_dycore_state_{mpi_comm.rank}.nc"
+            Path("RESTART") / f"restart_dycore_state_{mpi_comm.rank}.nc"
         )
         for var in driver_state.dycore_state.__dict__.keys():
             if isinstance(driver_state.dycore_state.__dict__[var], Quantity):
@@ -117,7 +109,7 @@ def test_restart_save_to_disk():
         # TODO: the physics state isn't actually needed in the restart folders as
         # all prognostic state is in dycore state, we could refactor it out
         restart_physics = xr.open_dataset(
-            f"RESTART/restart_physics_state_{mpi_comm.rank}.nc"
+            Path("RESTART") / f"restart_physics_state_{mpi_comm.rank}.nc"
         )
         for var in driver_state.physics_state.__dict__.keys():
             if isinstance(
@@ -135,7 +127,7 @@ def test_restart_save_to_disk():
                             should not be in physics restart file"
                     )
         # test we can use the saved driver config in the restart to load it
-        with open("RESTART/restart.yaml", "r") as f:
+        with open(Path("RESTART") / "restart.yaml", "r") as f:
             restart_config = DriverConfig.from_dict(yaml.safe_load(f))
 
             (
