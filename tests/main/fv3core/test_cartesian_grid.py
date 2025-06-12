@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import numpy as np
 import pytest
 
@@ -35,7 +37,7 @@ def test_cartesian_grid_generation(
         dx_const=dx_const,
         dy_const=dy_const,
         deglat=deglat,
-        eta_file="tests/main/input/eta79.nc",
+        eta_file=Path("tests/main/input/eta79.nc"),
     )
     assert np.all(grid_generator.lat_agrid.data == deglat * PI / 180.0)
     assert np.all(grid_generator.lon_agrid.data == 0.0)
