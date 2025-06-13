@@ -1,3 +1,5 @@
+from pathlib import Path
+
 import numpy as np
 import pytest
 
@@ -37,7 +39,7 @@ def test_grid_init_not_decomposition_dependent(rank: int):
     halo updates for their values in the compute domain.
     """
     nx_tile, ny_tile, nz = 48, 48, 79
-    eta_file = "tests/main/input/eta79.nc"
+    eta_file = Path("tests/main/input/eta79.nc")
     metric_terms_1by1 = MetricTerms(
         quantity_factory=get_quantity_factory(
             layout=(1, 1), nx_tile=nx_tile, ny_tile=ny_tile, nz=nz

@@ -1,7 +1,7 @@
-import os
 import unittest.mock
 from dataclasses import fields
 from datetime import timedelta
+from pathlib import Path
 from typing import Tuple
 
 import pyFV3.initialization.analytic_init as ai
@@ -23,9 +23,6 @@ from ndsl.grid import DampingCoefficients, GridData, MetricTerms
 from ndsl.performance.timer import NullTimer, Timer
 from ndsl.stencils.testing import assert_same_temporaries, copy_temporaries
 from pyFV3 import DycoreState, DynamicalCore, DynamicalCoreConfig
-
-
-DIR = os.path.abspath(os.path.dirname(__file__))
 
 
 def setup_dycore() -> Tuple[DynamicalCore, DycoreState, Timer]:
@@ -100,7 +97,7 @@ def setup_dycore() -> Tuple[DynamicalCore, DycoreState, Timer]:
         sizer=sizer, comm=communicator
     )
     quantity_factory = QuantityFactory.from_backend(sizer=sizer, backend=backend)
-    eta_file = "tests/main/input/eta79.nc"
+    eta_file = Path("tests/main/input/eta79.nc")
     metric_terms = MetricTerms(
         quantity_factory=quantity_factory,
         communicator=communicator,
@@ -210,5 +207,5 @@ def test_call_does_not_define_stencils():
     def error_func(*args, **kwargs):
         raise AssertionError("call not allowed")
 
-    with unittest.mock.patch("gt4py.cartesian.gtscript.stencil", new=error_func):
+    with unittest.mock.patch("ndsl.dsl.gt4py.stencil", new=error_func):
         dycore.step_dynamics(state, timer)

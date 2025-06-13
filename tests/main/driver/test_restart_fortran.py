@@ -1,5 +1,3 @@
-import os
-
 import numpy as np
 import xarray as xr
 
@@ -14,10 +12,7 @@ from ndsl import (
 )
 from pace import FortranRestartInit, GeneratedGridConfig
 from pySHiELD import PHYSICS_PACKAGES
-
-
-DIR = os.path.dirname(os.path.abspath(__file__))
-PACE_DIR = os.path.join(DIR, "../../../")
+from tests.paths import REPO_ROOT
 
 
 def test_state_from_fortran_restart():
@@ -42,10 +37,10 @@ def test_state_from_fortran_restart():
     )
 
     quantity_factory = QuantityFactory.from_backend(sizer=sizer, backend="numpy")
-    restart_dir = os.path.join(PACE_DIR, "tests/main/data/c12_restart")
+    restart_dir = REPO_ROOT / "tests" / "main" / "data" / "c12_restart"
 
     (damping_coefficients, driver_grid_data, grid_data,) = GeneratedGridConfig(
-        restart_path=restart_dir, eta_file=restart_dir + "/fv_core.res.nc"
+        restart_path=restart_dir, eta_file=restart_dir / "fv_core.res.nc"
     ).get_grid(quantity_factory, null_communicator)
 
     restart_config = FortranRestartInit(path=restart_dir)
@@ -57,7 +52,7 @@ def test_state_from_fortran_restart():
         grid_data=grid_data,
         schemes=[PHYSICS_PACKAGES["GFS_microphysics"]],
     )
-    ds = xr.open_dataset(os.path.join(restart_dir, "fv_core.res.tile1.nc"))
+    ds = xr.open_dataset(restart_dir / "fv_core.res.tile1.nc")
     np.testing.assert_array_equal(
         ds["u"].values[0, :].transpose(2, 1, 0), driver_state.dycore_state.u.view[:]
     )

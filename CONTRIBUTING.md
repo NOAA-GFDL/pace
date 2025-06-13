@@ -119,7 +119,7 @@ Turns into
 
 ### GT4Py stencils
 
-We interface to `gt4py.cartesian.gtscript.stencil` through ndsl.dsl.stencil, specifically the FrozenStencil, that allows us to minimize runtime overhead in calling stencils.
+We interface to `ndsl.dsl.gt4py.stencil` through ndsl.dsl.stencil, specifically the FrozenStencil, that allows us to minimize runtime overhead in calling stencils.
 
 ```python
 @gtstencil
@@ -132,11 +132,11 @@ For example, `FloatField[IJ]` for a 2D field of default floating point values.
 
 ### GTScript functions
 
-These use the `@gtscript.function` decorator and the arguments do not include type
+These use the `@gtfunction` decorator and the arguments do not include type
 specifications. They will continue to not have type hinting, e.g.:
 
 ```python
-    @gtscript.function
+    @gtfunction
     def get_bl(al, q):
 ```
 
