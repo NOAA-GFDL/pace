@@ -101,6 +101,9 @@ def test_extgrid_equals_generated(config_file_path: str, ranks: int):
         overlap=True,
     )
 
+    # TODO: Remove once FMSgridtools allows optional grid layout
+    subtile_slice_grid = (subtile_slice_grid[1], subtile_slice_grid[0])
+
     lon_rad = lon * (PI / 180)
     lat_rad = lat * (PI / 180)
 
@@ -142,3 +145,6 @@ def test_extgrid_equals_generated(config_file_path: str, ranks: int):
     if mpicomm.Get_rank() == 0:
         total_area = math.fsum(tile_area)
         assert np.isclose(total_area, surface_area_true)
+
+    if mpicomm.Get_rank() == 3:
+        print(f"lat_raw = {lat[subtile_slice_grid]}")

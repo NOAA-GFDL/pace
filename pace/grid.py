@@ -231,7 +231,7 @@ class ExternalNetcdfGridConfig(GridInitializer):
     ) -> Tuple[DampingCoefficients, DriverGridData, GridData]:
         ndsl_log.info("Using external grid data")
 
-        # ToDo: refactor when grid_type is an enum
+        # TODO: refactor when grid_type is an enum
         if self.grid_type <= 3:
             tile_num = (
                 get_tile_index(communicator.rank, communicator.partitioner.total_ranks)
@@ -242,6 +242,7 @@ class ExternalNetcdfGridConfig(GridInitializer):
             tile_file = self.grid_file_path
 
         ds = xr.open_dataset(tile_file)
+        # TODO: Remove transpose once FMSgridtools enables selective grid layout output
         lon = ds.x.values[::2, ::2].T
         lat = ds.y.values[::2, ::2].T
         npx = ds.nx.values.size / 2 + 1
@@ -253,6 +254,9 @@ class ExternalNetcdfGridConfig(GridInitializer):
             global_extent=(npy, npx),
             overlap=True,
         )
+
+        # TODO: Remove once FMSgridtools enables selective grid layout output
+        subtile_slice_grid = (subtile_slice_grid[1], subtile_slice_grid[0])
 
         metric_terms = MetricTerms.from_external(
             x=lon[subtile_slice_grid],
