@@ -242,10 +242,10 @@ class ExternalNetcdfGridConfig(GridInitializer):
             tile_file = self.grid_file_path
 
         ds = xr.open_dataset(tile_file)
-        lon = ds.x.values
-        lat = ds.y.values
-        npx = ds.nxp.values.size
-        npy = ds.nyp.values.size
+        lon = ds.x.values[::2, ::2].T
+        lat = ds.y.values[::2, ::2].T
+        npx = ds.nx.values.size / 2 + 1
+        npy = ds.ny.values.size / 2 + 1
 
         subtile_slice_grid = communicator.partitioner.tile.subtile_slice(
             rank=communicator.rank,
