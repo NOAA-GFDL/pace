@@ -250,13 +250,10 @@ class ExternalNetcdfGridConfig(GridInitializer):
 
         subtile_slice_grid = communicator.partitioner.tile.subtile_slice(
             rank=communicator.rank,
-            global_dims=[Y_INTERFACE_DIM, X_INTERFACE_DIM],
-            global_extent=(npy, npx),
+            global_dims=[X_INTERFACE_DIM, Y_INTERFACE_DIM],
+            global_extent=(npx, npy),
             overlap=True,
         )
-
-        # TODO: Remove once FMSgridtools enables selective grid layout output
-        subtile_slice_grid = (subtile_slice_grid[1], subtile_slice_grid[0])
 
         metric_terms = MetricTerms.from_external(
             x=lon[subtile_slice_grid],
