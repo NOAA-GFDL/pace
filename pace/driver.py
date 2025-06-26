@@ -37,9 +37,9 @@ from pace.grid import GeneratedGridConfig, GridInitializerSelector
 from pace.initialization import InitializerSelector
 from pace.safety_checks import SafetyChecker
 from pace.state import DriverState
-from pyFV3 import DynamicalCore, DynamicalCoreConfig
-from pySHiELD import Physics, PhysicsConfig
-from pySHiELD.update import update_atmos_state
+from pyfv3 import DynamicalCore, DynamicalCoreConfig
+from pyshield import Physics, PhysicsConfig
+from pyshield.update import update_atmos_state
 
 
 try:

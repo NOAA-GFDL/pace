@@ -70,6 +70,18 @@ Inside of your pace `venv` or `conda` environment, install pace and its dependen
 pip install -e .[dev]
 ```
 
+To install editable versions of the submodules of Pace, use the `-e` flag followed by the name of the package (if editing the local version) or path to edited version of the submodule after base installation of Pace:
+
+```shell
+pip install -e .
+pip install -e NDSL
+# pip install -e /path/to/edited/NDSL
+pip install -e pyFV3
+# pip install -e /path/to/edited/pyFV3
+pip install -e pySHiELD
+# pip install -e /path/to/edited/pySHiELD
+```
+
 For running tests, we recommend to install pace with the `[test]` extra (avoid pulling other dev dependencies):
 
 ```shell

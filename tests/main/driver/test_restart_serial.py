@@ -22,7 +22,7 @@ from pace import (
     GeneratedGridConfig,
     RestartConfig,
 )
-from pySHiELD import PHYSICS_PACKAGES
+from pyshield import PHYSICS_PACKAGES
 
 
 DIR = os.path.dirname(os.path.abspath(__file__))

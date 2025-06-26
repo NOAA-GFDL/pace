@@ -36,7 +36,7 @@ from ndsl.grid import (
     VerticalGridData,
 )
 from ndsl.grid.gnomonic import great_circle_distance_lon_lat
-from pyFV3.stencils import FiniteVolumeFluxPrep, FiniteVolumeTransport, TracerAdvection
+from pyfv3.stencils import FiniteVolumeFluxPrep, FiniteVolumeTransport, TracerAdvection
 
 
 class GridType(enum.Enum):

@@ -5,7 +5,7 @@ import pytest
 from ndsl import QuantityFactory, SubtileGridSizer
 from pace import DiagnosticsConfig
 from pace.diagnostics import MonitorDiagnostics, NullDiagnostics, ZSelect
-from pyFV3 import DycoreState
+from pyfv3 import DycoreState
 
 
 def test_returns_null_diagnostics_if_no_path_given():

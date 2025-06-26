@@ -4,15 +4,15 @@ import typing
 
 import pytest
 
-import pyFV3._config
+import pyfv3._config
 
 
 CONFIG_CLASSES = [
-    pyFV3._config.SatAdjustConfig,
-    pyFV3._config.AcousticDynamicsConfig,
-    pyFV3._config.RiemannConfig,
-    pyFV3._config.DGridShallowWaterLagrangianDynamicsConfig,
-    pyFV3._config.DynamicalCoreConfig,
+    pyfv3._config.SatAdjustConfig,
+    pyfv3._config.AcousticDynamicsConfig,
+    pyfv3._config.RiemannConfig,
+    pyfv3._config.DGridShallowWaterLagrangianDynamicsConfig,
+    pyfv3._config.DynamicalCoreConfig,
 ]
 
 

@@ -7,7 +7,7 @@ from typing import Callable, ClassVar, List, Type, TypeVar
 
 import f90nml
 
-import pyFV3.initialization.analytic_init as analytic_init
+import pyfv3.initialization.analytic_init as analytic_init
 from ndsl import (
     CompilationConfig,
     DaceConfig,
@@ -22,9 +22,9 @@ from ndsl.stencils.testing import TranslateGrid, grid
 from ndsl.typing import Communicator
 from pace.registry import Registry
 from pace.state import DriverState, TendencyState, _restart_driver_state
-from pyFV3 import DycoreState
-from pyFV3.testing import TranslateFVDynamics
-from pySHiELD import PHYSICS_PACKAGES, PhysicsState
+from pyfv3 import DycoreState
+from pyfv3.testing import TranslateFVDynamics
+from pyshield import PHYSICS_PACKAGES, PhysicsState
 
 
 class Initializer(abc.ABC):

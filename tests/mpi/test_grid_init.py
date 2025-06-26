@@ -13,8 +13,8 @@ from ndsl import (
     TilePartitioner,
 )
 from ndsl.grid import GridData, MetricTerms
-from pyFV3 import DycoreState
-from pyFV3.initialization.test_cases.initialize_baroclinic import init_baroclinic_state
+from pyfv3 import DycoreState
+from pyfv3.initialization.test_cases.initialize_baroclinic import init_baroclinic_state
 
 
 def get_cube_comm(layout, comm: MPIComm):
