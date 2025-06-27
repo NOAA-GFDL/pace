@@ -22,7 +22,8 @@ from ndsl.stencils.testing import TranslateGrid, grid
 from ndsl.typing import Communicator
 from pace.registry import Registry
 from pace.state import DriverState, TendencyState, _restart_driver_state
-from pyFV3 import DycoreState
+from pyFV3.initialization.analytic_init import AnalyticCase
+from pyFV3 import DycoreState, DynamicalCoreConfig
 from pyFV3.testing import TranslateFVDynamics
 from pySHiELD import PHYSICS_PACKAGES, PhysicsState
 
@@ -91,8 +92,8 @@ class InitializerSelector(Initializer):
         )
 
     @classmethod
-    def from_dict(cls, config: dict):
-        instance = cls.registry.from_dict(config)
+    def from_dict(cls, config: dict, hooks={}):
+        instance = cls.registry.from_dict(config, hooks=hooks)
         return cls(config=instance, type=config["type"])
 
 
@@ -103,8 +104,10 @@ class AnalyticInit(Initializer):
     Configuration for analytic initialization.
     """
 
-    case: str = "baroclinic"
+    case: AnalyticCase = AnalyticCase.baroclinic_instability
     start_time: datetime = datetime(2000, 1, 1)
+    dycore_config: DynamicalCoreConfig = dataclasses.field(default_factory=DynamicalCoreConfig)
+
 
     def get_driver_state(
         self,
@@ -119,9 +122,10 @@ class AnalyticInit(Initializer):
             analytic_init_case=self.case,
             grid_data=grid_data,
             quantity_factory=quantity_factory,
-            adiabatic=False,
-            hydrostatic=False,
-            moist_phys=True,
+            adiabatic=self.dycore_config.adiabatic,
+            hydrostatic=self.dycore_config.hydrostatic,
+            moist_phys=self.dycore_config.moist_phys,
+            sw_dynamics=self.dycore_config.sw_dynamics,
             comm=communicator,
         )
         physics_state = PhysicsState.init_zeros(

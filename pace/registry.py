@@ -105,7 +105,7 @@ class Registry(Generic[T]):
 
         return register_func
 
-    def from_dict(self, config: dict) -> T:
+    def from_dict(self, config: dict, hooks={}) -> T:
         """
         Creates a registered type from the given config dict.
 
@@ -130,6 +130,7 @@ class Registry(Generic[T]):
             instance = dacite.from_dict(
                 data_class=self._types[type_name],
                 data=config["config"],
-                config=dacite.Config(strict=True),
+                config=dacite.Config(strict=True,
+                                     type_hooks=hooks),
             )
             return instance

@@ -8,7 +8,7 @@ stencil_config:
 initialization:
   type: analytic
   config:
-    case: baroclinic
+    case: baroclinic_instability
 diagnostics_config:
   path: "output.zarr"
   names:
