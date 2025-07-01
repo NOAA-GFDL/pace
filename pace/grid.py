@@ -242,9 +242,12 @@ class ExternalNetcdfGridConfig(GridInitializer):
             tile_file = self.grid_file_path
 
         ds = xr.open_dataset(tile_file)
-        # TODO: Remove transpose once FMSgridtools enables selective grid layout output
-        lon = ds.x.values[::2, ::2].T
-        lat = ds.y.values[::2, ::2].T
+        if "ordering" in ds and ds.ordering.values[0] == "row_major":
+            lon = ds.x.values[::2, ::2]
+            lat = ds.y.values[::2, ::2]
+        else:
+            lon = ds.x.values[::2, ::2].T
+            lat = ds.y.values[::2, ::2].T
         npx = ds.nx.values.size / 2 + 1
         npy = ds.ny.values.size / 2 + 1
 
