@@ -34,7 +34,10 @@ def test_analytic_init_config(tested_configs: List[Path]):
         # config and analytic case types for addition consistency checks.
         # Other initialization types don't require this.
         if driver_config.initialization.type == "analytic":
-            assert type(driver_config.initialization.config.dycore_config) == DynamicalCoreConfig
+            assert (
+                type(driver_config.initialization.config.dycore_config)
+                == DynamicalCoreConfig
+            )
             assert hasattr(driver_config.initialization.config, "case")
             assert type(driver_config.initialization.config.case) == AnalyticCase
         else:

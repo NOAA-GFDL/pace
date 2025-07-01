@@ -1,5 +1,5 @@
-""" Unit tests for Jablonowski & Williamson Baroclinic test cases 
-Corresponds to Fortran test #12 (Steady State) and #13 (Perturbation) 
+""" Unit tests for Jablonowski & Williamson Baroclinic test cases
+Corresponds to Fortran test #12 (Steady State) and #13 (Perturbation)
 found in tools/test_cases.F90 of:
 
 https://github.com/NOAA-GFDL/GFDL_atmos_cubed_sphere.git
@@ -7,7 +7,6 @@ https://github.com/NOAA-GFDL/GFDL_atmos_cubed_sphere.git
 TODO This is a place holder class for more unit tests in the future.
 """
 
-import os
 from datetime import timedelta
 
 import pyFV3.initialization.analytic_init as ai
@@ -22,19 +21,15 @@ from ndsl import (
     StencilConfig,
     StencilFactory,
     SubtileGridSizer,
-    TilePartitioner,
     TileCommunicator,
+    TilePartitioner,
 )
+from ndsl.grid import DampingCoefficients, GridData, MetricTerms
 from ndsl.performance.timer import NullTimer
-from ndsl.grid import (
-    DampingCoefficients,
-    GridData,
-    MetricTerms,
-)
 from pyFV3 import DycoreState, DynamicalCore, DynamicalCoreConfig
 
 
-def setup_dycore_config(test_case=ai.AnalyticCase.baroclinic_instability) -> DynamicalCoreConfig:
+def setup_dycore_config() -> DynamicalCoreConfig:
     config = DynamicalCoreConfig(
         layout=(1, 1),
         npx=48,
@@ -50,10 +45,10 @@ def setup_dycore_config(test_case=ai.AnalyticCase.baroclinic_instability) -> Dyn
         d2_bg_k1=0.2,
         d2_bg_k2=0.1,
         d4_bg=0.15,
-        d_con=0.0,       # Default is 0 in GFDL_atmos_cubed_sphere/model/fv_arrays.F90
+        d_con=0.0,  # Default is 0 in GFDL_atmos_cubed_sphere/model/fv_arrays.F90
         d_ext=0.0,
         dddmp=0.5,
-        #delt_max=0.002,  # TODO: What is equiv in SHiELD_build?
+        # delt_max=0.002,  # TODO: What is equiv in SHiELD_build?
         do_sat_adj=True,
         do_vort_damp=True,
         fill=True,
@@ -64,14 +59,14 @@ def setup_dycore_config(test_case=ai.AnalyticCase.baroclinic_instability) -> Dyn
         hord_vt=6,
         hydrostatic=False,
         k_split=1,
-        ke_bg=0.0,       # Default is 0 in GFDL_atmos_cubed_sphere/model/fv_arrays.F90
+        ke_bg=0.0,  # Default is 0 in GFDL_atmos_cubed_sphere/model/fv_arrays.F90
         kord_mt=9,
         kord_tm=-9,
         kord_tr=9,
         kord_wz=9,
         n_split=1,
         nord=3,
-        p_fac=0.05,      # Default is 0.05 in GFDL_atmos_cubed_sphere/model/fv_arrays.F90
+        p_fac=0.05,  # Default is 0.05 in GFDL_atmos_cubed_sphere/model/fv_arrays.F90
         rf_fast=True,
         rf_cutoff=3000.0,
         tau=10.0,
@@ -84,14 +79,12 @@ def setup_dycore_config(test_case=ai.AnalyticCase.baroclinic_instability) -> Dyn
 
 
 def setup_dycore(
-    rank=0,
-    usesCubedSphereComm=True,
-    test_case=ai.AnalyticCase.baroclinic_instability
+    rank=0, usesCubedSphereComm=True, test_case=ai.AnalyticCase.baroclinic_instability
 ) -> DycoreState:
     """Sets up Dycore state for analytic initialization"""
 
     backend = "numpy"
-    config = setup_dycore_config(test_case=test_case)
+    config = setup_dycore_config()
     mpi_comm = NullComm(
         rank=rank, total_ranks=6 * config.layout[0] * config.layout[1], fill_value=0.0
     )
@@ -164,11 +157,9 @@ def setup_dycore(
 def test_baroclinic_steady_and_instability_are_different():
     """
     Simple test to check that the steady and instability tests produce
-    different results.   
+    different results.
     """
-    _, state_steady, _ = setup_dycore(
-        test_case=ai.AnalyticCase.baroclinic_steady
-    )
+    _, state_steady, _ = setup_dycore(test_case=ai.AnalyticCase.baroclinic_steady)
     _, state_instability, _ = setup_dycore(
         test_case=ai.AnalyticCase.baroclinic_instability
     )

@@ -37,8 +37,8 @@ from pace.grid import GeneratedGridConfig, GridInitializerSelector
 from pace.initialization import InitializerSelector
 from pace.safety_checks import SafetyChecker
 from pace.state import DriverState
-from pyFV3.initialization.analytic_init import AnalyticCase
 from pyFV3 import DynamicalCore, DynamicalCoreConfig
+from pyFV3.initialization.analytic_init import AnalyticCase
 from pySHiELD import Physics, PhysicsConfig
 from pySHiELD.update import update_atmos_state
 
@@ -280,7 +280,9 @@ class DriverConfig:
 
         analytic_hooks = {}
         if kwargs["initialization"]["type"] == "analytic":
-            kwargs["initialization"]["config"]["dycore_config"] = kwargs["dycore_config"]
+            kwargs["initialization"]["config"]["dycore_config"] = kwargs[
+                "dycore_config"
+            ]
             analytic_hooks[AnalyticCase] = AnalyticCase
         kwargs["initialization"] = InitializerSelector.from_dict(
             kwargs["initialization"],

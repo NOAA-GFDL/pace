@@ -130,7 +130,6 @@ class Registry(Generic[T]):
             instance = dacite.from_dict(
                 data_class=self._types[type_name],
                 data=config["config"],
-                config=dacite.Config(strict=True,
-                                     type_hooks=hooks),
+                config=dacite.Config(strict=True, type_hooks=hooks),
             )
             return instance
