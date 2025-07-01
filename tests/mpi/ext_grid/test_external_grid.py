@@ -22,7 +22,7 @@ TEST_CONFIG_FILE_RANKS = [
     ("test_external_C12_2x2.yaml", 24),
 ]
 
-TILE_FILE_BASE_NAME = "C24.tile"
+TILE_FILE_BASE_NAME = "C12.tile"
 
 
 def get_cube_comm(layout, comm: MPIComm):
