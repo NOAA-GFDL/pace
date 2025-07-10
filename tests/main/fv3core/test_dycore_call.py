@@ -1,7 +1,7 @@
-import os
 import unittest.mock
 from dataclasses import fields
 from datetime import timedelta
+from pathlib import Path
 from typing import Tuple
 
 import pyfv3.initialization.analytic_init as ai
@@ -24,9 +24,6 @@ from ndsl.performance.timer import NullTimer, Timer
 from ndsl.stencils.testing import assert_same_temporaries, copy_temporaries
 from pyfv3 import DycoreState, DynamicalCore, DynamicalCoreConfig
 from pyfv3.initialization.analytic_init import AnalyticCase
-
-
-DIR = os.path.abspath(os.path.dirname(__file__))
 
 
 def setup_dycore() -> Tuple[DynamicalCore, DycoreState, Timer]:
@@ -101,7 +98,7 @@ def setup_dycore() -> Tuple[DynamicalCore, DycoreState, Timer]:
         sizer=sizer, comm=communicator
     )
     quantity_factory = QuantityFactory.from_backend(sizer=sizer, backend=backend)
-    eta_file = "tests/main/input/eta79.nc"
+    eta_file = Path("tests/main/input/eta79.nc")
     metric_terms = MetricTerms(
         quantity_factory=quantity_factory,
         communicator=communicator,

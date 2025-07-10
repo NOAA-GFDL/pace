@@ -95,7 +95,7 @@ class GeneratedGridConfig(GridInitializer):
     dx_const: Optional[float] = 1000.0
     dy_const: Optional[float] = 1000.0
     deglat: Optional[float] = 15.0
-    eta_file: str = "None"
+    eta_file: Optional[str] = None
 
     def get_grid(
         self,
@@ -215,7 +215,7 @@ class ExternalNetcdfGridConfig(GridInitializer):
     |         |         |
     X----X----X----X----X
 
-    The grid data must define the verticies, centroids, and mid-points
+    The grid data must define the vertices, centroids, and mid-points
     on edge of the cells contained in the computation. For more information
     on grid discretization for the FV3 dynamical core please visit:
     https://www.gfdl.noaa.gov/fv3/

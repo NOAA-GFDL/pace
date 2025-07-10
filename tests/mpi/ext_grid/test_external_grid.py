@@ -1,5 +1,4 @@
 import math
-import os
 
 import numpy as np
 import pytest
@@ -15,11 +14,8 @@ from ndsl import (
 from ndsl.comm.partitioner import get_tile_number
 from ndsl.constants import PI, RADIUS, X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM
 from pace import Driver, DriverConfig
+from tests.paths import EXAMPLE_CONFIGS_DIR, REPO_ROOT
 
-
-DIR = os.path.dirname(os.path.abspath(__file__))
-TEST_CONFIGS_DIR = os.path.join(DIR, "../../../examples/configs/")
-TEST_DATA_DIR = os.path.join(DIR, "../../../test_input/")
 
 TEST_CONFIG_FILE_RANKS = [
     ("test_external_C12_1x1.yaml", 6),
@@ -80,10 +76,7 @@ def test_extgrid_equals_generated(config_file_path: str, ranks: int):
     side = int(math.sqrt(size // 6))
     cube_comm = get_cube_comm(layout=(side, side), comm=comm)
 
-    with open(
-        os.path.join(TEST_CONFIGS_DIR, config_file_path),
-        "r",
-    ) as ext_f:
+    with open(EXAMPLE_CONFIGS_DIR / config_file_path, "r") as ext_f:
         ext_config = yaml.safe_load(ext_f)
         ext_driver_config = DriverConfig.from_dict(ext_config)
 
@@ -91,7 +84,7 @@ def test_extgrid_equals_generated(config_file_path: str, ranks: int):
 
     tile_num = get_tile_num(cube_comm)
     tile_file = TILE_FILE_BASE_NAME + str(tile_num) + ".nc"
-    ds = xr.open_dataset(os.path.join(TEST_DATA_DIR, tile_file))
+    ds = xr.open_dataset(REPO_ROOT / "test_input" / tile_file)
     lon = ds.x.values
     lat = ds.y.values
     dx = ds.dx.values
@@ -188,7 +181,7 @@ def test_extgrid_equals_generated(config_file_path: str, ranks: int):
 
     print(diffs)
 
-    assert not errors, "errors occured in 2x2:\n{}".format("\n".join(errors))
+    assert not errors, "errors occurred in 2x2:\n{}".format("\n".join(errors))
 
     surface_area_true = 4 * PI * (RADIUS ** 2)
 

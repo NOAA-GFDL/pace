@@ -9,7 +9,6 @@ module rm PrgEnv-intel
 module load PrgEnv-gnu
 module rm gcc
 module load gcc/10.3.0
-module load boost/1.72.0
 module load python/3.9
 
 # clone Pace and update submodules

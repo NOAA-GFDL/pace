@@ -20,18 +20,6 @@ or if you have already cloned the repository:
 
 
 Pace requires GCC > 9.2, MPI, and Python 3.8 on your system, and CUDA is required to run with a GPU backend.
-You will also need the headers of the boost libraries in your `$PATH` (boost itself does not need to be installed).
-If installed outside the standard header locations, gt4py requires that `$BOOST_ROOT` be set:
-
-.. code-block:: console
-
-    $ cd BOOST/ROOT
-    $ wget https://boostorg.jfrog.io/artifactory/main/release/1.79.0/source/boost_1_79_0.tar.gz
-    $ tar -xzf boost_1_79_0.tar.gz
-    $ mkdir -p boost_1_79_0/include
-    $ mv boost_1_79_0/boost boost_1_79_0/include/
-    $ export BOOST_ROOT=BOOST/ROOT/boost_1_79_0
-
 
 We recommend creating a python `venv` or conda environment specifically for Pace.
 
