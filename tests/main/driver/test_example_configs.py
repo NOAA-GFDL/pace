@@ -25,7 +25,7 @@ EXCLUDED_CONFIGS: List[str] = [
     # filepath that are not in git
     "baroclinic_c12_from_serialbox.yaml",
     "baroclinic_c12_orch_cpu.yaml",
-    "baroclinic_c12_no_out.yaml",
+    "baroclinic_c48_no_out.yaml",
     "tropical_read_restart_fortran.yml",
     "tropicalcyclone_c128.yaml",
     "test_external_C12_1x1.yaml",
