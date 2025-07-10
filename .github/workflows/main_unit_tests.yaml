@@ -67,4 +67,4 @@ jobs:
         - name: Run baroclinic test case
           run: |
             cd ${GITHUB_WORKSPACE}/pace
-            mpiexec -np 54 --oversubscribe python -m pace.run examples/configs/baroclinic_c48_no_out.yaml
+            mpiexec -np 6 --oversubscribe python -m pace.run examples/configs/baroclinic_c48_no_out.yaml

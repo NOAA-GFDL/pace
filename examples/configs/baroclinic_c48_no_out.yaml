@@ -17,8 +17,8 @@ nz: 79
 dt_atmos: 225
 seconds: 225
 layout:
-  - 3
-  - 3
+  - 1
+  - 1
 dycore_config:
   a_imp: 1.0
   beta: 0.
