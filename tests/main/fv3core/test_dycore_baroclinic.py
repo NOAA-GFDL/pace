@@ -7,7 +7,7 @@ TODO This is a place holder class for more unit tests in the future.
 
 from datetime import timedelta
 
-import pyFV3.initialization.analytic_init as ai
+import pyfv3.initialization.analytic_init as ai
 from ndsl import (
     CompilationConfig,
     CubedSphereCommunicator,
@@ -24,7 +24,7 @@ from ndsl import (
 )
 from ndsl.grid import DampingCoefficients, GridData, MetricTerms
 from ndsl.performance.timer import NullTimer
-from pyFV3 import DycoreState, DynamicalCore, DynamicalCoreConfig
+from pyfv3 import DycoreState, DynamicalCore, DynamicalCoreConfig
 
 
 def setup_dycore_config() -> DynamicalCoreConfig:

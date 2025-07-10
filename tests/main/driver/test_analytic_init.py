@@ -5,8 +5,8 @@ import pytest
 import yaml
 
 from pace import DriverConfig
-from pyFV3 import DynamicalCoreConfig
-from pyFV3.initialization.analytic_init import AnalyticCase
+from pyfv3 import DynamicalCoreConfig
+from pyfv3.initialization.analytic_init import AnalyticCase
 from tests.paths import EXAMPLE_CONFIGS_DIR
 
 
