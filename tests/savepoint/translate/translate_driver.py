@@ -7,7 +7,7 @@ from pyfv3 import DynamicalCoreConfig
 # but also, driver tests should not be in physics
 from pyfv3.testing import TranslateFVDynamics
 from pyfv3.testing.validation import enable_selective_validation
-from pySHiELD import PHYSICS_PACKAGES, PhysicsConfig, PhysicsState
+from pyshield import PHYSICS_PACKAGES, PhysicsConfig, PhysicsState
 
 
 enable_selective_validation()

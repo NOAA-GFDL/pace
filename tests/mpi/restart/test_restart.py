@@ -15,7 +15,7 @@ from ndsl import (
     TilePartitioner,
 )
 from pace import DriverConfig, DriverState
-from pySHiELD import PHYSICS_PACKAGES
+from pyshield import PHYSICS_PACKAGES
 
 
 # The packages we import will import MPI, causing an MPI init, but we don't actually

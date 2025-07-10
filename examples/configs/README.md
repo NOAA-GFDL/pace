@@ -5,10 +5,12 @@ Currently, driver takes in a yaml config containing the following options. Examp
 Configuration options pertaining to GT4Py stencils such as backend and whether to rebuild stencils.
 
 ## initialization_type
-Driver initialization type can be either `baroclinic` or `serialbox`.
+Driver initialization type can be either `analytic`, `restart`, `fortran_restart`, `serialbox`, or `predefined`.
 
 ## initialization_config
-**`baroclinic`**:  no additional config needs to be specified.
+**`analytic`**:  `case` can optionally be set to `baroclinic_instability` (default) or `baroclinic_steady`. `start_time` can optionally be set to a datetime (default: 2000-1-1).
+
+[TODO] Update initialization_config parameters for other initialization types
 
 **`serialbox`**:  `path` to the test data directory and optionally `serialized_grid` to specify whether to create grid from serialized data or calculate them in Python. The directory should have the necessary serialized data and a fortran namelist which will be used to set options such as dycore_config and physics_config. Currently, the supported serialized dataset is the same as the test case in pace-physics. To obtain this data, run the following command at the top level:
 ```

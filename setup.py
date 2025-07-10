@@ -12,8 +12,8 @@ def local_pkg(name: str, relative_path: str) -> str:
 
 requirements: List[str] = [
     local_pkg("ndsl", "NDSL"),
-    local_pkg("pyFV3", "pyFV3"),
-    local_pkg("pySHiELD", "pySHiELD"),
+    local_pkg("pyfv3", "pyFV3"),
+    local_pkg("pyshield", "pySHiELD"),
     "dacite",
     "f90nml",
     "numpy < 2.0.0",
