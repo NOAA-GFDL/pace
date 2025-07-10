@@ -1,6 +1,6 @@
 stencil_config:
   compilation_config:
-    backend: gt:cpu_ifirst
+    backend: numpy
     rebuild: false
     validate_args: true
     format_source: false
@@ -12,13 +12,13 @@ initialization:
 performance_config:
   collect_performance: true
   experiment_name: c12_baroclinic_instability
-nx_tile: 12
+nx_tile: 48
 nz: 79
 dt_atmos: 225
 seconds: 225
 layout:
-  - 1
-  - 1
+  - 3
+  - 3
 dycore_config:
   a_imp: 1.0
   beta: 0.
