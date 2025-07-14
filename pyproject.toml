@@ -6,14 +6,14 @@ build-backend = "setuptools.build_meta"
 name = "pace"
 version = "0.2.0"
 dynamic = ["dependencies"]
-requires-python = ">=3.8,<3.12"
+requires-python = "<3.12"
 authors = [{name = "NOAA", email = "oliver.elbert@noaa.gov"}]
 readme = "README.md"
-license = {file = "LICENSE.md"}
+license = "Apache-2.0"
+license-files = ["LICENSE.md"]
 classifiers = [
         "Development Status :: 2 - Pre-Alpha",
         "Intended Audience :: Developers",
-        "License :: OSI Approved :: BSD License",
         "Natural Language :: English",
         "Programming Language :: Python :: 3",
         "Programming Language :: Python :: 3.11",
