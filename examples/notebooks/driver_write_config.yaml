@@ -2,7 +2,7 @@ comm_config:
   config:
     path: comm
     ranks:
-    - 0
+      - 0
   type: write
 dt_atmos: 225
 dycore_config:
@@ -58,8 +58,8 @@ dycore_config:
 initialization_config: {}
 initialization_type: baroclinic
 layout:
-- 1
-- 1
+  - 1
+  - 1
 minutes: 60
 nx_tile: 12
 nz: 79

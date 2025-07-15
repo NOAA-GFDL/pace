@@ -71,7 +71,11 @@ def test_restart_save_to_disk():
         quantity_factory = QuantityFactory.from_backend(sizer=sizer, backend=backend)
 
         eta_file = Path(driver_config.grid_config.config.eta_file)
-        (damping_coefficients, driver_grid_data, grid_data,) = GeneratedGridConfig(
+        (
+            damping_coefficients,
+            driver_grid_data,
+            grid_data,
+        ) = GeneratedGridConfig(
             eta_file=eta_file
         ).get_grid(quantity_factory, communicator)
         init = AnalyticInit(dycore_config=driver_config.dycore_config)

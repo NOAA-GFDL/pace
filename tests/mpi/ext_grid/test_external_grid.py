@@ -131,7 +131,7 @@ def test_extgrid_equals_generated(config_file_path: str, ranks: int):
 
     assert not errors, "errors occurred in:\n{}".format("\n".join(errors))
 
-    surface_area_true = 4 * PI * (RADIUS ** 2)
+    surface_area_true = 4 * PI * (RADIUS**2)
 
     mpicomm = MPIComm()
 

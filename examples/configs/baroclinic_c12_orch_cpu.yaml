@@ -75,6 +75,6 @@ physics_config:
   do_qa: true
 
 grid_config:
-  type:  generated
+  type: generated
   config:
     eta_file: 'tests/main/input/eta79.nc'

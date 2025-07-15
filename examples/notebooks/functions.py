@@ -184,7 +184,7 @@ def store_namelist_variables(local_variables: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def define_dimensions(
-    namelistDict: Dict[str, Any]
+    namelistDict: Dict[str, Any],
 ) -> Tuple[Dict[str, int], Dict[str, Tuple[Any]], Dict[str, str], int]:
     """
     Use: dimensions =

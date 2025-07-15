@@ -31,8 +31,7 @@ class GridInitializer(abc.ABC):
         self,
         quantity_factory: QuantityFactory,
         communicator: Communicator,
-    ) -> Tuple[DampingCoefficients, DriverGridData, GridData]:
-        ...
+    ) -> Tuple[DampingCoefficients, DriverGridData, GridData]: ...
 
 
 @dataclasses.dataclass

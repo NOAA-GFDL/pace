@@ -1,79 +1,79 @@
 [build-system]
-requires = ["setuptools >= 64"]
 build-backend = "setuptools.build_meta"
+requires = ["setuptools >= 64"]
 
 [project]
-name = "pace"
-version = "0.2.0"
-dynamic = ["dependencies"]
-requires-python = ">=3.11,<3.12"
 authors = [{name = "NOAA", email = "oliver.elbert@noaa.gov"}]
-readme = "README.md"
+classifiers = [
+  "Development Status :: 2 - Pre-Alpha",
+  "Intended Audience :: Developers",
+  "Natural Language :: English",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11"
+]
+dynamic = ["dependencies"]
 license = "Apache-2.0"
 license-files = ["LICENSE.md"]
-classifiers = [
-        "Development Status :: 2 - Pre-Alpha",
-        "Intended Audience :: Developers",
-        "Natural Language :: English",
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.11",
-]
+name = "pace"
+readme = "README.md"
+requires-python = ">=3.11,<3.12"
+version = "0.2.0"
 
 [project.optional-dependencies]
-test = [
-    "mpi4py",
-    "nbmake",
-    "pytest",
-]
 dev = [
-    "pace[test]",
-    "pre-commit"
+  "pace[test]",
+  "pre-commit"
+]
+test = [
+  "mpi4py",
+  "nbmake",
+  "pytest"
 ]
 
 [project.urls]
 Repository = "https://github.com/NOAA-GFDL/pace"
 
-[tool.setuptools.packages.find]
-include = ["pace", "pace.*"]
-
-[tool.setuptools]
-include-package-data = true
+[tool.aliases]
 
 [tool.black]
 line-length = 88
 target_version = ['py311']
 
 [tool.bumpversion]
-current_version = "0.2.0"
 commit = "True"
+current_version = "0.2.0"
 
 [tool.distutils.bdist_wheel]
 universal = 1
 
-[tool.aliases]
-
-[tool.isort]
-line_length = 88
-force_grid_wrap = 0
-include_trailing_comma = true
-multi_line_output = 3
-use_parentheses = true
-lines_after_imports = 2
-default_section = "THIRDPARTY"
-sections = "FUTURE,STDLIB,THIRDPARTY,FIRSTPARTY,LOCALFOLDER"
-known_first_party = "ndsl,pyfv3,pyshield,fv3gfs,pace"
-known_third_party = "f90nml,pytest,xarray,numpy,mpi4py,gt4py"
-
-[tool.mypy]
-ignore_missing_imports = true
-follow_imports = "normal"
-namespace_packages = true
-strict_optional = false
-mypy_path = "NDSL:pySHiELD:pyFV3"
-warn_unreachable = true
-explicit_package_bases = true
-
 [tool.flake8]
 exclude = ["docs"]
-extend-ignore = ["W503","E302","E203","F841"]
+extend-ignore = ["W503", "E302", "E203", "F841"]
 max-line-length = 88
+
+[tool.isort]
+default_section = "THIRDPARTY"
+force_grid_wrap = 0
+include_trailing_comma = true
+known_first_party = "ndsl,pyfv3,pyshield,fv3gfs,pace"
+known_third_party = "f90nml,pytest,xarray,numpy,mpi4py,gt4py"
+line_length = 88
+lines_after_imports = 2
+multi_line_output = 3
+sections = "FUTURE,STDLIB,THIRDPARTY,FIRSTPARTY,LOCALFOLDER"
+use_parentheses = true
+
+[tool.mypy]
+explicit_package_bases = true
+follow_imports = "normal"
+ignore_missing_imports = true
+mypy_path = "NDSL:pySHiELD:pyFV3"
+namespace_packages = true
+strict_optional = false
+warn_unreachable = true
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["pace", "pace.*"]

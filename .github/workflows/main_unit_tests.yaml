@@ -23,48 +23,48 @@ jobs:
     container:
       image: ghcr.io/noaa-gfdl/miniforge:mpich
     steps:
-        - name: "External trigger: Checkout pace/develop"
-          if:  ${{ inputs.component_trigger }}
-          uses: actions/checkout@v4
-          with:
-            submodules: 'recursive'
-            repository: NOAA-GFDL/pace
-            path: pace
-            ref: develop
+      - name: "External trigger: Checkout pace/develop"
+        if: ${{ inputs.component_trigger }}
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+          repository: NOAA-GFDL/pace
+          path: pace
+          ref: develop
 
-        - name: "External trigger: Remove existing component in pace/develop"
-          if:  ${{ inputs.component_trigger }}
-          run: rm -rf ${GITHUB_WORKSPACE}/pace/${{inputs.component_name}}
+      - name: "External trigger: Remove existing component in pace/develop"
+        if: ${{ inputs.component_trigger }}
+        run: rm -rf ${GITHUB_WORKSPACE}/pace/${{inputs.component_name}}
 
-        - name: Checkout out hash that triggered CI
-          uses: actions/checkout@v4
-          with:
-            submodules: 'recursive'
-            path: pace/${{inputs.component_name}}
+      - name: Checkout out hash that triggered CI
+        uses: actions/checkout@v4
+        with:
+          submodules: 'recursive'
+          path: pace/${{inputs.component_name}}
 
-        - name: Install packages
-          run: |
-            cd ${GITHUB_WORKSPACE}/pace
-            pip install .[test]
+      - name: Install packages
+        run: |
+          cd ${GITHUB_WORKSPACE}/pace
+          pip install .[test]
 
-        - name: Print versions
-          run: |
-            python --version
-            pip --version
-            pip list
+      - name: Print versions
+        run: |
+          python --version
+          pip --version
+          pip list
 
-        - name: Prepare input files
-          run: |
-            cd ${GITHUB_WORKSPACE}/pace
-            mkdir tests/main/input
-            python examples/generate_eta_files.py tests/main/input
+      - name: Prepare input files
+        run: |
+          cd ${GITHUB_WORKSPACE}/pace
+          mkdir tests/main/input
+          python examples/generate_eta_files.py tests/main/input
 
-        - name: Run tests
-          run: |
-            cd ${GITHUB_WORKSPACE}/pace
-            python -m pytest -x tests/main
+      - name: Run tests
+        run: |
+          cd ${GITHUB_WORKSPACE}/pace
+          python -m pytest -x tests/main
 
-        - name: Run baroclinic test case
-          run: |
-            cd ${GITHUB_WORKSPACE}/pace
-            mpiexec -np 6 --oversubscribe python -m pace.run examples/configs/baroclinic_c48_no_out.yaml
+      - name: Run baroclinic test case
+        run: |
+          cd ${GITHUB_WORKSPACE}/pace
+          mpiexec -np 6 --oversubscribe python -m pace.run examples/configs/baroclinic_c48_no_out.yaml

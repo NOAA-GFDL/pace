@@ -8,7 +8,7 @@ stencil_config:
 initialization_type: serialbox
 initialization_config:
   path: /test_data/8.0.0/c12_6ranks_baroclinic_dycore_microphysics/driver
-  serialized_grid: True
+  serialized_grid: true
 performance_config:
   collect_performance: false
 nx_tile: 12

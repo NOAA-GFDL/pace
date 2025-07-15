@@ -133,7 +133,7 @@ jobs:
 
   lint:
     docker:
-    - image: cimg/python:3.8
+      - image: cimg/python:3.8
     resource_class: small
     steps:
       - checkout
@@ -158,7 +158,7 @@ jobs:
 
   doctest:
     docker:
-    - image: cimg/python:3.8
+      - image: cimg/python:3.8
     steps:
       - checkout
       - run:
@@ -470,7 +470,7 @@ jobs:
 
   push_docs:
     docker:
-    - image: cimg/python:3.8
+      - image: cimg/python:3.8
     steps:
       - checkout
       - run:

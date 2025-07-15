@@ -1,4 +1,4 @@
-""" Unit tests for Jablonowski & Williamson Baroclinic test cases
+"""Unit tests for Jablonowski & Williamson Baroclinic test cases
 Corresponds to Fortran test #12 (Steady State) and #13 (Perturbation)
 found in tools/test_cases.F90 of:
 https://github.com/NOAA-GFDL/GFDL_atmos_cubed_sphere.git

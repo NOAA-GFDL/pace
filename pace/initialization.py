@@ -31,8 +31,7 @@ from pyshield import PHYSICS_PACKAGES, PhysicsState
 class Initializer(abc.ABC):
     @property
     @abc.abstractmethod
-    def start_time(self) -> datetime:
-        ...
+    def start_time(self) -> datetime: ...
 
     @abc.abstractmethod
     def get_driver_state(
@@ -43,8 +42,7 @@ class Initializer(abc.ABC):
         driver_grid_data: DriverGridData,
         grid_data: GridData,
         schemes: List[PHYSICS_PACKAGES],
-    ) -> DriverState:
-        ...
+    ) -> DriverState: ...
 
 
 IT = TypeVar("IT", bound=Type[Initializer])
