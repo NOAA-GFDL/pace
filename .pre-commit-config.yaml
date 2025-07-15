@@ -9,13 +9,13 @@ repos:
         additional_dependencies: ["click==8.0.4"]
 
   - repo: https://github.com/pre-commit/mirrors-isort
-    rev: v5.4.2
+    rev: v5.10.1
     hooks:
       - id: isort
         args: ["--profile", "black"]
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.4.1
+    rev: v1.17.0
     hooks:
       - id: mypy
         additional_dependencies: [types-pyyaml]
@@ -24,19 +24,19 @@ repos:
         args: ["--config-file", "pyproject.toml"]
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v2.3.0
+    rev: v5.0.0
     hooks:
       - id: check-toml
       - id: check-yaml
       - id: end-of-file-fixer
       - id: trailing-whitespace
   - repo: https://github.com/pycqa/flake8
-    rev: 3.9.2
+    rev: 7.3.0
     hooks:
       - id: flake8
         name: flake8
         language_version: python3
-        args: ["--ignore=W503,E501,E302,E203,F841,E704"]
+        args: ["--ignore=W503,E501,E302,E203,F841,E704,E721"]
         exclude: |
           (?x)^(
           .*/__init__.py |
@@ -45,7 +45,7 @@ repos:
         name: flake8 __init__.py files
         files: "__init__.py"
       # ignore unused import error in __init__.py files
-        args: ["--ignore=F401,E203,W503,E302,F841,E704"]
+        args: ["--ignore=F401,E203,W503,E302,F841,E704,E721"]
 
   - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
     rev: v2.15.0
