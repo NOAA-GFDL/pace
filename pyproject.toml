@@ -6,7 +6,7 @@ build-backend = "setuptools.build_meta"
 name = "pace"
 version = "0.2.0"
 dynamic = ["dependencies"]
-requires-python = "<3.12"
+requires-python = ">=3.11,<3.12"
 authors = [{name = "NOAA", email = "oliver.elbert@noaa.gov"}]
 readme = "README.md"
 license = "Apache-2.0"
@@ -42,3 +42,38 @@ include-package-data = true
 [tool.black]
 line-length = 88
 target_version = ['py38']
+
+[tool.bumpversion]
+current_version = "0.2.0"
+commit = "True"
+
+[tool.distutils.bdist_wheel]
+universal = 1
+
+[tool.aliases]
+
+[tool.isort]
+line_length = 88
+force_grid_wrap = 0
+include_trailing_comma = true
+multi_line_output = 3
+use_parentheses = true
+lines_after_imports = 2
+default_section = "THIRDPARTY"
+sections = "FUTURE,STDLIB,THIRDPARTY,FIRSTPARTY,LOCALFOLDER"
+known_first_party = "ndsl,pyfv3,pyshield,fv3gfs,pace"
+known_third_party = "f90nml,pytest,xarray,numpy,mpi4py,gt4py"
+
+[tool.mypy]
+ignore_missing_imports = true
+follow_imports = "normal"
+namespace_packages = true
+strict_optional = false
+mypy_path = "NDSL:pySHiELD:pyFV3"
+warn_unreachable = true
+explicit_package_bases = true
+
+[tool.flake8]
+exclude = ["docs"]
+extend-ignore = ["W503","E302","E203","F841"]
+max-line-length = 88

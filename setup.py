@@ -1,15 +1,14 @@
 from pathlib import Path
-from typing import List
 
 from setuptools import setup
 
 
 def local_pkg(name: str, relative_path: str) -> str:
     """Returns an absolute path to a local package."""
-    return f"{name} @ file://{Path(__file__).parent / relative_path} "
+    return f"{name} @ file://{Path(__file__).absolute().parent / relative_path} "
 
 
-requirements: List[str] = [
+requirements: list[str] = [
     local_pkg("ndsl", "NDSL"),
     local_pkg("pyfv3", "pyFV3"),
     local_pkg("pyshield", "pySHiELD"),
