@@ -2,47 +2,56 @@ default_language_version:
   python: python3
 
 repos:
--   repo: https://github.com/psf/black
-    rev: 20.8b1
+  - repo: https://github.com/psf/black
+    rev: 25.1.0
     hooks:
-    - id: black
-      additional_dependencies: ["click==8.0.4"]
+      - id: black
+        additional_dependencies: ["click==8.0.4"]
 
--   repo: https://github.com/pre-commit/mirrors-isort
-    rev: v5.4.2
+  - repo: https://github.com/pre-commit/mirrors-isort
+    rev: v5.10.1
     hooks:
-    - id: isort
-      args: ["--profile", "black"]
+      - id: isort
+        args: ["--profile", "black"]
 
--   repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.4.1
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: v1.17.0
     hooks:
-    - id: mypy
-      additional_dependencies: [types-pyyaml]
-      name: mypy-pace
-      files: pace
-      args: [--config-file, setup.cfg]
+      - id: mypy
+        additional_dependencies: [types-pyyaml]
+        name: mypy-pace
+        files: pace
+        args: ["--config-file", "pyproject.toml"]
 
--   repo: https://github.com/pre-commit/pre-commit-hooks
-    rev: v2.3.0
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v5.0.0
     hooks:
-    - id: check-toml
-    - id: check-yaml
-    - id: end-of-file-fixer
-    - id: trailing-whitespace
--   repo: https://github.com/pycqa/flake8
-    rev: 3.9.2
+      - id: check-toml
+      - id: check-yaml
+      - id: end-of-file-fixer
+      - id: trailing-whitespace
+  - repo: https://github.com/pycqa/flake8
+    rev: 7.3.0
     hooks:
-    - id: flake8
-      name: flake8
-      language_version: python3
-      args: [--config, setup.cfg]
-      exclude: |
-        (?x)^(
-        .*/__init__.py |
-        )$
-    - id: flake8
-      name: flake8 __init__.py files
-      files: "__init__.py"
+      - id: flake8
+        name: flake8
+        language_version: python3
+        additional_dependencies: [Flake8-pyproject]
+        exclude: |
+          (?x)^(
+          .*/__init__.py |
+          )$
+      - id: flake8
+        name: flake8 __init__.py files
+        files: "__init__.py"
       # ignore unused import error in __init__.py files
-      args: ["--ignore=F401,E203", --config, setup.cfg]
+        additional_dependencies: [Flake8-pyproject]
+
+  - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
+    rev: v2.15.0
+    hooks:
+      - id: pretty-format-toml
+        args: [--autofix, --indent, "2"]
+      - id: pretty-format-yaml
+        args: [--autofix, --preserve-quotes, --indent, "2", --offset, "2"]
+        exclude: ^tests/savepoint/thresholds

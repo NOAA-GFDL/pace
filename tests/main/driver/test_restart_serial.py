@@ -23,8 +23,11 @@ from pace import (
     GeneratedGridConfig,
     RestartConfig,
 )
-from pySHiELD import PHYSICS_PACKAGES
+from pyshield import PHYSICS_PACKAGES
 from tests.paths import EXAMPLE_CONFIGS_DIR
+
+
+DIR = os.path.dirname(os.path.abspath(__file__))
 
 
 class NullCommConfig(CreatesComm):
@@ -68,10 +71,14 @@ def test_restart_save_to_disk():
         quantity_factory = QuantityFactory.from_backend(sizer=sizer, backend=backend)
 
         eta_file = Path(driver_config.grid_config.config.eta_file)
-        (damping_coefficients, driver_grid_data, grid_data,) = GeneratedGridConfig(
+        (
+            damping_coefficients,
+            driver_grid_data,
+            grid_data,
+        ) = GeneratedGridConfig(
             eta_file=eta_file
         ).get_grid(quantity_factory, communicator)
-        init = AnalyticInit()
+        init = AnalyticInit(dycore_config=driver_config.dycore_config)
         driver_state = init.get_driver_state(
             quantity_factory=quantity_factory,
             communicator=communicator,

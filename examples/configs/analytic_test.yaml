@@ -8,10 +8,10 @@ stencil_config:
 initialization:
   type: analytic
   config:
-    case: baroclinic
+    case: baroclinic_instability
 performance_config:
   collect_performance: true
-  experiment_name: c12_baroclinic
+  experiment_name: c12_baroclinic_instability
 comm_config:
   type: null_comm
   config:

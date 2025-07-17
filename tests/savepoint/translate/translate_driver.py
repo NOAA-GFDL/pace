@@ -1,13 +1,13 @@
 from ndsl import Namelist, QuantityFactory, SubtileGridSizer
 from ndsl.constants import N_HALO_DEFAULT
 from pace import Driver, DriverConfig, TendencyState
-from pyFV3 import DynamicalCoreConfig
+from pyfv3 import DynamicalCoreConfig
 
 # TODO physics should not depend on pyFV3
 # but also, driver tests should not be in physics
-from pyFV3.testing import TranslateFVDynamics
-from pyFV3.testing.validation import enable_selective_validation
-from pySHiELD import PHYSICS_PACKAGES, PhysicsConfig, PhysicsState
+from pyfv3.testing import TranslateFVDynamics
+from pyfv3.testing.validation import enable_selective_validation
+from pyshield import PHYSICS_PACKAGES, PhysicsConfig, PhysicsState
 
 
 enable_selective_validation()

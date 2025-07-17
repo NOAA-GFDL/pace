@@ -4,7 +4,7 @@ from datetime import timedelta
 from pathlib import Path
 from typing import Tuple
 
-import pyFV3.initialization.analytic_init as ai
+import pyfv3.initialization.analytic_init as ai
 from ndsl import (
     CompilationConfig,
     CubedSphereCommunicator,
@@ -22,7 +22,8 @@ from ndsl import (
 from ndsl.grid import DampingCoefficients, GridData, MetricTerms
 from ndsl.performance.timer import NullTimer, Timer
 from ndsl.stencils.testing import assert_same_temporaries, copy_temporaries
-from pyFV3 import DycoreState, DynamicalCore, DynamicalCoreConfig
+from pyfv3 import DycoreState, DynamicalCore, DynamicalCoreConfig
+from pyfv3.initialization.analytic_init import AnalyticCase
 
 
 def setup_dycore() -> Tuple[DynamicalCore, DycoreState, Timer]:
@@ -108,12 +109,13 @@ def setup_dycore() -> Tuple[DynamicalCore, DycoreState, Timer]:
     # create an initial state from the Jablonowski & Williamson Baroclinic
     # test case perturbation. JRMS2006
     state = ai.init_analytic_state(
-        analytic_init_case="baroclinic",
+        analytic_init_case=AnalyticCase.baroclinic_instability,
         grid_data=grid_data,
         quantity_factory=quantity_factory,
         adiabatic=config.adiabatic,
         hydrostatic=config.hydrostatic,
         moist_phys=config.moist_phys,
+        sw_dynamics=config.sw_dynamics,
         comm=communicator,
     )
     stencil_factory = StencilFactory(

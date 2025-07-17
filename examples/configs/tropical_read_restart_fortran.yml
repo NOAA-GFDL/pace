@@ -17,7 +17,7 @@ grid_config:
     lon_target: 172.5
     lat_target: 17.5
     ks: 0
-    vertical_grid_from_restart: True
+    vertical_grid_from_restart: true
   type: generated
 performance_config:
   collect_performance: false

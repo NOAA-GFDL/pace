@@ -31,8 +31,8 @@ from ndsl.checkpointer import (
 from ndsl.grid import DampingCoefficients, GridData
 from ndsl.stencils.testing import Grid, TranslateGrid, dataset_to_dict
 from ndsl.testing import perturb
-from pyFV3 import DycoreState, DynamicalCore, DynamicalCoreConfig
-from pyFV3.testing import TranslateFVDynamics
+from pyfv3 import DycoreState, DynamicalCore, DynamicalCoreConfig
+from pyfv3.testing import TranslateFVDynamics
 
 
 def get_grid(data_path: Path, rank: int, layout: Tuple[int, int], backend: str) -> Grid:
