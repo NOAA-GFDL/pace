@@ -11,6 +11,7 @@ on:
         default: ''
         required: false
   pull_request:
+  push:
 
 # cancel running jobs if theres a newer push
 concurrency:
