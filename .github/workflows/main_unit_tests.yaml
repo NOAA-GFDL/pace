@@ -11,6 +11,7 @@ on:
         default: ''
         required: false
   pull_request:
+  push:
 
 # cancel running jobs if theres a newer push
 concurrency:
@@ -20,8 +21,6 @@ concurrency:
 jobs:
   pace_main_unit_tests:
     runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/noaa-gfdl/miniforge:mpich
     steps:
       - name: "External trigger: Checkout pace/develop"
         if: ${{ inputs.component_trigger }}
@@ -31,6 +30,14 @@ jobs:
           repository: NOAA-GFDL/pace
           path: pace
           ref: develop
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - name: Install mpi (MPICH flavor)
+        run: pip install mpich
 
       - name: "External trigger: Remove existing component in pace/develop"
         if: ${{ inputs.component_trigger }}
@@ -67,4 +74,4 @@ jobs:
       - name: Run baroclinic test case
         run: |
           cd ${GITHUB_WORKSPACE}/pace
-          mpiexec -np 6 --oversubscribe python -m pace.run examples/configs/baroclinic_c48_no_out.yaml
+          mpiexec -np 6 python -m pace.run examples/configs/baroclinic_c48_no_out.yaml
