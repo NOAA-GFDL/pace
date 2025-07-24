@@ -3,7 +3,7 @@ from typing import ClassVar, Dict, Optional
 import numpy as np
 
 from ndsl import Quantity
-from pyFV3 import DycoreState
+from pyfv3 import DycoreState
 
 
 class VariableBounds:

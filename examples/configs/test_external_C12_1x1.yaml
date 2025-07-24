@@ -9,19 +9,19 @@ grid_config:
   type: external
   config:
     grid_type: 0
-    grid_file_path: "../../../test_input/C12.tile"
-    eta_file: '../../../tests/main/input/eta79.nc'
+    grid_file_path: "tests/main/input/C12.tile"
+    eta_file: 'tests/main/input/eta79.nc'
 initialization:
   type: analytic
   config:
-    case: baroclinic
+    case: baroclinic_instability
 performance_config:
   collect_performance: true
-  experiment_name: c12_baroclinic
+  experiment_name: c12_baroclinic_instability
 nx_tile: 12
 nz: 79
 dt_atmos: 225
-minutes: 15
+seconds: 225
 layout:
   - 1
   - 1

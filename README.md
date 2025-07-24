@@ -34,17 +34,6 @@ Pace requires:
 
 For GPU backends CUDA and/or ROCm is required depending on the targeted hardware.
 
-For GT stencils backends, you will also need the headers of the boost libraries in your `$PATH`. This could be down like this.
-
-```shell
-cd BOOST/ROOT
-wget https://boostorg.jfrog.io/artifactory/main/release/1.79.0/source/boost_1_79_0.tar.gz
-tar -xzf boost_1_79_0.tar.gz
-mkdir -p boost_1_79_0/include
-mv boost_1_79_0/boost boost_1_79_0/include/
-export BOOST_ROOT=BOOST/ROOT/boost_1_79_0
-```
-
 When cloning Pace you will need to update the repository's submodules as well:
 
 ```shell
@@ -68,6 +57,18 @@ Inside of your pace `venv` or `conda` environment, install pace and its dependen
 
 ```shell
 pip install -e .[dev]
+```
+
+To install editable versions of the submodules of Pace, use the `-e` flag followed by the name of the package (if editing the local version) or path to edited version of the submodule after base installation of Pace:
+
+```shell
+pip install -e .
+pip install -e NDSL
+# pip install -e /path/to/edited/NDSL
+pip install -e pyFV3
+# pip install -e /path/to/edited/pyFV3
+pip install -e pySHiELD
+# pip install -e /path/to/edited/pySHiELD
 ```
 
 For running tests, we recommend to install pace with the `[test]` extra (avoid pulling other dev dependencies):

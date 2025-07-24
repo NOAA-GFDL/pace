@@ -5,7 +5,6 @@ RUN apt-get update && apt-get install -y make \
     libgeos-dev \
     libopenmpi3 \
     libopenmpi-dev \
-    libboost-all-dev \
     libhdf5-serial-dev \
     netcdf-bin \
     libnetcdf-dev \

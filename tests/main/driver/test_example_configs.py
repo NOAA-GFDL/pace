@@ -1,15 +1,13 @@
 import os
+from pathlib import Path
 from typing import List
 
 import pytest
 import yaml
 
 from pace import DriverConfig
+from tests.paths import EXAMPLE_CONFIGS_DIR, JENKINS_CONFIGS_DIR
 
-
-dirname = os.path.dirname(os.path.abspath(__file__))
-
-EXAMPLE_CONFIGS_DIR = os.path.join(dirname, "../../../examples/configs/")
 
 TESTED_CONFIGS: List[str] = [
     "baroclinic_c12.yaml",
@@ -27,13 +25,14 @@ EXCLUDED_CONFIGS: List[str] = [
     # filepath that are not in git
     "baroclinic_c12_from_serialbox.yaml",
     "baroclinic_c12_orch_cpu.yaml",
+    "baroclinic_c48_no_out.yaml",
     "tropical_read_restart_fortran.yml",
     "tropicalcyclone_c128.yaml",
     "test_external_C12_1x1.yaml",
     "test_external_C12_2x2.yaml",
 ]
 
-JENKINS_CONFIGS_DIR = os.path.join(dirname, "../../../.jenkins/driver_configs/")
+
 TESTED_JENKINS_CONFIGS: List[str] = [
     "baroclinic_c48_6ranks_dycore_only.yaml",
     "baroclinic_c192_6ranks.yaml",
@@ -62,7 +61,7 @@ EXCLUDED_JENKINS_CONFIGS: List[str] = [
     ],
 )
 def test_all_configs_tested_or_excluded(
-    config_dir: str, tested_configs: List[str], excluded_configs: List[str]
+    config_dir: Path, tested_configs: List[str], excluded_configs: List[str]
 ):
     """
     If any configs are not tested or excluded, add them to TESTED_CONFIGS or
@@ -85,8 +84,8 @@ def test_all_configs_tested_or_excluded(
         pytest.param(JENKINS_CONFIGS_DIR, TESTED_JENKINS_CONFIGS),
     ],
 )
-def test_example_config_can_initialize(path: str, file_list: List[str]):
+def test_example_config_can_initialize(path: Path, file_list: List[str]):
     for file_name in file_list:
-        with open(os.path.join(path, file_name), "r") as f:
+        with open(path / file_name, "r") as f:
             config = DriverConfig.from_dict(yaml.safe_load(f))
         assert isinstance(config, DriverConfig)

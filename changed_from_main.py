@@ -8,14 +8,14 @@ This is useful for running tests only on projects that have changed.
 This script should depend only on Python 3.6+ standard libraries.
 """
 import argparse
-import os
 import re
 import subprocess
+from pathlib import Path
 from typing import Any, Dict, Set
 
 
-DIRNAME = os.path.dirname(os.path.abspath(__file__))
-DEPENDENCIES_DOTFILE = os.path.join(DIRNAME, "dependencies.dot")
+DIRNAME = Path(__file__).parent
+DEPENDENCIES_DOTFILE = DIRNAME / "dependencies.dot"
 
 DEFINITION_PATTERN = re.compile(r"\s*([a-zA-Z0-9]+) \[.*label=\"(.*)\".*\]")
 DEPENDENCY_PATTERN = re.compile(r"\s*([a-zA-Z0-9]+) -> ([a-zA-Z0-9]+)")
