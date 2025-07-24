@@ -11,8 +11,8 @@ from ndsl.dsl.typing import Float
 from ndsl.filesystem import get_fs
 from ndsl.grid import DampingCoefficients, DriverGridData, GridData
 from ndsl.typing import Communicator
-from pyFV3 import DycoreState
-from pySHiELD import PHYSICS_PACKAGES, PhysicsState
+from pyfv3 import DycoreState
+from pyshield import PHYSICS_PACKAGES, PhysicsState
 
 
 @dataclasses.dataclass()

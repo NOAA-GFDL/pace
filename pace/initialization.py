@@ -7,7 +7,7 @@ from typing import Callable, ClassVar, List, Type, TypeVar
 
 import f90nml
 
-import pyFV3.initialization.analytic_init as analytic_init
+import pyfv3.initialization.analytic_init as analytic_init
 from ndsl import (
     CompilationConfig,
     DaceConfig,
@@ -22,16 +22,16 @@ from ndsl.stencils.testing import TranslateGrid, grid
 from ndsl.typing import Communicator
 from pace.registry import Registry
 from pace.state import DriverState, TendencyState, _restart_driver_state
-from pyFV3 import DycoreState
-from pyFV3.testing import TranslateFVDynamics
-from pySHiELD import PHYSICS_PACKAGES, PhysicsState
+from pyfv3 import DycoreState, DynamicalCoreConfig
+from pyfv3.initialization.analytic_init import AnalyticCase
+from pyfv3.testing import TranslateFVDynamics
+from pyshield import PHYSICS_PACKAGES, PhysicsState
 
 
 class Initializer(abc.ABC):
     @property
     @abc.abstractmethod
-    def start_time(self) -> datetime:
-        ...
+    def start_time(self) -> datetime: ...
 
     @abc.abstractmethod
     def get_driver_state(
@@ -42,8 +42,7 @@ class Initializer(abc.ABC):
         driver_grid_data: DriverGridData,
         grid_data: GridData,
         schemes: List[PHYSICS_PACKAGES],
-    ) -> DriverState:
-        ...
+    ) -> DriverState: ...
 
 
 IT = TypeVar("IT", bound=Type[Initializer])
@@ -91,8 +90,8 @@ class InitializerSelector(Initializer):
         )
 
     @classmethod
-    def from_dict(cls, config: dict):
-        instance = cls.registry.from_dict(config)
+    def from_dict(cls, config: dict, hooks={}):
+        instance = cls.registry.from_dict(config, hooks=hooks)
         return cls(config=instance, type=config["type"])
 
 
@@ -103,8 +102,11 @@ class AnalyticInit(Initializer):
     Configuration for analytic initialization.
     """
 
-    case: str = "baroclinic"
+    case: AnalyticCase = AnalyticCase.baroclinic_instability
     start_time: datetime = datetime(2000, 1, 1)
+    dycore_config: DynamicalCoreConfig = dataclasses.field(
+        default_factory=DynamicalCoreConfig
+    )
 
     def get_driver_state(
         self,
@@ -119,9 +121,10 @@ class AnalyticInit(Initializer):
             analytic_init_case=self.case,
             grid_data=grid_data,
             quantity_factory=quantity_factory,
-            adiabatic=False,
-            hydrostatic=False,
-            moist_phys=True,
+            adiabatic=self.dycore_config.adiabatic,
+            hydrostatic=self.dycore_config.hydrostatic,
+            moist_phys=self.dycore_config.moist_phys,
+            sw_dynamics=self.dycore_config.sw_dynamics,
             comm=communicator,
         )
         physics_state = PhysicsState.init_zeros(

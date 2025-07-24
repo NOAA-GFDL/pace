@@ -20,7 +20,7 @@ from ndsl import (
 )
 from ndsl.grid import GridData, MetricTerms
 from ndsl.stencils.testing import assert_same_temporaries, copy_temporaries
-from pySHiELD import PHYSICS_PACKAGES, Physics, PhysicsConfig, PhysicsState
+from pyshield import PHYSICS_PACKAGES, Physics, PhysicsConfig, PhysicsState
 
 
 try:

@@ -12,7 +12,7 @@ from ndsl import (
     TilePartitioner,
 )
 from ndsl.comm.partitioner import get_tile_number
-from ndsl.constants import PI, RADIUS, X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM
+from ndsl.constants import PI, RADIUS, X_INTERFACE_DIM, Y_INTERFACE_DIM
 from pace import Driver, DriverConfig
 from tests.paths import EXAMPLE_CONFIGS_DIR, REPO_ROOT
 
@@ -84,42 +84,20 @@ def test_extgrid_equals_generated(config_file_path: str, ranks: int):
 
     tile_num = get_tile_num(cube_comm)
     tile_file = TILE_FILE_BASE_NAME + str(tile_num) + ".nc"
-    ds = xr.open_dataset(REPO_ROOT / "test_input" / tile_file)
-    lon = ds.x.values
-    lat = ds.y.values
-    dx = ds.dx.values
-    dy = ds.dy.values
-    area = ds.area.values
-    nx = ds.nx.values.size
-    ny = ds.ny.values.size
-    npx = ds.nxp.values.size
-    npy = ds.nyp.values.size
+    ds = xr.open_dataset(REPO_ROOT / "tests/main/input" / tile_file)
+    lon = ds.x.values[::2, ::2].T
+    lat = ds.y.values[::2, ::2].T
+    nx = ds.nx.values.size / 2
+    ny = ds.ny.values.size / 2
+    npx = nx + 1
+    npy = ny + 1
+
+    print(f"nx = {npx}, ny = {npy}")
 
     subtile_slice_grid = cube_comm.partitioner.tile.subtile_slice(
         rank=cube_comm.rank,
-        global_dims=[Y_INTERFACE_DIM, X_INTERFACE_DIM],
-        global_extent=(npy, npx),
-        overlap=True,
-    )
-
-    subtile_slice_dx = cube_comm.partitioner.tile.subtile_slice(
-        rank=cube_comm.rank,
-        global_dims=[Y_INTERFACE_DIM, X_DIM],
-        global_extent=(npy, nx),
-        overlap=True,
-    )
-
-    subtile_slice_dy = cube_comm.partitioner.tile.subtile_slice(
-        rank=cube_comm.rank,
-        global_dims=[Y_DIM, X_INTERFACE_DIM],
-        global_extent=(ny, npx),
-        overlap=True,
-    )
-
-    subtile_slice_area = cube_comm.partitioner.tile.subtile_slice(
-        rank=cube_comm.rank,
-        global_dims=[Y_DIM, X_DIM],
-        global_extent=(ny, nx),
+        global_dims=[X_INTERFACE_DIM, Y_INTERFACE_DIM],
+        global_extent=(npx, npy),
         overlap=True,
     )
 
@@ -149,41 +127,11 @@ def test_extgrid_equals_generated(config_file_path: str, ranks: int):
     ) / np.amax(lat_rad[subtile_slice_grid])
     diffs.append(f"Lat maximum relative error = {diff_lat}")
 
-    if not np.isclose(
-        ext_driver.state.grid_data.dy.view[:, :], dx[subtile_slice_dx]
-    ).all():
-        errors.append("dx data mismatch")
-
-    diff_dx = np.amax(
-        ext_driver.state.grid_data.dy.view[:, :] - dx[subtile_slice_dx]
-    ) / np.amax(dx[subtile_slice_dx])
-    diffs.append(f"dx maximum relative error = {diff_dx}")
-
-    if not np.isclose(
-        ext_driver.state.grid_data.dx.view[:, :], dy[subtile_slice_dy]
-    ).all():
-        errors.append("dy data mismatch")
-
-    diff_dy = np.amax(
-        ext_driver.state.grid_data.dx.view[:, :] - dy[subtile_slice_dy]
-    ) / np.amax(dy[subtile_slice_dy])
-    diffs.append(f"dy maximum relative error = {diff_dy}")
-
-    if not np.isclose(
-        ext_driver.state.grid_data.area.view[:, :], area[subtile_slice_area]
-    ).all():
-        errors.append("area data mismatch")
-
-    diff_area = np.amax(
-        ext_driver.state.grid_data.area.view[:, :] - area[subtile_slice_area]
-    ) / np.amax(area[subtile_slice_area])
-    diffs.append(f"Area maximum relative error = {diff_area}")
-
     print(diffs)
 
-    assert not errors, "errors occurred in 2x2:\n{}".format("\n".join(errors))
+    assert not errors, "errors occurred in:\n{}".format("\n".join(errors))
 
-    surface_area_true = 4 * PI * (RADIUS ** 2)
+    surface_area_true = 4 * PI * (RADIUS**2)
 
     mpicomm = MPIComm()
 

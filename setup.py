@@ -1,65 +1,22 @@
 from pathlib import Path
-from typing import List
 
-from setuptools import find_namespace_packages, setup
+from setuptools import setup
 
 
 def local_pkg(name: str, relative_path: str) -> str:
     """Returns an absolute path to a local package."""
-    return f"{name} @ file://{Path(__file__).parent / relative_path} "
+    return f"{name} @ file://{Path(__file__).absolute().parent / relative_path} "
 
 
-requirements: List[str] = [
-    local_pkg("NDSL", "NDSL"),
-    local_pkg("pyFV3", "pyFV3"),
-    local_pkg("pySHiELD", "pySHiELD"),
+requirements: list[str] = [
+    local_pkg("ndsl", "NDSL"),
+    local_pkg("pyfv3", "pyFV3"),
+    local_pkg("pyshield", "pySHiELD"),
     "dacite",
     "f90nml",
-    "numpy < 2.0.0",  # numpy 2.x has breaking API changes
+    "numpy < 2.0.0",
     "xarray",
-    "zarr < 3.0.0",  # zarr 3.x has breaking API changes
+    "zarr < 3.0.0",
 ]
 
-test_requirements = [
-    "mpi4py",
-    "nbmake",
-    "pytest",
-]
-
-dev_requirements = [
-    *test_requirements,
-    "pip-tools",  # for pip-compile
-    "pre-commit",
-]
-
-extras_require = {
-    "dev": dev_requirements,
-    "test": test_requirements,
-}
-
-
-setup(
-    author="Allen Institute for AI",
-    author_email="oliver.elbert@noaa.gov",
-    python_requires=">=3.8,<3.12",
-    classifiers=[
-        "Development Status :: 2 - Pre-Alpha",
-        "Intended Audience :: Developers",
-        "License :: OSI Approved :: BSD License",
-        "Natural Language :: English",
-        "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.8",
-        "Programming Language :: Python :: 3.9",
-        "Programming Language :: Python :: 3.10",
-        "Programming Language :: Python :: 3.11",
-    ],
-    install_requires=requirements,
-    extras_require=extras_require,
-    name="pace",
-    license="BSD license",
-    packages=find_namespace_packages(include=["pace", "pace.*"]),
-    include_package_data=True,
-    url="https://github.com/NOAA-GFDL/pace",
-    version="0.2.0",
-    zip_safe=False,
-)
+setup(install_requires=requirements)
