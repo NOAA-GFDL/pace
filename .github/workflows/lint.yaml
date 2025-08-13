@@ -1,6 +1,12 @@
 name: "Lint"
+
+# Run these these whenever ...
 on:
-  pull_request:
+  pull_request: # ... a PR is opened / updated
+  merge_group: # ... the PR is added to the merge queue
+  push:
+    branches:
+      - main # ... when merging into the main branch
 
 jobs:
   lint:
