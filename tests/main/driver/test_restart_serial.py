@@ -121,7 +121,7 @@ def test_restart_save_to_disk():
         for var in driver_state.physics_state.__dict__.keys():
             if isinstance(
                 driver_state.physics_state.__dict__[var],
-                np.ndarray,
+                Quantity,
             ):
                 np.testing.assert_allclose(
                     driver_state.physics_state.__dict__[var].data,
@@ -130,7 +130,7 @@ def test_restart_save_to_disk():
             else:
                 if var in restart_physics.keys():
                     raise KeyError(
-                        f"{var} is not a storage and \
+                        f"{var} is not a Quantity and \
                             should not be in physics restart file"
                     )
         # test we can use the saved driver config in the restart to load it
