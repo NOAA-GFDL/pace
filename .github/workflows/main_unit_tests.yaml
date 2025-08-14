@@ -14,7 +14,9 @@ on:
         required: false
   pull_request: # ... a PR is opened / updated
   merge_group:  # ... the PR is added to the merge queue
-  push:         # ... code is pushed to any branch
+  push:
+    branches:
+      - main # ... when merging into the main branch
 
 # cancel running jobs if theres a newer push
 concurrency:
