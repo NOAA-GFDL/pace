@@ -1,6 +1,8 @@
 name: "pace main unit tests"
+
+# Run these these whenever ...
 on:
-  workflow_call:
+  workflow_call: # ... called from a downstream repo
     inputs:
       component_trigger:
         type: boolean
@@ -10,8 +12,9 @@ on:
         type: string
         default: ''
         required: false
-  pull_request:
-  push:
+  pull_request: # ... a PR is opened / updated
+  merge_group:  # ... the PR is added to the merge queue
+  push:         # ... code is pushed to any branch
 
 # cancel running jobs if theres a newer push
 concurrency:
