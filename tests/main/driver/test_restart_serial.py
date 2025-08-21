@@ -122,6 +122,9 @@ def test_restart_save_to_disk():
             if isinstance(
                 driver_state.physics_state.__dict__[var],
                 np.ndarray,
+            ) or isinstance(
+                driver_state.physics_state.__dict__[var],
+                Quantity,
             ):
                 np.testing.assert_allclose(
                     driver_state.physics_state.__dict__[var].data,
