@@ -11,15 +11,11 @@ jobs:
     steps:
     - name: Checkout Files
       uses: actions/checkout@v5.0.0
+      with:
+        submodules: recursive
     - name: Build Dockerfile
       uses: docker/build-push-action@v6.18.0
       with:
         context: .
         push: false
         file: "Dockerfile"
-    - name: Build Dockerfile.nvhpc
-      uses: docker/build-push-action@v6.18.0
-      with:
-        context: .
-        push: false
-        file: "Dockerfile.nvhpc"
