@@ -44,9 +44,9 @@ jobs:
           auto-activate-base: false
           activate-environment: pace_test_env
 
-      # - name: Install mpi (MPICH flavor)
-      #   shell: bash -l {0}
-      #   run: pip install mpich
+      - name: Install mpi (MPICH flavor)
+        shell: bash -l {0}
+        run: conda install -c conda-forge mpich
 
       - name: "External trigger: Remove existing component in pace/develop"
         shell: bash -l {0}
