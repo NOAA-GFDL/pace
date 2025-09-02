@@ -32,9 +32,9 @@ jobs:
         uses: actions/checkout@v4
         with:
           submodules: 'recursive'
-          repository: fmalatino/pace
+          repository: NOAA-GFDL/pace
           path: pace
-          ref: conda-ci
+          ref: develop
 
       - name: Setup Miniconda
         uses: conda-incubator/setup-miniconda@v3
