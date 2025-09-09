@@ -1,0 +1,21 @@
+on:
+  push:
+    branches:
+      - 'develop'
+  schedule:
+    - cron: '0 0 * * 0' # sundays @ midnight
+
+jobs:
+  test-container-builds:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout Files
+        uses: actions/checkout@v5.0.0
+        with:
+          submodules: recursive
+      - name: Build Dockerfile
+        uses: docker/build-push-action@v6.18.0
+        with:
+          context: .
+          push: false
+          file: "Dockerfile"
