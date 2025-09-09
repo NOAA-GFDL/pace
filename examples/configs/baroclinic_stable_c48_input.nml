@@ -1,0 +1,179 @@
+! Example analytic test case for baroclinic_stable
+
+&diag_manager_nml
+    !flush_nc_files = .false.
+    prepend_date = .F.
+! this diag table creates a lot of files
+! next three lines are necessary
+    max_num_axis_sets = 100
+    max_files = 100
+    max_axes = 240
+    !do_diag_field_log = .T.
+/
+
+ &fms_affinity_nml
+    affinity = .false.
+/
+
+ &fms_io_nml
+       checksum_required   = .false.
+/
+
+ &fms_nml
+       clock_grain = 'ROUTINE',
+       domains_stack_size = 16000000,
+       print_memory_usage = .false.
+/
+
+ &fv_core_nml
+       layout   = 2,2
+       io_layout = 1,1
+       npx      = 49
+       npy      = 49
+       ntiles   = 6
+       npz    = 32
+       npz_type = 'gfs'
+       grid_type = 0
+       make_nh = .T.
+       fv_debug = .F.
+       range_warn = .F.
+       reset_eta = .F.
+       sg_cutoff = 150.e2 !replaces old "n_sponge"
+       fv_sg_adj = 3600
+       nudge_qv = .T.
+       RF_fast = .T.
+       tau_h2o = 0.
+       tau = 10.
+       rf_cutoff = 3000.
+       d2_bg_k1 = 0.20
+       d2_bg_k2 = 0.10 ! z2: increased
+       kord_tm = -9
+       kord_mt = 9
+       kord_wz = 9
+       kord_tr = 9
+       hydrostatic = .F.
+       phys_hydrostatic = .F.
+       use_hydro_pressure = .F.
+       beta = 0.
+       a_imp = 1.
+       p_fac = 0.05
+       k_split = 1
+       n_split = 1
+       nwat = 6
+       na_init = 0
+       d_ext = 0.0
+       dnats = 1
+       d2_bg = 0.
+       nord = 3
+       dddmp = 0.5
+       d4_bg = 0.15
+       do_vort_damp = .T.
+       external_ic = .F. !COLD START
+       is_ideal_case = .T.
+       mountain = .F.
+       hord_mt = 6
+       hord_vt = 6
+       hord_tm = 6
+       hord_dp = 6
+       hord_tr = 8 ! z2: changed
+       adjust_dry_mass = .F.
+       consv_te = 0.
+       consv_am = .T.
+       fill = .T.
+       dwind_2d = .F.
+       print_freq = 6
+       warm_start = .F.
+       z_tracer = .T.
+       fill_dp = .T.
+       adiabatic = .F.
+/
+
+ &integ_phys_nml
+       do_inline_mp = .T.
+       do_sat_adj = .T.
+/
+
+&fv_diag_plevs_nml
+    nplev=7
+    levs = 50,200,300,500,700,850,1000
+    levs_ave = 10,100,300,500,700,850,1000
+/
+
+&test_case_nml ! cold start
+    test_case = 12
+/
+
+ &main_nml
+       days  = 0
+       hours = 0
+       minutes = 0
+       seconds = 0
+       dt_atmos = 225
+       current_time =  0,0,0,0
+       atmos_nthreads = 2
+       use_hyper_thread = .true.
+/
+
+ &external_ic_nml
+       filtered_terrain = .T.
+       levp = 64
+       gfs_dwinds = .T.
+       checker_tr = .F.
+       nt_checker = 0
+/
+
+ &sim_phys_nml
+  do_GFDL_sim_phys = .F.
+/
+
+
+ &gfdl_mp_nml
+       do_sedi_heat = .T.
+       do_sedi_w = .T.
+       rad_snow = .true.
+       rad_graupel = .true.
+       rad_rain = .true.
+       const_vi = .F.
+       const_vs = .F.
+       const_vg = .F.
+       const_vr = .F.
+       vi_max = 1.
+       vs_max = 2.
+       vg_max = 16.
+       vr_max = 16.
+       qi_lim = 1.
+       prog_ccn = .false.
+       do_qa = .true.
+       tau_l2v = 300.
+       tau_v2l = 90. ! z7: enabled
+       do_cond_timescale = .true. ! z7: enabled
+       rthresh = 10.e-6  !   10.e-6  ! This is a key parameter for cloud water
+      dw_land  = 0.15
+      dw_ocean = 0.10
+    ql_mlt = 2.0e-3
+    qs_mlt = 1.e-6
+       qi0_crt = 8.E-5
+       qs0_crt = 3.0e-3
+       tau_i2s = 1000.
+       c_psaci = 0.05
+       c_pgacs = 0.01
+       rh_inc = 0.0
+       rh_inr = 0.0
+       ccn_l = 300.
+       ccn_o = 100.
+       c_paut =  0.55
+       z_slope_liq  = .T.
+       z_slope_ice  = .T.
+       fix_negative = .true.
+       irain_f = 0
+       icloud_f = 0
+/
+
+!# From LJZ mar 2019
+ &cld_eff_rad_nml
+       reiflag        = 4
+        rewmin = 5.0
+        rewmax = 10.0
+        reimin = 10.0
+        reimax = 150.0
+/

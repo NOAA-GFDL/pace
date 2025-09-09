@@ -18,7 +18,7 @@ def test_geos_wrapper():
                 "device_sync": False,
             }
         },
-        "initialization": {"type": "baroclinic"},
+        "initialization": {"type": "baroclinic_instability"},
         "nx_tile": 12,
         "nz": 91,
         "dt_atmos": 225,
