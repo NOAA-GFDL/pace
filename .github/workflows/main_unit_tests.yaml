@@ -25,6 +25,9 @@ concurrency:
 
 # TODO: Revert tests back to GFDL (not jjuyeonkim) after merging
 # https://github.com/NOAA-GFDL/NDSL/issues/64
+# For now, manually doing checkouts of NDSL, pyFV3, pySHiELD because
+# at this point, I don't know of a better way to checkout with
+# a specific branch name
 jobs:
   pace_main_unit_tests:
     runs-on: ubuntu-latest
@@ -33,9 +36,33 @@ jobs:
         if: ${{ inputs.component_trigger }}
         uses: actions/checkout@v4
         with:
-          submodules: 'recursive'
+          submodules: 'false'
           repository: jjuyeonkim/pace
           path: pace
+          ref: 20250908_namelist_2
+
+      - name: "Checkout NDSL recursively using 20250908_namelist_2 branch"
+        uses: actions/checkout@v5
+        with:
+          submodules: 'recursive'
+          repository: jjuyeonkim/ndsl
+          path: pace/NDSL
+          ref: 20250908_namelist_2
+
+      - name: "Checkout pyFV3 recursively using 20250908_namelist_2 branch"
+        uses: actions/checkout@v5
+        with:
+          submodules: 'recursive'
+          repository: jjuyeonkim/pyfv3
+          path: pace/pyFV3
+          ref: 20250908_namelist_2
+
+      - name: "Checkout pySHiELD recursively using 20250908_namelist_2 branch"
+        uses: actions/checkout@v5
+        with:
+          submodules: 'recursive'
+          repository: jjuyeonkim/pyshield
+          path: pace/pySHiELD
           ref: 20250908_namelist_2
 
       - name: Setup Python 3.11
