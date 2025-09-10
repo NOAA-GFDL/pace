@@ -46,7 +46,7 @@ jobs:
         with:
           submodules: 'recursive'
           repository: jjuyeonkim/ndsl
-          path: pace/NDSL
+          path: NDSL
           ref: 20250908_namelist_2
 
       - name: "Checkout pyFV3 recursively using 20250908_namelist_2 branch"
@@ -54,7 +54,7 @@ jobs:
         with:
           submodules: 'recursive'
           repository: jjuyeonkim/pyfv3
-          path: pace/pyFV3
+          path: pyFV3
           ref: 20250908_namelist_2
 
       - name: "Checkout pySHiELD recursively using 20250908_namelist_2 branch"
@@ -62,7 +62,7 @@ jobs:
         with:
           submodules: 'recursive'
           repository: jjuyeonkim/pyshield
-          path: pace/pySHiELD
+          path: pySHiELD
           ref: 20250908_namelist_2
 
       - name: Setup Python 3.11
