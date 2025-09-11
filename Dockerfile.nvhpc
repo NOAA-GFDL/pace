@@ -1,0 +1,71 @@
+FROM nvcr.io/nvidia/nvhpc:25.7-devel-cuda12.9-ubuntu22.04
+
+# Install Python 3.11 and essential packages
+RUN apt-get update && apt-get install -y \
+    software-properties-common \
+    make \
+    git \
+    wget \
+    curl \
+    && add-apt-repository ppa:deadsnakes/ppa \
+    && apt-get update && apt-get install -y \
+    python3.11 \
+    python3.11-dev \
+    python3.11-distutils \
+    python3-pip \
+    libgeos-dev \
+    libhdf5-serial-dev \
+    netcdf-bin \
+    libnetcdf-dev \
+    libproj-dev \
+    proj-bin \
+    proj-data \
+    && rm -rf /var/lib/apt/lists/*
+
+# Set Python 3.11 as default python3
+RUN update-alternatives --install /usr/bin/python3 python3 /usr/bin/python3.11 1 \
+    && update-alternatives --install /usr/bin/python python /usr/bin/python3.11 1
+
+RUN python3 -m pip install --upgrade pip setuptools wheel
+
+# Set NVHPC compilers as default (PATH and LD_LIBRARY_PATH already set by base image)
+ENV CC=nvc
+ENV CXX=nvc++
+ENV FC=nvfortran
+
+COPY . /pace
+
+RUN cd /pace && \
+    NOSWITCHERROR=1 \
+    CFLAGS="-noswitcherror" \
+    CXXFLAGS="-noswitcherror" \
+    python3 -m pip install .[test]
+
+RUN cd / && \
+    git clone https://github.com/ai2cm/fv3net
+
+ENV CFLAGS="-I/usr/include -DACCEPT_USE_OF_DEPRECATED_PROJ_API_H=1"
+
+# Install additional packages with CUDA support
+RUN python3 -m pip install --no-cache-dir \
+    matplotlib==3.10.0 \
+    ipyparallel==8.4.1 \
+    jupyterlab==3.4.4 \
+    shapely==1.8.5 \
+    cartopy==0.23.0 \
+    jupyterlab_code_formatter==1.5.2 \
+    isort==5.10.1 \
+    black==22.3.0 \
+    cupy-cuda12x \
+    /fv3net/external/vcm
+
+ENV PYTHONPATH=/fv3net/external/fv3viz:/pace/external/gt4py/src
+
+# NVHPC MPI environment variables
+ENV OMPI_ALLOW_RUN_AS_ROOT=1
+ENV OMPI_ALLOW_RUN_AS_ROOT_CONFIRM=1
+
+# CUDA environment variables
+ENV CUDA_HOME=/opt/nvidia/hpc_sdk/Linux_x86_64/25.7/cuda
+ENV PATH="${CUDA_HOME}/bin:${PATH}"
+ENV LD_LIBRARY_PATH="${CUDA_HOME}/lib64:${LD_LIBRARY_PATH}"

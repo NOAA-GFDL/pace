@@ -3,7 +3,7 @@ from unittest.mock import MagicMock
 import numpy as np
 import pytest
 
-from pyFV3.testing.validation import get_selective_class
+from pyfv3.testing.validation import get_selective_class
 
 
 class DummyClass:

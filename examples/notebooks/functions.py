@@ -36,7 +36,7 @@ from ndsl.grid import (
     VerticalGridData,
 )
 from ndsl.grid.gnomonic import great_circle_distance_lon_lat
-from pyFV3.stencils import FiniteVolumeFluxPrep, FiniteVolumeTransport, TracerAdvection
+from pyfv3.stencils import FiniteVolumeFluxPrep, FiniteVolumeTransport, TracerAdvection
 
 
 class GridType(enum.Enum):
@@ -184,7 +184,7 @@ def store_namelist_variables(local_variables: Dict[str, Any]) -> Dict[str, Any]:
 
 
 def define_dimensions(
-    namelistDict: Dict[str, Any]
+    namelistDict: Dict[str, Any],
 ) -> Tuple[Dict[str, int], Dict[str, Tuple[Any]], Dict[str, str], int]:
     """
     Use: dimensions =

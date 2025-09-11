@@ -1,6 +1,7 @@
 import os
 import shutil
 from datetime import datetime
+from pathlib import Path
 
 import numpy as np
 import xarray as xr
@@ -22,7 +23,8 @@ from pace import (
     GeneratedGridConfig,
     RestartConfig,
 )
-from pySHiELD import PHYSICS_PACKAGES
+from pyshield import PHYSICS_PACKAGES
+from tests.paths import EXAMPLE_CONFIGS_DIR
 
 
 DIR = os.path.dirname(os.path.abspath(__file__))
@@ -50,13 +52,7 @@ def test_default_save_restart():
 
 def test_restart_save_to_disk():
     try:
-        with open(
-            os.path.join(
-                DIR,
-                "../../../examples/configs/baroclinic_c12_write_restart.yaml",
-            ),
-            "r",
-        ) as f:
+        with open(EXAMPLE_CONFIGS_DIR / "baroclinic_c12_write_restart.yaml", "r") as f:
             driver_config = DriverConfig.from_dict(yaml.safe_load(f))
         backend = "numpy"
         mpi_comm = NullComm(rank=0, total_ranks=6, fill_value=0.0)
@@ -74,11 +70,15 @@ def test_restart_save_to_disk():
         )
         quantity_factory = QuantityFactory.from_backend(sizer=sizer, backend=backend)
 
-        eta_file = driver_config.grid_config.config.eta_file
-        (damping_coefficients, driver_grid_data, grid_data,) = GeneratedGridConfig(
+        eta_file = Path(driver_config.grid_config.config.eta_file)
+        (
+            damping_coefficients,
+            driver_grid_data,
+            grid_data,
+        ) = GeneratedGridConfig(
             eta_file=eta_file
         ).get_grid(quantity_factory, communicator)
-        init = AnalyticInit()
+        init = AnalyticInit(dycore_config=driver_config.dycore_config)
         driver_state = init.get_driver_state(
             quantity_factory=quantity_factory,
             communicator=communicator,
@@ -98,7 +98,7 @@ def test_restart_save_to_disk():
         )
 
         restart_dycore = xr.open_dataset(
-            f"RESTART/restart_dycore_state_{mpi_comm.rank}.nc"
+            Path("RESTART") / f"restart_dycore_state_{mpi_comm.rank}.nc"
         )
         for var in driver_state.dycore_state.__dict__.keys():
             if isinstance(driver_state.dycore_state.__dict__[var], Quantity):
@@ -116,12 +116,11 @@ def test_restart_save_to_disk():
         # TODO: the physics state isn't actually needed in the restart folders as
         # all prognostic state is in dycore state, we could refactor it out
         restart_physics = xr.open_dataset(
-            f"RESTART/restart_physics_state_{mpi_comm.rank}.nc"
+            Path("RESTART") / f"restart_physics_state_{mpi_comm.rank}.nc"
         )
         for var in driver_state.physics_state.__dict__.keys():
             if isinstance(
-                driver_state.physics_state.__dict__[var],
-                np.ndarray,
+                driver_state.physics_state.__dict__[var], (np.ndarray, Quantity)
             ):
                 np.testing.assert_allclose(
                     driver_state.physics_state.__dict__[var].data,
@@ -134,7 +133,7 @@ def test_restart_save_to_disk():
                             should not be in physics restart file"
                     )
         # test we can use the saved driver config in the restart to load it
-        with open("RESTART/restart.yaml", "r") as f:
+        with open(Path("RESTART") / "restart.yaml", "r") as f:
             restart_config = DriverConfig.from_dict(yaml.safe_load(f))
 
             (

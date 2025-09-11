@@ -1,6 +1,8 @@
 name: "pace main unit tests"
+
+# Run these these whenever ...
 on:
-  workflow_call:
+  workflow_call: # ... called from a downstream repo
     inputs:
       component_trigger:
         type: boolean
@@ -10,7 +12,11 @@ on:
         type: string
         default: ''
         required: false
-  pull_request:
+  pull_request: # ... a PR is opened / updated
+  merge_group:  # ... the PR is added to the merge queue
+  push:
+    branches:
+      - main # ... when merging into the main branch
 
 # cancel running jobs if theres a newer push
 concurrency:
@@ -20,57 +26,69 @@ concurrency:
 jobs:
   pace_main_unit_tests:
     runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/noaa-gfdl/miniforge:mpich
     steps:
-        - name: "External trigger: Checkout pace/develop"
-          if:  ${{ inputs.component_trigger }}
-          uses: actions/checkout@v4
-          with:
-            submodules: 'recursive'
-            repository: NOAA-GFDL/pace
-            path: pace
-            ref: develop
+      - name: "External trigger: Checkout pace/develop"
+        if: ${{ inputs.component_trigger }}
+        uses: actions/checkout@v5
+        with:
+          submodules: 'recursive'
+          repository: NOAA-GFDL/pace
+          path: pace
+          ref: develop
 
-        - name: "External trigger: Remove existing component in pace/develop"
-          if:  ${{ inputs.component_trigger }}
-          run: rm -rf ${GITHUB_WORKSPACE}/pace/${{inputs.component_name}}
+      - name: Setup Miniconda
+        uses: conda-incubator/setup-miniconda@v3
+        with:
+          python-version: 3.11.13
+          conda-remove-defaults: true
+          auto-activate-base: false
+          activate-environment: pace_test_env
 
-        - name: Checkout out hash that triggered CI
-          uses: actions/checkout@v4
-          with:
-            submodules: 'recursive'
-            path: pace/${{inputs.component_name}}
+      - name: Install mpi (MPICH flavor)
+        shell: bash -l {0}
+        run: pip install mpich
 
-        - name: install packages
-          if:  ${{ ! inputs.component_trigger }}
-          run: |
-            cd ${GITHUB_WORKSPACE}/pace
-            pip3 install --upgrade pip setuptools wheel
-            pip3 install -r requirements_dev.txt -c constraints.txt
+      - name: "External trigger: Remove existing component in pace/develop"
+        shell: bash -l {0}
+        if: ${{ inputs.component_trigger }}
+        run: rm -rf ${GITHUB_WORKSPACE}/pace/${{inputs.component_name}}
 
-        - name: "External trigger: Install packages"
-          if:  ${{ inputs.component_trigger }}
-          # Ignore `constraints.txt` when running as part of the NDSL pipeline
-          # to avoid false positives in package dependency resolution.
-          run: |
-            cd ${GITHUB_WORKSPACE}/pace
-            pip3 install --upgrade pip setuptools wheel
-            pip3 install -r requirements_dev.txt
+      - name: Checkout out hash that triggered CI
+        uses: actions/checkout@v5
+        with:
+          submodules: 'recursive'
+          path: pace/${{inputs.component_name}}
 
-        - name: prepare input files
-          run: |
-            cd ${GITHUB_WORKSPACE}/pace
-            mkdir tests/main/input
-            python3 examples/generate_eta_files.py
-            mv *eta*.nc tests/main/input
+      - name: Install packages
+        shell: bash -l {0}
+        run: |
+          cd ${GITHUB_WORKSPACE}/pace
+          pip install .[test]
+          pip install numpy==1.26.4
+          conda remove sqlite
 
-        - name: run tests
-          run: |
-            cd ${GITHUB_WORKSPACE}/pace
-            pytest -x tests/main
+      - name: Print versions
+        shell: bash -l {0}
+        run: |
+          python --version
+          pip --version
+          pip list
 
-        - name: run baroclinic
-          run: |
-            cd ${GITHUB_WORKSPACE}/pace
-            mpiexec -np 6 --oversubscribe python -m pace.run examples/configs/baroclinic_c12.yaml
+      - name: Prepare input files
+        shell: bash -l {0}
+        run: |
+          cd ${GITHUB_WORKSPACE}/pace
+          mkdir tests/main/input
+          python examples/generate_eta_files.py tests/main/input
+
+      - name: Run tests
+        shell: bash -l {0}
+        run: |
+          cd ${GITHUB_WORKSPACE}/pace
+          python -m pytest -x tests/main
+
+      - name: Run baroclinic test case
+        shell: bash -l {0}
+        run: |
+          cd ${GITHUB_WORKSPACE}/pace
+          mpiexec -np 6 --oversubscribe python -m pace.run examples/configs/baroclinic_c48_no_out.yaml

@@ -9,7 +9,7 @@ Pace is an implementation of the FV3GFS / SHiELD atmospheric model developed by 
 
 🚧 **WARNING** This repo is under active development - supported features and procedures can change rapidly and without notice. 🚧
 
-The repository model code is split between [pyFV3](https://github.com/NOAA-GFDL/pyFV3) for the dynamical core and [pySHiELD](https://github.com/NOAA-GFDL/pySHiELD) for the physics parametrization. A full depencies looks like the following:
+The repository model code is split between [pyFV3](https://github.com/NOAA-GFDL/pyFV3) for the dynamical core and [pySHiELD](https://github.com/NOAA-GFDL/pySHiELD) for the physics parametrization. A full dependencies looks like the following:
 
 ```mermaid
 flowchart TD
@@ -34,17 +34,6 @@ Pace requires:
 
 For GPU backends CUDA and/or ROCm is required depending on the targeted hardware.
 
-For GT stencils backends, you will also need the headers of the boost libraries in your `$PATH`. This could be down like this.
-
-```shell
-cd BOOST/ROOT
-wget https://boostorg.jfrog.io/artifactory/main/release/1.79.0/source/boost_1_79_0.tar.gz
-tar -xzf boost_1_79_0.tar.gz
-mkdir -p boost_1_79_0/include
-mv boost_1_79_0/boost boost_1_79_0/include/
-export BOOST_ROOT=BOOST/ROOT/boost_1_79_0
-```
-
 When cloning Pace you will need to update the repository's submodules as well:
 
 ```shell
@@ -60,14 +49,38 @@ git submodule update --init --recursive
 We recommend creating a python `venv` or `conda` environment specifically for Pace.
 
 ```shell
-python3 -m venv venv_name
-source venv_name/bin/activate
+python -m venv .venv
+source .venv/bin/activate
 ```
 
-Inside of your pace `venv` or conda environment pip install the Python requirements, GT4Py, and Pace:
+Inside of your pace `venv` or `conda` environment, install pace and its dependencies. For developers, we recommend an editable install with the `[dev]` extra:
 
 ```shell
-pip3 install -r requirements_dev.txt -c constraints.txt
+pip install -e .[dev]
+```
+
+To install editable versions of the submodules of Pace, use the `-e` flag followed by the name of the package (if editing the local version) or path to edited version of the submodule after base installation of Pace:
+
+```shell
+pip install -e .
+pip install -e NDSL
+# pip install -e /path/to/edited/NDSL
+pip install -e pyFV3
+# pip install -e /path/to/edited/pyFV3
+pip install -e pySHiELD
+# pip install -e /path/to/edited/pySHiELD
+```
+
+For running tests, we recommend to install pace with the `[test]` extra (avoid pulling other dev dependencies):
+
+```shell
+pip install .[test]
+```
+
+For just running pace, you don't need any extra:
+
+```shell
+pip install .
 ```
 
 Shell scripts to install Pace on specific machines such as Gaea can be found in `examples/build_scripts/`.
@@ -80,8 +93,7 @@ Before starting any run, including unit tests, the user must ensure that the pro
 
 ```shell
 mkdir tests/main/input
-python3 examples/generate_eta_files.py
-mv *eta*.nc tests/main/input
+python examples/generate_eta_files.py tests/main/input
 ```
 
 These commands will generate the files necessary and place them in the `tests/main/input` directory. Once the files are generated the `baroclinic_c12.yaml` configuration can be used to generate a run:
@@ -93,7 +105,7 @@ mpirun -n 6 python3 -m pace.run examples/configs/baroclinic_c12.yaml
 mpirun -n 6 --oversubscribe python3 -m pace.run examples/configs/baroclinic_c12.yaml
 ```
 
-After the run completes, you will see an output direcotry `output.zarr`. An example to visualize the output is provided in `examples/plot_output.py`. See the [driver example](examples/README.md) section for more details.
+After the run completes, you will see an output directory `output.zarr`. An example to visualize the output is provided in `examples/plot_output.py`. See the [driver example](examples/README.md) section for more details.
 
 ### Environment variable configuration
 

@@ -3,8 +3,8 @@ import numpy as np
 import pytest  # noqa
 
 from ndsl import NullComm
-from pyFV3 import DynamicalCore
-from pyFV3.wrappers import GeosDycoreWrapper
+from pyfv3 import DynamicalCore
+from pyfv3.wrappers import GeosDycoreWrapper
 
 
 def test_geos_wrapper():

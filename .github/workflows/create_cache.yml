@@ -1,0 +1,44 @@
+name: "Create GHA cache"
+
+# GitHub puts the following restrictions on cache sharing. PRs can access
+#
+# - caches that were created by the PR / earlier runs of the PR
+# - caches that were created on the target branch
+#
+# To get effective cache sharing between PRs, we create caches on the `develop`
+# branch (which is where almost all PRs merge into).
+
+on:
+  push:
+    branches: [develop]
+
+# Cancel running jobs if there's a newer push
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  # GitHub Actions cache of the pre-commit environment
+  pre-commit:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+
+      - uses: actions/cache@v4
+        id: cache
+        with:
+          path: ~/.cache/pre-commit
+          key: pre-commit_${{ env.pythonLocation }}_${{ hashFiles('.pre-commit-config.yaml') }}
+          lookup-only: true  # don't actually download the cache
+
+      - name: Populate pre-commit environment (if not cached)
+        if: steps.cache.outputs.cache-hit != 'true'
+        run: |
+          pip install pre-commit
+          pre-commit install --install-hooks

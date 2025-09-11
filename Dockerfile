@@ -5,7 +5,6 @@ RUN apt-get update && apt-get install -y make \
     libgeos-dev \
     libopenmpi3 \
     libopenmpi-dev \
-    libboost-all-dev \
     libhdf5-serial-dev \
     netcdf-bin \
     libnetcdf-dev \
@@ -21,7 +20,7 @@ RUN pip3 install --upgrade pip setuptools wheel
 COPY . /pace
 
 RUN cd /pace && \
-    pip3 install -r /pace/requirements_dev.txt -c /pace/constraints.txt
+    pip3 install .[test]
 
 RUN cd / && \
     git clone https://github.com/ai2cm/fv3net
@@ -29,7 +28,7 @@ RUN cd / && \
 ENV CFLAGS="-I/usr/include -DACCEPT_USE_OF_DEPRECATED_PROJ_API_H=1"
 
 RUN python3 -m pip install \
-    matplotlib==3.5.2 \
+    matplotlib==3.10.0 \
     ipyparallel==8.4.1 \
     jupyterlab==3.4.4 \
     shapely==1.8.5 \

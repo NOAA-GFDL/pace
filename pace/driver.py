@@ -37,9 +37,10 @@ from pace.grid import GeneratedGridConfig, GridInitializerSelector
 from pace.initialization import InitializerSelector
 from pace.safety_checks import SafetyChecker
 from pace.state import DriverState
-from pyFV3 import DynamicalCore, DynamicalCoreConfig
-from pySHiELD import Physics, PhysicsConfig
-from pySHiELD.update import update_atmos_state
+from pyfv3 import DynamicalCore, DynamicalCoreConfig
+from pyfv3.initialization.analytic_init import AnalyticCase
+from pyshield import Physics, PhysicsConfig
+from pyshield.update import update_atmos_state
 
 
 try:
@@ -266,9 +267,6 @@ class DriverConfig:
         kwargs["comm_config"] = CreatesCommSelector.from_dict(
             kwargs.get("comm_config", {})
         )
-        kwargs["initialization"] = InitializerSelector.from_dict(
-            kwargs["initialization"]
-        )
         if "grid_config" in kwargs:
             kwargs["grid_config"] = GridInitializerSelector.from_dict(
                 kwargs["grid_config"]
@@ -279,6 +277,17 @@ class DriverConfig:
                 kwargs["dycore_config"].grid_type = grid_type
                 if grid_type > 3:
                     kwargs["dycore_config"].ntiles = 1
+
+        analytic_hooks = {}
+        if kwargs["initialization"]["type"] == "analytic":
+            kwargs["initialization"]["config"]["dycore_config"] = kwargs[
+                "dycore_config"
+            ]
+            analytic_hooks[AnalyticCase] = AnalyticCase
+        kwargs["initialization"] = InitializerSelector.from_dict(
+            kwargs["initialization"],
+            hooks=analytic_hooks,
+        )
 
         if (
             isinstance(kwargs["stencil_config"], dict)
@@ -291,10 +300,10 @@ class DriverConfig:
             isinstance(kwargs["stencil_config"], dict)
             and "compilation_config" in kwargs["stencil_config"].keys()
         ):
-            kwargs["stencil_config"][
-                "compilation_config"
-            ] = CompilationConfig.from_dict(
-                data=kwargs["stencil_config"]["compilation_config"]
+            kwargs["stencil_config"]["compilation_config"] = (
+                CompilationConfig.from_dict(
+                    data=kwargs["stencil_config"]["compilation_config"]
+                )
             )
 
         return dacite.from_dict(
@@ -322,6 +331,9 @@ class DriverConfig:
             config_dict["dycore_config"].pop(field, None)
             config_dict["physics_config"].pop(field, None)
         config_dict["initialization"]["type"] = "restart"
+        # Remove existing initialization config and repopulate
+        config_dict["initialization"].pop("config")
+        config_dict["initialization"]["config"] = {}
         config_dict["initialization"]["config"]["start_time"] = time
         config_dict["initialization"]["config"]["path"] = restart_path
         # convert physics package enum to str
@@ -471,7 +483,11 @@ class Driver:
                 stencil_compare_comm=stencil_compare_comm,
             )
             ndsl_log.info("setting up grid started")
-            (damping_coefficients, driver_grid_data, grid_data,) = self.config.get_grid(
+            (
+                damping_coefficients,
+                driver_grid_data,
+                grid_data,
+            ) = self.config.get_grid(
                 quantity_factory=self.quantity_factory,
                 communicator=communicator,
             )

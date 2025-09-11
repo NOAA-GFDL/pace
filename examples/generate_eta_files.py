@@ -1,3 +1,6 @@
+import sys
+from pathlib import Path
+
 import numpy as np
 import xarray as xr
 
@@ -6,10 +9,17 @@ import xarray as xr
 This notebook uses the python xarray module
 to create an eta_file containing ak and bk coefficients
 for km=79 and km=91.  The coefficients are written out to
-eta79.nc and eta91.nc netcdf files respectively
+`eta79.nc` and `eta91.nc` netcdf files respectively in the
+given folder (defaults to `./` if not provided).
 
-To run this script:  `python3 ./generate_eta_files.py`
+To run this script:  `python3 ./generate_eta_files.py <folder>`
 """
+
+folder = Path("." if len(sys.argv) < 2 else sys.argv[1])
+if not folder.exists():
+    raise ValueError(f"Cannot open folder '{folder}'. Make sure it exists.")
+if not folder.is_dir():
+    raise ValueError(f"Expected '{folder}' to be a directory.")
 
 # km = 79
 ak = xr.DataArray(
@@ -189,7 +199,7 @@ bk = xr.DataArray(
     ),
 )
 coefficients = xr.Dataset(data_vars={"ak": ak, "bk": bk})
-coefficients.to_netcdf("eta79.nc")
+coefficients.to_netcdf(Path(folder) / "eta79.nc")
 
 
 # km = 91
@@ -394,6 +404,4 @@ bk = xr.DataArray(
     ),
 )
 coefficients = xr.Dataset(data_vars={"ak": ak, "bk": bk})
-coefficients.to_netcdf("eta91.nc")
-
-# km =
+coefficients.to_netcdf(Path(folder) / "eta91.nc")
