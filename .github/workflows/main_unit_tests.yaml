@@ -38,6 +38,9 @@ concurrency:
 jobs:
   pace_main_unit_tests:
     runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -el {0}
     steps:
       - name: "Checkout pace@20250908_namelist_2"
         uses: actions/checkout@v5
@@ -84,43 +87,36 @@ jobs:
           activate-environment: pace_test_env
 
       - name: Install mpi (MPICH flavor)
-        shell: bash -l {0}
         run: pip install mpich
 
       - name: "External trigger: Remove existing component in pace/develop"
-        shell: bash -l {0}
         if: ${{ inputs.component_trigger }}
         run: rm -rf ${GITHUB_WORKSPACE}/pace/${{inputs.component_name}}
 
       - name: Install packages
-        shell: bash -l {0}
         run: |
           cd ${GITHUB_WORKSPACE}/pace
           pip install .[test]
           pip install numpy==1.26.4
 
       - name: Print versions
-        shell: bash -l {0}
         run: |
           python --version
           pip --version
           pip list
 
       - name: Prepare input files
-        shell: bash -l {0}
         run: |
           cd ${GITHUB_WORKSPACE}/pace
           mkdir tests/main/input
           python examples/generate_eta_files.py tests/main/input
 
       - name: Run tests
-        shell: bash -l {0}
         run: |
           cd ${GITHUB_WORKSPACE}/pace
           python -m pytest -x tests/main
 
       - name: Run baroclinic test case
-        shell: bash -l {0}
         run: |
           cd ${GITHUB_WORKSPACE}/pace
           mpiexec -np 6 python -m pace.run examples/configs/baroclinic_c48_no_out.yaml
