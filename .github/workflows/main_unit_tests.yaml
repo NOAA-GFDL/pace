@@ -1,3 +1,15 @@
+# TODO: Revert tests back to NOAA-GFDL version (not jjuyeonkim) after
+# NDSL/issues#64's PRs close and are all merged. These PRs include:
+# https://github.com/NOAA-GFDL/NDSL/pull/218
+# https://github.com/NOAA-GFDL/PyFV3/pull/83
+# https://github.com/NOAA-GFDL/PySHiELD/pull/58
+# https://github.com/NOAA-GFDL/pace/pull/145
+#
+# For now, I'm manually doing checkouts of NDSL, pyFV3, pySHiELD
+# submodules because I don't know of a better way to checkout
+# submodules using a specific branch name. I've also
+# commented out the step "Checkout out hash that triggered CI"
+#
 name: "pace main unit tests"
 
 # Run these these whenever ...
@@ -15,55 +27,80 @@ on:
   pull_request: # ... a PR is opened / updated
   merge_group:  # ... the PR is added to the merge queue
   push:
+    inputs:
+      component_trigger:
+        type: boolean
+        default: true
+        required: false
+      component_name:
+        type: string
+        default: ''
+        required: false
     branches:
-      - main # ... when merging into the main branch
+      - 20250908_namelist_2
 
 # cancel running jobs if theres a newer push
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
-# TODO: Revert tests back to GFDL (not jjuyeonkim) after merging
-# https://github.com/NOAA-GFDL/NDSL/issues/64
-# For now, manually doing checkouts of NDSL, pyFV3, pySHiELD because
-# at this point, I don't know of a better way to checkout with
-# a specific branch name
 jobs:
   pace_main_unit_tests:
     runs-on: ubuntu-latest
     steps:
-      - name: "External trigger: Checkout pace/develop"
-        if: ${{ inputs.component_trigger }}
-        uses: actions/checkout@v4
+      - name: "Checkout pace@20250908_namelist_2"
+        uses: actions/checkout@v5
         with:
           submodules: 'false'
           repository: jjuyeonkim/pace
           path: pace
           ref: 20250908_namelist_2
+          fetch-depth: 0
 
-      - name: "Checkout NDSL recursively using 20250908_namelist_2 branch"
+      - name: "Checkout NDSL"
         uses: actions/checkout@v5
         with:
           submodules: 'recursive'
           repository: jjuyeonkim/ndsl
-          path: NDSL
+          path: pace/NDSL
           ref: 20250908_namelist_2
+          fetch-depth: 0
 
-      - name: "Checkout pyFV3 recursively using 20250908_namelist_2 branch"
+      - name: "Checkout pyFV3"
         uses: actions/checkout@v5
         with:
           submodules: 'recursive'
           repository: jjuyeonkim/pyfv3
-          path: pyFV3
+          path: pace/pyFV3
           ref: 20250908_namelist_2
+          fetch-depth: 0
 
-      - name: "Checkout pySHiELD recursively using 20250908_namelist_2 branch"
+      - name: "Checkout pySHiELD"
         uses: actions/checkout@v5
         with:
           submodules: 'recursive'
           repository: jjuyeonkim/pyshield
-          path: pySHiELD
+          path: pace/pySHiELD
           ref: 20250908_namelist_2
+          fetch-depth: 0
+
+      - name: "Sanity Check 1"
+        run: |
+          echo "GITHUB_WORKSPACE: " ${GITHUB_WORKSPACE}
+          echo "pwd: "
+          pwd
+          echo "ls ${GITHUB_WORKSPACE}/pace"
+          ls "${GITHUB_WORKSPACE}/pace"
+          echo ""
+          echo "ls ${GITHUB_WORKSPACE}/pace/NDSL"
+          ls "${GITHUB_WORKSPACE}/pace/NDSL"
+          echo ""
+          echo "ls ${GITHUB_WORKSPACE}/pace/pyFV3"
+          ls "${GITHUB_WORKSPACE}/pace/pyFV3"
+          echo ""
+          echo "ls ${GITHUB_WORKSPACE}/pace/pySHiELD"
+          ls "${GITHUB_WORKSPACE}/pace/pySHiELD"
+          echo ""
 
       - name: Setup Python 3.11
         uses: actions/setup-python@v5
@@ -77,11 +114,18 @@ jobs:
         if: ${{ inputs.component_trigger }}
         run: rm -rf ${GITHUB_WORKSPACE}/pace/${{inputs.component_name}}
 
-      - name: Checkout out hash that triggered CI
-        uses: actions/checkout@v4
-        with:
-          submodules: 'recursive'
-          path: pace/${{inputs.component_name}}
+      #- name: Checkout out hash that triggered CI
+      #  uses: actions/checkout@v4
+      #  with:
+      #    submodules: 'recursive'
+      #    path: pace/${{inputs.component_name}}
+
+      - name: "Sanity Check 2"
+        run: |
+          git -C ${GITHUB_WORKSPACE}/pace log -1
+          git -C ${GITHUB_WORKSPACE}/pace/NDSL log -1
+          git -C ${GITHUB_WORKSPACE}/pace/pyFV3 log -1
+          git -C ${GITHUB_WORKSPACE}/pace/pySHiELD log -1
 
       - name: Install packages
         run: |
