@@ -1,13 +1,13 @@
-# TODO Revert the submodules after completing Namelist Refactor: NDSL Issue#64
+
 [submodule "NDSL"]
 	path = NDSL
-	url = git@github.com:jjuyeonkim/NDSL.git
-	branch = 20250908_namelist_2
+	url = https://github.com/NOAA-GFDL/NDSL.git
+	branch = develop
 [submodule "pyFV3"]
 	path = pyFV3
-	url = git@github.com:jjuyeonkim/PyFV3.git
-	branch = 20250908_namelist_2
+	url = https://github.com/NOAA-GFDL/PyFV3.git
+	branch = develop
 [submodule "pySHiELD"]
 	path = pySHiELD
-	url = git@github.com:jjuyeonkim/PySHiELD.git
-	branch = 20250908_namelist_2
+	url = https://github.com/NOAA-GFDL/PySHiELD.git
+	branch = develop

@@ -27,15 +27,6 @@ on:
   pull_request: # ... a PR is opened / updated
   merge_group:  # ... the PR is added to the merge queue
   push:
-    inputs:
-      component_trigger:
-        type: boolean
-        default: true
-        required: false
-      component_name:
-        type: string
-        default: ''
-        required: false
     branches:
       - 20250908_namelist_2
 
@@ -84,24 +75,6 @@ jobs:
           ref: 20250908_namelist_2
           fetch-depth: 0
 
-      - name: "Sanity Check 1"
-        run: |
-          echo "GITHUB_WORKSPACE: " ${GITHUB_WORKSPACE}
-          echo "pwd: "
-          pwd
-          echo "ls ${GITHUB_WORKSPACE}/pace"
-          ls "${GITHUB_WORKSPACE}/pace"
-          echo ""
-          echo "ls ${GITHUB_WORKSPACE}/pace/NDSL"
-          ls "${GITHUB_WORKSPACE}/pace/NDSL"
-          echo ""
-          echo "ls ${GITHUB_WORKSPACE}/pace/pyFV3"
-          ls "${GITHUB_WORKSPACE}/pace/pyFV3"
-          echo ""
-          echo "ls ${GITHUB_WORKSPACE}/pace/pySHiELD"
-          ls "${GITHUB_WORKSPACE}/pace/pySHiELD"
-          echo ""
-
       - name: Setup Miniconda
         uses: conda-incubator/setup-miniconda@v3
         with:
@@ -118,19 +91,6 @@ jobs:
         shell: bash -l {0}
         if: ${{ inputs.component_trigger }}
         run: rm -rf ${GITHUB_WORKSPACE}/pace/${{inputs.component_name}}
-
-      #- name: Checkout out hash that triggered CI
-      #  uses: actions/checkout@v4
-      #  with:
-      #    submodules: 'recursive'
-      #    path: pace/${{inputs.component_name}}
-
-      - name: "Sanity Check 2"
-        run: |
-          git -C ${GITHUB_WORKSPACE}/pace log -1
-          git -C ${GITHUB_WORKSPACE}/pace/NDSL log -1
-          git -C ${GITHUB_WORKSPACE}/pace/pyFV3 log -1
-          git -C ${GITHUB_WORKSPACE}/pace/pySHiELD log -1
 
       - name: Install packages
         shell: bash -l {0}
@@ -163,4 +123,4 @@ jobs:
         shell: bash -l {0}
         run: |
           cd ${GITHUB_WORKSPACE}/pace
-          mpiexec -np 6 --oversubscribe python -m pace.run examples/configs/baroclinic_c48_no_out.yaml
+          mpiexec -np 6 python -m pace.run examples/configs/baroclinic_c48_no_out.yaml
