@@ -138,7 +138,6 @@ jobs:
           cd ${GITHUB_WORKSPACE}/pace
           pip install .[test]
           pip install numpy==1.26.4
-          conda remove sqlite
 
       - name: Print versions
         shell: bash -l {0}
