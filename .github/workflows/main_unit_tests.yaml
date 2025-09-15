@@ -5,10 +5,6 @@
 # https://github.com/NOAA-GFDL/PySHiELD/pull/58
 # https://github.com/NOAA-GFDL/pace/pull/145
 #
-# For now, I'm manually doing checkouts of NDSL, pyFV3, pySHiELD
-# submodules because I don't know of a better way to checkout
-# submodules using a specific branch name. 
-#
 name: "pace main unit tests"
 
 # Run these these whenever ...
@@ -38,15 +34,6 @@ jobs:
   pace_main_unit_tests:
     runs-on: ubuntu-latest
     steps:
-      - name: "Checkout pace@20250908_namelist_2"
-        uses: actions/checkout@v5
-        with:
-          submodules: 'false'
-          repository: jjuyeonkim/pace
-          path: pace
-          ref: 20250908_namelist_4_CI_TEST
-          fetch-depth: 0
-
       - name: Setup Miniconda
         uses: conda-incubator/setup-miniconda@v3
         with:
@@ -59,10 +46,44 @@ jobs:
         shell: bash -l {0}
         run: pip install mpich
 
-      - name: "External trigger: Remove existing component in pace/develop"
-        shell: bash -l {0}
-        if: ${{ inputs.component_trigger }}
-        run: rm -rf ${GITHUB_WORKSPACE}/pace/${{inputs.component_name}}
+      - name: Checkout Pace
+        uses: actions/checkout@v5
+        with:
+          submodules: 'false'
+          repository: jjuyeonkim/pace
+          path: pace
+          ref: 20250908_namelist_2
+
+      - name: "Checkout NDSL"
+        uses: actions/checkout@v5
+        with:
+          submodules: 'recursive'
+          repository: jjuyeonkim/ndsl
+          path: pace/NDSL
+          ref: 20250908_namelist_2
+
+      - name: "Checkout pyFV3"
+        uses: actions/checkout@v5
+        with:
+          submodules: 'recursive'
+          repository: jjuyeonkim/pyfv3
+          path: pace/pyFV3
+          ref: 20250908_namelist_2
+
+      - name: "Checkout pySHiELD"
+        uses: actions/checkout@v5
+        with:
+          submodules: 'recursive'
+          repository: jjuyeonkim/pyshield
+          path: pace/pySHiELD
+          ref: 20250908_namelist_2
+
+      - name: "Git log checks"
+        run: |
+          git -C ${GITHUB_WORKSPACE}/pace log -1
+          git -C ${GITHUB_WORKSPACE}/pace/NDSL log -1
+          git -C ${GITHUB_WORKSPACE}/pace/pyFV3 log -1
+          git -C ${GITHUB_WORKSPACE}/pace/pySHiELD log -1
 
       - name: Install packages
         shell: bash -l {0}
@@ -70,7 +91,6 @@ jobs:
           cd ${GITHUB_WORKSPACE}/pace
           pip install .[test]
           pip install numpy==1.26.4
-          #conda remove sqlite
 
       - name: Print versions
         shell: bash -l {0}
