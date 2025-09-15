@@ -7,8 +7,7 @@
 #
 # For now, I'm manually doing checkouts of NDSL, pyFV3, pySHiELD
 # submodules because I don't know of a better way to checkout
-# submodules using a specific branch name. I've also
-# commented out the step "Checkout out hash that triggered CI"
+# submodules using a specific branch name. 
 #
 name: "pace main unit tests"
 
@@ -48,34 +47,7 @@ jobs:
           submodules: 'false'
           repository: jjuyeonkim/pace
           path: pace
-          ref: 20250908_namelist_2
-          fetch-depth: 0
-
-      - name: "Checkout NDSL"
-        uses: actions/checkout@v5
-        with:
-          submodules: 'recursive'
-          repository: jjuyeonkim/ndsl
-          path: pace/NDSL
-          ref: 20250908_namelist_2
-          fetch-depth: 0
-
-      - name: "Checkout pyFV3"
-        uses: actions/checkout@v5
-        with:
-          submodules: 'recursive'
-          repository: jjuyeonkim/pyfv3
-          path: pace/pyFV3
-          ref: 20250908_namelist_2
-          fetch-depth: 0
-
-      - name: "Checkout pySHiELD"
-        uses: actions/checkout@v5
-        with:
-          submodules: 'recursive'
-          repository: jjuyeonkim/pyshield
-          path: pace/pySHiELD
-          ref: 20250908_namelist_2
+          ref: 20250908_namelist_4_CI_TEST
           fetch-depth: 0
 
       - name: Setup Miniconda
