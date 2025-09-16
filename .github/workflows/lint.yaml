@@ -24,6 +24,8 @@ jobs:
         uses: actions/checkout@v5
         with:
           submodules: 'false'
+          repository: jjuyeonkim/pace
+          path: pace
           ref: 20250908_namelist_2
 
       - name: "Checkout NDSL"
