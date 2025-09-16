@@ -1,3 +1,10 @@
+# TODO: Revert tests back to NOAA-GFDL version (not jjuyeonkim) after
+# NDSL/issues#64's PRs close and are all merged. These PRs include:
+# https://github.com/NOAA-GFDL/NDSL/pull/218
+# https://github.com/NOAA-GFDL/PyFV3/pull/83
+# https://github.com/NOAA-GFDL/PySHiELD/pull/58
+# https://github.com/NOAA-GFDL/pace/pull/145
+#
 name: "Lint"
 
 # Run these these whenever ...
@@ -7,15 +14,48 @@ on:
   push:
     branches:
       - main # ... when merging into the main branch
+      - 20250908_namelist_2
 
 jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - name: Checkout repository
+      - name: Checkout Pace
+        uses: actions/checkout@v5
+        with:
+          submodules: 'false'
+          ref: 20250908_namelist_2
+
+      - name: "Checkout NDSL"
         uses: actions/checkout@v5
         with:
           submodules: 'recursive'
+          repository: jjuyeonkim/ndsl
+          path: pace/NDSL
+          ref: 20250908_namelist_2
+
+      - name: "Checkout pyFV3"
+        uses: actions/checkout@v5
+        with:
+          submodules: 'recursive'
+          repository: jjuyeonkim/pyfv3
+          path: pace/pyFV3
+          ref: 20250908_namelist_2
+
+      - name: "Checkout pySHiELD"
+        uses: actions/checkout@v5
+        with:
+          submodules: 'recursive'
+          repository: jjuyeonkim/pyshield
+          path: pace/pySHiELD
+          ref: 20250908_namelist_2
+
+      - name: "Git log checks"
+        run: |
+          git -C ${GITHUB_WORKSPACE}/pace log -1
+          git -C ${GITHUB_WORKSPACE}/pace/NDSL log -1
+          git -C ${GITHUB_WORKSPACE}/pace/pyFV3 log -1
+          git -C ${GITHUB_WORKSPACE}/pace/pySHiELD log -1
 
       - name: Step Python 3.11
         uses: actions/setup-python@v5

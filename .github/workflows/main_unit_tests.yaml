@@ -23,6 +23,7 @@ on:
   merge_group:  # ... the PR is added to the merge queue
   push:
     branches:
+      - main
       - 20250908_namelist_2
 
 # cancel running jobs if theres a newer push
