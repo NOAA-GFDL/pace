@@ -109,12 +109,12 @@ After the run completes, you will see an output directory `output.zarr`. An exam
 
 ### Environment variable configuration
 
-- `PACE_CONSTANTS`: Pace is bundled with various constants.
+- `NDSL_CONSTANTS`: Pace is bundled with various constants.
   - `GFDL` NOAA's FV3 dynamical core constants (original port)
   - `GFS` Constant as defined in NOAA GFS
   - `GEOS`  Constant as defined in GEOS v13
-- `PACE_FLOAT_PRECISION`: default precision of the field & scalars in the numerics. Default to 64.
-- `PACE_LOGLEVEL`: logging level to display (DEBUG, INFO, WARNING, ERROR, CRITICAL). Default to INFO.
+- `NDSL_LITERAL_PRECISION`: default precision of the field & scalars in the numerics. Default to 64.
+- `NDSL_LOGLEVEL`: logging level to display (DEBUG, INFO, WARNING, ERROR, CRITICAL). Default to INFO.
 
 ## Quickstart - Docker
 
