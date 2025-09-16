@@ -114,7 +114,7 @@ def setup_dycore(
         sizer=sizer, comm=communicator
     )
     quantity_factory = QuantityFactory.from_backend(sizer=sizer, backend=backend)
-    eta_file = "tests/main/input/eta79.nc"
+    eta_file = "NDSL/tests/data/eta/eta79.nc"
     metric_terms = MetricTerms(
         quantity_factory=quantity_factory,
         communicator=communicator,
