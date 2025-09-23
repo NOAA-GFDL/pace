@@ -10,7 +10,7 @@ grid_config:
   config:
     grid_type: 0
     grid_file_path: "tests/main/input/C12.tile"
-    eta_file: 'tests/main/input/eta79.nc'
+    eta_file: 'NDSL/tests/data/eta/eta79.nc'
 initialization:
   type: analytic
   config:

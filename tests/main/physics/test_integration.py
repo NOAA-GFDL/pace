@@ -72,7 +72,7 @@ def setup_physics():
     metric_terms = MetricTerms(
         quantity_factory=quantity_factory,
         communicator=communicator,
-        eta_file=Path("tests/main/input/eta79.nc"),
+        eta_file=Path("NDSL/tests/data/eta/eta79.nc"),
     )
     grid_data = GridData.new_from_metric_terms(metric_terms)
     physics = Physics(

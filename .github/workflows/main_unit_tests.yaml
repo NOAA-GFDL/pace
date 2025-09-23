@@ -72,12 +72,6 @@ jobs:
           pip --version
           pip list
 
-      - name: Prepare input files
-        run: |
-          cd ${GITHUB_WORKSPACE}/pace
-          mkdir tests/main/input
-          python examples/generate_eta_files.py tests/main/input
-
       - name: Run tests
         run: |
           cd ${GITHUB_WORKSPACE}/pace

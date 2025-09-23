@@ -37,7 +37,7 @@ def test_cartesian_grid_generation(
         dx_const=dx_const,
         dy_const=dy_const,
         deglat=deglat,
-        eta_file=Path("tests/main/input/eta79.nc"),
+        eta_file=Path("NDSL/tests/data/eta/eta79.nc"),
     )
     assert np.all(grid_generator.lat_agrid.data == deglat * PI / 180.0)
     assert np.all(grid_generator.lon_agrid.data == 0.0)

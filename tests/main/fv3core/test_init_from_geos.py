@@ -76,7 +76,7 @@ def test_geos_wrapper():
             "n_sponge": 48,
         },
         "grid_config": {
-            "config": {"eta_file": "tests/main/input/eta91.nc"},
+            "config": {"eta_file": "NDSL/tests/data/eta/eta91.nc"},
         },
     }
 
