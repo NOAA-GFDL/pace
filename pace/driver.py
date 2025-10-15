@@ -239,10 +239,21 @@ class DriverConfig:
                         "as it is determined based on top-level configuration"
                     )
 
+            # TODO - After pyFV3 PR #88, replace dycore dacite cmd with:
+            # kwargs["dycore_config"] = DynamicalCoreConfig.from_dict(
+            #     kwargs.get("dycore_config", {})
+            # )
+            dycore_dacite_config = dacite.Config(
+                strict=True,
+                type_hooks={
+                    Tuple[int, int]: lambda x: tuple(x),
+                    Tuple[str, ...]: lambda x: tuple(x) if x is not None else None,
+                },
+            )
             kwargs["dycore_config"] = dacite.from_dict(
                 data_class=DynamicalCoreConfig,
                 data=kwargs.get("dycore_config", {}),
-                config=dacite.Config(strict=True),
+                config=dycore_dacite_config,
             )
 
         if isinstance(kwargs["physics_config"], dict):
