@@ -39,13 +39,10 @@ jobs:
           path: pace
           ref: develop
 
-      - name: Setup Miniconda
-        uses: conda-incubator/setup-miniconda@v3
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
         with:
-          python-version: 3.11.13
-          conda-remove-defaults: true
-          auto-activate-base: false
-          activate-environment: pace_test_env
+          python-version: '3.11'
 
       - name: Install mpi (MPICH flavor)
         run: pip install mpich
