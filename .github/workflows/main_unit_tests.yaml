@@ -50,6 +50,10 @@ jobs:
       - name: Install mpi (MPICH flavor)
         run: pip install mpich
 
+      - name: Install numpy==1.26.4
+        # Front-load installing numpy to force it's usage
+        run: pip install numpy==1.26.4
+
       - name: "External trigger: Remove existing component in pace/develop"
         if: ${{ inputs.component_trigger }}
         run: rm -rf ${GITHUB_WORKSPACE}/pace/${{inputs.component_name}}
@@ -64,7 +68,6 @@ jobs:
         run: |
           cd ${GITHUB_WORKSPACE}/pace
           pip install .[test]
-          pip install numpy==1.26.4
 
       - name: Print versions
         run: |
