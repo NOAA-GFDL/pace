@@ -44,7 +44,12 @@ def test_zselect_raises_error_if_not_3d(tmpdir):
         result = config.diagnostics_factory(unittest.mock.MagicMock())
         quantity_factory = QuantityFactory.from_backend(
             sizer=SubtileGridSizer.from_tile_params(
-                nx=12, ny=12, nz=79, n_halo=3, extra_dim_lengths={}, layout=(1, 1)
+                nx_tile=12,
+                ny_tile=12,
+                nz=79,
+                n_halo=3,
+                extra_dim_lengths={},
+                layout=(1, 1),
             ),
             backend="numpy",
         )
@@ -61,7 +66,12 @@ def test_zselect_raises_error_if_3rd_dim_not_z(tmpdir):
         result = config.diagnostics_factory(unittest.mock.MagicMock())
         quantity_factory = QuantityFactory.from_backend(
             sizer=SubtileGridSizer.from_tile_params(
-                nx=12, ny=12, nz=79, n_halo=3, extra_dim_lengths={}, layout=(1, 1)
+                nx_tile=12,
+                ny_tuke=12,
+                nz=79,
+                n_halo=3,
+                extra_dim_lengths={},
+                layout=(1, 1),
             ),
             backend="numpy",
         )
