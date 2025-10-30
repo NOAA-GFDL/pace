@@ -243,21 +243,8 @@ class DriverConfig:
             )
 
         if isinstance(kwargs["physics_config"], dict):
-            # TODO - After pySHiELD PR #68, replace physics dacite cmd with:
-            # kwargs["physics_config"] = PhysicsConfig.from_dict(
-            #     kwargs.get("physics_config", {})
-            # )
-            phys_dacite_config = dacite.Config(
-                strict=True,
-                type_hooks={
-                    Tuple[int, int]: lambda x: tuple(x),
-                    Tuple[str, ...]: lambda x: tuple(x) if x is not None else None,
-                },
-            )
-            kwargs["physics_config"] = dacite.from_dict(
-                data_class=PhysicsConfig,
-                data=kwargs.get("physics_config", {}),
-                config=phys_dacite_config,
+            kwargs["physics_config"] = PhysicsConfig.from_dict(
+                kwargs.get("physics_config", {})
             )
 
         kwargs["layout"] = tuple(kwargs["layout"])
