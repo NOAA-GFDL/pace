@@ -1,6 +1,6 @@
 import dataclasses
-from dataclasses import fields
-from typing import List
+from pathlib import Path
+from typing import Self
 
 import xarray as xr
 
@@ -8,7 +8,6 @@ import ndsl.dsl.gt4py_utils as gt_utils
 from ndsl import Quantity, QuantityFactory, SubtileGridSizer
 from ndsl.constants import N_HALO_DEFAULT, X_DIM, Y_DIM, Z_DIM
 from ndsl.dsl.typing import Float
-from ndsl.filesystem import get_fs
 from ndsl.grid import DampingCoefficients, DriverGridData, GridData
 from ndsl.typing import Communicator
 from pyfv3 import DycoreState
@@ -18,7 +17,7 @@ from pyshield import PHYSICS_PACKAGES, PhysicsState
 @dataclasses.dataclass()
 class TendencyState:
     """
-    Accumulated tendencies from physical parameterizations to be applied
+    Accumulated tendencies from physical parametrizations to be applied
     to the dynamical core model state.
     """
 
@@ -48,7 +47,7 @@ class TendencyState:
     )
 
     @classmethod
-    def init_zeros(cls, quantity_factory: QuantityFactory) -> "TendencyState":
+    def init_zeros(cls, quantity_factory: QuantityFactory) -> Self:
         initial_quantities = {}
         for _field in dataclasses.fields(cls):
             initial_quantities[_field.name] = quantity_factory.zeros(
@@ -79,8 +78,8 @@ class DriverState:
         damping_coefficients: DampingCoefficients,
         driver_grid_data: DriverGridData,
         grid_data: GridData,
-        schemes: List[PHYSICS_PACKAGES],
-    ) -> "DriverState":
+        schemes: list[PHYSICS_PACKAGES],
+    ) -> Self:
         comm = driver_config.comm_config.get_comm()
         communicator = Communicator.from_layout(comm=comm, layout=driver_config.layout)
         sizer = SubtileGridSizer.from_tile_params(
@@ -88,7 +87,6 @@ class DriverState:
             ny_tile=driver_config.nx_tile,
             nz=driver_config.nz,
             n_halo=N_HALO_DEFAULT,
-            extra_dim_lengths={},
             layout=driver_config.layout,
             tile_partitioner=communicator.partitioner.tile,
             tile_rank=communicator.tile.rank,
@@ -110,8 +108,6 @@ class DriverState:
         return state
 
     def save_state(self, comm, restart_path: str = "RESTART"):
-        from pathlib import Path
-
         Path(restart_path).mkdir(parents=True, exist_ok=True)
         current_rank = str(comm.Get_rank())
         self.dycore_state.xr_dataset.to_netcdf(
@@ -165,7 +161,7 @@ def _overwrite_state_from_restart(
     """
     ds = xr.open_dataset(path + f"/{restart_file_prefix}_{rank}.nc")
 
-    for _field in fields(type(state)):
+    for _field in dataclasses.fields(type(state)):
         if "units" in _field.metadata.keys():
             state.__dict__[_field.name].data[:] = gt_utils.asarray(
                 ds[_field.name].data[:], to_type=state.__dict__[_field.name].np.ndarray
@@ -180,14 +176,11 @@ def _restart_driver_state(
     damping_coefficients: DampingCoefficients,
     driver_grid_data: DriverGridData,
     grid_data: GridData,
-    schemes: List[PHYSICS_PACKAGES],
+    schemes: list[PHYSICS_PACKAGES],
 ):
-    fs = get_fs(path)
-
-    restart_files = fs.ls(path)
-    is_fortran_restart = any(
-        fname.endswith("fv_core.res.nc") for fname in restart_files
-    )
+    # It's a restart from a FORTRAN run if we find any files in the restart directory
+    # that ends in "fv_core.res.nc".
+    is_fortran_restart = any(fname for fname in Path(path).glob("**/*fv_core.res.nc"))
 
     if is_fortran_restart:
         dycore_state = DycoreState.from_fortran_restart(

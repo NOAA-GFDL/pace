@@ -43,7 +43,6 @@ def setup_physics():
         ny_tile=physics_config.npy - 1,
         nz=physics_config.npz,
         n_halo=3,
-        extra_dim_lengths={},
         layout=layout,
         tile_partitioner=partitioner.tile,
         tile_rank=communicator.tile.rank,

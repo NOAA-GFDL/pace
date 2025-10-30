@@ -29,7 +29,7 @@ def get_quantity_factory(layout, nx_tile, ny_tile, nz):
     ny = ny_tile // layout[1]
     return QuantityFactory.from_backend(
         sizer=SubtileGridSizer.from_tile_params(
-            nx=nx, ny=ny, nz=nz, n_halo=3, extra_dim_lengths={}, layout=(1, 1)
+            nx=nx, ny=ny, nz=nz, n_halo=3, layout=(1, 1)
         ),
         backend="numpy",
     )

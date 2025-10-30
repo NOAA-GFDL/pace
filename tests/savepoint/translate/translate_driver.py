@@ -31,7 +31,6 @@ class TranslateDriver(TranslateFVDynamics):
             ny_tile=self.namelist.npy - 1,
             nz=self.namelist.npz,
             n_halo=N_HALO_DEFAULT,
-            extra_dim_lengths={},
             layout=self.namelist.layout,
             tile_partitioner=communicator.partitioner.tile,
             tile_rank=communicator.tile.rank,
