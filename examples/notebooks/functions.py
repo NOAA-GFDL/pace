@@ -263,7 +263,6 @@ def configure_domain(
         ny_tile=dimensions["ny"],
         nz=dimensions["nz"],
         n_halo=dimensions["nhalo"],
-        extra_dim_lengths={},
         layout=dimensions["layout"],
         tile_partitioner=partitioner.tile,
         tile_rank=communicator.tile.rank,

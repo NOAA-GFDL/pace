@@ -89,7 +89,6 @@ def setup_dycore() -> Tuple[DynamicalCore, DycoreState, Timer]:
         ny_tile=config.npy - 1,
         nz=config.npz,
         n_halo=3,
-        extra_dim_lengths={},
         layout=config.layout,
         tile_partitioner=partitioner.tile,
         tile_rank=communicator.tile.rank,

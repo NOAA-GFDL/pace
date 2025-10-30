@@ -30,7 +30,6 @@ You can initialize a zero-filled PhysicsState and MicrophysicsState from other P
     ...    ny_tile=12,
     ...    nz=79,
     ...    n_halo=3,
-    ...    extra_dim_lengths={},
     ...    layout=layout,
     ...    tile_partitioner=partitioner.tile,
     ...    tile_rank=communicator.tile.rank,

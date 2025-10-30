@@ -89,7 +89,6 @@ def test_fv_dynamics(
                 n_halo=3,
                 tile_partitioner=communicator.partitioner.tile,
                 tile_rank=communicator.rank,
-                extra_dim_lengths={},
                 layout=namelist.layout,
             ),
             comm=communicator,

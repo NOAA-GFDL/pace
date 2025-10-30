@@ -88,7 +88,6 @@ class DriverState:
             ny_tile=driver_config.nx_tile,
             nz=driver_config.nz,
             n_halo=N_HALO_DEFAULT,
-            extra_dim_lengths={},
             layout=driver_config.layout,
             tile_partitioner=communicator.partitioner.tile,
             tile_rank=communicator.tile.rank,
