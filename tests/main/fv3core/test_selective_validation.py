@@ -3,7 +3,7 @@ from unittest.mock import MagicMock
 import numpy as np
 import pytest
 
-from pyFV3.testing.validation import get_selective_class
+from pyfv3.testing.validation import get_selective_class
 
 
 class DummyClass:
@@ -16,8 +16,8 @@ class DummyClass:
 
 
 def check_selective_region_and_values(instance, name, array, domain):
-    validated_gridcells = np.product(domain)
-    total_gridcells = np.product(array.shape)
+    validated_gridcells = np.prod(domain)
+    total_gridcells = np.prod(array.shape)
     assert np.sum(np.isnan(array)) == total_gridcells - validated_gridcells
     validation_subset = instance.subset_output(name, array)
     assert validation_subset.shape == domain

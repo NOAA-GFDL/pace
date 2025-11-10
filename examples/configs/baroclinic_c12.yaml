@@ -8,10 +8,10 @@ stencil_config:
 initialization:
   type: analytic
   config:
-    case: baroclinic
+    case: baroclinic_instability
 performance_config:
   collect_performance: true
-  experiment_name: c12_baroclinic
+  experiment_name: c12_baroclinic_instability
 nx_tile: 12
 nz: 79
 dt_atmos: 225
@@ -96,6 +96,6 @@ physics_config:
   do_qa: true
 
 grid_config:
-  type:  generated
+  type: generated
   config:
-    eta_file: 'tests/main/input/eta79.nc'
+    eta_file: 'NDSL/tests/data/eta/eta79.nc'

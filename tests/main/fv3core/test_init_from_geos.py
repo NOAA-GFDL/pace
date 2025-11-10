@@ -3,8 +3,8 @@ import numpy as np
 import pytest  # noqa
 
 from ndsl import NullComm
-from pyFV3 import DynamicalCore
-from pyFV3.wrappers import GeosDycoreWrapper
+from pyfv3 import DynamicalCore
+from pyfv3.wrappers import GeosDycoreWrapper
 
 
 def test_geos_wrapper():
@@ -76,7 +76,7 @@ def test_geos_wrapper():
             "n_sponge": 48,
         },
         "grid_config": {
-            "config": {"eta_file": "tests/main/input/eta91.nc"},
+            "config": {"eta_file": "NDSL/tests/data/eta/eta91.nc"},
         },
     }
 

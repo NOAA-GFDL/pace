@@ -1,19 +1,20 @@
-import os
-from typing import List
+from pathlib import Path
 
 import pytest
 import yaml
 
 from pace import DriverConfig
+from pyfv3 import DynamicalCoreConfig
+from pyfv3.initialization.analytic_init import AnalyticCase
+from tests.paths import EXAMPLE_CONFIGS_DIR
 
-
-DIR = os.path.dirname(os.path.abspath(__file__))
 
 # TODO: Location of test configurations will be changed after refactor,
 #       need to update after
 
-TESTED_CONFIGS: List[str] = [
-    "../../../examples/configs/analytic_test.yaml",
+TESTED_CONFIGS: list[Path] = [
+    EXAMPLE_CONFIGS_DIR / "analytic_test.yaml",
+    EXAMPLE_CONFIGS_DIR / "baroclinic_c48_6ranks_serialbox_test.yaml",
 ]
 
 
@@ -23,9 +24,20 @@ TESTED_CONFIGS: List[str] = [
         pytest.param(TESTED_CONFIGS, id="example configs"),
     ],
 )
-def test_analytic_init_config(tested_configs: List[str]):
+def test_analytic_init_config(tested_configs: list[Path]):
     for config_file in tested_configs:
-        with open(os.path.join(DIR, config_file), "r") as f:
+        with open(Path(__file__).parent / config_file, "r") as f:
             config = yaml.safe_load(f)
         driver_config = DriverConfig.from_dict(config)
-        assert driver_config.initialization.type == "analytic"
+        # Analytic initialization contains a copy of the dynamical core
+        # config and analytic case types for addition consistency checks.
+        # Other initialization types don't require this.
+        if driver_config.initialization.type == "analytic":
+            assert (
+                type(driver_config.initialization.config.dycore_config)
+                == DynamicalCoreConfig
+            )
+            assert hasattr(driver_config.initialization.config, "case")
+            assert type(driver_config.initialization.config.case) == AnalyticCase
+        else:
+            assert not hasattr(driver_config.initialization, "dycore_config")

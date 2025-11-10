@@ -1,3 +1,80 @@
+[build-system]
+build-backend = "setuptools.build_meta"
+requires = ["setuptools >= 77.0.3"]
+
+[project]
+authors = [{name = "NOAA", email = "oliver.elbert@noaa.gov"}]
+classifiers = [
+  "Development Status :: 2 - Pre-Alpha",
+  "Intended Audience :: Developers",
+  "Natural Language :: English",
+  "Programming Language :: Python :: 3",
+  "Programming Language :: Python :: 3.11"
+]
+dynamic = ["dependencies"]
+license = "Apache-2.0"
+license-files = ["LICENSE.md"]
+name = "pace"
+readme = "README.md"
+requires-python = ">=3.11,<3.12"
+version = "0.2.0"
+
+[project.optional-dependencies]
+dev = [
+  "pace[test]",
+  "pre-commit",
+  "flake8-pyproject"
+]
+test = [
+  "mpi4py",
+  "nbmake",
+  "pytest"
+]
+
+[project.urls]
+Repository = "https://github.com/NOAA-GFDL/pace"
+
+[tool.aliases]
+
 [tool.black]
 line-length = 88
-target_version = ['py36', 'py37', 'py38']
+target_version = ['py311']
+
+[tool.bumpversion]
+commit = "True"
+current_version = "0.2.0"
+
+[tool.distutils.bdist_wheel]
+universal = 1
+
+[tool.flake8]
+exclude = ["docs"]
+extend-ignore = ["W503", "E302", "E203", "F841", "F401", "E501", "E721"]
+max-line-length = 88
+
+[tool.isort]
+default_section = "THIRDPARTY"
+force_grid_wrap = 0
+include_trailing_comma = true
+known_first_party = "ndsl,pyfv3,pyshield,fv3gfs,pace"
+known_third_party = "f90nml,pytest,xarray,numpy,mpi4py,gt4py"
+line_length = 88
+lines_after_imports = 2
+multi_line_output = 3
+sections = "FUTURE,STDLIB,THIRDPARTY,FIRSTPARTY,LOCALFOLDER"
+use_parentheses = true
+
+[tool.mypy]
+explicit_package_bases = true
+follow_imports = "normal"
+ignore_missing_imports = true
+mypy_path = "NDSL:pySHiELD:pyFV3"
+namespace_packages = true
+strict_optional = false
+warn_unreachable = true
+
+[tool.setuptools]
+include-package-data = true
+
+[tool.setuptools.packages.find]
+include = ["pace", "pace.*"]

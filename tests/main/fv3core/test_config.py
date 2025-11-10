@@ -4,15 +4,15 @@ import typing
 
 import pytest
 
-import pyFV3._config
+import pyfv3._config
 
 
 CONFIG_CLASSES = [
-    pyFV3._config.SatAdjustConfig,
-    pyFV3._config.AcousticDynamicsConfig,
-    pyFV3._config.RiemannConfig,
-    pyFV3._config.DGridShallowWaterLagrangianDynamicsConfig,
-    pyFV3._config.DynamicalCoreConfig,
+    pyfv3._config.SatAdjustConfig,
+    pyfv3._config.AcousticDynamicsConfig,
+    pyfv3._config.RiemannConfig,
+    pyfv3._config.DGridShallowWaterLagrangianDynamicsConfig,
+    pyfv3._config.DynamicalCoreConfig,
 ]
 
 
@@ -42,7 +42,9 @@ def assert_types_match(classes):
     types = collections.defaultdict(set)
     for cls in classes:
         for name, field in cls.__dataclass_fields__.items():
-            types[name].add(field.type)
+            # Get type hints in case we're using postponed evaluation of types
+            # Example: '<class 'bool'> instead of 'bool'
+            types[name].add(typing.get_type_hints(cls)[name])
         for name, attr in cls.__dict__.items():
             if isinstance(attr, property):
                 types[name].add(

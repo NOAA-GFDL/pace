@@ -45,7 +45,7 @@ DaCe has many configuration options. When executing, it drops or reads a `dace.c
 
 `ndsl.dsl.dace.dace_config` carries a set of tested options for DaCe, with doc. It also takes care of removing the `dace.conf` that will be generated automatically when using DaCe.
 
-Orchestration can be debugged by using the env var `PACE_DACE_DEBUG`.
+Orchestration can be debugged by using the env var `NDSL_DACE_DEBUG`.
 When set to `True`, this will drop a few checks:
 
 - `sdfg_nan_checker`, which drops a NaN check after _every_ computation on field _written_,

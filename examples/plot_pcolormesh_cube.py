@@ -120,7 +120,7 @@ def gather_fortran_data_at_klevel(path: str, cn: int, var: str, klevel: int):
     Assuming the fileout has this format: atmos_custom_fine_inst.tile%RANK.nc
     where %RANK is the tile number starting from 1
     Args:
-        path: direcotry to Fortran output files
+        path: directory to Fortran output files
         cn: resolution (e.g., 12, 48)
         var: variable name to be extracted
         klevel: index number in the k-axis to be read
@@ -163,7 +163,7 @@ if __name__ == "__main__":
         + args.diff_init
     ) > 1:
         raise RuntimeError(
-            "Scirpt called with confilicting options between: \
+            "Script called with conflicting options between: \
             Diff init, diff python and diff to fortran"
         )
     if args.fortran_data_path is not None:

@@ -7,11 +7,10 @@ from typing import Callable, ClassVar, List, Type, TypeVar
 
 import f90nml
 
-import pyFV3.initialization.analytic_init as analytic_init
+import pyfv3.initialization.analytic_init as analytic_init
 from ndsl import (
     CompilationConfig,
     DaceConfig,
-    Namelist,
     QuantityFactory,
     StencilConfig,
     StencilFactory,
@@ -20,18 +19,19 @@ from ndsl.constants import X_DIM, Y_DIM
 from ndsl.grid import DampingCoefficients, DriverGridData, GridData
 from ndsl.stencils.testing import TranslateGrid, grid
 from ndsl.typing import Communicator
+from ndsl.utils import grid_params_from_f90nml
 from pace.registry import Registry
 from pace.state import DriverState, TendencyState, _restart_driver_state
-from pyFV3 import DycoreState
-from pyFV3.testing import TranslateFVDynamics
-from pySHiELD import PHYSICS_PACKAGES, PhysicsState
+from pyfv3 import DycoreState, DynamicalCoreConfig
+from pyfv3.initialization.analytic_init import AnalyticCase
+from pyfv3.testing import TranslateFVDynamics
+from pyshield import PHYSICS_PACKAGES, PhysicsState
 
 
 class Initializer(abc.ABC):
     @property
     @abc.abstractmethod
-    def start_time(self) -> datetime:
-        ...
+    def start_time(self) -> datetime: ...
 
     @abc.abstractmethod
     def get_driver_state(
@@ -42,8 +42,7 @@ class Initializer(abc.ABC):
         driver_grid_data: DriverGridData,
         grid_data: GridData,
         schemes: List[PHYSICS_PACKAGES],
-    ) -> DriverState:
-        ...
+    ) -> DriverState: ...
 
 
 IT = TypeVar("IT", bound=Type[Initializer])
@@ -91,8 +90,8 @@ class InitializerSelector(Initializer):
         )
 
     @classmethod
-    def from_dict(cls, config: dict):
-        instance = cls.registry.from_dict(config)
+    def from_dict(cls, config: dict, hooks={}):
+        instance = cls.registry.from_dict(config, hooks=hooks)
         return cls(config=instance, type=config["type"])
 
 
@@ -103,8 +102,11 @@ class AnalyticInit(Initializer):
     Configuration for analytic initialization.
     """
 
-    case: str = "baroclinic"
+    case: AnalyticCase = AnalyticCase.baroclinic_instability
     start_time: datetime = datetime(2000, 1, 1)
+    dycore_config: DynamicalCoreConfig = dataclasses.field(
+        default_factory=DynamicalCoreConfig
+    )
 
     def get_driver_state(
         self,
@@ -119,9 +121,10 @@ class AnalyticInit(Initializer):
             analytic_init_case=self.case,
             grid_data=grid_data,
             quantity_factory=quantity_factory,
-            adiabatic=False,
-            hydrostatic=False,
-            moist_phys=True,
+            adiabatic=self.dycore_config.adiabatic,
+            hydrostatic=self.dycore_config.hydrostatic,
+            moist_phys=self.dycore_config.moist_phys,
+            sw_dynamics=self.dycore_config.sw_dynamics,
             comm=communicator,
         )
         physics_state = PhysicsState.init_zeros(
@@ -250,8 +253,8 @@ class SerialboxInit(Initializer):
         return f90nml.read(self.path + "/input.nml")
 
     @property
-    def _namelist(self) -> Namelist:
-        return Namelist.from_f90nml(self._f90_namelist)
+    def _grid_params(self) -> dict:
+        return grid_params_from_f90nml(self._f90_namelist)
 
     def _get_serialized_grid(
         self,
@@ -260,7 +263,7 @@ class SerialboxInit(Initializer):
     ) -> grid.Grid:  # type: ignore
         ser = self._serializer(communicator)
         grid = TranslateGrid.new_from_serialized_data(
-            ser, communicator.rank, self._namelist.layout, backend
+            ser, communicator.rank, self._grid_params["layout"], backend
         ).python_grid()
         return grid
 
@@ -315,8 +318,8 @@ class SerialboxInit(Initializer):
         dace_config = DaceConfig(
             communicator,
             backend,
-            tile_nx=self._namelist.npx,
-            tile_nz=self._namelist.npz,
+            tile_nx=self._grid_params["npx"],
+            tile_nz=self._grid_params["npz"],
         )
         stencil_config = StencilConfig(
             compilation_config=CompilationConfig(
@@ -327,7 +330,9 @@ class SerialboxInit(Initializer):
         stencil_factory = StencilFactory(
             config=stencil_config, grid_indexing=grid.grid_indexing
         )
-        translate_object = TranslateFVDynamics(grid, self._namelist, stencil_factory)
+        translate_object = TranslateFVDynamics(
+            grid, self._f90_namelist, stencil_factory
+        )
         input_data = translate_object.collect_input_data(ser, savepoint_in)
         dycore_state = translate_object.state_from_inputs(input_data)
         return dycore_state

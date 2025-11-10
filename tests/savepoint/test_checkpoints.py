@@ -1,6 +1,6 @@
 import dataclasses
-import os
 from datetime import timedelta
+from pathlib import Path
 from typing import List, Tuple
 
 import dacite
@@ -31,14 +31,12 @@ from ndsl.checkpointer import (
 from ndsl.grid import DampingCoefficients, GridData
 from ndsl.stencils.testing import Grid, TranslateGrid, dataset_to_dict
 from ndsl.testing import perturb
-from pyFV3 import DycoreState, DynamicalCore, DynamicalCoreConfig
-from pyFV3.testing import TranslateFVDynamics
+from pyfv3 import DycoreState, DynamicalCore, DynamicalCoreConfig
+from pyfv3.testing import TranslateFVDynamics
 
 
-def get_grid(data_path: str, rank: int, layout: Tuple[int, int], backend: str) -> Grid:
-    ds_grid: xr.Dataset = xr.open_dataset(os.path.join(data_path, "Grid-Info.nc")).isel(
-        savepoint=0
-    )
+def get_grid(data_path: Path, rank: int, layout: Tuple[int, int], backend: str) -> Grid:
+    ds_grid: xr.Dataset = xr.open_dataset(data_path / "Grid-Info.nc").isel(savepoint=0)
     grid = TranslateGrid(
         dataset_to_dict(ds_grid.isel(rank=rank)),
         rank=rank,
@@ -64,11 +62,11 @@ class StateInitializer:
 
 
 def test_fv_dynamics(
-    backend: str, data_path: str, calibrate_thresholds: bool, threshold_path: str
+    backend: str, data_path: Path, calibrate_thresholds: bool, threshold_path: Path
 ):
     print("start test call")
-    namelist = Namelist.from_f90nml(f90nml.read(os.path.join(data_path, "input.nml")))
-    threshold_filename = os.path.join(threshold_path, "fv_dynamics.yaml")
+    namelist = Namelist.from_f90nml(f90nml.read(data_path / "input.nml"))
+    threshold_filename = threshold_path / "fv_dynamics.yaml"
     communicator = CubedSphereCommunicator(
         comm=MPIComm(),
         partitioner=CubedSpherePartitioner(
@@ -91,7 +89,6 @@ def test_fv_dynamics(
                 n_halo=3,
                 tile_partitioner=communicator.partitioner.tile,
                 tile_rank=communicator.rank,
-                extra_dim_lengths={},
                 layout=namelist.layout,
             ),
             comm=communicator,
@@ -106,7 +103,7 @@ def test_fv_dynamics(
     translate = TranslateFVDynamics(
         grid=grid, namelist=namelist, stencil_factory=stencil_factory
     )
-    ds = xr.open_dataset(os.path.join(data_path, "FVDynamics-In.nc")).sel(
+    ds = xr.open_dataset(data_path / "FVDynamics-In.nc").sel(
         savepoint=0, rank=communicator.rank
     )
     dycore_config = DynamicalCoreConfig.from_namelist(namelist)

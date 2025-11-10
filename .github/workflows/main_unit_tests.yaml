@@ -1,6 +1,8 @@
 name: "pace main unit tests"
+
+# Run these these whenever ...
 on:
-  workflow_call:
+  workflow_call: # ... called from a downstream repo
     inputs:
       component_trigger:
         type: boolean
@@ -10,7 +12,11 @@ on:
         type: string
         default: ''
         required: false
-  pull_request:
+  pull_request: # ... a PR is opened / updated
+  merge_group:  # ... the PR is added to the merge queue
+  push:
+    branches:
+      - main # ... when merging into the main branch
 
 # cancel running jobs if theres a newer push
 concurrency:
@@ -20,47 +26,61 @@ concurrency:
 jobs:
   pace_main_unit_tests:
     runs-on: ubuntu-latest
-    container:
-      image: ghcr.io/noaa-gfdl/miniforge:mpich
+    defaults:
+      run:
+        shell: bash -el {0}
     steps:
-        - name: external trigger Checkout pace/develop
-          if:  ${{ inputs.component_trigger }}
-          uses: actions/checkout@v4
-          with:
-            submodules: 'recursive'
-            repository: NOAA-GFDL/pace
-            path: pace
-            ref: develop
+      - name: "External trigger: Checkout pace/develop"
+        if: ${{ inputs.component_trigger }}
+        uses: actions/checkout@v5
+        with:
+          submodules: 'recursive'
+          repository: NOAA-GFDL/pace
+          path: pace
+          ref: develop
 
-        - name: external trigger Remove existing component in pace/develop
-          if:  ${{ inputs.component_trigger }}
-          run: rm -rf ${GITHUB_WORKSPACE}/pace/${{inputs.component_name}}
+      - name: Setup Python 3.11
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
 
-        - name: Checkout out hash that triggered CI
-          uses: actions/checkout@v4
-          with:
-            submodules: 'recursive'
-            path: pace/${{inputs.component_name}}
+      - name: Install mpi (MPICH flavor)
+        run: pip install mpich
 
-        - name: install packages
-          run: |
-            cd ${GITHUB_WORKSPACE}/pace
-            pip3 install --upgrade pip setuptools wheel
-            pip3 install -r requirements_dev.txt -c constraints.txt
+      - name: Install numpy==1.26.4
+        # Front-load installing numpy to force its usage in the radiation
+        # scheme of pySHiELD.
+        # TODO: This is an ugly hack and it should be cleaned up latest once
+        #       we add support for numpy >= 2.0
+        run: pip install numpy==1.26.4
 
-        - name: prepare input files
-          run: |
-            cd ${GITHUB_WORKSPACE}/pace
-            mkdir tests/main/input
-            python3 examples/generate_eta_files.py
-            mv *eta*.nc tests/main/input
+      - name: "External trigger: Remove existing component in pace/develop"
+        if: ${{ inputs.component_trigger }}
+        run: rm -rf ${GITHUB_WORKSPACE}/pace/${{inputs.component_name}}
 
-        - name: run tests
-          run: |
-            cd ${GITHUB_WORKSPACE}/pace
-            pytest -x tests/main
+      - name: Checkout out hash that triggered CI
+        uses: actions/checkout@v5
+        with:
+          submodules: 'recursive'
+          path: pace/${{inputs.component_name}}
 
-        - name: run baroclinic
-          run: |
-            cd ${GITHUB_WORKSPACE}/pace
-            mpiexec -np 6 --oversubscribe python -m pace.run examples/configs/baroclinic_c12.yaml
+      - name: Install packages
+        run: |
+          cd ${GITHUB_WORKSPACE}/pace
+          pip install .[test]
+
+      - name: Print versions
+        run: |
+          python --version
+          pip --version
+          pip list
+
+      - name: Run tests
+        run: |
+          cd ${GITHUB_WORKSPACE}/pace
+          python -m pytest -x tests/main
+
+      - name: Run baroclinic test case
+        run: |
+          cd ${GITHUB_WORKSPACE}/pace
+          mpiexec -np 6 python -m pace.run examples/configs/baroclinic_c48_no_out.yaml
