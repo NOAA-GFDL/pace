@@ -1,7 +1,7 @@
 on:
   push:
-    branches:
-      - 'develop'
+    # branches:
+    #   - 'develop'
   schedule:
     - cron: '0 0 * * 0' # sundays @ midnight
 
