@@ -50,13 +50,6 @@ jobs:
       - name: Install mpi (MPICH flavor)
         run: pip install mpich
 
-      - name: Install numpy==1.26.4
-        # Front-load installing numpy to force its usage in the radiation
-        # scheme of pySHiELD.
-        # TODO: This is an ugly hack and it should be cleaned up latest once
-        #       we add support for numpy >= 2.0
-        run: pip install numpy==1.26.4
-
       - name: "External trigger: Remove existing component in pace/develop"
         if: ${{ inputs.component_trigger }}
         run: rm -rf ${GITHUB_WORKSPACE}/pace/${{inputs.component_name}}
@@ -71,6 +64,13 @@ jobs:
         run: |
           cd ${GITHUB_WORKSPACE}/pace
           pip install .[test]
+
+      - name: Install numpy==1.26.4
+        # Front-load installing numpy to force its usage in the radiation
+        # scheme of pySHiELD.
+        # TODO: This is an ugly hack and it should be cleaned up latest once
+        #       we add support for numpy >= 2.0
+        run: pip install numpy==1.26.4
 
       - name: Print versions
         run: |
