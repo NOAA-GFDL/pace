@@ -98,4 +98,4 @@ physics_config:
 grid_config:
   type: generated
   config:
-    eta_file: 'tests/main/input/eta79.nc'
+    eta_file: 'NDSL/tests/data/eta/eta79.nc'

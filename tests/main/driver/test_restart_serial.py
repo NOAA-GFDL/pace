@@ -63,7 +63,6 @@ def test_restart_save_to_disk():
             ny_tile=12,
             nz=79,
             n_halo=3,
-            extra_dim_lengths={},
             layout=(1, 1),
             tile_partitioner=partitioner.tile,
             tile_rank=communicator.tile.rank,

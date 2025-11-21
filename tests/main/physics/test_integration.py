@@ -43,7 +43,6 @@ def setup_physics():
         ny_tile=physics_config.npy - 1,
         nz=physics_config.npz,
         n_halo=3,
-        extra_dim_lengths={},
         layout=layout,
         tile_partitioner=partitioner.tile,
         tile_rank=communicator.tile.rank,
@@ -72,7 +71,7 @@ def setup_physics():
     metric_terms = MetricTerms(
         quantity_factory=quantity_factory,
         communicator=communicator,
-        eta_file=Path("tests/main/input/eta79.nc"),
+        eta_file=Path("NDSL/tests/data/eta/eta79.nc"),
     )
     grid_data = GridData.new_from_metric_terms(metric_terms)
     physics = Physics(

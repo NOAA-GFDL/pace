@@ -26,7 +26,13 @@ def get_quantity_factory(layout, nx_tile, ny_tile, nz):
     nx = nx_tile // layout[0]
     ny = ny_tile // layout[1]
     return QuantityFactory.from_backend(
-        sizer=SubtileGridSizer(nx=nx, ny=ny, nz=nz, n_halo=3, extra_dim_lengths={}),
+        sizer=SubtileGridSizer.from_tile_params(
+            nx_tile=nx,
+            ny_tile=ny,
+            nz=nz,
+            n_halo=3,
+            layout=(1, 1),
+        ),
         backend="numpy",
     )
 
@@ -39,7 +45,7 @@ def test_grid_init_not_decomposition_dependent(rank: int):
     halo updates for their values in the compute domain.
     """
     nx_tile, ny_tile, nz = 48, 48, 79
-    eta_file = Path("tests/main/input/eta79.nc")
+    eta_file = Path("NDSL/tests/data/eta/eta79.nc")
     metric_terms_1by1 = MetricTerms(
         quantity_factory=get_quantity_factory(
             layout=(1, 1), nx_tile=nx_tile, ny_tile=ny_tile, nz=nz
