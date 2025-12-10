@@ -1,7 +1,8 @@
 SHELL := /bin/bash
 include docker/Makefile.image_names
-include Makefile.data_download
 ROOT_DIR:=$(shell dirname $(realpath $(firstword $(MAKEFILE_LIST))))
+
+
 
 define BROWSER_PYSCRIPT
 import os, webbrowser, sys
@@ -35,6 +36,22 @@ BUILD_FLAGS ?=
 
 ### Testing variables
 
+NUM_RANKS ?=6
+MPIRUN_ARGS ?=--oversubscribe --mca btl_vader_single_copy_mechanism none
+MPIRUN_CALL ?=mpirun -np $(NUM_RANKS) $(MPIRUN_ARGS)
+TEST_ARGS ?=-v
+TEST_TYPE ?= standard
+FV3CORE_THRESH_ARGS=--threshold_overrides_file=$(PACE_PATH)/pyFV3/tests/savepoint/translate/overrides/$(TEST_TYPE).yaml
+PHYSICS_THRESH_ARGS=--threshold_overrides_file=$(PACE_PATH)/pySHiELD/tests/savepoint/translate/overrides/$(TEST_TYPE).yaml
+
+TEST_DATA_LOC ?=test_data/
+TEST_DATA_VERSION ?=8.1.3
+TEST_DATA_HOST ?= https://portal.nccs.nasa.gov/datashare/astg/smt/pace-regression-data/
+TEST_RESOLUTION ?= c12
+TEST_CONFIG ?= $(TEST_RESOLUTION)_$(NUM_RANKS)ranks
+TEST_CASE ?=$(TEST_CONFIG)_$(TEST_TYPE)
+TEST_DATA_TARFILE = $(TEST_DATA_VERSION)_$(TEST_CONFIG)_$(TEST_TYPE).tar.gz
+
 RUN_FLAGS ?=--rm
 ifeq ("$(CONTAINER_CMD)","")
 	PACE_PATH?=$(ROOT_DIR)
@@ -64,13 +81,6 @@ ifeq ($(CONTAINER_CMD),docker)
 else
 	CONTAINER_FLAGS=
 endif
-NUM_RANKS ?=6
-MPIRUN_ARGS ?=--oversubscribe --mca btl_vader_single_copy_mechanism none
-MPIRUN_CALL ?=mpirun -np $(NUM_RANKS) $(MPIRUN_ARGS)
-TEST_ARGS ?=-v
-TEST_TYPE=$(word 3, $(subst _, ,$(EXPERIMENT)))
-FV3CORE_THRESH_ARGS=--threshold_overrides_file=$(PACE_PATH)/fv3core/tests/savepoint/translate/overrides/$(TEST_TYPE).yaml
-PHYSICS_THRESH_ARGS=--threshold_overrides_file=$(PACE_PATH)/physics/tests/savepoint/translate/overrides/$(TEST_TYPE).yaml
 
 ###
 
@@ -107,6 +117,18 @@ notebook:
 	CMD="jupyter notebook --ip 0.0.0.0 --no-browser --allow-root --notebook-dir=/pace/examples/notebooks" \
 	DEV=y \
 	$(MAKE) enter
+
+get_test_data:
+	if [ ! -d $(TEST_DATA_LOC) ]; then \
+		mkdir $(TEST_DATA_LOC); \
+	fi
+
+	if [ ! -f "$(TEST_DATA_LOC)$(TEST_DATA_VERSION)/$(TEST_CASE)/dycore/input.nml" ] ; then \
+		wget $(TEST_DATA_HOST)$(TEST_DATA_TARFILE) ; \
+		tar -xzvf $(TEST_DATA_TARFILE) ; \
+		mv $(TEST_DATA_VERSION) $(TEST_DATA_LOC) ; \
+		rm $(TEST_DATA_TARFILE); \
+	fi
 
 test_util:
 	if [ $(shell $(CHECK_CHANGED_SCRIPT) util) != false ]; then \
