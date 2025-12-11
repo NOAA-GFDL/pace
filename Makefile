@@ -40,17 +40,14 @@ NUM_RANKS ?=6
 MPIRUN_ARGS ?=--oversubscribe --mca btl_vader_single_copy_mechanism none
 MPIRUN_CALL ?=mpirun -np $(NUM_RANKS) $(MPIRUN_ARGS)
 TEST_ARGS ?=-v
-TEST_TYPE ?= standard
-FV3CORE_THRESH_ARGS=--threshold_overrides_file=$(PACE_PATH)/pyFV3/tests/savepoint/translate/overrides/$(TEST_TYPE).yaml
-PHYSICS_THRESH_ARGS=--threshold_overrides_file=$(PACE_PATH)/pySHiELD/tests/savepoint/translate/overrides/$(TEST_TYPE).yaml
+FV3CORE_THRESH_ARGS=--threshold_overrides_file=$(PACE_PATH)/pyFV3/tests/savepoint/translate/overrides/standard.yaml
+PHYSICS_THRESH_ARGS=--threshold_overrides_file=$(PACE_PATH)/pySHiELD/tests/savepoint/translate/overrides/standard.yaml
 
 TEST_DATA_LOC ?=test_data/
 TEST_DATA_VERSION ?=8.1.3
 TEST_DATA_HOST ?= https://portal.nccs.nasa.gov/datashare/astg/smt/pace-regression-data/
 TEST_RESOLUTION ?= c12
-TEST_CONFIG ?= $(TEST_RESOLUTION)_$(NUM_RANKS)ranks
-TEST_CASE ?=$(TEST_CONFIG)_$(TEST_TYPE)
-TEST_DATA_TARFILE = $(TEST_DATA_VERSION)_$(TEST_CONFIG)_$(TEST_TYPE).tar.gz
+TEST_CONFIG ?= $(TEST_DATA_LOC)/$(TEST_RESOLUTION)_$(NUM_RANKS)ranks
 
 RUN_FLAGS ?=--rm
 ifeq ("$(CONTAINER_CMD)","")
@@ -63,18 +60,18 @@ else
 endif
 endif
 ifeq ("$(CONTAINER_CMD)","")
-	EXPERIMENT_DATA_RUN=$(EXPERIMENT_DATA)
+	EXPERIMENT_DATA_RUN=$(TEST_CONFIG)
 else
 ifeq ("$(CONTAINER_CMD)","srun")
-	EXPERIMENT_DATA_RUN=$(EXPERIMENT_DATA)
+	EXPERIMENT_DATA_RUN=$(TEST_CONFIG)
 else
-	EXPERIMENT_DATA_RUN=$(PACE_PATH)/test_data/$(FORTRAN_SERIALIZED_DATA_VERSION)/$(EXPERIMENT)
+	EXPERIMENT_DATA_RUN=$(TEST_CONFIG)
 endif
 endif
 ifeq ($(DEV),y)
 	VOLUMES += -v $(ROOT_DIR):/pace
 else
-	VOLUMES += -v $(EXPERIMENT_DATA):$(EXPERIMENT_DATA_RUN)
+	VOLUMES += -v $(EXPERIMENT_DATA_RUN)
 endif
 ifeq ($(CONTAINER_CMD),docker)
 	CONTAINER_FLAGS=run $(RUN_FLAGS) $(VOLUMES) --env GT_CACHE_ROOT=/pace/.gt_cache $(PACE_IMAGE)
@@ -120,14 +117,17 @@ notebook:
 
 get_test_data:
 	if [ ! -d $(TEST_DATA_LOC) ]; then \
-		mkdir $(TEST_DATA_LOC); \
-	fi
-
-	if [ ! -f "$(TEST_DATA_LOC)$(TEST_DATA_VERSION)/$(TEST_CASE)/dycore/input.nml" ] ; then \
-		wget $(TEST_DATA_HOST)$(TEST_DATA_TARFILE) ; \
-		tar -xzvf $(TEST_DATA_TARFILE) ; \
-		mv $(TEST_DATA_VERSION) $(TEST_DATA_LOC) ; \
-		rm $(TEST_DATA_TARFILE); \
+	    mkdir -p $(TEST_DATA_LOC); \
+	fi ; \
+	if [ ! -f "$(TEST_DATA_LOC)$(TEST_DATA_VERSION)/standard/dycore/input.nml" ] ; then \
+		wget $(TEST_DATA_HOST)/8.1.3_c12_6ranks_baroclinic.physics.tar.gz ; \
+		tar -xzvf $(ROOT_DIR)/8.1.3_c12_6ranks_baroclinic.physics.tar.gz; \
+		mv $(ROOT_DIR)/8.1.3/* $(TEST_DATA_LOC); \
+		rm -rf 8.1.3*; \
+		wget $(TEST_DATA_HOST)/8.1.3_c12_6ranks_standard.tar.gz; \
+		tar -xzvf $(ROOT_DIR)/8.1.3_c12_6ranks_standard.tar.gz; \
+		mv $(ROOT_DIR)/8.1.3/* $(TEST_DATA_LOC); \
+		rm -rf 8.1.3*; \
 	fi
 
 test_util:
@@ -137,22 +137,22 @@ test_util:
 
 savepoint_tests: build  ## dycore-only savepoint tests
 	TARGET=dycore $(MAKE) get_test_data
-	$(CONTAINER_CMD) $(CONTAINER_FLAGS) bash -c "$(SAVEPOINT_SETUP) && cd $(PACE_PATH) && pytest --data_path=$(EXPERIMENT_DATA_RUN)/dycore/ $(TEST_ARGS) $(FV3CORE_THRESH_ARGS) $(PACE_PATH)/fv3core/tests/savepoint"
+	$(CONTAINER_CMD) $(CONTAINER_FLAGS) bash -c "$(SAVEPOINT_SETUP) && cd $(PACE_PATH) && pytest --data_path=$(TEST_DATA_LOC)/standard/dycore/ $(TEST_ARGS) $(FV3CORE_THRESH_ARGS) $(PACE_PATH)/pyFV3/tests/savepoint"
 
 savepoint_tests_mpi: build
 	TARGET=dycore $(MAKE) get_test_data
-	$(CONTAINER_CMD) $(CONTAINER_FLAGS) bash -c "$(SAVEPOINT_SETUP) && cd $(PACE_PATH) && $(MPIRUN_CALL) python3 -m mpi4py -m pytest --maxfail=1 --data_path=$(EXPERIMENT_DATA_RUN)/dycore/ $(TEST_ARGS) $(FV3CORE_THRESH_ARGS) -m parallel $(PACE_PATH)/fv3core/tests/savepoint"
+	$(CONTAINER_CMD) $(CONTAINER_FLAGS) bash -c "$(SAVEPOINT_SETUP) && cd $(PACE_PATH) && $(MPIRUN_CALL) python3 -m mpi4py -m pytest --maxfail=1 --data_path=$(TEST_DATA_LOC)/dycore/ $(TEST_ARGS) $(FV3CORE_THRESH_ARGS) -m parallel $(PACE_PATH)/pyFV3/tests/savepoint"
 
 dependencies.svg: dependencies.dot
 	dot -Tsvg $< -o $@
 
 physics_savepoint_tests: build
 	TARGET=physics $(MAKE) get_test_data
-	$(CONTAINER_CMD) $(CONTAINER_FLAGS) bash -c "$(SAVEPOINT_SETUP) && cd $(PACE_PATH) && pytest --data_path=$(EXPERIMENT_DATA_RUN)/physics/ $(TEST_ARGS) $(PHYSICS_THRESH_ARGS) $(PACE_PATH)/physics/tests/savepoint"
+	$(CONTAINER_CMD) $(CONTAINER_FLAGS) bash -c "$(SAVEPOINT_SETUP) && cd $(PACE_PATH) && pytest --data_path=$(EXPERIMENT_DATA_RUN)/physics/ $(TEST_ARGS) $(PHYSICS_THRESH_ARGS) $(PACE_PATH)/pySHiELD/tests/savepoint"
 
 physics_savepoint_tests_mpi: build
 	TARGET=physics $(MAKE) get_test_data
-	$(CONTAINER_CMD) $(CONTAINER_FLAGS) bash -c "$(SAVEPOINT_SETUP) && cd $(PACE_PATH) && $(MPIRUN_CALL) python -m mpi4py -m pytest --maxfail=1 --data_path=$(EXPERIMENT_DATA_RUN)/physics/ $(TEST_ARGS) $(PHYSICS_THRESH_ARGS) -m parallel $(PACE_PATH)/physics/tests/savepoint"
+	$(CONTAINER_CMD) $(CONTAINER_FLAGS) bash -c "$(SAVEPOINT_SETUP) && cd $(PACE_PATH) && $(MPIRUN_CALL) python -m mpi4py -m pytest --maxfail=1 --data_path=$(EXPERIMENT_DATA_RUN)/physics/ $(TEST_ARGS) $(PHYSICS_THRESH_ARGS) -m parallel $(PACE_PATH)/pySHiELD/tests/savepoint"
 
 test_main: build
 	$(CONTAINER_CMD) $(CONTAINER_FLAGS) bash -c "$(SAVEPOINT_SETUP) && cd $(PACE_PATH) && pytest $(TEST_ARGS) $(PACE_PATH)/tests/main"
@@ -169,7 +169,7 @@ test_mpi_54rank:
 
 driver_savepoint_tests_mpi: build
 	TARGET=pace $(MAKE) get_test_data
-	$(CONTAINER_CMD) $(CONTAINER_FLAGS) bash -c "$(SAVEPOINT_SETUP) && cd $(PACE_PATH) && $(MPIRUN_CALL) python -m mpi4py -m pytest --maxfail=1 --data_path=$(EXPERIMENT_DATA_RUN)/pace/ $(TEST_ARGS) $(PHYSICS_THRESH_ARGS) -m parallel $(PACE_PATH)/physics/tests/savepoint"
+	$(CONTAINER_CMD) $(CONTAINER_FLAGS) bash -c "$(SAVEPOINT_SETUP) && cd $(PACE_PATH) && $(MPIRUN_CALL) python -m mpi4py -m pytest --maxfail=1 --data_path=$(EXPERIMENT_DATA_RUN)/physics/ $(TEST_ARGS) $(PHYSICS_THRESH_ARGS) -m parallel $(PACE_PATH)/pySHiELD/tests/savepoint"
 
 docs: ## generate Sphinx HTML documentation
 	$(MAKE) -C docs html
