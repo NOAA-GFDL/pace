@@ -138,15 +138,8 @@ get_physics_test_data:
 	fi
 
 get_test_data:
-	if [ ! -d $(TEST_DATA_LOC) ]; then \
-	    mkdir -p $(TEST_DATA_LOC); \
-	fi ; \
-	if [ ! -f $(TEST_CONFIG)_standard/dycore/input.nml ] ; then \
-		$(MAKE) get_standard_test_data; \
-	fi ; \
-	if [ ! -f $(TEST_CONFIG)_baroclinic/physics/input.nml ] ; then \
-		$(MAKE) get_physics_test_data; \
-	fi
+	$(MAKE) get_standard_test_data; \
+	$(MAKE) get_physics_test_data
 
 test_util:
 	if [ $(shell $(CHECK_CHANGED_SCRIPT) util) != false ]; then \
