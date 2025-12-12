@@ -47,7 +47,7 @@ TEST_DATA_LOC ?=test_data/
 TEST_DATA_VERSION ?=8.1.3
 TEST_DATA_HOST ?= https://portal.nccs.nasa.gov/datashare/astg/smt/pace-regression-data/
 TEST_RESOLUTION ?= c12
-TEST_CONFIG ?= $(TEST_DATA_LOC)/$(TEST_RESOLUTION)_$(NUM_RANKS)ranks
+TEST_CONFIG ?= $(TEST_DATA_LOC)$(TEST_RESOLUTION)_$(NUM_RANKS)ranks
 
 RUN_FLAGS ?=--rm
 ifeq ("$(CONTAINER_CMD)","")
@@ -115,19 +115,37 @@ notebook:
 	DEV=y \
 	$(MAKE) enter
 
-get_test_data:
+get_standard_test_data:
 	if [ ! -d $(TEST_DATA_LOC) ]; then \
 	    mkdir -p $(TEST_DATA_LOC); \
 	fi ; \
-	if [ ! -f "$(TEST_DATA_LOC)$(TEST_DATA_VERSION)/standard/dycore/input.nml" ] ; then \
-		wget $(TEST_DATA_HOST)/8.1.3_c12_6ranks_baroclinic.physics.tar.gz ; \
-		tar -xzvf $(ROOT_DIR)/8.1.3_c12_6ranks_baroclinic.physics.tar.gz; \
-		mv $(ROOT_DIR)/8.1.3/* $(TEST_DATA_LOC); \
-		rm -rf 8.1.3*; \
+	if [ ! -f $(TEST_CONFIG)_standard/dycore/input.nml ] ; then \
 		wget $(TEST_DATA_HOST)/8.1.3_c12_6ranks_standard.tar.gz; \
 		tar -xzvf $(ROOT_DIR)/8.1.3_c12_6ranks_standard.tar.gz; \
 		mv $(ROOT_DIR)/8.1.3/* $(TEST_DATA_LOC); \
 		rm -rf 8.1.3*; \
+	fi
+
+get_physics_test_data:
+	if [ ! -d $(TEST_DATA_LOC) ]; then \
+	    mkdir -p $(TEST_DATA_LOC); \
+	fi ; \
+	if [ ! -f $(TEST_CONFIG)_baroclinic/physics/input.nml ] ; then \
+		wget $(TEST_DATA_HOST)/8.1.3_c12_6ranks_baroclinic.physics.tar.gz ; \
+		tar -xzvf $(ROOT_DIR)/8.1.3_c12_6ranks_baroclinic.physics.tar.gz; \
+		mv $(ROOT_DIR)/8.1.3/* $(TEST_DATA_LOC); \
+		rm -rf 8.1.3*; \
+	fi
+
+get_test_data:
+	if [ ! -d $(TEST_DATA_LOC) ]; then \
+	    mkdir -p $(TEST_DATA_LOC); \
+	fi ; \
+	if [ ! -f $(TEST_CONFIG)_standard/dycore/input.nml ] ; then \
+		$(MAKE) get_standard_test_data; \
+	fi ; \
+	if [ ! -f $(TEST_CONFIG)_baroclinic/physics/input.nml ] ; then \
+		$(MAKE) get_physics_test_data; \
 	fi
 
 test_util:
