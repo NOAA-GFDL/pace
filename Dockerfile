@@ -15,19 +15,21 @@ RUN apt-get update && apt-get install -y make \
     python3-pip \
     git
 
-RUN pip3 install --upgrade pip setuptools wheel
+RUN pip install --upgrade pip setuptools wheel
 
 COPY . /pace
 
+ENV SETUPTOOLS_SCM_PRETEND_VERSION_FOR_NDSL=2025.10.00
+
 RUN cd /pace && \
-    pip3 install .[test]
+    pip install .[test]
 
 RUN cd / && \
     git clone https://github.com/ai2cm/fv3net
 
 ENV CFLAGS="-I/usr/include -DACCEPT_USE_OF_DEPRECATED_PROJ_API_H=1"
 
-RUN python3 -m pip install \
+RUN python -m pip install \
     matplotlib==3.10.0 \
     ipyparallel==8.4.1 \
     jupyterlab==3.4.4 \
@@ -35,7 +37,7 @@ RUN python3 -m pip install \
     cartopy==0.23.0 \
     jupyterlab_code_formatter==1.5.2 \
     isort==5.10.1 \
-    black==22.3.0 \
+    black>=22.3.0 \
     /fv3net/external/vcm
 
 ENV PYTHONPATH=/fv3net/external/fv3viz:/pace/external/gt4py/src
