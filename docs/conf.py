@@ -25,8 +25,8 @@ sys.path.insert(0, os.path.abspath("../driver"))
 # -- Project information -----------------------------------------------------
 
 project = "Pace"
-copyright = "2022, AI2 Climate Modeling Team"
-author = "AI2 Climate Modeling Team"
+copyright = "2022-2025, NOAA-GFDL (originally developed by AI2 Climate Modeling Team)"
+author = "NOAA-GFDL"
 
 
 # -- General configuration ---------------------------------------------------
