@@ -14,7 +14,6 @@ from ndsl import (
     CubedSpherePartitioner,
     DaceConfig,
     GridIndexing,
-    NullComm,
     QuantityFactory,
     StencilConfig,
     StencilFactory,
@@ -24,6 +23,7 @@ from ndsl import (
 )
 from ndsl.grid import DampingCoefficients, GridData, MetricTerms
 from ndsl.performance.timer import NullTimer
+from pace import NullComm
 from pyfv3 import DycoreState, DynamicalCore, DynamicalCoreConfig
 
 

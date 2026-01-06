@@ -5,12 +5,11 @@ from ndsl import (
     CubedSphereCommunicator,
     CubedSpherePartitioner,
     LocalComm,
-    NullComm,
     QuantityFactory,
     SubtileGridSizer,
     TilePartitioner,
 )
-from pace import FortranRestartInit, GeneratedGridConfig
+from pace import FortranRestartInit, GeneratedGridConfig, NullComm
 from pyshield import PHYSICS_PACKAGES
 from tests.paths import REPO_ROOT
 

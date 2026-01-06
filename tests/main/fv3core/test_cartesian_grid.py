@@ -3,9 +3,10 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from ndsl import NullComm, TileCommunicator, TilePartitioner
+from ndsl import TileCommunicator, TilePartitioner
 from ndsl.constants import PI
 from ndsl.grid import MetricTerms
+from pace import NullComm
 
 
 @pytest.mark.parametrize("npx", [8])

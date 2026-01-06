@@ -2,7 +2,7 @@ import f90nml
 import numpy as np
 import pytest  # noqa
 
-from ndsl import NullComm
+from pace import NullComm
 from pyfv3 import DynamicalCore
 from pyfv3.wrappers import GeosDycoreWrapper
 
