@@ -27,7 +27,7 @@ def get_cube_comm(layout, comm: MPIComm):
 def get_quantity_factory(layout, nx_tile, ny_tile, nz):
     nx = nx_tile // layout[0]
     ny = ny_tile // layout[1]
-    return QuantityFactory.from_backend(
+    return QuantityFactory(
         sizer=SubtileGridSizer.from_tile_params(
             nx=nx, ny=ny, nz=nz, n_halo=3, layout=(1, 1)
         ),

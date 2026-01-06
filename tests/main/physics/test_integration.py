@@ -50,7 +50,7 @@ def setup_physics():
     grid_indexing = GridIndexing.from_sizer_and_communicator(
         sizer=sizer, comm=communicator
     )
-    quantity_factory = QuantityFactory.from_backend(sizer=sizer, backend=backend)
+    quantity_factory = QuantityFactory(sizer=sizer, backend=backend)
     dace_config = DaceConfig(
         communicator=communicator,
         backend=backend,

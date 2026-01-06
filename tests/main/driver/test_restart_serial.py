@@ -67,7 +67,7 @@ def test_restart_save_to_disk():
             tile_partitioner=partitioner.tile,
             tile_rank=communicator.tile.rank,
         )
-        quantity_factory = QuantityFactory.from_backend(sizer=sizer, backend=backend)
+        quantity_factory = QuantityFactory(sizer=sizer, backend=backend)
 
         eta_file = Path(driver_config.grid_config.config.eta_file)
         (

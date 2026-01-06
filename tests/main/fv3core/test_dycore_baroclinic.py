@@ -112,7 +112,7 @@ def setup_dycore(
     grid_indexing = GridIndexing.from_sizer_and_communicator(
         sizer=sizer, comm=communicator
     )
-    quantity_factory = QuantityFactory.from_backend(sizer=sizer, backend=backend)
+    quantity_factory = QuantityFactory(sizer=sizer, backend=backend)
     eta_file = "NDSL/tests/data/eta/eta79.nc"
     metric_terms = MetricTerms(
         quantity_factory=quantity_factory,

@@ -35,7 +35,7 @@ def test_state_from_fortran_restart():
         tile_rank=0,
     )
 
-    quantity_factory = QuantityFactory.from_backend(sizer=sizer, backend="numpy")
+    quantity_factory = QuantityFactory(sizer=sizer, backend="numpy")
     restart_dir = REPO_ROOT / "tests" / "main" / "data" / "c12_restart"
 
     (

@@ -268,7 +268,7 @@ def configure_domain(
         tile_rank=communicator.tile.rank,
     )
 
-    quantity_factory = QuantityFactory.from_backend(sizer=sizer, backend=backend)
+    quantity_factory = QuantityFactory(sizer=sizer, backend=backend)
 
     metric_terms = MetricTerms(
         quantity_factory=quantity_factory,
