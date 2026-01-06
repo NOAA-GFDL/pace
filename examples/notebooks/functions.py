@@ -106,7 +106,7 @@ def init_quantity(
             units=units,
             origin=(nhalo, nhalo, 0)[:skip_z],
             extent=(nx, ny, nz)[:skip_z],
-            gt4py_backend=backend,
+            backend=backend,
         )
 
     if grid == VariableGrid.CellCorners:
@@ -116,7 +116,7 @@ def init_quantity(
             units=units,
             origin=(nhalo, nhalo, 0)[:skip_z],
             extent=(nx + 1, ny + 1, nz)[:skip_z],
-            gt4py_backend=backend,
+            backend=backend,
         )
 
     elif grid == VariableGrid.StaggeredInX:
@@ -126,7 +126,7 @@ def init_quantity(
             units=units,
             origin=(nhalo, nhalo, 0)[:skip_z],
             extent=(nx + 1, ny, nz)[:skip_z],
-            gt4py_backend=backend,
+            backend=backend,
         )
 
     elif grid == VariableGrid.StaggeredInY:
@@ -136,7 +136,7 @@ def init_quantity(
             units=units,
             origin=(nhalo, nhalo, 0)[:skip_z],
             extent=(nx, ny + 1, nz)[:skip_z],
-            gt4py_backend=backend,
+            backend=backend,
         )
 
     return variable

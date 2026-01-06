@@ -65,7 +65,7 @@ def test_check_state_domain_only():
         "unknown",
         origin=(1, 1, 0),
         extent=(3, 3, 2),
-        gt4py_backend="numpy",
+        backend="numpy",
     )
     dycore_state = unittest.mock.MagicMock(u=u_quantity)
     checker.check_state(dycore_state)
@@ -83,7 +83,7 @@ def test_check_nan_value():
         "unknown",
         origin=(0, 0, 0),
         extent=(4, 4, 2),
-        gt4py_backend="numpy",
+        backend="numpy",
     )
     dycore_state = unittest.mock.MagicMock(u=u_quantity)
     with pytest.raises(RuntimeError):

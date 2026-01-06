@@ -181,12 +181,8 @@ class SerialboxGridConfig(GridInitializer):
         quantity_factory: QuantityFactory,
         communicator: Communicator,
     ) -> Tuple[DampingCoefficients, DriverGridData, GridData]:
-        backend = quantity_factory.zeros(
-            dims=[X_DIM, Y_DIM], units="unknown"
-        ).gt4py_backend
-
         ndsl_log.info("Using serialized grid data")
-        grid = self._get_serialized_grid(communicator, backend)
+        grid = self._get_serialized_grid(communicator, quantity_factory.backend)
         grid_data = grid.grid_data
         driver_grid_data = grid.driver_grid_data
         damping_coefficients = grid.damping_coefficients
