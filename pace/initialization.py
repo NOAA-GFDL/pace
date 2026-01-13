@@ -286,11 +286,9 @@ class SerialboxInit(Initializer):
         grid_data: GridData,
         schemes: List[PHYSICS_PACKAGES],
     ) -> DriverState:
-        backend = quantity_factory.zeros(
-            dims=[X_DIM, Y_DIM], units="unknown"
-        ).gt4py_backend
-
-        dycore_state = self._initialize_dycore_state(communicator, backend)
+        dycore_state = self._initialize_dycore_state(
+            communicator, quantity_factory.backend
+        )
         physics_state = PhysicsState.init_zeros(
             quantity_factory=quantity_factory,
             schemes=schemes,
