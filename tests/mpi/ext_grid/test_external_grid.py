@@ -11,7 +11,7 @@ from ndsl import (
     MPIComm,
     TilePartitioner,
 )
-from ndsl.comm.partitioner import get_tile_number
+from ndsl.comm.partitioner import get_tile_index
 from ndsl.constants import PI, RADIUS, X_INTERFACE_DIM, Y_INTERFACE_DIM
 from pace import Driver, DriverConfig
 from tests.paths import EXAMPLE_CONFIGS_DIR, REPO_ROOT
@@ -33,7 +33,7 @@ def get_cube_comm(layout, comm: MPIComm):
 
 
 def get_tile_num(comm: MPIComm):
-    return get_tile_number(comm.rank, comm.partitioner.total_ranks)
+    return get_tile_index(comm.rank, comm.partitioner.total_ranks) + 1
 
 
 # TODO: Location of test configurations and data will be changed
