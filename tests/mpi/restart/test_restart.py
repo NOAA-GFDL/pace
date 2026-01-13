@@ -10,11 +10,10 @@ from mpi4py import MPI
 from ndsl import (
     CubedSphereCommunicator,
     CubedSpherePartitioner,
-    NullComm,
     Quantity,
     TilePartitioner,
 )
-from pace import DriverConfig, DriverState
+from pace import DriverConfig, DriverState, NullComm
 from pyshield import PHYSICS_PACKAGES
 
 

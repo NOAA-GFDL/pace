@@ -6,13 +6,13 @@ import pytest
 from ndsl import (
     CubedSphereCommunicator,
     CubedSpherePartitioner,
-    NullComm,
     Quantity,
     QuantityFactory,
     SubtileGridSizer,
     TilePartitioner,
 )
 from ndsl.grid import MetricTerms
+from pace import NullComm
 
 
 def get_cube_comm(layout, rank: int):

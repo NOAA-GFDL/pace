@@ -10,7 +10,6 @@ import yaml
 from ndsl import (
     CubedSphereCommunicator,
     CubedSpherePartitioner,
-    NullComm,
     Quantity,
     QuantityFactory,
     SubtileGridSizer,
@@ -18,9 +17,9 @@ from ndsl import (
 )
 from pace import (
     AnalyticInit,
-    CreatesComm,
     DriverConfig,
     GeneratedGridConfig,
+    NullComm,
     RestartConfig,
 )
 from pyshield import PHYSICS_PACKAGES
@@ -28,21 +27,6 @@ from tests.paths import EXAMPLE_CONFIGS_DIR
 
 
 DIR = os.path.dirname(os.path.abspath(__file__))
-
-
-class NullCommConfig(CreatesComm):
-    def __init__(self, layout):
-        self.layout = layout
-
-    def get_comm(self):
-        return NullComm(
-            rank=0,
-            total_ranks=6 * self.layout[0] * self.layout[1],
-            fill_value=0.0,
-        )
-
-    def cleanup(self, comm):
-        pass
 
 
 def test_default_save_restart():
