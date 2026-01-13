@@ -91,7 +91,7 @@ class DriverState:
             tile_partitioner=communicator.partitioner.tile,
             tile_rank=communicator.tile.rank,
         )
-        quantity_factory = QuantityFactory.from_backend(
+        quantity_factory = QuantityFactory(
             sizer, backend=driver_config.stencil_config.compilation_config.backend
         )
 

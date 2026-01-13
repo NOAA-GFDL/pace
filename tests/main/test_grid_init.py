@@ -25,7 +25,7 @@ def get_cube_comm(layout, rank: int):
 def get_quantity_factory(layout, nx_tile, ny_tile, nz):
     nx = nx_tile // layout[0]
     ny = ny_tile // layout[1]
-    return QuantityFactory.from_backend(
+    return QuantityFactory(
         sizer=SubtileGridSizer.from_tile_params(
             nx_tile=nx,
             ny_tile=ny,

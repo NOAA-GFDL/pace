@@ -35,7 +35,7 @@ You can initialize a zero-filled PhysicsState and MicrophysicsState from other P
     ...    tile_rank=communicator.tile.rank,
     ... )
 
-    >>> quantity_factory = QuantityFactory.from_backend(sizer=sizer, backend="numpy")
+    >>> quantity_factory = QuantityFactory(sizer=sizer, backend="numpy")
     >>> physics_state = PhysicsState.init_zeros(
     ...  quantity_factory=quantity_factory, schemes=["GFS_microphysics"]
     ... )
