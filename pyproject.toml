@@ -73,6 +73,16 @@ namespace_packages = true
 strict_optional = false
 warn_unreachable = true
 
+[[tool.mypy.overrides]]
+ignore_errors = true
+module = [
+  # We currently can't type stencils
+  "pyshield.stencils.*",
+  # Will be fixed with NDSL version 2026.01.00, see
+  # https://github.com/NOAA-GFDL/NDSL/pull/360
+  "pyfv3.testing.translate_fvdynamics"
+]
+
 [tool.setuptools]
 include-package-data = true
 
