@@ -34,6 +34,7 @@ class TranslateDriver(TranslateFVDynamics):
             layout=self.namelist.layout,
             tile_partitioner=communicator.partitioner.tile,
             tile_rank=communicator.tile.rank,
+            backend=self.stencil_config.backend,
         )
 
         quantity_factory = QuantityFactory(

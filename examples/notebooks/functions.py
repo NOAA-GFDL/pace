@@ -266,6 +266,7 @@ def configure_domain(
         layout=dimensions["layout"],
         tile_partitioner=partitioner.tile,
         tile_rank=communicator.tile.rank,
+        backend=backend,
     )
 
     quantity_factory = QuantityFactory(sizer=sizer, backend=backend)
