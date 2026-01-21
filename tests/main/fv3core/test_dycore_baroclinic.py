@@ -108,6 +108,7 @@ def setup_dycore(
         layout=config.layout,
         tile_partitioner=partitioner.tile,
         tile_rank=communicator.tile.rank,
+        backend=backend,
     )
     grid_indexing = GridIndexing.from_sizer_and_communicator(
         sizer=sizer, comm=communicator

@@ -46,6 +46,7 @@ def setup_physics():
         layout=layout,
         tile_partitioner=partitioner.tile,
         tile_rank=communicator.tile.rank,
+        backend=backend,
     )
     grid_indexing = GridIndexing.from_sizer_and_communicator(
         sizer=sizer, comm=communicator

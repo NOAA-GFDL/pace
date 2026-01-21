@@ -50,6 +50,7 @@ def test_restart_save_to_disk():
             layout=(1, 1),
             tile_partitioner=partitioner.tile,
             tile_rank=communicator.tile.rank,
+            backend=backend,
         )
         quantity_factory = QuantityFactory(sizer=sizer, backend=backend)
 

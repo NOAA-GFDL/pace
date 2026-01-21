@@ -90,6 +90,7 @@ def test_fv_dynamics(
                 tile_partitioner=communicator.partitioner.tile,
                 tile_rank=communicator.rank,
                 layout=namelist.layout,
+                backend=backend,
             ),
             comm=communicator,
         ),
