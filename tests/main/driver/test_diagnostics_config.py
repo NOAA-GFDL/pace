@@ -45,7 +45,12 @@ def test_zselect_raises_error_if_not_3d(tmpdir):
         backend = "numpy"
         quantity_factory = QuantityFactory(
             sizer=SubtileGridSizer.from_tile_params(
-                nx_tile=12, ny_tile=12, nz=79, n_halo=3, layout=(1, 1), backend=backend
+                nx_tile=12,
+                ny_tile=12,
+                nz=79,
+                n_halo=3,
+                layout=(1, 1),
+                backend=backend,
             ),
             backend=backend,
         )
