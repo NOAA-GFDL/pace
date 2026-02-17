@@ -5,9 +5,9 @@
 	branch = develop
 [submodule "pyFV3"]
 	path = pyFV3
-	url = https://github.com/NOAA-GFDL/PyFV3.git
+	url = https://github.com/NOAA-GFDL/pyFV3.git
 	branch = develop
 [submodule "pySHiELD"]
 	path = pySHiELD
-	url = https://github.com/NOAA-GFDL/PySHiELD.git
+	url = https://github.com/NOAA-GFDL/pySHiELD.git
 	branch = develop
