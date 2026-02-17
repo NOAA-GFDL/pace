@@ -443,7 +443,8 @@ class Driver:
                     )
                     exit(0)
 
-                setattr(self, "step_all", exit_function)
+                # setattr(self, "step_all", exit_function)
+                self.step_all = exit_function  # type: ignore[method-assign]
             elif self.config.stencil_config.compilation_config.run_mode == RunMode.Run:
 
                 def exit_instead_of_build(self):
@@ -458,7 +459,8 @@ class Driver:
 
                 from gt4py.stencil_builder import StencilBuilder
 
-                setattr(StencilBuilder, "build", exit_instead_of_build)
+                # setattr(StencilBuilder, "build", exit_instead_of_build)
+                StencilBuilder.build = exit_instead_of_build  # type: ignore["method-assign"]
 
             self.config.stencil_config.dace_config = DaceConfig(
                 communicator=communicator,

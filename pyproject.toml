@@ -49,7 +49,7 @@ universal = 1
 
 [tool.flake8]
 exclude = ["docs"]
-extend-ignore = ["W503", "E302", "E203", "F841", "F401", "E501", "E721", "B010", "B006"]
+extend-ignore = ["W503", "E302", "E203", "F841", "F401", "E501", "E721"]
 max-line-length = 88
 
 [tool.isort]

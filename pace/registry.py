@@ -105,7 +105,7 @@ class Registry(Generic[T]):
 
         return register_func
 
-    def from_dict(self, config: dict, hooks={}) -> T:
+    def from_dict(self, config: dict, hooks=None) -> T:
         """
         Creates a registered type from the given config dict.
 
@@ -116,6 +116,8 @@ class Registry(Generic[T]):
         It can also have a "config" key, which is a dict used to initialize the
         dataclass. By default this is an empty dict.
         """
+        if not hooks:
+            hooks = {}
         config.setdefault("config", {})
         if self.default_type is not None:
             type_name = config.get("type", self.default_type)
