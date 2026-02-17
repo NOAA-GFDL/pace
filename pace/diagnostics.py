@@ -200,7 +200,9 @@ class MonitorDiagnostics(Diagnostics):
                         state.dycore_state.delp,
                     )
                 else:
-                    warnings.warn(f"{name} is not a supported diagnostic variable.")
+                    warnings.warn(
+                        f"{name} is not a supported diagnostic variable.", stacklevel=2
+                    )
         return output
 
     def _get_z_select_state(self, state: DycoreState):

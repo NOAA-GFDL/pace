@@ -49,7 +49,7 @@ universal = 1
 
 [tool.flake8]
 exclude = ["docs"]
-extend-ignore = ["W503", "E302", "E203", "F841", "F401", "E501", "E721"]
+extend-ignore = ["W503", "E302", "E203", "F841", "F401", "E501", "E721", "B010", "B006"]
 max-line-length = 88
 
 [tool.isort]
@@ -77,10 +77,8 @@ warn_unreachable = true
 ignore_errors = true
 module = [
   # We currently can't type stencils
-  "pyshield.stencils.*",
-  # Will be fixed with NDSL version 2026.01.00, see
-  # https://github.com/NOAA-GFDL/NDSL/pull/360
-  "pyfv3.testing.translate_fvdynamics"
+  "pyfv3.stencils.*",
+  "pyshield.stencils.*"
 ]
 
 [tool.setuptools]

@@ -150,7 +150,8 @@ class DriverConfig:
         if self.total_time < self.timestep:
             warnings.warn(
                 f"No simulation possible: you asked for {self.total_time} "
-                f"simulation time but the timestep is {self.timestep}"
+                f"simulation time but the timestep is {self.timestep}",
+                stacklevel=2,
             )
         return floor(self.total_time.total_seconds() / self.timestep.total_seconds())
 
