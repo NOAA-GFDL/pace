@@ -90,7 +90,7 @@ class InitializerSelector(Initializer):
         )
 
     @classmethod
-    def from_dict(cls, config: dict, hooks=None):
+    def from_dict(cls, config: dict, hooks: dict | None = None):
         if not hooks:
             hooks = {}
         instance = cls.registry.from_dict(config, hooks=hooks)
