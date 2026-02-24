@@ -308,7 +308,7 @@ class SerialboxInit(Initializer):
     def _initialize_dycore_state(
         self,
         communicator: Communicator,
-        backend: str,
+        backend: Backend,
     ) -> DycoreState:
         grid = self._get_serialized_grid(communicator=communicator, backend=backend)
 

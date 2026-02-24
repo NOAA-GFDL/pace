@@ -96,6 +96,6 @@ physics_config:
   do_qa: true
 
 grid_config:
-  type:  generated
+  type: generated
   config:
     eta_file: './eta79.nc'

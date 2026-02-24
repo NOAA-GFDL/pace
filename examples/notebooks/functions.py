@@ -25,7 +25,7 @@ from ndsl import (
     SubtileGridSizer,
     TilePartitioner,
 )
-from ndsl.config import backend_python, Backend
+from ndsl.config import Backend, backend_python
 from ndsl.constants import RADIUS, X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_DIM
 from ndsl.grid import (
     AngleGridData,
