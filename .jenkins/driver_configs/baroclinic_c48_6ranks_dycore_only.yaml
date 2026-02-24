@@ -2,7 +2,7 @@ dycore_only: true
 disable_step_physics: true
 stencil_config:
   compilation_config:
-    backend: gt:gpu
+    backend: st:gt:gpu:KJI
     rebuild: false
     validate_args: true
     format_source: false

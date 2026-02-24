@@ -4,6 +4,7 @@ import numpy as np
 import pytest
 
 from ndsl import Quantity
+from ndsl.config import Backend
 from ndsl.constants import X_DIM, Y_DIM, Z_DIM
 from pace import SafetyChecker
 
@@ -66,7 +67,7 @@ def test_check_state_domain_only():
         "unknown",
         origin=(1, 1, 0),
         extent=(3, 3, 2),
-        backend="numpy",
+        backend=Backend("st:numpy:cpu:IJK"),
     )
     dycore_state = unittest.mock.MagicMock(u=u_quantity)
     checker.check_state(dycore_state)
@@ -84,7 +85,7 @@ def test_check_nan_value():
         "unknown",
         origin=(0, 0, 0),
         extent=(4, 4, 2),
-        backend="numpy",
+        backend=Backend("st:numpy:cpu:IJK"),
     )
     dycore_state = unittest.mock.MagicMock(u=u_quantity)
     with pytest.raises(RuntimeError):

@@ -28,6 +28,7 @@ from ndsl.checkpointer import (
     ThresholdCalibrationCheckpointer,
     ValidationCheckpointer,
 )
+from ndsl.config import Backend
 from ndsl.grid import DampingCoefficients, GridData
 from ndsl.stencils.testing import Grid, TranslateGrid, dataset_to_dict
 from ndsl.testing import perturb
@@ -35,7 +36,7 @@ from pyfv3 import DycoreState, DynamicalCore, DynamicalCoreConfig
 from pyfv3.testing import TranslateFVDynamics
 
 
-def get_grid(data_path: Path, rank: int, layout: Tuple[int, int], backend: str) -> Grid:
+def get_grid(data_path: Path, rank: int, layout: Tuple[int, int], backend: Backend) -> Grid:
     ds_grid: xr.Dataset = xr.open_dataset(data_path / "Grid-Info.nc").isel(savepoint=0)
     grid = TranslateGrid(
         dataset_to_dict(ds_grid.isel(rank=rank)),

@@ -25,6 +25,7 @@ from ndsl import (
     SubtileGridSizer,
     TilePartitioner,
 )
+from ndsl.config import backend_python, Backend
 from ndsl.constants import RADIUS, X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM, Z_DIM
 from ndsl.grid import (
     AngleGridData,
@@ -62,7 +63,7 @@ def init_quantity(
     grid: VariableGrid,
     dims: VariableDims = VariableDims.XYZ,
     units: str = "",
-    backend: str = "numpy",
+    backend: Backend = backend_python,
 ) -> Quantity:
     """
     Use: output = init_quantity(dimensions, grid, dims, units)
@@ -310,13 +311,13 @@ def configure_domain(
 
 def configure_stencil(
     domain_configuration: Dict[str, Any],
-    backend: str = "numpy",
+    backend: Backend = backend_python,
     single_layer: bool = True,
 ) -> Dict[str, Any]:
     """
     Use:
     stencil_configuration = configure_stencil(
-        domain_configuration, backend="numpy", single_layer=True)
+        domain_configuration, backend=Backend("st:numpy:cpu:IJK"), single_layer=True)
 
     Inputs:
     - domain configuration (Dict) from configure_domain()

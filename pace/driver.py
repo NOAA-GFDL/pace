@@ -338,6 +338,7 @@ class DriverConfig:
         if "case" in config_dict["initialization"]["config"].keys():
             del config_dict["initialization"]["config"]["case"]
         with open(f"{restart_path}/restart.yaml", "w") as file:
+            print(config_dict)
             yaml.safe_dump(config_dict, file)
 
 

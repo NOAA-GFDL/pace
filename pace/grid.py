@@ -8,6 +8,7 @@ import xarray as xr
 
 from ndsl import QuantityFactory, ndsl_log
 from ndsl.comm.partitioner import get_tile_index
+from ndsl.config import Backend
 from ndsl.constants import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM
 from ndsl.grid import (
     AngleGridData,
@@ -168,7 +169,7 @@ class SerialboxGridConfig(GridInitializer):
     def _get_serialized_grid(
         self,
         communicator: Communicator,
-        backend: str,
+        backend: Backend,
     ) -> grid.Grid:  # type: ignore
         ser = self._serializer(communicator)
         grid = TranslateGrid.new_from_serialized_data(
