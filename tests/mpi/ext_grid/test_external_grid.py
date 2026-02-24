@@ -12,7 +12,7 @@ from ndsl import (
     TilePartitioner,
 )
 from ndsl.comm.partitioner import get_tile_index
-from ndsl.constants import PI, RADIUS, X_INTERFACE_DIM, Y_INTERFACE_DIM
+from ndsl.constants import I_INTERFACE_DIM, J_INTERFACE_DIM, PI, RADIUS
 from pace import Driver, DriverConfig
 from tests.paths import EXAMPLE_CONFIGS_DIR, REPO_ROOT
 
@@ -96,7 +96,7 @@ def test_extgrid_equals_generated(config_file_path: str, ranks: int):
 
     subtile_slice_grid = cube_comm.partitioner.tile.subtile_slice(
         rank=cube_comm.rank,
-        global_dims=[X_INTERFACE_DIM, Y_INTERFACE_DIM],
+        global_dims=[I_INTERFACE_DIM, J_INTERFACE_DIM],
         global_extent=(npx, npy),
         overlap=True,
     )

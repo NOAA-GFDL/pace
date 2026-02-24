@@ -68,7 +68,7 @@ To see how the boundary and other objects operate, we will need some data to ope
     >>> import numpy as np
     >>> quantity = pace.util.Quantity(
     ...     data=np.zeros((6, 6)),
-    ...     dims=[pace.util.X_DIM, pace.util.Y_DIM],
+    ...     dims=[pace.util.I_DIM, pace.util.J_DIM],
     ...     units="m",
     ...     origin=(1, 1),
     ...     extent=(4, 4),

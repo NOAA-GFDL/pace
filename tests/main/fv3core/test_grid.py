@@ -6,12 +6,12 @@ import pytest
 import ndsl.dsl.gt4py as gt
 from ndsl import GridIndexing
 from ndsl.constants import (
-    X_DIM,
-    X_INTERFACE_DIM,
-    Y_DIM,
-    Y_INTERFACE_DIM,
-    Z_DIM,
-    Z_INTERFACE_DIM,
+    I_DIM,
+    I_INTERFACE_DIM,
+    J_DIM,
+    J_INTERFACE_DIM,
+    K_DIM,
+    K_INTERFACE_DIM,
 )
 from ndsl.dsl.typing import Index3D
 
@@ -280,7 +280,7 @@ def test_domain_compute(
         pytest.param(
             3,
             (4, 4, 7),
-            [X_DIM, Y_DIM, Z_DIM],
+            [I_DIM, J_DIM, K_DIM],
             (0, 0, 0),
             (3, 3, 0),
             (4, 4, 7),
@@ -289,7 +289,7 @@ def test_domain_compute(
         pytest.param(
             3,
             (4, 4, 7),
-            [X_DIM, Y_DIM, Z_DIM],
+            [I_DIM, J_DIM, K_DIM],
             tuple(),
             (3, 3, 0),
             (4, 4, 7),
@@ -298,7 +298,7 @@ def test_domain_compute(
         pytest.param(
             3,
             (4, 4, 7),
-            [Z_DIM, Y_DIM, X_DIM],
+            [K_DIM, J_DIM, I_DIM],
             (0, 0, 0),
             (0, 3, 3),
             (7, 4, 4),
@@ -307,7 +307,7 @@ def test_domain_compute(
         pytest.param(
             3,
             (4, 4, 7),
-            [X_DIM, Z_DIM],
+            [I_DIM, K_DIM],
             (0, 0),
             (3, 0),
             (4, 7),
@@ -316,7 +316,7 @@ def test_domain_compute(
         pytest.param(
             3,
             (4, 4, 7),
-            [X_DIM, Y_DIM, Z_DIM],
+            [I_DIM, J_DIM, K_DIM],
             (1, 0, 0),
             (2, 3, 0),
             (6, 4, 7),
@@ -325,7 +325,7 @@ def test_domain_compute(
         pytest.param(
             3,
             (4, 4, 7),
-            [X_DIM, Y_DIM, Z_DIM],
+            [I_DIM, J_DIM, K_DIM],
             (0, 1, 0),
             (3, 2, 0),
             (4, 6, 7),
@@ -335,7 +335,7 @@ def test_domain_compute(
         pytest.param(
             3,
             (4, 4, 7),
-            [X_DIM, Y_DIM, Z_DIM],
+            [I_DIM, J_DIM, K_DIM],
             (0, 0, 1),
             (3, 3, -1),
             (4, 4, 9),
@@ -344,7 +344,7 @@ def test_domain_compute(
         pytest.param(
             3,
             (4, 4, 7),
-            [X_DIM, Y_DIM, Z_DIM],
+            [I_DIM, J_DIM, K_DIM],
             (2, 2),
             (1, 1, 0),
             (8, 8, 7),
@@ -353,7 +353,7 @@ def test_domain_compute(
         pytest.param(
             3,
             (4, 4, 7),
-            [X_DIM, Y_DIM],
+            [I_DIM, J_DIM],
             (2, 2),
             (1, 1),
             (8, 8),
@@ -362,7 +362,7 @@ def test_domain_compute(
         pytest.param(
             3,
             (4, 4, 7),
-            [X_INTERFACE_DIM, Y_DIM, Z_DIM],
+            [I_INTERFACE_DIM, J_DIM, K_DIM],
             (0, 0, 0),
             (3, 3, 0),
             (5, 4, 7),
@@ -371,7 +371,7 @@ def test_domain_compute(
         pytest.param(
             3,
             (4, 4, 7),
-            [X_DIM, Y_INTERFACE_DIM, Z_DIM],
+            [I_DIM, J_INTERFACE_DIM, K_DIM],
             (0, 0, 0),
             (3, 3, 0),
             (4, 5, 7),
@@ -380,7 +380,7 @@ def test_domain_compute(
         pytest.param(
             3,
             (4, 4, 7),
-            [X_DIM, Y_DIM, Z_INTERFACE_DIM],
+            [I_DIM, J_DIM, K_INTERFACE_DIM],
             (0, 0, 0),
             (3, 3, 0),
             (4, 4, 8),
@@ -389,7 +389,7 @@ def test_domain_compute(
         pytest.param(
             3,
             (4, 4, 7),
-            [X_INTERFACE_DIM, Y_DIM, Z_DIM],
+            [I_INTERFACE_DIM, J_DIM, K_DIM],
             (0, 3),
             (3, 0, 0),
             (5, 10, 7),
@@ -398,7 +398,7 @@ def test_domain_compute(
         pytest.param(
             1,
             (4, 4, 7),
-            [X_DIM, Y_DIM, Z_DIM],
+            [I_DIM, J_DIM, K_DIM],
             (0, 0, 0),
             (1, 1, 0),
             (4, 4, 7),
@@ -407,7 +407,7 @@ def test_domain_compute(
         pytest.param(
             3,
             (2, 3, 6),
-            [X_DIM, Y_DIM, Z_DIM],
+            [I_DIM, J_DIM, K_DIM],
             (0, 0, 0),
             (3, 3, 0),
             (2, 3, 6),
@@ -456,7 +456,7 @@ def test_get_origin_domain(
         pytest.param(
             3,
             (4, 4, 7),
-            [X_DIM, Y_DIM, Z_DIM],
+            [I_DIM, J_DIM, K_DIM],
             (0, 0, 0),
             (3, 3, 0),
             (4, 4, 7),
@@ -465,7 +465,7 @@ def test_get_origin_domain(
         pytest.param(
             3,
             (4, 4, 7),
-            [X_DIM, Y_DIM, Z_DIM],
+            [I_DIM, J_DIM, K_DIM],
             tuple(),
             (3, 3, 0),
             (4, 4, 7),
@@ -518,7 +518,7 @@ def test_get_origin_domain_restricted_vertical(
         pytest.param(
             3,
             (5, 6, 7),
-            [X_DIM, Y_DIM, Z_DIM],
+            [I_DIM, J_DIM, K_DIM],
             (0, 0, 0),
             (8, 9, 7),
             id="compute",
@@ -526,7 +526,7 @@ def test_get_origin_domain_restricted_vertical(
         pytest.param(
             3,
             (5, 6, 7),
-            [X_DIM, Y_DIM, Z_DIM],
+            [I_DIM, J_DIM, K_DIM],
             tuple(),
             (8, 9, 7),
             id="compute_empty_halo",
@@ -534,7 +534,7 @@ def test_get_origin_domain_restricted_vertical(
         pytest.param(
             3,
             (5, 6, 7),
-            [Z_DIM, Y_DIM, X_DIM],
+            [K_DIM, J_DIM, I_DIM],
             (0, 0, 0),
             (7, 9, 8),
             id="compute_reverse",
@@ -542,7 +542,7 @@ def test_get_origin_domain_restricted_vertical(
         pytest.param(
             0,
             (4, 4, 7),
-            [X_DIM, Y_DIM, Z_DIM],
+            [I_DIM, J_DIM, K_DIM],
             (0, 0, 0),
             (4, 4, 7),
             id="no_halos_anywhere",
@@ -550,7 +550,7 @@ def test_get_origin_domain_restricted_vertical(
         pytest.param(
             3,
             (4, 4, 7),
-            [X_INTERFACE_DIM, Y_DIM, Z_DIM],
+            [I_INTERFACE_DIM, J_DIM, K_DIM],
             (0, 0, 0),
             (8, 7, 7),
             id="x_interface",
@@ -558,7 +558,7 @@ def test_get_origin_domain_restricted_vertical(
         pytest.param(
             3,
             (4, 4, 7),
-            [X_DIM, Y_INTERFACE_DIM, Z_DIM],
+            [I_DIM, J_INTERFACE_DIM, K_DIM],
             (0, 0, 0),
             (7, 8, 7),
             id="y_interface",
@@ -566,7 +566,7 @@ def test_get_origin_domain_restricted_vertical(
         pytest.param(
             3,
             (4, 4, 7),
-            [X_DIM, Y_DIM, Z_INTERFACE_DIM],
+            [I_DIM, J_DIM, K_INTERFACE_DIM],
             (0, 0, 0),
             (7, 7, 8),
             id="z_interface",
@@ -574,7 +574,7 @@ def test_get_origin_domain_restricted_vertical(
         pytest.param(
             3,
             (4, 4, 7),
-            [X_DIM, Y_DIM, Z_DIM],
+            [I_DIM, J_DIM, K_DIM],
             (3, 3),
             (10, 10, 7),
             id="halos_required",
@@ -582,7 +582,7 @@ def test_get_origin_domain_restricted_vertical(
         pytest.param(
             3,
             (4, 4, 7),
-            [X_DIM, Y_DIM, Z_DIM],
+            [I_DIM, J_DIM, K_DIM],
             (0, 3),
             (7, 10, 7),
             id="y_halos_required",

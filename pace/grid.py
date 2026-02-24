@@ -9,7 +9,7 @@ import xarray as xr
 from ndsl import QuantityFactory, ndsl_log
 from ndsl.comm.partitioner import get_tile_index
 from ndsl.config import Backend
-from ndsl.constants import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM
+from ndsl.constants import I_DIM, I_INTERFACE_DIM, J_DIM, J_INTERFACE_DIM
 from ndsl.grid import (
     AngleGridData,
     ContravariantGridData,
@@ -257,7 +257,7 @@ class ExternalNetcdfGridConfig(GridInitializer):
 
         subtile_slice_grid = communicator.partitioner.tile.subtile_slice(
             rank=communicator.rank,
-            global_dims=[X_INTERFACE_DIM, Y_INTERFACE_DIM],
+            global_dims=[I_INTERFACE_DIM, J_INTERFACE_DIM],
             global_extent=(npx, npy),
             overlap=True,
         )
