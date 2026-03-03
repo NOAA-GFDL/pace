@@ -1,7 +1,6 @@
 import dataclasses
 from datetime import timedelta
 from pathlib import Path
-from typing import List, Tuple
 
 import dacite
 import f90nml
@@ -37,7 +36,7 @@ from pyfv3.testing import TranslateFVDynamics
 
 
 def get_grid(
-    data_path: Path, rank: int, layout: Tuple[int, int], backend: Backend
+    data_path: Path, rank: int, layout: tuple[int, int], backend: Backend
 ) -> Grid:
     ds_grid: xr.Dataset = xr.open_dataset(data_path / "Grid-Info.nc").isel(savepoint=0)
     grid = TranslateGrid(
@@ -58,7 +57,7 @@ class StateInitializer:
         self._ds = ds
         self._translate = translate
 
-    def new_state(self) -> Tuple[DycoreState, GridData]:
+    def new_state(self) -> tuple[DycoreState, GridData]:
         input_data = dataset_to_dict(self._ds.copy())
         state, grid_data = self._translate.prepare_data(input_data)
         return state, grid_data
@@ -202,7 +201,7 @@ def set_manual_thresholds(thresholds: SavepointThresholds):
             entry[name] = Threshold(relative=0.0, absolute=0.0)
 
 
-def merge_thresholds(all_thresholds: List[SavepointThresholds]):
+def merge_thresholds(all_thresholds: list[SavepointThresholds]):
     thresholds = all_thresholds[0]
     for other_thresholds in all_thresholds[1:]:
         for savepoint_name in thresholds.savepoints:
