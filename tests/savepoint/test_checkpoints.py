@@ -13,7 +13,6 @@ from ndsl import (
     CubedSpherePartitioner,
     GridIndexing,
     MPIComm,
-    Namelist,
     Quantity,
     QuantityFactory,
     StencilConfig,
@@ -67,7 +66,7 @@ def test_fv_dynamics(
     backend: str, data_path: Path, calibrate_thresholds: bool, threshold_path: Path
 ):
     print("start test call")
-    namelist = Namelist.from_f90nml(f90nml.read(data_path / "input.nml"))
+    namelist = f90nml.read(data_path / "input.nml")
     threshold_filename = threshold_path / "fv_dynamics.yaml"
     communicator = CubedSphereCommunicator(
         comm=MPIComm(),
