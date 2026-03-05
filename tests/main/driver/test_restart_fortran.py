@@ -9,6 +9,7 @@ from ndsl import (
     SubtileGridSizer,
     TilePartitioner,
 )
+from ndsl.config import Backend
 from pace import FortranRestartInit, GeneratedGridConfig, NullComm
 from pyshield import PHYSICS_PACKAGES
 from tests.paths import REPO_ROOT
@@ -16,7 +17,7 @@ from tests.paths import REPO_ROOT
 
 def test_state_from_fortran_restart():
     layout = (1, 1)
-    backend = "numpy"
+    backend = Backend("st:numpy:cpu:IJK")
     partitioner = CubedSpherePartitioner(TilePartitioner(layout))
     # need a local communicator to mock "scatter" for the restart data,
     # but need null communicator to handle grid initialization

@@ -15,6 +15,7 @@ from ndsl import (
     SubtileGridSizer,
     TilePartitioner,
 )
+from ndsl.config import Backend
 from pace import (
     AnalyticInit,
     DriverConfig,
@@ -38,7 +39,7 @@ def test_restart_save_to_disk():
     try:
         with open(EXAMPLE_CONFIGS_DIR / "baroclinic_c12_write_restart.yaml", "r") as f:
             driver_config = DriverConfig.from_dict(yaml.safe_load(f))
-        backend = "numpy"
+        backend = Backend("st:numpy:cpu:IJK")
         mpi_comm = NullComm(rank=0, total_ranks=6, fill_value=0.0)
         partitioner = CubedSpherePartitioner(TilePartitioner((1, 1)))
         communicator = CubedSphereCommunicator(mpi_comm, partitioner)

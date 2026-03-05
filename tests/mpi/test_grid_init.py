@@ -12,6 +12,7 @@ from ndsl import (
     TileCommunicator,
     TilePartitioner,
 )
+from ndsl.config import Backend
 from ndsl.grid import GridData, MetricTerms
 from pyfv3 import DycoreState
 from pyfv3.initialization.test_cases.initialize_baroclinic import init_baroclinic_state
@@ -27,7 +28,7 @@ def get_cube_comm(layout, comm: MPIComm):
 def get_quantity_factory(layout, nx_tile, ny_tile, nz):
     nx = nx_tile // layout[0]
     ny = ny_tile // layout[1]
-    backend = "numpy"
+    backend = Backend("st:numpy:cpu:IJK")
 
     return QuantityFactory(
         sizer=SubtileGridSizer.from_tile_params(

@@ -17,10 +17,10 @@ jobs:
         with:
           submodules: 'recursive'
 
-      - name: Step Python 3.11
+      - name: Step Python 3.12
         uses: actions/setup-python@v6
         with:
-          python-version: '3.11'
+          python-version: '3.12'
 
       # Only restore (don't save) caches on PRs. New caches created from PRs won't be
       # accessible from other PRs, see workflows/create-cache.yaml.

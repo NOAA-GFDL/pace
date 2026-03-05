@@ -2,6 +2,7 @@ import f90nml
 import numpy as np
 import pytest  # noqa
 
+from ndsl.config import Backend
 from pace import NullComm
 from pyfv3 import DynamicalCore
 from pyfv3.wrappers import GeosDycoreWrapper
@@ -11,7 +12,7 @@ def test_geos_wrapper():
     namelist_dict = {
         "stencil_config": {
             "compilation_config": {
-                "backend": "numpy",
+                "backend": "st:numpy:cpu:IJK",
                 "rebuild": False,
                 "validate_args": True,
                 "format_source": False,
@@ -83,7 +84,7 @@ def test_geos_wrapper():
     namelist = f90nml.namelist.Namelist(namelist_dict)
 
     comm = NullComm(rank=0, total_ranks=6, fill_value=0.0)
-    backend = "numpy"
+    backend = Backend("st:numpy:cpu:IJK")
 
     wrapper = GeosDycoreWrapper(
         namelist=namelist,
