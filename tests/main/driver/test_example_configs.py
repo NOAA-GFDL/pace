@@ -1,6 +1,5 @@
 import os
 from pathlib import Path
-from typing import List
 
 import pytest
 import yaml
@@ -9,7 +8,7 @@ from pace import DriverConfig
 from tests.paths import EXAMPLE_CONFIGS_DIR, JENKINS_CONFIGS_DIR
 
 
-TESTED_CONFIGS: List[str] = [
+TESTED_CONFIGS: list[str] = [
     "baroclinic_c12.yaml",
     "baroclinic_c12_dp.yaml",
     "baroclinic_c12_explicit_physics.yaml",
@@ -20,7 +19,7 @@ TESTED_CONFIGS: List[str] = [
     "baroclinic_c48_6ranks_serialbox_test.yaml",
     "analytic_test.yaml",
 ]
-EXCLUDED_CONFIGS: List[str] = [
+EXCLUDED_CONFIGS: list[str] = [
     # We don't test serialbox example because it loads namelist
     # filepath that are not in git
     "baroclinic_c12_from_serialbox.yaml",
@@ -33,13 +32,13 @@ EXCLUDED_CONFIGS: List[str] = [
 ]
 
 
-TESTED_JENKINS_CONFIGS: List[str] = [
+TESTED_JENKINS_CONFIGS: list[str] = [
     "baroclinic_c48_6ranks_dycore_only.yaml",
     "baroclinic_c192_6ranks.yaml",
     "baroclinic_c192_54ranks.yaml",
 ]
 
-EXCLUDED_JENKINS_CONFIGS: List[str] = [
+EXCLUDED_JENKINS_CONFIGS: list[str] = [
     # We don't test serialbox example because it loads namelist
     # filepath that are not in git
     "baroclinic_c48_6ranks_dycore_only_serialbox.yaml",
@@ -61,7 +60,7 @@ EXCLUDED_JENKINS_CONFIGS: List[str] = [
     ],
 )
 def test_all_configs_tested_or_excluded(
-    config_dir: Path, tested_configs: List[str], excluded_configs: List[str]
+    config_dir: Path, tested_configs: list[str], excluded_configs: list[str]
 ):
     """
     If any configs are not tested or excluded, add them to TESTED_CONFIGS or
@@ -84,7 +83,7 @@ def test_all_configs_tested_or_excluded(
         pytest.param(JENKINS_CONFIGS_DIR, TESTED_JENKINS_CONFIGS),
     ],
 )
-def test_example_config_can_initialize(path: Path, file_list: List[str]):
+def test_example_config_can_initialize(path: Path, file_list: list[str]):
     for file_name in file_list:
         with open(path / file_name, "r") as f:
             config = DriverConfig.from_dict(yaml.safe_load(f))

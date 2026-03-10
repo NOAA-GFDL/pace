@@ -1,4 +1,6 @@
-from ndsl import Namelist, QuantityFactory, SubtileGridSizer
+from f90nml import Namelist
+
+from ndsl import QuantityFactory, SubtileGridSizer
 from ndsl.constants import N_HALO_DEFAULT
 from pace import Driver, DriverConfig, TendencyState
 from pyfv3 import DynamicalCoreConfig

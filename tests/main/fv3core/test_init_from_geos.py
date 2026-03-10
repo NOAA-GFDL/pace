@@ -1,6 +1,5 @@
 import f90nml
 import numpy as np
-import pytest  # noqa
 
 from ndsl.config import Backend
 from pace import NullComm
@@ -107,11 +106,6 @@ def test_geos_wrapper():
         namelist["nx_tile"] + 2 * nhalo,
         namelist["nx_tile"] + 2 * nhalo + 1,
         namelist["nz"],
-    )
-    shape_z_interface = (
-        namelist["nx_tile"] + 2 * nhalo,
-        namelist["nx_tile"] + 2 * nhalo,
-        namelist["nz"] + 1,
     )
     shape2d = (
         namelist["nx_tile"] + 2 * nhalo,
