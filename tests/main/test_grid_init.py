@@ -11,6 +11,7 @@ from ndsl import (
     SubtileGridSizer,
     TilePartitioner,
 )
+from ndsl.config import Backend
 from ndsl.grid import MetricTerms
 from pace import NullComm
 
@@ -25,7 +26,7 @@ def get_cube_comm(layout, rank: int):
 def get_quantity_factory(layout, nx_tile, ny_tile, nz):
     nx = nx_tile // layout[0]
     ny = ny_tile // layout[1]
-    backend = "numpy"
+    backend = Backend("st:numpy:cpu:IJK")
 
     return QuantityFactory(
         sizer=SubtileGridSizer.from_tile_params(

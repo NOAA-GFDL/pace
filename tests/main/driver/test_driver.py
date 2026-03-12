@@ -1,6 +1,6 @@
 import unittest.mock
 from datetime import datetime, timedelta
-from typing import Literal, Tuple
+from typing import Literal
 
 import pytest
 
@@ -22,7 +22,7 @@ def get_driver_config(
     hours: int = 0,
     minutes: int = 0,
     seconds: int = 0,
-    layout: Tuple[int, int] = (1, 1),
+    layout: tuple[int, int] = (1, 1),
     frequency: int = 1,
     output_initial_state=False,
     start_time_type: Literal["timedelta", "datetime"] = "timedelta",

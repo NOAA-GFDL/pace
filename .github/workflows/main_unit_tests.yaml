@@ -34,7 +34,7 @@ jobs:
       run:
         shell: bash -el {0}
     env:
-      python_default: '3.11'
+      python_default: '3.12'
 
     steps:
       - name: "External trigger: Checkout pace/develop"
@@ -44,7 +44,6 @@ jobs:
           submodules: 'recursive'
           repository: NOAA-GFDL/pace
           path: pace
-          ref: develop
 
       - name: 'Setup Python ${{ inputs.python_version && inputs.python_version || env.python_default }}'
         uses: actions/setup-python@v6

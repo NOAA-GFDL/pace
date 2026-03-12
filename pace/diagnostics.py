@@ -7,7 +7,7 @@ from pathlib import Path
 import numpy as np
 
 from ndsl import Quantity
-from ndsl.constants import RGRAV, Z_DIM, Z_INTERFACE_DIM
+from ndsl.constants import K_DIM, K_INTERFACE_DIM, RGRAV
 from ndsl.dsl.dace.orchestration import dace_inhibitor
 from ndsl.dsl.typing import Float
 from ndsl.grid import GridData
@@ -46,7 +46,7 @@ class ZSelect:
             if name not in state.__dict__.keys():
                 raise ValueError(f"Invalid state variable {name} for level select")
             assert len(getattr(state, name).dims) > 2
-            if getattr(state, name).dims[2] != (Z_DIM or Z_INTERFACE_DIM):
+            if getattr(state, name).dims[2] != (K_DIM or K_INTERFACE_DIM):
                 raise ValueError(
                     f"z_select only works for state variables with dimension (x, y, z). \
                         \n {name} has dimension {getattr(state, name).dims}"
@@ -95,13 +95,11 @@ class DiagnosticsConfig:
             )
         if self.output_format not in ["zarr", "netcdf"]:
             raise ValueError(
-                "output_format must be one of 'zarr' or 'netcdf', "
-                f"got {self.output_format}"
+                f"output_format must be one of 'zarr' or 'netcdf', got {self.output_format}"
             )
         if self.precision not in ["Float", "float32", "float64"]:
             raise ValueError(
-                "precision must be one of 'Float', 'float32', or 'float64"
-                f"got {self.precision}"
+                f"precision must be one of 'Float', 'float32', or 'float64got {self.precision}"
             )
 
     def diagnostics_factory(self, communicator: Communicator) -> Diagnostics:
@@ -140,8 +138,7 @@ class DiagnosticsConfig:
             )
         else:
             raise ValueError(
-                "output_format must be one of 'zarr' or 'netcdf', "
-                f"got {self.output_format}"
+                f"output_format must be one of 'zarr' or 'netcdf', got {self.output_format}"
             )
 
         return MonitorDiagnostics(
@@ -253,7 +250,7 @@ def _compute_column_integral(name: str, q_in: Quantity, delp: Quantity) -> Quant
     if len(q_in.dims) <= 2:
         raise RuntimeError("This function assumes that q_in is at least 3-dimensional.")
 
-    if q_in.dims[2] != Z_DIM:
+    if q_in.dims[2] != K_DIM:
         raise RuntimeError(
             "This function assumes the z-dimension is the third dimension"
         )
