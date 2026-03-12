@@ -105,7 +105,7 @@ class Registry(Generic[T]):
 
         return register_func
 
-    def from_dict(self, config: dict, hooks: dict | None = None) -> T:
+    def from_dict(self, config: dict, hooks: dict = None) -> T:
         """
         Creates a registered type from the given config dict.
 
