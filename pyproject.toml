@@ -78,6 +78,7 @@ warn_unreachable = true
 ignore_errors = true
 module = [
   # We currently can't type stencils
+  "pyfv3.stencils.*",
   "pyshield.stencils.*"
 ]
 
