@@ -1,6 +1,6 @@
 stencil_config:
   compilation_config:
-    backend: dace:gpu
+    backend: st:dace:gpu:KJI
     rebuild: false
     validate_args: false
     format_source: false
