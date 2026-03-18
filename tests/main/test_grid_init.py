@@ -6,13 +6,14 @@ import pytest
 from ndsl import (
     CubedSphereCommunicator,
     CubedSpherePartitioner,
-    NullComm,
     Quantity,
     QuantityFactory,
     SubtileGridSizer,
     TilePartitioner,
 )
+from ndsl.config import Backend
 from ndsl.grid import MetricTerms
+from pace import NullComm
 
 
 def get_cube_comm(layout, rank: int):
@@ -25,15 +26,18 @@ def get_cube_comm(layout, rank: int):
 def get_quantity_factory(layout, nx_tile, ny_tile, nz):
     nx = nx_tile // layout[0]
     ny = ny_tile // layout[1]
-    return QuantityFactory.from_backend(
+    backend = Backend("st:numpy:cpu:IJK")
+
+    return QuantityFactory(
         sizer=SubtileGridSizer.from_tile_params(
             nx_tile=nx,
             ny_tile=ny,
             nz=nz,
             n_halo=3,
             layout=(1, 1),
+            backend=backend,
         ),
-        backend="numpy",
+        backend=backend,
     )
 
 

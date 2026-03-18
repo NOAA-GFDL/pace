@@ -7,7 +7,7 @@ from pathlib import Path
 import numpy as np
 
 from ndsl import Quantity
-from ndsl.constants import RGRAV, Z_DIM, Z_INTERFACE_DIM
+from ndsl.constants import K_DIM, K_INTERFACE_DIM, RGRAV
 from ndsl.dsl.dace.orchestration import dace_inhibitor
 from ndsl.dsl.typing import Float
 from ndsl.grid import GridData
@@ -46,7 +46,7 @@ class ZSelect:
             if name not in state.__dict__.keys():
                 raise ValueError(f"Invalid state variable {name} for level select")
             assert len(getattr(state, name).dims) > 2
-            if getattr(state, name).dims[2] != (Z_DIM or Z_INTERFACE_DIM):
+            if getattr(state, name).dims[2] != (K_DIM or K_INTERFACE_DIM):
                 raise ValueError(
                     f"z_select only works for state variables with dimension (x, y, z). \
                         \n {name} has dimension {getattr(state, name).dims}"
@@ -58,6 +58,7 @@ class ZSelect:
                 origin=getattr(state, name).origin[0:2],
                 extent=getattr(state, name).extent[0:2],
                 units=getattr(state, name).units,
+                backend=getattr(state, name).backend,
             )
         return output
 
@@ -94,13 +95,11 @@ class DiagnosticsConfig:
             )
         if self.output_format not in ["zarr", "netcdf"]:
             raise ValueError(
-                "output_format must be one of 'zarr' or 'netcdf', "
-                f"got {self.output_format}"
+                f"output_format must be one of 'zarr' or 'netcdf', got {self.output_format}"
             )
         if self.precision not in ["Float", "float32", "float64"]:
             raise ValueError(
-                "precision must be one of 'Float', 'float32', or 'float64"
-                f"got {self.precision}"
+                f"precision must be one of 'Float', 'float32', or 'float64got {self.precision}"
             )
 
     def diagnostics_factory(self, communicator: Communicator) -> Diagnostics:
@@ -139,8 +138,7 @@ class DiagnosticsConfig:
             )
         else:
             raise ValueError(
-                "output_format must be one of 'zarr' or 'netcdf', "
-                f"got {self.output_format}"
+                f"output_format must be one of 'zarr' or 'netcdf', got {self.output_format}"
             )
 
         return MonitorDiagnostics(
@@ -199,7 +197,9 @@ class MonitorDiagnostics(Diagnostics):
                         state.dycore_state.delp,
                     )
                 else:
-                    warnings.warn(f"{name} is not a supported diagnostic variable.")
+                    warnings.warn(
+                        f"{name} is not a supported diagnostic variable.", stacklevel=2
+                    )
         return output
 
     def _get_z_select_state(self, state: DycoreState):
@@ -235,7 +235,7 @@ class NullDiagnostics(Diagnostics):
         pass
 
 
-def _compute_column_integral(name: str, q_in: Quantity, delp: Quantity):
+def _compute_column_integral(name: str, q_in: Quantity, delp: Quantity) -> Quantity:
     """
     Compute column integrated mixing ratio (e.g., total liquid water path)
 
@@ -243,19 +243,25 @@ def _compute_column_integral(name: str, q_in: Quantity, delp: Quantity):
         name: name of the tracer
         q_in: tracer mixing ratio
         delp: pressure thickness of atmospheric layer
+
+    Returns:
+        The column integral.
     """
-    assert len(q_in.dims) > 2
-    if q_in.dims[2] != Z_DIM:
-        raise NotImplementedError(
-            "this function assumes the z-dimension is the third dimension"
+    if len(q_in.dims) <= 2:
+        raise RuntimeError("This function assumes that q_in is at least 3-dimensional.")
+
+    if q_in.dims[2] != K_DIM:
+        raise RuntimeError(
+            "This function assumes the z-dimension is the third dimension"
         )
+
     k_slice = slice(q_in.origin[2], q_in.origin[2] + q_in.extent[2])
-    column_integral = Quantity(
+    return Quantity(
         RGRAV
         * q_in.np.sum(q_in.data[:, :, k_slice] * delp.data[:, :, k_slice], axis=2),
         dims=tuple(q_in.dims[:2]) + tuple(q_in.dims[3:]),
         origin=q_in.metadata.origin[0:2],
         extent=(q_in.metadata.extent[0], q_in.metadata.extent[1]),
         units="kg/m**2",
+        backend=q_in.backend,
     )
-    return column_integral

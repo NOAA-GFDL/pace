@@ -11,15 +11,16 @@ from ndsl import (
     DaceConfig,
     DaCeOrchestration,
     GridIndexing,
-    NullComm,
     QuantityFactory,
     StencilConfig,
     StencilFactory,
     SubtileGridSizer,
     TilePartitioner,
 )
+from ndsl.config import Backend
 from ndsl.grid import GridData, MetricTerms
 from ndsl.stencils.testing import assert_same_temporaries, copy_temporaries
+from pace import NullComm
 from pyshield import PHYSICS_PACKAGES, Physics, PhysicsConfig, PhysicsState
 
 
@@ -30,7 +31,7 @@ except ImportError:
 
 
 def setup_physics():
-    backend = "numpy"
+    backend = Backend("st:numpy:cpu:IJK")
     layout = (1, 1)
     physics_config = PhysicsConfig(
         dt_atmos=225, hydrostatic=False, npx=13, npy=13, npz=79, nwat=6, do_qa=True
@@ -46,15 +47,16 @@ def setup_physics():
         layout=layout,
         tile_partitioner=partitioner.tile,
         tile_rank=communicator.tile.rank,
+        backend=backend,
     )
     grid_indexing = GridIndexing.from_sizer_and_communicator(
         sizer=sizer, comm=communicator
     )
-    quantity_factory = QuantityFactory.from_backend(sizer=sizer, backend=backend)
+    quantity_factory = QuantityFactory(sizer=sizer, backend=backend)
     dace_config = DaceConfig(
         communicator=communicator,
         backend=backend,
-        orchestration=DaCeOrchestration.Python,
+        orchestration=DaCeOrchestration.BuildAndRun,
     )
     stencil_config = StencilConfig(
         compilation_config=CompilationConfig(

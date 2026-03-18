@@ -3,9 +3,11 @@ from pathlib import Path
 import numpy as np
 import pytest
 
-from ndsl import NullComm, TileCommunicator, TilePartitioner
+from ndsl import TileCommunicator, TilePartitioner
+from ndsl.config import Backend
 from ndsl.constants import PI
 from ndsl.grid import MetricTerms
+from pace import NullComm
 
 
 @pytest.mark.parametrize("npx", [8])
@@ -14,7 +16,7 @@ from ndsl.grid import MetricTerms
 @pytest.mark.parametrize("dx_const", [1e2, 1e3])
 @pytest.mark.parametrize("dy_const", [2e2, 3e3])
 @pytest.mark.parametrize("deglat", [0.0, 15.0])
-@pytest.mark.parametrize("backend", ["numpy"])
+@pytest.mark.parametrize("backend", [Backend("st:numpy:cpu:IJK")])
 def test_cartesian_grid_generation(
     npx: int,
     npy: int,

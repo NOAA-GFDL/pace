@@ -41,7 +41,7 @@ class IncompatiblePropertyConfigClass:
 def assert_types_match(classes):
     types = collections.defaultdict(set)
     for cls in classes:
-        for name, field in cls.__dataclass_fields__.items():
+        for name, _field in cls.__dataclass_fields__.items():
             # Get type hints in case we're using postponed evaluation of types
             # Example: '<class 'bool'> instead of 'bool'
             types[name].add(typing.get_type_hints(cls)[name])

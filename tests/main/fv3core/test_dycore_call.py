@@ -2,7 +2,6 @@ import unittest.mock
 from dataclasses import fields
 from datetime import timedelta
 from pathlib import Path
-from typing import Tuple
 
 import pyfv3.initialization.analytic_init as ai
 from ndsl import (
@@ -11,7 +10,6 @@ from ndsl import (
     CubedSpherePartitioner,
     DaceConfig,
     GridIndexing,
-    NullComm,
     Quantity,
     QuantityFactory,
     StencilConfig,
@@ -19,15 +17,17 @@ from ndsl import (
     SubtileGridSizer,
     TilePartitioner,
 )
+from ndsl.config import Backend
 from ndsl.grid import DampingCoefficients, GridData, MetricTerms
 from ndsl.performance.timer import NullTimer, Timer
 from ndsl.stencils.testing import assert_same_temporaries, copy_temporaries
+from pace import NullComm
 from pyfv3 import DycoreState, DynamicalCore, DynamicalCoreConfig
 from pyfv3.initialization.analytic_init import AnalyticCase
 
 
-def setup_dycore() -> Tuple[DynamicalCore, DycoreState, Timer]:
-    backend = "numpy"
+def setup_dycore() -> tuple[DynamicalCore, DycoreState, Timer]:
+    backend = Backend("st:numpy:cpu:IJK")
     config = DynamicalCoreConfig(
         layout=(1, 1),
         npx=13,
@@ -92,11 +92,12 @@ def setup_dycore() -> Tuple[DynamicalCore, DycoreState, Timer]:
         layout=config.layout,
         tile_partitioner=partitioner.tile,
         tile_rank=communicator.tile.rank,
+        backend=backend,
     )
     grid_indexing = GridIndexing.from_sizer_and_communicator(
         sizer=sizer, comm=communicator
     )
-    quantity_factory = QuantityFactory.from_backend(sizer=sizer, backend=backend)
+    quantity_factory = QuantityFactory(sizer=sizer, backend=backend)
     eta_file = Path("NDSL/tests/data/eta/eta79.nc")
     metric_terms = MetricTerms(
         quantity_factory=quantity_factory,

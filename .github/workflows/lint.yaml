@@ -13,18 +13,18 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v5
+        uses: actions/checkout@v6
         with:
           submodules: 'recursive'
 
-      - name: Step Python 3.11
-        uses: actions/setup-python@v5
+      - name: Step Python 3.12
+        uses: actions/setup-python@v6
         with:
-          python-version: '3.11'
+          python-version: '3.12'
 
       # Only restore (don't save) caches on PRs. New caches created from PRs won't be
       # accessible from other PRs, see workflows/create-cache.yaml.
-      - uses: actions/cache/restore@v4
+      - uses: actions/cache/restore@v5
         with:
           path: ~/.cache/pre-commit
           key: pre-commit_${{ env.pythonLocation }}_${{ hashFiles('.pre-commit-config.yaml') }}

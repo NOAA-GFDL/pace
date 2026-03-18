@@ -8,4 +8,4 @@ def backend(pytestconfig):
 
 
 def pytest_addoption(parser):
-    parser.addoption("--backend", action="store", default="numpy")
+    parser.addoption("--backend", action="store", default="st:numpy:cpu:IJK")

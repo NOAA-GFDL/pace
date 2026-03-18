@@ -25,7 +25,8 @@ from ndsl import (
     SubtileGridSizer,
     TilePartitioner,
 )
-from ndsl.constants import RADIUS
+from ndsl.config import Backend, backend_python
+from ndsl.constants import I_DIM, I_INTERFACE_DIM, J_DIM, J_INTERFACE_DIM, K_DIM, RADIUS
 from ndsl.grid import (
     AngleGridData,
     ContravariantGridData,
@@ -62,7 +63,7 @@ def init_quantity(
     grid: VariableGrid,
     dims: VariableDims = VariableDims.XYZ,
     units: str = "",
-    backend: str = "numpy",
+    backend: Backend = backend_python,
 ) -> Quantity:
     """
     Use: output = init_quantity(dimensions, grid, dims, units)
@@ -102,41 +103,41 @@ def init_quantity(
     if grid == VariableGrid.CellCenters:
         variable = Quantity(
             data=empty,
-            dims=("x", "y", "z")[:skip_z],
+            dims=(I_DIM, J_DIM, K_DIM)[:skip_z],
             units=units,
             origin=(nhalo, nhalo, 0)[:skip_z],
             extent=(nx, ny, nz)[:skip_z],
-            gt4py_backend=backend,
+            backend=backend,
         )
 
     if grid == VariableGrid.CellCorners:
         variable = Quantity(
             data=empty,
-            dims=("x_interface", "y_interface", "z")[:skip_z],
+            dims=(I_INTERFACE_DIM, J_INTERFACE_DIM, K_DIM)[:skip_z],
             units=units,
             origin=(nhalo, nhalo, 0)[:skip_z],
             extent=(nx + 1, ny + 1, nz)[:skip_z],
-            gt4py_backend=backend,
+            backend=backend,
         )
 
     elif grid == VariableGrid.StaggeredInX:
         variable = Quantity(
             data=empty,
-            dims=("x_interface", "y", "z")[:skip_z],
+            dims=(I_INTERFACE_DIM, J_DIM, K_DIM)[:skip_z],
             units=units,
             origin=(nhalo, nhalo, 0)[:skip_z],
             extent=(nx + 1, ny, nz)[:skip_z],
-            gt4py_backend=backend,
+            backend=backend,
         )
 
     elif grid == VariableGrid.StaggeredInY:
         variable = Quantity(
             data=empty,
-            dims=("x", "y_interface", "z")[:skip_z],
+            dims=(I_DIM, J_INTERFACE_DIM, K_DIM)[:skip_z],
             units=units,
             origin=(nhalo, nhalo, 0)[:skip_z],
             extent=(nx, ny + 1, nz)[:skip_z],
-            gt4py_backend=backend,
+            backend=backend,
         )
 
     return variable
@@ -266,9 +267,10 @@ def configure_domain(
         layout=dimensions["layout"],
         tile_partitioner=partitioner.tile,
         tile_rank=communicator.tile.rank,
+        backend=backend,
     )
 
-    quantity_factory = QuantityFactory.from_backend(sizer=sizer, backend=backend)
+    quantity_factory = QuantityFactory(sizer=sizer, backend=backend)
 
     metric_terms = MetricTerms(
         quantity_factory=quantity_factory,
@@ -309,13 +311,13 @@ def configure_domain(
 
 def configure_stencil(
     domain_configuration: Dict[str, Any],
-    backend: str = "numpy",
+    backend: Backend = backend_python,
     single_layer: bool = True,
 ) -> Dict[str, Any]:
     """
     Use:
     stencil_configuration = configure_stencil(
-        domain_configuration, backend="numpy", single_layer=True)
+        domain_configuration, backend=Backend("st:numpy:cpu:IJK"), single_layer=True)
 
     Inputs:
     - domain configuration (Dict) from configure_domain()
@@ -645,20 +647,20 @@ def calculate_winds_from_streamfunction_grid(
     if isinstance(u_grid.data, np.ndarray) and isinstance(v_grid.data, np.ndarray):
         if grid == GridType.AGrid:
             if not (
-                u_grid.metadata.dims == ("x", "y", "z")
-                and v_grid.metadata.dims == ("x", "y", "z")
+                u_grid.metadata.dims == (I_DIM, J_DIM, K_DIM)
+                and v_grid.metadata.dims == (I_DIM, J_DIM, K_DIM)
             ):
                 print("Incorrect wind input dimensions for A-grid.")
         elif grid == GridType.CGrid:
             if not (
-                u_grid.metadata.dims == ("x", "y_interface", "z")
-                and v_grid.metadata.dims == ("x_interface", "y", "z")
+                u_grid.metadata.dims == (I_DIM, J_INTERFACE_DIM, K_DIM)
+                and v_grid.metadata.dims == (I_INTERFACE_DIM, J_DIM, K_DIM)
             ):
                 print("Incorrect wind input dimensions for C-grid.")
         elif grid == GridType.DGrid:
             if not (
-                u_grid.metadata.dims == ("x_interface", "y", "z")
-                and v_grid.metadata.dims == ("x", "y_interface", "z")
+                u_grid.metadata.dims == (I_INTERFACE_DIM, J_DIM, K_DIM)
+                and v_grid.metadata.dims == (I_DIM, J_INTERFACE_DIM, K_DIM)
             ):
                 print("Incorrect wind input dimensions for D-grid.")
     else:

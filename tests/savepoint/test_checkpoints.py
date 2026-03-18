@@ -1,7 +1,6 @@
 import dataclasses
 from datetime import timedelta
 from pathlib import Path
-from typing import List, Tuple
 
 import dacite
 import f90nml
@@ -14,7 +13,6 @@ from ndsl import (
     CubedSpherePartitioner,
     GridIndexing,
     MPIComm,
-    Namelist,
     Quantity,
     QuantityFactory,
     StencilConfig,
@@ -28,6 +26,7 @@ from ndsl.checkpointer import (
     ThresholdCalibrationCheckpointer,
     ValidationCheckpointer,
 )
+from ndsl.config import Backend
 from ndsl.grid import DampingCoefficients, GridData
 from ndsl.stencils.testing import Grid, TranslateGrid, dataset_to_dict
 from ndsl.testing import perturb
@@ -35,7 +34,9 @@ from pyfv3 import DycoreState, DynamicalCore, DynamicalCoreConfig
 from pyfv3.testing import TranslateFVDynamics
 
 
-def get_grid(data_path: Path, rank: int, layout: Tuple[int, int], backend: str) -> Grid:
+def get_grid(
+    data_path: Path, rank: int, layout: tuple[int, int], backend: Backend
+) -> Grid:
     ds_grid: xr.Dataset = xr.open_dataset(data_path / "Grid-Info.nc").isel(savepoint=0)
     grid = TranslateGrid(
         dataset_to_dict(ds_grid.isel(rank=rank)),
@@ -55,7 +56,7 @@ class StateInitializer:
         self._ds = ds
         self._translate = translate
 
-    def new_state(self) -> Tuple[DycoreState, GridData]:
+    def new_state(self) -> tuple[DycoreState, GridData]:
         input_data = dataset_to_dict(self._ds.copy())
         state, grid_data = self._translate.prepare_data(input_data)
         return state, grid_data
@@ -65,7 +66,7 @@ def test_fv_dynamics(
     backend: str, data_path: Path, calibrate_thresholds: bool, threshold_path: Path
 ):
     print("start test call")
-    namelist = Namelist.from_f90nml(f90nml.read(data_path / "input.nml"))
+    namelist = f90nml.read(data_path / "input.nml")
     threshold_filename = threshold_path / "fv_dynamics.yaml"
     communicator = CubedSphereCommunicator(
         comm=MPIComm(),
@@ -90,6 +91,7 @@ def test_fv_dynamics(
                 tile_partitioner=communicator.partitioner.tile,
                 tile_rank=communicator.rank,
                 layout=namelist.layout,
+                backend=backend,
             ),
             comm=communicator,
         ),
@@ -198,7 +200,7 @@ def set_manual_thresholds(thresholds: SavepointThresholds):
             entry[name] = Threshold(relative=0.0, absolute=0.0)
 
 
-def merge_thresholds(all_thresholds: List[SavepointThresholds]):
+def merge_thresholds(all_thresholds: list[SavepointThresholds]):
     thresholds = all_thresholds[0]
     for other_thresholds in all_thresholds[1:]:
         for savepoint_name in thresholds.savepoints:

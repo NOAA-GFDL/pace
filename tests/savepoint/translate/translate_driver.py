@@ -1,4 +1,6 @@
-from ndsl import Namelist, QuantityFactory, SubtileGridSizer
+from f90nml import Namelist
+
+from ndsl import QuantityFactory, SubtileGridSizer
 from ndsl.constants import N_HALO_DEFAULT
 from pace import Driver, DriverConfig, TendencyState
 from pyfv3 import DynamicalCoreConfig
@@ -34,9 +36,10 @@ class TranslateDriver(TranslateFVDynamics):
             layout=self.namelist.layout,
             tile_partitioner=communicator.partitioner.tile,
             tile_rank=communicator.tile.rank,
+            backend=self.stencil_config.backend,
         )
 
-        quantity_factory = QuantityFactory.from_backend(
+        quantity_factory = QuantityFactory(
             sizer, backend=self.stencil_config.compilation_config.backend
         )
         physics_state = PhysicsState.init_zeros(

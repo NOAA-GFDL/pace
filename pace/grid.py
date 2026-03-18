@@ -8,7 +8,8 @@ import xarray as xr
 
 from ndsl import QuantityFactory, ndsl_log
 from ndsl.comm.partitioner import get_tile_index
-from ndsl.constants import X_DIM, X_INTERFACE_DIM, Y_DIM, Y_INTERFACE_DIM
+from ndsl.config import Backend
+from ndsl.constants import I_DIM, I_INTERFACE_DIM, J_DIM, J_INTERFACE_DIM
 from ndsl.grid import (
     AngleGridData,
     ContravariantGridData,
@@ -168,7 +169,7 @@ class SerialboxGridConfig(GridInitializer):
     def _get_serialized_grid(
         self,
         communicator: Communicator,
-        backend: str,
+        backend: Backend,
     ) -> grid.Grid:  # type: ignore
         ser = self._serializer(communicator)
         grid = TranslateGrid.new_from_serialized_data(
@@ -181,12 +182,8 @@ class SerialboxGridConfig(GridInitializer):
         quantity_factory: QuantityFactory,
         communicator: Communicator,
     ) -> Tuple[DampingCoefficients, DriverGridData, GridData]:
-        backend = quantity_factory.zeros(
-            dims=[X_DIM, Y_DIM], units="unknown"
-        ).gt4py_backend
-
         ndsl_log.info("Using serialized grid data")
-        grid = self._get_serialized_grid(communicator, backend)
+        grid = self._get_serialized_grid(communicator, quantity_factory.backend)
         grid_data = grid.grid_data
         driver_grid_data = grid.driver_grid_data
         damping_coefficients = grid.damping_coefficients
@@ -260,7 +257,7 @@ class ExternalNetcdfGridConfig(GridInitializer):
 
         subtile_slice_grid = communicator.partitioner.tile.subtile_slice(
             rank=communicator.rank,
-            global_dims=[X_INTERFACE_DIM, Y_INTERFACE_DIM],
+            global_dims=[I_INTERFACE_DIM, J_INTERFACE_DIM],
             global_extent=(npx, npy),
             overlap=True,
         )

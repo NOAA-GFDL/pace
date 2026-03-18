@@ -6,7 +6,7 @@ import xarray as xr
 
 import ndsl.dsl.gt4py_utils as gt_utils
 from ndsl import Quantity, QuantityFactory, SubtileGridSizer
-from ndsl.constants import N_HALO_DEFAULT, X_DIM, Y_DIM, Z_DIM
+from ndsl.constants import I_DIM, J_DIM, K_DIM, N_HALO_DEFAULT
 from ndsl.dsl.typing import Float
 from ndsl.grid import DampingCoefficients, DriverGridData, GridData
 from ndsl.typing import Communicator
@@ -24,7 +24,7 @@ class TendencyState:
     u_dt: Quantity = dataclasses.field(
         metadata={
             "name": "eastward_wind_tendency_due_to_physics",
-            "dims": [X_DIM, Y_DIM, Z_DIM],
+            "dims": [I_DIM, J_DIM, K_DIM],
             "units": "m/s**2",
             "intent": "inout",
         }
@@ -32,7 +32,7 @@ class TendencyState:
     v_dt: Quantity = dataclasses.field(
         metadata={
             "name": "northward_wind_tendency_due_to_physics",
-            "dims": [X_DIM, Y_DIM, Z_DIM],
+            "dims": [I_DIM, J_DIM, K_DIM],
             "units": "m/s**2",
             "intent": "inout",
         }
@@ -40,7 +40,7 @@ class TendencyState:
     pt_dt: Quantity = dataclasses.field(
         metadata={
             "name": "temperature_tendency_due_to_physics",
-            "dims": [X_DIM, Y_DIM, Z_DIM],
+            "dims": [I_DIM, J_DIM, K_DIM],
             "units": "K/s",
             "intent": "inout",
         }
@@ -90,8 +90,9 @@ class DriverState:
             layout=driver_config.layout,
             tile_partitioner=communicator.partitioner.tile,
             tile_rank=communicator.tile.rank,
+            backend=driver_config.stencil_config.backend,
         )
-        quantity_factory = QuantityFactory.from_backend(
+        quantity_factory = QuantityFactory(
             sizer, backend=driver_config.stencil_config.compilation_config.backend
         )
 
