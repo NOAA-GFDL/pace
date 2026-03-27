@@ -287,13 +287,6 @@ class DriverConfig:
 
         if (
             isinstance(kwargs["stencil_config"], dict)
-            and "dace_config" in kwargs["stencil_config"].keys()
-        ):
-            kwargs["stencil_config"]["dace_config"] = DaceConfig.from_dict(
-                data=kwargs["stencil_config"]["dace_config"]
-            )
-        if (
-            isinstance(kwargs["stencil_config"], dict)
             and "compilation_config" in kwargs["stencil_config"].keys()
         ):
             kwargs["stencil_config"]["compilation_config"] = (
@@ -592,6 +585,11 @@ class Driver:
             communicator=communicator,
         )
         self.config.stencil_config.compilation_config = compilation_config
+        self.config.stencil_config.dace_config = DaceConfig(
+            communicator=communicator,
+            backend=self.config.stencil_config.backend,
+            orchestration=None
+        )
 
     @dace_inhibitor
     def _callback_diagnostics(self):
