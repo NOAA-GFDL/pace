@@ -588,7 +588,7 @@ class Driver:
         self.config.stencil_config.dace_config = DaceConfig(
             communicator=communicator,
             backend=self.config.stencil_config.backend,
-            orchestration=None
+            orchestration=None,
         )
 
     @dace_inhibitor
