@@ -37,7 +37,10 @@ def dperiodic(pytestconfig):
 
 def pytest_addoption(parser):
     parser.addoption(
-        "--backend", action="store", default="numpy", help="gt4py backend name"
+        "--backend",
+        action="store",
+        default="st:numpy:cpu:IJK",
+        help="gt4py backend name",
     )
     parser.addoption(
         "--data_path", action="store", default="./", help="location of reference data"

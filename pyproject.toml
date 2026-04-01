@@ -9,14 +9,15 @@ classifiers = [
   "Intended Audience :: Developers",
   "Natural Language :: English",
   "Programming Language :: Python :: 3",
-  "Programming Language :: Python :: 3.11"
+  "Programming Language :: Python :: 3.11",
+  "Programming Language :: Python :: 3.12"
 ]
 dynamic = ["dependencies"]
 license = "Apache-2.0"
 license-files = ["LICENSE.md"]
 name = "pace"
 readme = "README.md"
-requires-python = ">=3.11,<3.12"
+requires-python = ">=3.11,<3.13"
 version = "0.2.0"
 
 [project.optional-dependencies]
@@ -77,10 +78,8 @@ warn_unreachable = true
 ignore_errors = true
 module = [
   # We currently can't type stencils
-  "pyshield.stencils.*",
-  # Will be fixed with NDSL version 2026.01.00, see
-  # https://github.com/NOAA-GFDL/NDSL/pull/360
-  "pyfv3.testing.translate_fvdynamics"
+  "pyfv3.stencils.*",
+  "pyshield.stencils.*"
 ]
 
 [tool.setuptools]

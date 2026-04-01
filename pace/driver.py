@@ -150,7 +150,8 @@ class DriverConfig:
         if self.total_time < self.timestep:
             warnings.warn(
                 f"No simulation possible: you asked for {self.total_time} "
-                f"simulation time but the timestep is {self.timestep}"
+                f"simulation time but the timestep is {self.timestep}",
+                stacklevel=2,
             )
         return floor(self.total_time.total_seconds() / self.timestep.total_seconds())
 
@@ -442,7 +443,7 @@ class Driver:
                     )
                     exit(0)
 
-                setattr(self, "step_all", exit_function)
+                self.step_all = exit_function  # type: ignore[method-assign]
             elif self.config.stencil_config.compilation_config.run_mode == RunMode.Run:
 
                 def exit_instead_of_build(self):
@@ -457,7 +458,7 @@ class Driver:
 
                 from gt4py.stencil_builder import StencilBuilder
 
-                setattr(StencilBuilder, "build", exit_instead_of_build)
+                StencilBuilder.build = exit_instead_of_build  # type: ignore["method-assign"]
 
             self.config.stencil_config.dace_config = DaceConfig(
                 communicator=communicator,

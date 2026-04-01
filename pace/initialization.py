@@ -15,7 +15,8 @@ from ndsl import (
     StencilConfig,
     StencilFactory,
 )
-from ndsl.constants import X_DIM, Y_DIM
+from ndsl.config import Backend
+from ndsl.constants import I_DIM, J_DIM
 from ndsl.grid import DampingCoefficients, DriverGridData, GridData
 from ndsl.stencils.testing import TranslateGrid, grid
 from ndsl.typing import Communicator
@@ -90,7 +91,9 @@ class InitializerSelector(Initializer):
         )
 
     @classmethod
-    def from_dict(cls, config: dict, hooks={}):
+    def from_dict(cls, config: dict, hooks: dict | None = None):
+        if not hooks:
+            hooks = {}
         instance = cls.registry.from_dict(config, hooks=hooks)
         return cls(config=instance, type=config["type"])
 
@@ -259,7 +262,7 @@ class SerialboxInit(Initializer):
     def _get_serialized_grid(
         self,
         communicator: Communicator,
-        backend: str,
+        backend: Backend,
     ) -> grid.Grid:  # type: ignore
         ser = self._serializer(communicator)
         grid = TranslateGrid.new_from_serialized_data(
@@ -307,7 +310,7 @@ class SerialboxInit(Initializer):
     def _initialize_dycore_state(
         self,
         communicator: Communicator,
-        backend: str,
+        backend: Backend,
     ) -> DycoreState:
         grid = self._get_serialized_grid(communicator=communicator, backend=backend)
 
