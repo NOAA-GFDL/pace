@@ -14,7 +14,7 @@ requirements: list[str] = [
     local_pkg("pyshield", "pySHiELD"),
     "dacite",
     "f90nml",
-    "numpy < 2.0.0",
+    "numpy >= 2",
     "xarray",
     "zarr < 3.0.0",
 ]
