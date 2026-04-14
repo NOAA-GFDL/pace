@@ -287,13 +287,6 @@ class DriverConfig:
 
         if (
             isinstance(kwargs["stencil_config"], dict)
-            and "dace_config" in kwargs["stencil_config"].keys()
-        ):
-            kwargs["stencil_config"]["dace_config"] = DaceConfig.from_dict(
-                data=kwargs["stencil_config"]["dace_config"]
-            )
-        if (
-            isinstance(kwargs["stencil_config"], dict)
             and "compilation_config" in kwargs["stencil_config"].keys()
         ):
             kwargs["stencil_config"]["compilation_config"] = (
@@ -312,10 +305,6 @@ class DriverConfig:
         restart_path: str,
     ):
         config_dict = dataclasses.asdict(self)
-        if self.stencil_config.dace_config:
-            config_dict["stencil_config"][
-                "dace_config"
-            ] = self.stencil_config.dace_config.as_dict()
         config_dict["stencil_config"][
             "compilation_config"
         ] = self.stencil_config.compilation_config.as_dict()
@@ -338,6 +327,10 @@ class DriverConfig:
         # restart config doesn't have 'case'
         if "case" in config_dict["initialization"]["config"].keys():
             del config_dict["initialization"]["config"]["case"]
+        # remove dace config - it will be init from other piece of the config
+        # during Driver.__init__
+        config_dict["stencil_config"].pop("dace_config", None)
+
         with open(f"{restart_path}/restart.yaml", "w") as file:
             yaml.safe_dump(config_dict, file)
 
@@ -592,6 +585,11 @@ class Driver:
             communicator=communicator,
         )
         self.config.stencil_config.compilation_config = compilation_config
+        self.config.stencil_config.dace_config = DaceConfig(
+            communicator=communicator,
+            backend=self.config.stencil_config.backend,
+            orchestration=None,
+        )
 
     @dace_inhibitor
     def _callback_diagnostics(self):
