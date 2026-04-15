@@ -1,0 +1,37 @@
+on:
+  schedule:
+    - cron: '0 0 * * 0' # sundays @ midnight
+
+jobs:
+  pace_orch_build:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        shell: bash -el {0}
+    env:
+      python_default: '3.12'
+
+    steps:
+      - name: Checkout Files
+        uses: actions/checkout@v6
+        with:
+          submodules: recursive
+
+      - name: 'Setup Python ${{ env.python_default }}'
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ env.python_default }}
+
+      - name: Install mpi (MPICH flavor)
+        run: pip install mpich
+
+      - name: Install packages
+        run: |
+          cd ${GITHUB_WORKSPACE}/pace
+          pip install .
+
+      - name: Build and Run baroclinic test case
+        run: |
+          cd ${GITHUB_WORKSPACE}/pace
+          export FV3_DACEMODE=BuildAndRun
+          mpiexec -np 6 python -m pace.run examples/configs/baroclinic_c12_orch_cpu.yaml
