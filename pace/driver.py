@@ -3,7 +3,7 @@ import functools
 import warnings
 from datetime import datetime, timedelta
 from math import floor
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any
 
 import dace
 import dacite
@@ -95,9 +95,9 @@ class DriverConfig:
     initialization: InitializerSelector
     nx_tile: int
     nz: int
-    layout: Tuple[int, int]
+    layout: tuple[int, int]
     dt_atmos: float
-    grid_type: Optional[int] = 0
+    grid_type: int | None = 0
     grid_config: GridInitializerSelector = dataclasses.field(
         default_factory=lambda: GridInitializerSelector(
             type="generated", config=GeneratedGridConfig()
@@ -129,14 +129,14 @@ class DriverConfig:
     pair_debug: bool = False
     output_initial_state: bool = False
     output_frequency: int = 1
-    safety_check_frequency: Optional[int] = None
+    safety_check_frequency: int | None = None
 
     @functools.cached_property
     def timestep(self) -> timedelta:
         return timedelta(seconds=self.dt_atmos)
 
     @property
-    def start_time(self) -> Union[datetime, timedelta]:
+    def start_time(self) -> datetime | timedelta:
         return self.initialization.start_time
 
     @functools.cached_property
@@ -166,8 +166,8 @@ class DriverConfig:
     def get_grid(
         self,
         communicator: Communicator,
-        quantity_factory: Optional[QuantityFactory] = None,
-    ) -> Tuple[DampingCoefficients, DriverGridData, GridData]:
+        quantity_factory: QuantityFactory | None = None,
+    ) -> tuple[DampingCoefficients, DriverGridData, GridData]:
         if quantity_factory is None:
             sizer = SubtileGridSizer.from_tile_params(
                 nx_tile=self.nx_tile,
@@ -194,8 +194,8 @@ class DriverConfig:
         damping_coefficients: DampingCoefficients,
         driver_grid_data: DriverGridData,
         grid_data: GridData,
-        quantity_factory: Optional[QuantityFactory] = None,
-        stencil_factory: Optional[StencilFactory] = None,
+        quantity_factory: QuantityFactory | None = None,
+        stencil_factory: StencilFactory | None = None,
     ) -> DriverState:
         """Load the initial state of the driver."""
         if quantity_factory is None or stencil_factory is None:
@@ -231,7 +231,7 @@ class DriverConfig:
         )
 
     @classmethod
-    def from_dict(cls, kwargs: Dict[str, Any]) -> "DriverConfig":
+    def from_dict(cls, kwargs: dict[str, Any]) -> "DriverConfig":
         if isinstance(kwargs["dycore_config"], dict):
             for derived_name in ("dt_atmos", "layout", "npx", "npy", "npz", "ntiles"):
                 if derived_name in kwargs["dycore_config"]:
@@ -301,7 +301,7 @@ class DriverConfig:
 
     def write_for_restart(
         self,
-        time: Union[datetime, timedelta],
+        time: datetime | timedelta,
         restart_path: str,
     ):
         config_dict = dataclasses.asdict(self)
@@ -338,7 +338,7 @@ class DriverConfig:
 @dataclasses.dataclass()
 class RestartConfig:
     save_restart: bool = False
-    intermediate_restart: List[int] = dataclasses.field(default_factory=list)
+    intermediate_restart: list[int] = dataclasses.field(default_factory=list)
     save_intermediate_restart: bool = False
 
     def __post_init__(self):
@@ -368,7 +368,7 @@ class RestartConfig:
         *,
         step: int,
         comm: Comm,
-        time: Union[datetime, timedelta],
+        time: datetime | timedelta,
         driver_config: DriverConfig,
         restart_path: str,
     ):
@@ -734,7 +734,7 @@ def _setup_factories(
     config: DriverConfig,
     communicator: Communicator,
     stencil_compare_comm,
-) -> Tuple[QuantityFactory, StencilFactory]:
+) -> tuple[QuantityFactory, StencilFactory]:
     """
     Args:
         config: configuration of driver

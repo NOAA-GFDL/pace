@@ -1,11 +1,11 @@
 import dataclasses
-from typing import Callable, Dict, Generic, Optional, Type, TypeVar
+from typing import Callable, Generic, TypeVar
 
 import dacite
 
 
 T = TypeVar("T")
-TT = TypeVar("TT", bound=Type)
+TT = TypeVar("TT", bound=type)
 
 
 @dataclasses.dataclass
@@ -74,7 +74,7 @@ class Registry(Generic[T]):
         certain values and store them.
     """
 
-    def __init__(self, default_type: Optional[str] = None):
+    def __init__(self, default_type: str | None = None):
         """
         Initialize the registry.
 
@@ -82,7 +82,7 @@ class Registry(Generic[T]):
             default_type: if given, the "type" key in the config dict is optional
                 and by default this type will be used.
         """
-        self._types: Dict[str, Type[T]] = {}
+        self._types: dict[str, type[T]] = {}
         self.default_type = default_type
 
     def register(self, type_name: str) -> Callable[[TT], TT]:

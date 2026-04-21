@@ -1,4 +1,4 @@
-from typing import ClassVar, Dict, Optional
+from typing import ClassVar
 
 import numpy as np
 
@@ -9,8 +9,8 @@ from pyfv3 import DycoreState
 class VariableBounds:
     def __init__(
         self,
-        minimum_value: Optional[float] = None,
-        maximum_value: Optional[float] = None,
+        minimum_value: float | None = None,
+        maximum_value: float | None = None,
         compute_domain_only: bool = False,
     ) -> None:
         self.minimum_value = minimum_value
@@ -27,23 +27,23 @@ class SafetyChecker:
         RuntimeError: Variables outside the specified bounds
     """
 
-    checks: ClassVar[Dict[str, VariableBounds]] = {}
+    checks: ClassVar[dict[str, VariableBounds]] = {}
 
     @classmethod
     def register_variable(
         cls,
         name: str,
-        minimum_value: Optional[float] = None,
-        maximum_value: Optional[float] = None,
+        minimum_value: float | None = None,
+        maximum_value: float | None = None,
         compute_domain_only: bool = False,
     ):
         """Register a variable in the checker
 
         Args:
             name (str): name of the variable in the dycore state
-            minimum_value (Optional[float], optional): Minimum value if specified.
+            minimum_value (float | None, optional): Minimum value if specified.
                 Defaults to None.
-            maximum_value (Optional[float], optional): Maximum value if specified.
+            maximum_value (float | None, optional): Maximum value if specified.
                 Defaults to None.
             compute_domain_only (bool, optional): If evaluation should only happen
                 on the compute or the entire domain. Defaults to False.

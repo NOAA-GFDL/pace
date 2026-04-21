@@ -2,7 +2,7 @@ import abc
 import copy
 import dataclasses
 import os
-from typing import Any, ClassVar, List, Mapping, TypeVar, cast
+from typing import Any, ClassVar, Mapping, TypeVar, cast
 
 from ndsl import MPIComm
 from ndsl.comm import (
@@ -245,7 +245,7 @@ class WriterCommConfig(CreatesComm):
         path: directory to write data to
     """
 
-    ranks: List[int]
+    ranks: list[int]
     path: str = "."
 
     def get_comm(self) -> CachingCommWriter:
