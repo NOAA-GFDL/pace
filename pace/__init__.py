@@ -1,5 +1,3 @@
-from ndsl.performance import PerformanceConfig
-
 from .comm import (
     CreatesComm,
     CreatesCommSelector,

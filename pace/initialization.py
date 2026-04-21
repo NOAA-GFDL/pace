@@ -16,7 +16,6 @@ from ndsl import (
     StencilFactory,
 )
 from ndsl.config import Backend
-from ndsl.constants import I_DIM, J_DIM
 from ndsl.grid import DampingCoefficients, DriverGridData, GridData
 from ndsl.stencils.testing import TranslateGrid, grid
 from ndsl.typing import Communicator
