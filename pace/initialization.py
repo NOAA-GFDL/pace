@@ -3,7 +3,7 @@ import dataclasses
 import os
 import pathlib
 from datetime import datetime
-from typing import Callable, ClassVar, List, Type, TypeVar
+from typing import Callable, ClassVar, TypeVar
 
 import f90nml
 
@@ -16,7 +16,6 @@ from ndsl import (
     StencilFactory,
 )
 from ndsl.config import Backend
-from ndsl.constants import I_DIM, J_DIM
 from ndsl.grid import DampingCoefficients, DriverGridData, GridData
 from ndsl.stencils.testing import TranslateGrid, grid
 from ndsl.typing import Communicator
@@ -42,11 +41,11 @@ class Initializer(abc.ABC):
         damping_coefficients: DampingCoefficients,
         driver_grid_data: DriverGridData,
         grid_data: GridData,
-        schemes: List[PHYSICS_PACKAGES],
+        schemes: list[PHYSICS_PACKAGES],
     ) -> DriverState: ...
 
 
-IT = TypeVar("IT", bound=Type[Initializer])
+IT = TypeVar("IT", bound=type[Initializer])
 
 
 @dataclasses.dataclass
@@ -79,7 +78,7 @@ class InitializerSelector(Initializer):
         damping_coefficients: DampingCoefficients,
         driver_grid_data: DriverGridData,
         grid_data: GridData,
-        schemes: List[PHYSICS_PACKAGES],
+        schemes: list[PHYSICS_PACKAGES],
     ) -> DriverState:
         return self.config.get_driver_state(
             quantity_factory=quantity_factory,
@@ -118,7 +117,7 @@ class AnalyticInit(Initializer):
         damping_coefficients: DampingCoefficients,
         driver_grid_data: DriverGridData,
         grid_data: GridData,
-        schemes: List[PHYSICS_PACKAGES],
+        schemes: list[PHYSICS_PACKAGES],
     ) -> DriverState:
         dycore_state = analytic_init.init_analytic_state(
             analytic_init_case=self.case,
@@ -163,7 +162,7 @@ class RestartInit(Initializer):
         damping_coefficients: DampingCoefficients,
         driver_grid_data: DriverGridData,
         grid_data: GridData,
-        schemes: List[PHYSICS_PACKAGES],
+        schemes: list[PHYSICS_PACKAGES],
     ) -> DriverState:
         state = _restart_driver_state(
             self.path,
@@ -214,7 +213,7 @@ class FortranRestartInit(Initializer):
         damping_coefficients: DampingCoefficients,
         driver_grid_data: DriverGridData,
         grid_data: GridData,
-        schemes: List[PHYSICS_PACKAGES],
+        schemes: list[PHYSICS_PACKAGES],
     ) -> DriverState:
         state = _restart_driver_state(
             self.path,
@@ -287,7 +286,7 @@ class SerialboxInit(Initializer):
         damping_coefficients: DampingCoefficients,
         driver_grid_data: DriverGridData,
         grid_data: GridData,
-        schemes: List[PHYSICS_PACKAGES],
+        schemes: list[PHYSICS_PACKAGES],
     ) -> DriverState:
         dycore_state = self._initialize_dycore_state(
             communicator, quantity_factory.backend
@@ -365,7 +364,7 @@ class PredefinedStateInit(Initializer):
         damping_coefficients: DampingCoefficients,
         driver_grid_data: DriverGridData,
         grid_data: GridData,
-        schemes: List[PHYSICS_PACKAGES],
+        schemes: list[PHYSICS_PACKAGES],
     ) -> DriverState:
         return DriverState(
             dycore_state=self.dycore_state,

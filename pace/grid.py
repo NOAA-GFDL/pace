@@ -9,7 +9,7 @@ import xarray as xr
 from ndsl import QuantityFactory, ndsl_log
 from ndsl.comm.partitioner import get_tile_index
 from ndsl.config import Backend
-from ndsl.constants import I_DIM, I_INTERFACE_DIM, J_DIM, J_INTERFACE_DIM
+from ndsl.constants import I_INTERFACE_DIM, J_INTERFACE_DIM
 from ndsl.grid import (
     AngleGridData,
     ContravariantGridData,
