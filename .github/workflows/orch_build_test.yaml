@@ -1,6 +1,8 @@
+name: "Orchestrated model run"
+
 on:
   schedule:
-    - cron: '0 0 * * 0' # sundays @ midnight
+    - cron: '0 0 * * 0' # Sundays @ midnight
 
 jobs:
   pace_orch_build:
@@ -30,7 +32,7 @@ jobs:
           cd ${GITHUB_WORKSPACE}/pace
           pip install .
 
-      - name: Build and Run baroclinic test case
+      - name: Build and run baroclinic test case
         run: |
           cd ${GITHUB_WORKSPACE}/pace
           export FV3_DACEMODE=BuildAndRun
