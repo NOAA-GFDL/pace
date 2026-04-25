@@ -1,9 +1,11 @@
+name: "Container Build"
+
 on:
   push:
     branches:
       - 'develop'
   schedule:
-    - cron: '0 0 * * 0' # sundays @ midnight
+    - cron: '0 0 * * 0' # Sundays @ midnight
 
 jobs:
   test-container-builds:
@@ -14,7 +16,7 @@ jobs:
         with:
           submodules: recursive
       - name: Build Dockerfile
-        uses: docker/build-push-action@v6.18.0
+        uses: docker/build-push-action@v7
         with:
           context: .
           push: false
