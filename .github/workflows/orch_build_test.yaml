@@ -7,7 +7,7 @@ on:
   # Temporarily uncomment the next line in case you want to run this workflow on you PR.
   # For example, this can be useful when you are changing the workflow and you don't
   # want to wait until Sunday to see it run.
-  pull_request:
+  # pull_request:
 
 jobs:
   pace_orch_build:
