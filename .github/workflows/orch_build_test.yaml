@@ -15,10 +15,27 @@ jobs:
       python_default: '3.12'
 
     steps:
-      - name: Checkout Files
+      - name: Checkout pace
+        uses: actions/checkout@v6
+
+      - name: Checkout NDSL
         uses: actions/checkout@v6
         with:
+          repository: NOAA-GFDL/NDSL
+          path: NDSL
           submodules: recursive
+
+      - name: Checkout pyFV3
+        uses: actions/checkout@v6
+        with:
+          repository: NOAA-GFDL/pyFV3
+          path: pyFV3
+
+      - name: Checkout pySHiELD
+        uses: actions/checkout@v6
+        with:
+          repository: NOAA-GFDL/pySHiELD
+          path: pySHiELD
 
       - name: 'Setup Python ${{ env.python_default }}'
         uses: actions/setup-python@v6
@@ -32,6 +49,7 @@ jobs:
         run: pip install .
 
       - name: Build and run baroclinic test case
+        env:
+          FV3_DACEMODE: BuildAndRun
         run: |
-          export FV3_DACEMODE=BuildAndRun
           mpiexec -np 6 python -m pace.run examples/configs/baroclinic_c12_orch_cpu.yaml
