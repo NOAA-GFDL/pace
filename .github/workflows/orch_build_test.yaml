@@ -1,12 +1,17 @@
 name: "Orchestrated model run"
 
 on:
+  # Sundays @ midnight
   schedule:
-    - cron: '0 0 * * 0' # Sundays @ midnight
+    - cron: '0 0 * * 0'
+  # Temporarily uncomment the next line in case you want to run this workflow on you PR.
+  # For example, this can be useful when you are changing the workflow and you don't
+  # want to wait until Sunday to see it run.
+  # pull_request:
 
 jobs:
   pace_orch_build:
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     defaults:
       run:
         shell: bash -el {0}
@@ -14,10 +19,27 @@ jobs:
       python_default: '3.12'
 
     steps:
-      - name: Checkout Files
+      - name: Checkout pace
+        uses: actions/checkout@v6
+
+      - name: Checkout NDSL
         uses: actions/checkout@v6
         with:
+          repository: NOAA-GFDL/NDSL
+          path: NDSL
           submodules: recursive
+
+      - name: Checkout pyFV3
+        uses: actions/checkout@v6
+        with:
+          repository: NOAA-GFDL/pyFV3
+          path: pyFV3
+
+      - name: Checkout pySHiELD
+        uses: actions/checkout@v6
+        with:
+          repository: NOAA-GFDL/pySHiELD
+          path: pySHiELD
 
       - name: 'Setup Python ${{ env.python_default }}'
         uses: actions/setup-python@v6
@@ -28,12 +50,10 @@ jobs:
         run: pip install mpich
 
       - name: Install packages
-        run: |
-          cd ${GITHUB_WORKSPACE}/pace
-          pip install .
+        run: pip install .
 
       - name: Build and run baroclinic test case
-        run: |
-          cd ${GITHUB_WORKSPACE}/pace
-          export FV3_DACEMODE=BuildAndRun
-          mpiexec -np 6 python -m pace.run examples/configs/baroclinic_c12_orch_cpu.yaml
+        env:
+          FV3_DACEMODE: BuildAndRun
+          NDSL_LOGLEVEL: Info
+        run: mpiexec -np 6 python -m pace.run examples/configs/baroclinic_c12_orch_cpu.yaml

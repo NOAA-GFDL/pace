@@ -1,6 +1,6 @@
 stencil_config:
   compilation_config:
-    backend: st:dace:cpu:KIJ
+    backend: orch:dace:cpu:KIJ
     rebuild: false
     validate_args: true
     format_source: false
