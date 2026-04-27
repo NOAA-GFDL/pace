@@ -1,12 +1,13 @@
 name: "Orchestrated model run"
 
 on:
+  # Sundays @ midnight
   schedule:
-    - cron: '0 0 * * 0' # Sundays @ midnight
+    - cron: '0 0 * * 0'
   # Temporarily uncomment the next line in case you want to run this workflow on you PR.
   # For example, this can be useful when you are changing the workflow and you don't
   # want to wait until Sunday to see it run.
-  # pull_request:
+  pull_request:
 
 jobs:
   pace_orch_build:
@@ -54,6 +55,6 @@ jobs:
       - name: Build and run baroclinic test case
         env:
           FV3_DACEMODE: BuildAndRun
-          NDSL_LOGLEVEL: Debug
+          NDSL_LOGLEVEL: Info
         run: |
           mpiexec -np 6 python -m pace.run examples/configs/baroclinic_c12_orch_cpu.yaml
