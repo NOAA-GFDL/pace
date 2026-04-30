@@ -494,6 +494,7 @@ class Driver:
 
             self._start_time = self.config.initialization.start_time
             ndsl_log.info("setting up dycore object started")
+            default_ai2_tracers(self.quantity_factory)
             self.dycore = DynamicalCore(
                 comm=communicator,
                 grid_data=self.state.grid_data,
@@ -505,7 +506,6 @@ class Driver:
                 phis=self.state.dycore_state.phis,
                 state=self.state.dycore_state,
             )
-            default_ai2_tracers(self.quantity_factory)
             ndsl_log.info("setting up dycore object done")
 
             ndsl_log.info("setting up physics object started")
