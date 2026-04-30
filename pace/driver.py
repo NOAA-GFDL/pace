@@ -39,6 +39,7 @@ from pace.safety_checks import SafetyChecker
 from pace.state import DriverState
 from pyfv3 import DynamicalCore, DynamicalCoreConfig
 from pyfv3.initialization.analytic_init import AnalyticCase
+from pyfv3.tracers import default_ai2_tracers
 from pyshield import Physics, PhysicsConfig
 from pyshield.update import update_atmos_state
 
@@ -504,6 +505,7 @@ class Driver:
                 phis=self.state.dycore_state.phis,
                 state=self.state.dycore_state,
             )
+            default_ai2_tracers(self.quantity_factory)
             ndsl_log.info("setting up dycore object done")
 
             ndsl_log.info("setting up physics object started")
