@@ -24,6 +24,7 @@ from ndsl.stencils.testing import assert_same_temporaries, copy_temporaries
 from pace import NullComm
 from pyfv3 import DycoreState, DynamicalCore, DynamicalCoreConfig
 from pyfv3.initialization.analytic_init import AnalyticCase
+from pyfv3.tracers import default_ai2_tracers
 
 
 def setup_dycore() -> tuple[DynamicalCore, DycoreState, Timer]:
@@ -123,6 +124,7 @@ def setup_dycore() -> tuple[DynamicalCore, DycoreState, Timer]:
         grid_indexing=grid_indexing,
     )
 
+    default_ai2_tracers(quantity_factory)
     dycore = DynamicalCore(
         comm=communicator,
         grid_data=grid_data,
