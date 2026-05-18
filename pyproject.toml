@@ -31,6 +31,9 @@ test = [
   "nbmake",
   "pytest"
 ]
+pyfms = [
+  "ndsl[pyfms]"
+]
 
 [project.urls]
 Repository = "https://github.com/NOAA-GFDL/pace"
