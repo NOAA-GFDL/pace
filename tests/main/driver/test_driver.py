@@ -11,7 +11,7 @@ from ndsl.performance.report import (
     gather_timing_data,
     get_sypd,
 )
-from pace import CreatesCommSelector, DriverConfig, NullComm, NullCommConfig
+from pace import CreatesCommSelector, Driver, DriverConfig, NullComm, NullCommConfig
 
 
 def get_driver_config(
@@ -141,3 +141,37 @@ test_data = [timing_info, 365.0, 1.0]
 def test_sypd(timing_info, dt_atmos, expected_SYPD):
     sypd = get_sypd(timing_info, dt_atmos)
     assert sypd == expected_SYPD
+
+
+def test_initialize_pyfms_calls_pyfms(monkeypatch):
+    driver = Driver.__new__(Driver)
+    config = get_driver_config()
+    config.initialize_pyfms = True
+    config.grid_type = 0
+    config.dycore_config = unittest.mock.MagicMock(ntiles=6)
+    driver.config = config
+
+    fake_pyfms = unittest.mock.MagicMock()
+    fake_pyfms.fms.NOLEAP = 0
+    fake_pyfms.fms.init = unittest.mock.Mock()
+    fake_pyfms.mpp_domains.define_cubic_mosaic = unittest.mock.Mock(return_value=42)
+    fake_pyfms.mpp_domains.set_current_domain = unittest.mock.Mock()
+    fake_pyfms.mpp_domains.define_io_domain = unittest.mock.Mock()
+    monkeypatch.setattr("pace.driver.pyfms", fake_pyfms, raising=False)
+
+    inner_comm = unittest.mock.MagicMock()
+    inner_comm.py2f.return_value = "fortran_comm"
+    global_comm = unittest.mock.MagicMock(_comm=inner_comm)
+
+    driver._initialize_pyfms(global_comm)
+
+    fake_pyfms.fms.init.assert_called_once_with(
+        localcomm="fortran_comm",
+        calendar_type=0,
+    )
+    fake_pyfms.mpp_domains.define_cubic_mosaic.assert_called_once()
+    fake_pyfms.mpp_domains.set_current_domain.assert_called_once_with(domain_id=42)
+    fake_pyfms.mpp_domains.define_io_domain.assert_called_once_with(
+        domain_id=42,
+        io_layout=[1, 1],
+    )

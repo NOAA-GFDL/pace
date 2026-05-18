@@ -49,6 +49,11 @@ try:
 except ImportError:
     cp = None
 
+try:
+    import pyfms
+except ImportError:
+    pyfms = None
+
 
 @dataclasses.dataclass
 class DriverConfig:
@@ -117,6 +122,7 @@ class DriverConfig:
         default_factory=DynamicalCoreConfig
     )
     physics_config: PhysicsConfig = dataclasses.field(default_factory=PhysicsConfig)
+    initialize_pyfms: bool = False
 
     days: int = 0
     hours: int = 0
@@ -406,6 +412,8 @@ class Driver:
         else:
             self.comm = global_comm
             stencil_compare_comm = None
+        if self.config.initialize_pyfms:
+            self._initialize_pyfms(global_comm)
         self.performance_collector = self.config.performance_config.build(self.comm)
         self.profiler = self.config.performance_config.build_profiler()
         with self.performance_collector.total_timer.clock("initialization"):
@@ -565,6 +573,55 @@ class Driver:
         ndsl_log.info("setting up safety checkers done")
         ndsl_log.info("initialization of the object done")
 
+    def _initialize_pyfms(self, global_comm: Any) -> None:
+        if pyfms is None:
+            raise ModuleNotFoundError(
+                "pyfms is required to initialize the FMS MPP domain"
+            )
+        if not hasattr(global_comm, "_comm") or not hasattr(
+            global_comm._comm, "py2f"
+        ):
+            raise TypeError(
+                "pyfms initialization requires a communicator with a py2f() method"
+            )
+
+        text_content = "&diag_manager_nml\nuse_modern_diag=.true.\n/"
+        with open("input.nml", "w", encoding="utf-8") as f:
+            f.write(text_content)
+        pyfms.fms.init(
+            localcomm=global_comm._comm.py2f(),
+            calendar_type=pyfms.fms.NOLEAP,
+        )
+
+        nx = self.config.nx_tile
+        ny = self.config.nx_tile
+        layout = list(self.config.layout)
+        if self.config.grid_type <= 3:
+            domain_id = pyfms.mpp_domains.define_cubic_mosaic(
+                ni=[nx for _ in range(self.config.dycore_config.ntiles)],
+                nj=[ny for _ in range(self.config.dycore_config.ntiles)],
+                global_indices=[0, nx - 1, 0, ny - 1],
+                layout=layout,
+                ntiles=self.config.dycore_config.ntiles,
+                halo=N_HALO_DEFAULT,
+                use_memsize=False,
+            )
+        else:
+            domain = pyfms.mpp_domains.define_domains(
+                global_indices=[0, nx - 1, 0, ny - 1],
+                layout=layout,
+                xhalo=N_HALO_DEFAULT,
+                yhalo=N_HALO_DEFAULT,
+            )
+            domain_id = domain.domain_id
+
+        pyfms.mpp_domains.set_current_domain(domain_id=domain_id)
+        pyfms.mpp_domains.define_io_domain(
+            domain_id=domain_id,
+            io_layout=[1, 1],
+        )
+        self.domain_id = domain_id
+
     def _update_driver_config_with_communicator(
         self, communicator: Communicator
     ) -> None:
@@ -719,6 +776,8 @@ class Driver:
             driver_config=self.config,
             restart_path="RESTART",
         )
+        if self.config.initialize_pyfms:
+            pyfms.fms.end()
         self.comm_config.cleanup(self.comm)
 
 
