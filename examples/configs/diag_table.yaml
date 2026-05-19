@@ -1,0 +1,57 @@
+title: pace_diag_manager_test
+base_date: 1 1 1 0 0 0
+diag_files:
+  - file_name: pace_diagnostics
+    freq: 225 seconds 
+    time_units: seconds 
+    unlimdim: time
+    varlist:
+    - module: pyfv3
+      var_name: u
+      long_name: u
+      reduction: none
+      kind: r8
+    - module: pyfv3
+      var_name: v
+      reduction: none
+      kind: r8
+    - module: pyfv3
+      var_name: ua
+      reduction: none
+      kind: r8
+    - module: pyfv3
+      var_name: va
+      reduction: none
+      kind: r8
+    - module: pyfv3
+      var_name: pt
+      reduction: none
+      kind: r8
+    - module: pyshield
+      var_name: delp
+      reduction: none
+      kind: r8
+    - module: pyshield
+      var_name: qvapor
+      reduction: none
+      kind: r8
+    - module: pyshield
+      var_name: qliquid
+      reduction: none
+      kind: r8
+    - module: pyshield
+      var_name: qice
+      reduction: none
+      kind: r8
+    - module: pyshield
+      var_name: qrain
+      reduction: none
+      kind: r8
+    - module: pyshield
+      var_name: qsnow
+      reduction: none
+      kind: r8
+    - module: pyshield
+      var_name: qgraupel
+      reduction: none
+      kind: r8

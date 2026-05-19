@@ -122,7 +122,6 @@ class DriverConfig:
         default_factory=DynamicalCoreConfig
     )
     physics_config: PhysicsConfig = dataclasses.field(default_factory=PhysicsConfig)
-    initialize_pyfms: bool = False
 
     days: int = 0
     hours: int = 0
@@ -412,8 +411,6 @@ class Driver:
         else:
             self.comm = global_comm
             stencil_compare_comm = None
-        if self.config.initialize_pyfms:
-            self._initialize_pyfms(global_comm)
         self.performance_collector = self.config.performance_config.build(self.comm)
         self.profiler = self.config.performance_config.build_profiler()
         with self.performance_collector.total_timer.clock("initialization"):
@@ -552,11 +549,26 @@ class Driver:
                 self.dycore_to_physics = None
                 self.end_of_step_update = None
             ndsl_log.info("setting up physics object done")
+            if(config.diagnostics_config.output_format == "diag_manager"):
+                ndsl_log.info("setting up pyFMS (enabled from using 'diag_manager' output format for diagnostics)")
+                communicator.pyfms_domain_id = self._initialize_pyfms()
+                communicator.pyfms_init_time = self.config.start_time 
+                ndsl_log.info(f"setting up pyFMS done, using init_time: {self.config.start_time}")
             ndsl_log.info("setting up diagnostics factory started")
             self.diagnostics = config.diagnostics_config.diagnostics_factory(
                 communicator=communicator
             )
             ndsl_log.info("setting up diagnostics factory done")
+            if(config.diagnostics_config.output_format == "diag_manager"):
+                run_time = timedelta(
+                    days=config.days,
+                    hours=config.hours,
+                    minutes=config.minutes,
+                    seconds=config.seconds
+                )
+                end_time = self.time + run_time 
+                self.diagnostics.monitor.set_end_time(end_time)
+                self.diagnostics.monitor.set_timestep(timedelta(seconds=config.dt_atmos))
         log_subtile_location(
             partitioner=communicator.partitioner.tile, rank=communicator.rank
         )
@@ -573,23 +585,22 @@ class Driver:
         ndsl_log.info("setting up safety checkers done")
         ndsl_log.info("initialization of the object done")
 
-    def _initialize_pyfms(self, global_comm: Any) -> None:
+    def _initialize_pyfms(self) -> int:
+        """
+            Initialize pyFMS library's mpi communication and domain decomposition
+            This is only required when using the 'diag_manager' output format
+            for diagnostics.
+            Returns the domain id number used for subsequent domain operations with pyFMS
+        """
         if pyfms is None:
             raise ModuleNotFoundError(
                 "pyfms is required to initialize the FMS MPP domain"
             )
-        if not hasattr(global_comm, "_comm") or not hasattr(
-            global_comm._comm, "py2f"
-        ):
-            raise TypeError(
-                "pyfms initialization requires a communicator with a py2f() method"
-            )
-
         text_content = "&diag_manager_nml\nuse_modern_diag=.true.\n/"
         with open("input.nml", "w", encoding="utf-8") as f:
             f.write(text_content)
         pyfms.fms.init(
-            localcomm=global_comm._comm.py2f(),
+            localcomm=self.comm._comm.py2f(),
             calendar_type=pyfms.fms.NOLEAP,
         )
 
@@ -620,7 +631,7 @@ class Driver:
             domain_id=domain_id,
             io_layout=[1, 1],
         )
-        self.domain_id = domain_id
+        return  domain_id
 
     def _update_driver_config_with_communicator(
         self, communicator: Communicator
@@ -776,7 +787,7 @@ class Driver:
             driver_config=self.config,
             restart_path="RESTART",
         )
-        if self.config.initialize_pyfms:
+        if(self.config.diagnostics_config.output_format == "diag_manager"):
             pyfms.fms.end()
         self.comm_config.cleanup(self.comm)
 

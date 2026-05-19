@@ -6,7 +6,7 @@ from pathlib import Path
 
 import numpy as np
 
-from ndsl import Quantity
+from ndsl import Quantity, DiagManagerMonitor
 from ndsl.constants import K_DIM, K_INTERFACE_DIM, RGRAV
 from ndsl.dsl.dace.orchestration import dace_inhibitor
 from ndsl.dsl.typing import Float
@@ -16,6 +16,7 @@ from ndsl.monitor.netcdf_monitor import NetCDFMonitor
 from ndsl.typing import Communicator
 from pace.state import DriverState
 from pyfv3 import DycoreState
+#from pySHiELD import PhysicsState
 
 
 try:
@@ -93,9 +94,9 @@ class DiagnosticsConfig:
             raise ValueError(
                 "DiagnosticsConfig.path must be given to enable diagnostics"
             )
-        if self.output_format not in ["zarr", "netcdf"]:
+        if self.output_format not in ["zarr", "netcdf", "diag_manager"]:
             raise ValueError(
-                f"output_format must be one of 'zarr' or 'netcdf', got {self.output_format}"
+                f"output_format must be one of 'zarr', 'netcdf', or 'diag_manager', got {self.output_format}"
             )
         if self.precision not in ["Float", "float32", "float64"]:
             raise ValueError(
@@ -136,9 +137,15 @@ class DiagnosticsConfig:
                 time_chunk_size=self.time_chunk_size,
                 precision=precision,
             )
+        elif self.output_format == "diag_manager":
+            monitor = DiagManagerMonitor(
+                domain_id=communicator.pyfms_domain_id,
+            )
+            #PhysicsState.register_diag_manager_fields(monitor)
+            #DycoreState.register_diag_manager_fields(monitor)
         else:
             raise ValueError(
-                f"output_format must be one of 'zarr' or 'netcdf', got {self.output_format}"
+                f"output_format must be one of 'zarr', 'netcdf', or 'diag_manager', got {self.output_format}"
             )
 
         return MonitorDiagnostics(
