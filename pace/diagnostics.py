@@ -141,8 +141,6 @@ class DiagnosticsConfig:
             monitor = DiagManagerMonitor(
                 domain_id=communicator.pyfms_domain_id,
             )
-            #PhysicsState.register_diag_manager_fields(monitor)
-            #DycoreState.register_diag_manager_fields(monitor)
         else:
             raise ValueError(
                 f"output_format must be one of 'zarr', 'netcdf', or 'diag_manager', got {self.output_format}"

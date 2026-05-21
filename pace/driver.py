@@ -42,7 +42,7 @@ from pyfv3.initialization.analytic_init import AnalyticCase
 from pyfv3.tracers import default_ai2_tracers
 from pyshield import Physics, PhysicsConfig
 from pyshield.update import update_atmos_state
-
+import numpy as np
 
 try:
     import cupy as cp
@@ -53,6 +53,8 @@ try:
     import pyfms
 except ImportError:
     pyfms = None
+from pyfv3 import DycoreState
+
 
 
 @dataclasses.dataclass
@@ -559,7 +561,10 @@ class Driver:
                 communicator=communicator
             )
             ndsl_log.info("setting up diagnostics factory done")
+            # diag_manager needs some additional set up steps after initialization via the monitor class
+            # TODO this can probably be added to the DiagManagerMonitor __init__, besides the register function
             if(config.diagnostics_config.output_format == "diag_manager"):
+                ndsl_log.info("setting up diag_manager axes and fields")
                 run_time = timedelta(
                     days=config.days,
                     hours=config.hours,
@@ -569,6 +574,68 @@ class Driver:
                 end_time = self.time + run_time 
                 self.diagnostics.monitor.set_end_time(end_time)
                 self.diagnostics.monitor.set_timestep(timedelta(seconds=config.dt_atmos))
+                # TODO get the correct precision at runtime
+                i = np.arange(config.nx_tile, dtype=np.float64)
+                j = i # square dims required by ndsl 
+                i_interface = np.arange(config.nx_tile + 1, dtype=np.float64)
+                j_interface = i_interface 
+                k = np.arange(config.nz, dtype=np.float64)
+                self.diagnostics.monitor.register_axis(
+                    name="i",
+                    long_name="i",
+                    axis_data=i,
+                    cart_name="x",
+                    domain_id=communicator.pyfms_domain_id,
+                    set_name="pyfv3",
+                    units="radians",
+                    not_xy=False,
+                )
+                self.diagnostics.monitor.register_axis(
+                    name="j",
+                    long_name="j",
+                    axis_data=j,
+                    cart_name="y",
+                    domain_id=communicator.pyfms_domain_id,
+                    set_name="pyfv3",
+                    units="radians",
+                    not_xy=False,
+                )
+                self.diagnostics.monitor.register_axis(
+                    name="k",
+                    long_name="k",
+                    axis_data=k,
+                    cart_name="z",
+                    set_name="pyfv3",
+                    not_xy=True,
+                    units="radians"
+                )
+                self.diagnostics.monitor.register_axis(
+                    name="i_interface",
+                    long_name="i_interface",
+                    axis_data=i_interface,
+                    cart_name="x",
+                    domain_id=communicator.pyfms_domain_id,
+                    set_name="atm",
+                    not_xy=True,
+                    units="radians"
+                )
+                self.diagnostics.monitor.register_axis(
+                    name="j_interface",
+                    long_name="j_interface",
+                    axis_data=j_interface,
+                    cart_name="y",
+                    domain_id=communicator.pyfms_domain_id,
+                    set_name="atm",
+                    not_xy=True,
+                    units="radians"
+                )
+                # TODO move register calls to diagnostics.py, and only register requested fields from diagnostic config
+                self.state.dycore_state.register_diag_manager_fields(
+                    monitor=self.diagnostics.monitor,
+                    init_time=self.time,
+                    field_names=config.diagnostics_config.names,
+                )
+                ndsl_log.info("setting up diag_manager done")
         log_subtile_location(
             partitioner=communicator.partitioner.tile, rank=communicator.rank
         )
