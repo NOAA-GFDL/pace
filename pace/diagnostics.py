@@ -90,7 +90,8 @@ class DiagnosticsConfig:
     precision: str = "Float"
 
     def __post_init__(self):
-        if (len(self.names) > 0 or len(self.derived_names) > 0) and self.path is None:
+        if (len(self.names) > 0 or len(self.derived_names) > 0) and \
+            (self.path is None and self.output_format != "diag_manager"):
             raise ValueError(
                 "DiagnosticsConfig.path must be given to enable diagnostics"
             )
@@ -111,11 +112,12 @@ class DiagnosticsConfig:
             communicator: provides global communication e.g. to gather state
                 or to coordinate filesystem access between ranks
         """
-        if self.path is None:
+        if self.path is None and self.output_format != "diag_manager":
             return NullDiagnostics()
 
-        if not Path(self.path).exists():
-            Path(self.path).mkdir()
+        if self.output_format != "diag_manager":
+            if not Path(self.path).exists():
+                Path(self.path).mkdir()
 
         if self.output_format == "zarr":
             store = zarr_storage.DirectoryStore(path=self.path)

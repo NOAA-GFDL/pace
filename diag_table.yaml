@@ -1,0 +1,23 @@
+title: pace_diag_manager_test
+base_date: 2000 1 1 0 0 0
+diag_files:
+  - file_name: pace_diagnostics
+    freq: 225 seconds 
+    time_units: seconds 
+    unlimdim: time
+    module: pyfv3 
+    reduction: none 
+    kind: r8
+    varlist:
+    - var_name: u
+    - var_name: v
+    - var_name: ua
+    - var_name: va
+    - var_name: pt
+    - var_name: delp
+    - var_name: qvapor
+    - var_name: qliquid
+    - var_name: qice
+    - var_name: qrain
+    - var_name: qsnow
+    - var_name: qgraupel

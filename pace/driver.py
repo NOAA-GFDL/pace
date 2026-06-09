@@ -614,8 +614,7 @@ class Driver:
                     long_name="i_interface",
                     axis_data=i_interface,
                     cart_name="x",
-                    domain_id=communicator.pyfms_domain_id,
-                    set_name="atm",
+                    set_name="pyfv3",
                     not_xy=True,
                     units="radians"
                 )
@@ -624,17 +623,27 @@ class Driver:
                     long_name="j_interface",
                     axis_data=j_interface,
                     cart_name="y",
-                    domain_id=communicator.pyfms_domain_id,
-                    set_name="atm",
+                    set_name="pyfv3",
                     not_xy=True,
                     units="radians"
                 )
-                # TODO move register calls to diagnostics.py, and only register requested fields from diagnostic config
+                fields_to_register = config.diagnostics_config.names.copy()
+                # TODO, some fields are duplicated between physics and dycore state
+                # the diagnostics will check the dycore_state first, so we should do the same here
+                # another TODO, move this function to the NDSL/PACE does not really need to be in pyfv3/shield
                 self.state.dycore_state.register_diag_manager_fields(
                     monitor=self.diagnostics.monitor,
                     init_time=self.time,
-                    field_names=config.diagnostics_config.names,
+                    field_names=fields_to_register,
                 )
+                if(fields_to_register): # if there are still fields left to register, they must be in the physics state
+                    self.state.physics_state.register_diag_manager_fields(
+                        monitor=self.diagnostics.monitor,
+                        init_time=self.time,
+                        field_names=fields_to_register,
+                    )
+                if(fields_to_register): # should be empty
+                    ndsl_log.warning(f"Some fields requested for diagnostics were not found in either the physics or dycore state: {fields_to_register}")
                 ndsl_log.info("setting up diag_manager done")
         log_subtile_location(
             partitioner=communicator.partitioner.tile, rank=communicator.rank

@@ -20,11 +20,20 @@ layout:
   - 1
   - 1
 diagnostics_config:
-  path: doesntwork 
-  output_format: diag_manager 
+  output_format: diag_manager
   names:
+    - u
+    - v
+    - ua
+    - va
     - pt
-    - ps 
+    - delp
+    - qvapor
+    - qliquid
+    - qice
+    - qrain
+    - qsnow
+    - qgraupel
 dycore_config:
   a_imp: 1.0
   beta: 0.
