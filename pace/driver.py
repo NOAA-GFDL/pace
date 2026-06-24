@@ -32,7 +32,7 @@ from ndsl.grid import DampingCoefficients, DriverGridData, GridData
 from ndsl.performance import PerformanceConfig, Timer
 from ndsl.typing import Communicator
 from pace.comm import CreatesCommSelector
-from pace.diagnostics import DiagnosticsConfig
+from pace.diagnostics import DiagnosticsConfig, register_diag_manager_fields
 from pace.grid import GeneratedGridConfig, GridInitializerSelector
 from pace.initialization import InitializerSelector
 from pace.safety_checks import SafetyChecker
@@ -562,7 +562,6 @@ class Driver:
             )
             ndsl_log.info("setting up diagnostics factory done")
             # diag_manager needs some additional set up steps after initialization via the monitor class
-            # TODO this can probably be added to the DiagManagerMonitor __init__, besides the register function
             if(config.diagnostics_config.output_format == "diag_manager"):
                 ndsl_log.info("setting up diag_manager axes and fields")
                 run_time = timedelta(
@@ -628,19 +627,24 @@ class Driver:
                     units="radians"
                 )
                 fields_to_register = config.diagnostics_config.names.copy()
-                # TODO, some fields are duplicated between physics and dycore state
-                # the diagnostics will check the dycore_state first, so we should do the same here
-                # another TODO, move this function to the NDSL/PACE does not really need to be in pyfv3/shield
-                self.state.dycore_state.register_diag_manager_fields(
+                # monitors will check the dycore_state first and fallback to physics_state, so we do the same here
+                # field names will be removed from the list as they a registered to avoid duplicates
+                register_diag_manager_fields(
+                    dataclass_fields=self.state.dycore_state.__class__.__dataclass_fields__,
                     monitor=self.diagnostics.monitor,
                     init_time=self.time,
                     field_names=fields_to_register,
+                    module_name="pyfv3",
+                    dtype="float64",
                 )
                 if(fields_to_register): # if there are still fields left to register, they must be in the physics state
-                    self.state.physics_state.register_diag_manager_fields(
+                    register_diag_manager_fields(
+                        dataclass_fields=self.state.physics_state.__class__.__dataclass_fields__,
                         monitor=self.diagnostics.monitor,
                         init_time=self.time,
                         field_names=fields_to_register,
+                        module_name="pyfv3",
+                        dtype="float64",
                     )
                 if(fields_to_register): # should be empty
                     ndsl_log.warning(f"Some fields requested for diagnostics were not found in either the physics or dycore state: {fields_to_register}")

@@ -1,57 +1,58 @@
+# diag table for use with the 'baroclinic' test case for pace
+# the variable names below should correspond to the 'names' section in the diagnostics_config section
+# of the pace configuration file (e.g. baroclinic_c12_diag_manager.yaml) 
 title: pace_diag_manager_test
-base_date: 1 1 1 0 0 0
+base_date: 2000 1 1 0 0 0
 diag_files:
-  - file_name: pace_diagnostics
-    freq: 225 seconds 
+  # below will result in analogous output to the 'netcdf' monitor output option 
+  # it will be transposed, and contain all timesteps rather than 1 timestep per diagnostic output frequency.
+  # tile count in output filenames start at 1 instead of 0
+  - file_name: model_state_baroclinic
+    freq: 225 seconds # ie. one timestep of the model
     time_units: seconds 
     unlimdim: time
+    module: pyfv3
+    reduction: none 
+    kind: r8
     varlist:
-    - module: pyfv3
-      var_name: u
-      long_name: u
-      reduction: none
-      kind: r8
-    - module: pyfv3
-      var_name: v
-      reduction: none
-      kind: r8
-    - module: pyfv3
-      var_name: ua
-      reduction: none
-      kind: r8
-    - module: pyfv3
-      var_name: va
-      reduction: none
-      kind: r8
-    - module: pyfv3
-      var_name: pt
-      reduction: none
-      kind: r8
-    - module: pyshield
-      var_name: delp
-      reduction: none
-      kind: r8
-    - module: pyshield
-      var_name: qvapor
-      reduction: none
-      kind: r8
-    - module: pyshield
-      var_name: qliquid
-      reduction: none
-      kind: r8
-    - module: pyshield
-      var_name: qice
-      reduction: none
-      kind: r8
-    - module: pyshield
-      var_name: qrain
-      reduction: none
-      kind: r8
-    - module: pyshield
-      var_name: qsnow
-      reduction: none
-      kind: r8
-    - module: pyshield
-      var_name: qgraupel
-      reduction: none
-      kind: r8
+    - var_name: u
+    - var_name: v
+    - var_name: ua
+    - var_name: va
+    - var_name: pt
+    - var_name: delp
+    - var_name: qvapor
+    - var_name: qliquid
+    - var_name: qice
+    - var_name: qrain
+    - var_name: qsnow
+    - var_name: qgraupel
+  # this tests the reduction methods, taking the min/max/avg/etc over the entire simulation length (4 timesteps) 
+  - file_name: reductions_baroclinic
+    freq: 900 seconds # 4 timesteps ie. the entire simulation length
+    time_units: seconds
+    unlimdim: time
+    module: pyfv3
+    kind: r8
+    varlist:
+    - var_name: pt      # max temperature
+      output_name: max_pt
+      reduction: max
+    - var_name: qvapor  # min specific humidity
+      output_name: min_qvapor
+      reduction: min
+    - var_name: ps      # sum of surface pressure
+      output_name: sum_ps
+      reduction: sum
+    - var_name: pt      # avg temperature
+      output_name: avg_pt
+      reduction: average
+    - var_name: u      # rms of x wind
+      output_name: rms_u 
+      reduction: rms
+    - var_name: v      # sum of squares of y wind
+      output_name: pow2_v 
+      reduction: pow2
+    - var_name: pt            # diurnal temperature range, adds an 'diurnal' dimension to the output file. 
+      output_name: diurnal_pt # this is just to test the functionality, doesn't really make sense for a short simulation like this.
+      reduction: diurnal2
