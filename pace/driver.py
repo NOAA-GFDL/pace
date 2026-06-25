@@ -573,13 +573,27 @@ class Driver:
                 end_time = self.time + run_time 
                 self.diagnostics.monitor.set_end_time(end_time)
                 self.diagnostics.monitor.set_timestep(timedelta(seconds=config.dt_atmos))
-                # TODO get the correct precision at runtime
-                i = np.arange(config.nx_tile, dtype=np.float64)
+                if self.config.diagnostics_config.precision == "Float":
+                    precision = Float
+                    if precision == np.float32:
+                        prec_str = "float32"
+                    elif precision == np.float64:
+                        prec_str = "float64"
+                    else:
+                        raise ValueError(f"precision {precision} not supported for diag_manager output format")
+                elif self.config.diagnostics_config.precision == "float32":
+                    precision = np.float32
+                    prec_str = "float32"
+                elif self.config.diagnostics_config.precision == "float64":
+                    precision = np.float64
+                    prec_str = "float64"
+                # sets a string for the diag manager argument, in case 'Float' is set
+                i = np.arange(config.nx_tile, dtype=precision)
                 j = i # square dims required by ndsl 
-                i_interface = np.arange(config.nx_tile + 1, dtype=np.float64)
+                i_interface = np.arange(config.nx_tile + 1, dtype=precision)
                 j_interface = i_interface 
-                k = np.arange(config.nz, dtype=np.float64)
-                k_interface = np.arange(config.nz + 1, dtype=np.float64)
+                k = np.arange(config.nz, dtype=precision)
+                k_interface = np.arange(config.nz + 1, dtype=precision)
                 self.diagnostics.monitor.register_axis(
                     name="i",
                     long_name="i",
@@ -649,7 +663,7 @@ class Driver:
                     init_time=self.time,
                     field_names=fields_to_register,
                     module_name="pyfv3",
-                    dtype="float64",
+                    dtype=prec_str,
                 )
                 if(fields_to_register): # if there are still fields left to register, they must be in the physics state
                     register_diag_manager_fields(
@@ -658,7 +672,7 @@ class Driver:
                         init_time=self.time,
                         field_names=fields_to_register,
                         module_name="pyfv3",
-                        dtype="float64",
+                        dtype=prec_str,
                     )
                 if(fields_to_register): # should be empty
                     ndsl_log.warning(f"Some fields requested for diagnostics were not found in either the physics or dycore state: {fields_to_register}")
