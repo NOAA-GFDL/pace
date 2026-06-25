@@ -7,6 +7,7 @@ from typing import Any
 
 import dace
 import dacite
+import numpy as np
 import yaml
 
 from ndsl import (
@@ -42,7 +43,7 @@ from pyfv3.initialization.analytic_init import AnalyticCase
 from pyfv3.tracers import default_ai2_tracers
 from pyshield import Physics, PhysicsConfig
 from pyshield.update import update_atmos_state
-import numpy as np
+
 
 try:
     import cupy as cp
@@ -54,7 +55,6 @@ try:
 except ImportError:
     pyfms = None
 from pyfv3 import DycoreState
-
 
 
 @dataclasses.dataclass
@@ -551,28 +551,34 @@ class Driver:
                 self.dycore_to_physics = None
                 self.end_of_step_update = None
             ndsl_log.info("setting up physics object done")
-            if(config.diagnostics_config.output_format == "diag_manager"):
-                ndsl_log.info("setting up pyFMS (enabled from using 'diag_manager' output format for diagnostics)")
+            if config.diagnostics_config.output_format == "diag_manager":
+                ndsl_log.info(
+                    "setting up pyFMS (enabled from using 'diag_manager' output format for diagnostics)"
+                )
                 communicator.pyfms_domain_id = self._initialize_pyfms()
-                communicator.pyfms_init_time = self.config.start_time 
-                ndsl_log.info(f"setting up pyFMS done, using init_time: {self.config.start_time}")
+                communicator.pyfms_init_time = self.config.start_time
+                ndsl_log.info(
+                    f"setting up pyFMS done, using init_time: {self.config.start_time}"
+                )
             ndsl_log.info("setting up diagnostics factory started")
             self.diagnostics = config.diagnostics_config.diagnostics_factory(
                 communicator=communicator
             )
             ndsl_log.info("setting up diagnostics factory done")
             # diag_manager needs some additional set up steps after initialization via the monitor class
-            if(config.diagnostics_config.output_format == "diag_manager"):
+            if config.diagnostics_config.output_format == "diag_manager":
                 ndsl_log.info("setting up diag_manager axes and fields")
                 run_time = timedelta(
                     days=config.days,
                     hours=config.hours,
                     minutes=config.minutes,
-                    seconds=config.seconds
+                    seconds=config.seconds,
                 )
-                end_time = self.time + run_time 
+                end_time = self.time + run_time
                 self.diagnostics.monitor.set_end_time(end_time)
-                self.diagnostics.monitor.set_timestep(timedelta(seconds=config.dt_atmos))
+                self.diagnostics.monitor.set_timestep(
+                    timedelta(seconds=config.dt_atmos)
+                )
                 if self.config.diagnostics_config.precision == "Float":
                     precision = Float
                     if precision == np.float32:
@@ -580,7 +586,9 @@ class Driver:
                     elif precision == np.float64:
                         prec_str = "float64"
                     else:
-                        raise ValueError(f"precision {precision} not supported for diag_manager output format")
+                        raise ValueError(
+                            f"precision {precision} not supported for diag_manager output format"
+                        )
                 elif self.config.diagnostics_config.precision == "float32":
                     precision = np.float32
                     prec_str = "float32"
@@ -589,9 +597,9 @@ class Driver:
                     prec_str = "float64"
                 # sets a string for the diag manager argument, in case 'Float' is set
                 i = np.arange(config.nx_tile, dtype=precision)
-                j = i # square dims required by ndsl 
+                j = i  # square dims required by ndsl
                 i_interface = np.arange(config.nx_tile + 1, dtype=precision)
-                j_interface = i_interface 
+                j_interface = i_interface
                 k = np.arange(config.nz, dtype=precision)
                 k_interface = np.arange(config.nz + 1, dtype=precision)
                 self.diagnostics.monitor.register_axis(
@@ -643,7 +651,7 @@ class Driver:
                     cart_name="z",
                     set_name="pyfv3",
                     not_xy=True,
-                    units="radians"
+                    units="radians",
                 )
                 self.diagnostics.monitor.register_axis(
                     name="k_interface",
@@ -652,7 +660,7 @@ class Driver:
                     cart_name="z",
                     set_name="pyfv3",
                     not_xy=True,
-                    units="radians"
+                    units="radians",
                 )
                 fields_to_register = config.diagnostics_config.names.copy()
                 # when getting data, monitors will check the dycore_state first and fallback to physics_state, so we do the same here
@@ -665,7 +673,9 @@ class Driver:
                     module_name="pyfv3",
                     dtype=prec_str,
                 )
-                if(fields_to_register): # if there are still fields left to register, they must be in the physics state
+                if (
+                    fields_to_register
+                ):  # if there are still fields left to register, they must be in the physics state
                     register_diag_manager_fields(
                         dataclass_fields=self.state.physics_state.__class__.__dataclass_fields__,
                         monitor=self.diagnostics.monitor,
@@ -674,8 +684,10 @@ class Driver:
                         module_name="pyfv3",
                         dtype=prec_str,
                     )
-                if(fields_to_register): # should be empty
-                    ndsl_log.warning(f"Some fields requested for diagnostics were not found in either the physics or dycore state: {fields_to_register}")
+                if fields_to_register:  # should be empty
+                    ndsl_log.warning(
+                        f"Some fields requested for diagnostics were not found in either the physics or dycore state: {fields_to_register}"
+                    )
                 ndsl_log.info("setting up diag_manager done")
         log_subtile_location(
             partitioner=communicator.partitioner.tile, rank=communicator.rank
@@ -695,10 +707,10 @@ class Driver:
 
     def _initialize_pyfms(self) -> int:
         """
-            Initialize pyFMS library's mpi communication and domain decomposition
-            This is only required when using the 'diag_manager' output format
-            for diagnostics.
-            Returns the domain id number used for subsequent domain operations with pyFMS
+        Initialize pyFMS library's mpi communication and domain decomposition
+        This is only required when using the 'diag_manager' output format
+        for diagnostics.
+        Returns the domain id number used for subsequent domain operations with pyFMS
         """
         if pyfms is None:
             raise ModuleNotFoundError(
@@ -739,7 +751,7 @@ class Driver:
             domain_id=domain_id,
             io_layout=[1, 1],
         )
-        return  domain_id
+        return domain_id
 
     def _update_driver_config_with_communicator(
         self, communicator: Communicator
@@ -895,7 +907,7 @@ class Driver:
             driver_config=self.config,
             restart_path="RESTART",
         )
-        if(self.config.diagnostics_config.output_format == "diag_manager"):
+        if self.config.diagnostics_config.output_format == "diag_manager":
             pyfms.fms.end()
         self.comm_config.cleanup(self.comm)
 

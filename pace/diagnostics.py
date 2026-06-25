@@ -9,7 +9,7 @@ from typing import Any
 
 import numpy as np
 
-from ndsl import Quantity, DiagManagerMonitor
+from ndsl import DiagManagerMonitor, Quantity
 from ndsl.constants import K_DIM, K_INTERFACE_DIM, RGRAV
 from ndsl.dsl.dace.orchestration import dace_inhibitor
 from ndsl.dsl.typing import Float
@@ -92,8 +92,9 @@ class DiagnosticsConfig:
     precision: str = "Float"
 
     def __post_init__(self):
-        if (len(self.names) > 0 or len(self.derived_names) > 0) and \
-            (self.path is None and self.output_format != "diag_manager"):
+        if (len(self.names) > 0 or len(self.derived_names) > 0) and (
+            self.path is None and self.output_format != "diag_manager"
+        ):
             raise ValueError(
                 "DiagnosticsConfig.path must be given to enable diagnostics"
             )

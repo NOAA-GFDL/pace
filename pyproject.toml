@@ -26,13 +26,13 @@ dev = [
   "pre-commit",
   "flake8-pyproject"
 ]
+pyfms = [
+  "ndsl[pyfms]"
+]
 test = [
   "mpi4py",
   "nbmake",
   "pytest"
-]
-pyfms = [
-  "ndsl[pyfms]"
 ]
 
 [project.urls]
