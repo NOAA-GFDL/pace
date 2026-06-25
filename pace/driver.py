@@ -579,6 +579,7 @@ class Driver:
                 i_interface = np.arange(config.nx_tile + 1, dtype=np.float64)
                 j_interface = i_interface 
                 k = np.arange(config.nz, dtype=np.float64)
+                k_interface = np.arange(config.nz + 1, dtype=np.float64)
                 self.diagnostics.monitor.register_axis(
                     name="i",
                     long_name="i",
@@ -588,6 +589,17 @@ class Driver:
                     set_name="pyfv3",
                     units="radians",
                     not_xy=False,
+                )
+                self.diagnostics.monitor.register_axis(
+                    name="i_interface",
+                    long_name="i_interface",
+                    axis_data=i_interface,
+                    cart_name="x",
+                    domain_id=communicator.pyfms_domain_id,
+                    set_name="pyfv3",
+                    units="radians",
+                    not_xy=False,
+                    extend_domain_direction="east",
                 )
                 self.diagnostics.monitor.register_axis(
                     name="j",
@@ -600,6 +612,17 @@ class Driver:
                     not_xy=False,
                 )
                 self.diagnostics.monitor.register_axis(
+                    name="j_interface",
+                    long_name="j_interface",
+                    axis_data=j_interface,
+                    cart_name="y",
+                    domain_id=communicator.pyfms_domain_id,
+                    set_name="pyfv3",
+                    not_xy=False,
+                    units="radians",
+                    extend_domain_direction="north",
+                )
+                self.diagnostics.monitor.register_axis(
                     name="k",
                     long_name="k",
                     axis_data=k,
@@ -609,26 +632,17 @@ class Driver:
                     units="radians"
                 )
                 self.diagnostics.monitor.register_axis(
-                    name="i_interface",
-                    long_name="i_interface",
-                    axis_data=i_interface,
-                    cart_name="x",
-                    set_name="pyfv3",
-                    not_xy=True,
-                    units="radians"
-                )
-                self.diagnostics.monitor.register_axis(
-                    name="j_interface",
-                    long_name="j_interface",
-                    axis_data=j_interface,
-                    cart_name="y",
+                    name="k_interface",
+                    long_name="k_interface",
+                    axis_data=k_interface,
+                    cart_name="z",
                     set_name="pyfv3",
                     not_xy=True,
                     units="radians"
                 )
                 fields_to_register = config.diagnostics_config.names.copy()
-                # monitors will check the dycore_state first and fallback to physics_state, so we do the same here
-                # field names will be removed from the list as they a registered to avoid duplicates
+                # when getting data, monitors will check the dycore_state first and fallback to physics_state, so we do the same here
+                # field names will be removed from the list as they are registered to avoid duplicates
                 register_diag_manager_fields(
                     dataclass_fields=self.state.dycore_state.__class__.__dataclass_fields__,
                     monitor=self.diagnostics.monitor,

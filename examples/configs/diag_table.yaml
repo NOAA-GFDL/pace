@@ -1,6 +1,7 @@
 # diag table for use with the 'baroclinic' test case for pace
-# the variable names below should correspond to the 'names' section in the diagnostics_config section
-# of the pace configuration file (e.g. baroclinic_c12_diag_manager.yaml) 
+# The var_names below must correspond to the 'names' section in the diagnostics_config section for
+# the pace config file, otherwise the data will appear as all fill values in the output netcdf. 
+# The 'output_name' is what will be used in the output file if provided, and must be unique.
 title: pace_diag_manager_test
 base_date: 2000 1 1 0 0 0
 diag_files:
@@ -27,6 +28,7 @@ diag_files:
     - var_name: qrain
     - var_name: qsnow
     - var_name: qgraupel
+    - var_name: pe
   # this tests the reduction methods, taking the min/max/avg/etc over the entire simulation length (4 timesteps) 
   - file_name: reductions_baroclinic
     freq: 900 seconds # 4 timesteps ie. the entire simulation length

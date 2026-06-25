@@ -17,8 +17,8 @@ nz: 79
 dt_atmos: 225
 minutes: 15
 layout:
-  - 1
-  - 1
+  - 2
+  - 2
 diagnostics_config:
   output_format: diag_manager
   names:
@@ -34,6 +34,7 @@ diagnostics_config:
     - qrain
     - qsnow
     - qgraupel
+    - pe
 dycore_config:
   a_imp: 1.0
   beta: 0.
