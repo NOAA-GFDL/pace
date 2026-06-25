@@ -19,7 +19,6 @@ from ndsl.monitor.netcdf_monitor import NetCDFMonitor
 from ndsl.typing import Communicator
 from pace.state import DriverState
 from pyfv3 import DycoreState
-#from pySHiELD import PhysicsState
 
 
 try:
