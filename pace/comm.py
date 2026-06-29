@@ -119,6 +119,9 @@ class NullComm(Comm[T]):
 
     def Allreduce_inplace(self, obj: T, op: ReductionOperator) -> T:
         raise NotImplementedError("NullComm.Allreduce_inplace")
+    
+    def Scatterv(self, sendbuf, recvbuf, root: int = 0, **kwargs: dict):  # type: ignore[no-untyped-def]
+        pass
 
 
 class CreatesComm(abc.ABC):
