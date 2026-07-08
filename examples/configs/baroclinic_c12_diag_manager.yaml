@@ -17,10 +17,11 @@ nz: 79
 dt_atmos: 225
 minutes: 15
 layout:
-  - 2
-  - 2
+  - 1
+  - 1
 diagnostics_config:
   output_format: diag_manager
+  precision: Float
   names:
     - u
     - v

@@ -14,6 +14,7 @@ from ndsl import (
     CompilationConfig,
     CubedSphereCommunicator,
     DaceConfig,
+    DiagManagerMonitor,
     GridIndexing,
     PerformanceCollector,
     QuantityFactory,
@@ -30,10 +31,15 @@ from ndsl.constants import N_HALO_DEFAULT
 from ndsl.dsl.dace.orchestration import dace_inhibitor, orchestrate
 from ndsl.dsl.typing import Float
 from ndsl.grid import DampingCoefficients, DriverGridData, GridData
+from ndsl.monitor.diag_manager_monitor import initialize_pyfms
 from ndsl.performance import PerformanceConfig, Timer
 from ndsl.typing import Communicator
 from pace.comm import CreatesCommSelector
-from pace.diagnostics import DiagnosticsConfig, register_diag_manager_fields
+from pace.diagnostics import (
+    DiagnosticsConfig,
+    MonitorDiagnostics,
+    register_diag_manager_fields,
+)
 from pace.grid import GeneratedGridConfig, GridInitializerSelector
 from pace.initialization import InitializerSelector
 from pace.safety_checks import SafetyChecker
@@ -415,6 +421,7 @@ class Driver:
             stencil_compare_comm = None
         self.performance_collector = self.config.performance_config.build(self.comm)
         self.profiler = self.config.performance_config.build_profiler()
+        pyfms_domain_id: int | None = None
         with self.performance_collector.total_timer.clock("initialization"):
             comm_timer = (
                 self.performance_collector.timestep_timer
@@ -551,22 +558,27 @@ class Driver:
                 self.dycore_to_physics = None
                 self.end_of_step_update = None
             ndsl_log.info("setting up physics object done")
-            if config.diagnostics_config.output_format == "diag_manager":
-                ndsl_log.info(
-                    "setting up pyFMS (enabled from using 'diag_manager' output format for diagnostics)"
-                )
-                communicator.pyfms_domain_id = self._initialize_pyfms()
-                communicator.pyfms_init_time = self.config.start_time
-                ndsl_log.info(
-                    f"setting up pyFMS done, using init_time: {self.config.start_time}"
-                )
             ndsl_log.info("setting up diagnostics factory started")
+            if config.diagnostics_config.output_format == "diag_manager":
+                pyfms_domain_id = initialize_pyfms(
+                    nx_tile=self.config.nx_tile,
+                    layout=list(self.config.layout),
+                    ntiles=self.config.dycore_config.ntiles,
+                    halo=N_HALO_DEFAULT,
+                    use_cubic_mosaic=self.config.grid_type <= 3,
+                )
             self.diagnostics = config.diagnostics_config.diagnostics_factory(
-                communicator=communicator
+                communicator=communicator,
             )
             ndsl_log.info("setting up diagnostics factory done")
             # diag_manager needs some additional set up steps after initialization via the monitor class
             if config.diagnostics_config.output_format == "diag_manager":
+                if pyfms_domain_id is None:
+                    raise RuntimeError("pyFMS domain id was not initialized")
+                assert isinstance(self.diagnostics, MonitorDiagnostics)
+                assert isinstance(self.diagnostics.monitor, DiagManagerMonitor)
+                assert isinstance(self.time, datetime)
+                diag_manager_monitor = self.diagnostics.monitor
                 ndsl_log.info("setting up diag_manager axes and fields")
                 run_time = timedelta(
                     days=config.days,
@@ -575,10 +587,8 @@ class Driver:
                     seconds=config.seconds,
                 )
                 end_time = self.time + run_time
-                self.diagnostics.monitor.set_end_time(end_time)
-                self.diagnostics.monitor.set_timestep(
-                    timedelta(seconds=config.dt_atmos)
-                )
+                diag_manager_monitor.set_end_time(end_time)
+                diag_manager_monitor.set_timestep(timedelta(seconds=config.dt_atmos))
                 if self.config.diagnostics_config.precision == "Float":
                     precision = Float
                     if precision == np.float32:
@@ -602,49 +612,49 @@ class Driver:
                 j_interface = i_interface
                 k = np.arange(config.nz, dtype=precision)
                 k_interface = np.arange(config.nz + 1, dtype=precision)
-                self.diagnostics.monitor.register_axis(
+                diag_manager_monitor.register_axis(
                     name="i",
                     long_name="i",
                     axis_data=i,
                     cart_name="x",
-                    domain_id=communicator.pyfms_domain_id,
+                    domain_id=pyfms_domain_id,
                     set_name="pyfv3",
                     units="radians",
                     not_xy=False,
                 )
-                self.diagnostics.monitor.register_axis(
+                diag_manager_monitor.register_axis(
                     name="i_interface",
                     long_name="i_interface",
                     axis_data=i_interface,
                     cart_name="x",
-                    domain_id=communicator.pyfms_domain_id,
+                    domain_id=pyfms_domain_id,
                     set_name="pyfv3",
                     units="radians",
                     not_xy=False,
                     extend_domain_direction="east",
                 )
-                self.diagnostics.monitor.register_axis(
+                diag_manager_monitor.register_axis(
                     name="j",
                     long_name="j",
                     axis_data=j,
                     cart_name="y",
-                    domain_id=communicator.pyfms_domain_id,
+                    domain_id=pyfms_domain_id,
                     set_name="pyfv3",
                     units="radians",
                     not_xy=False,
                 )
-                self.diagnostics.monitor.register_axis(
+                diag_manager_monitor.register_axis(
                     name="j_interface",
                     long_name="j_interface",
                     axis_data=j_interface,
                     cart_name="y",
-                    domain_id=communicator.pyfms_domain_id,
+                    domain_id=pyfms_domain_id,
                     set_name="pyfv3",
                     not_xy=False,
                     units="radians",
                     extend_domain_direction="north",
                 )
-                self.diagnostics.monitor.register_axis(
+                diag_manager_monitor.register_axis(
                     name="k",
                     long_name="k",
                     axis_data=k,
@@ -653,7 +663,7 @@ class Driver:
                     not_xy=True,
                     units="radians",
                 )
-                self.diagnostics.monitor.register_axis(
+                diag_manager_monitor.register_axis(
                     name="k_interface",
                     long_name="k_interface",
                     axis_data=k_interface,
@@ -663,11 +673,12 @@ class Driver:
                     units="radians",
                 )
                 fields_to_register = config.diagnostics_config.names.copy()
-                # when getting data, monitors will check the dycore_state first and fallback to physics_state, so we do the same here
+                # Monitors check the dycore state first and then the physics
+                # state, so registration follows the same precedence.
                 # field names will be removed from the list as they are registered to avoid duplicates
                 register_diag_manager_fields(
                     dataclass_fields=self.state.dycore_state.__class__.__dataclass_fields__,
-                    monitor=self.diagnostics.monitor,
+                    monitor=diag_manager_monitor,
                     init_time=self.time,
                     field_names=fields_to_register,
                     module_name="pyfv3",
@@ -678,7 +689,7 @@ class Driver:
                 ):  # if there are still fields left to register, they must be in the physics state
                     register_diag_manager_fields(
                         dataclass_fields=self.state.physics_state.__class__.__dataclass_fields__,
-                        monitor=self.diagnostics.monitor,
+                        monitor=diag_manager_monitor,
                         init_time=self.time,
                         field_names=fields_to_register,
                         module_name="pyfv3",
@@ -686,7 +697,9 @@ class Driver:
                     )
                 if fields_to_register:  # should be empty
                     ndsl_log.warning(
-                        f"Some fields requested for diagnostics were not found in either the physics or dycore state: {fields_to_register}"
+                        "Some fields requested for diagnostics were not found "
+                        "in either the physics or dycore state: "
+                        f"{fields_to_register}"
                     )
                 ndsl_log.info("setting up diag_manager done")
         log_subtile_location(
@@ -704,54 +717,6 @@ class Driver:
         SafetyChecker.register_variable("pt", 100, 380, compute_domain_only=True)
         ndsl_log.info("setting up safety checkers done")
         ndsl_log.info("initialization of the object done")
-
-    def _initialize_pyfms(self) -> int:
-        """
-        Initialize pyFMS library's mpi communication and domain decomposition
-        This is only required when using the 'diag_manager' output format
-        for diagnostics.
-        Returns the domain id number used for subsequent domain operations with pyFMS
-        """
-        if pyfms is None:
-            raise ModuleNotFoundError(
-                "pyfms is required to initialize the FMS MPP domain"
-            )
-        text_content = "&diag_manager_nml\nuse_modern_diag=.true.\n/"
-        with open("input.nml", "w", encoding="utf-8") as f:
-            f.write(text_content)
-        pyfms.fms.init(
-            localcomm=self.comm._comm.py2f(),
-            calendar_type=pyfms.fms.NOLEAP,
-        )
-
-        nx = self.config.nx_tile
-        ny = self.config.nx_tile
-        layout = list(self.config.layout)
-        if self.config.grid_type <= 3:
-            domain_id = pyfms.mpp_domains.define_cubic_mosaic(
-                ni=[nx for _ in range(self.config.dycore_config.ntiles)],
-                nj=[ny for _ in range(self.config.dycore_config.ntiles)],
-                global_indices=[0, nx - 1, 0, ny - 1],
-                layout=layout,
-                ntiles=self.config.dycore_config.ntiles,
-                halo=N_HALO_DEFAULT,
-                use_memsize=False,
-            )
-        else:
-            domain = pyfms.mpp_domains.define_domains(
-                global_indices=[0, nx - 1, 0, ny - 1],
-                layout=layout,
-                xhalo=N_HALO_DEFAULT,
-                yhalo=N_HALO_DEFAULT,
-            )
-            domain_id = domain.domain_id
-
-        pyfms.mpp_domains.set_current_domain(domain_id=domain_id)
-        pyfms.mpp_domains.define_io_domain(
-            domain_id=domain_id,
-            io_layout=[1, 1],
-        )
-        return domain_id
 
     def _update_driver_config_with_communicator(
         self, communicator: Communicator
