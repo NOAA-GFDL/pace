@@ -51,7 +51,7 @@ jobs:
           python-version: ${{ inputs.python_version && inputs.python_version || env.python_default }}
 
       - name: Install pyFMS dependencies
-        run: apt install gfortran libnetcdf-dev libnetcdff-dev netcdf-bin
+        run: sudo apt install gfortran libnetcdf-dev libnetcdff-dev netcdf-bin
 
       - name: Install mpi (MPICH flavor)
         run: pip install mpich
