@@ -50,13 +50,19 @@ jobs:
         with:
           python-version: ${{ inputs.python_version && inputs.python_version || env.python_default }}
 
-      - name: Install mpi (MPICH flavor)
-        run: pip install mpich
-
       - name: Install pyFMS dependencies
         run: |
           sudo apt update
-          sudo apt install -y gfortran libnetcdf-dev libnetcdff-dev netcdf-bin
+          sudo apt install -y mpich gfortran libnetcdf-dev libnetcdff-dev netcdf-bin
+
+        # need to build mpi4py from source to avoid mismatching mpich versions between os and pip 
+      - name: Install mpi (MPICH flavor)
+        run: pip install mpi4py --no-cache-dir --no-binary mpi4py
+        env:
+          MPICC: mpicc
+          MPICXX: mpicxx
+          MPIFC: mpifort
+
 
       - name: "External trigger: Remove existing component in pace/develop"
         if: ${{ inputs.component_name }}
