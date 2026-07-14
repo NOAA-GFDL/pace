@@ -50,9 +50,8 @@ jobs:
         with:
           python-version: ${{ inputs.python_version && inputs.python_version || env.python_default }}
 
-      - name: Install mpi (MPICH flavor)
-        run: pip install mpich
-
+      - name: Install pyFMS dependencies
+        run: sudo apt install mpich gfortran libnetcdf-dev libnetcdff-dev netcdf-bin
       - name: "External trigger: Remove existing component in pace/develop"
         if: ${{ inputs.component_name }}
         run: rm -rf ${GITHUB_WORKSPACE}/pace/${{inputs.component_name}}
