@@ -51,7 +51,10 @@ jobs:
           python-version: ${{ inputs.python_version && inputs.python_version || env.python_default }}
 
       - name: Install pyFMS dependencies
-        run: sudo apt install mpich gfortran libnetcdf-dev libnetcdff-dev netcdf-bin
+        run: |
+          sudo apt update
+          sudo apt install -y mpich gfortran libnetcdf-dev libnetcdff-dev netcdf-bin
+
       - name: "External trigger: Remove existing component in pace/develop"
         if: ${{ inputs.component_name }}
         run: rm -rf ${GITHUB_WORKSPACE}/pace/${{inputs.component_name}}
