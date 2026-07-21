@@ -97,4 +97,4 @@ jobs:
           mpicc --version
           mpifort --version
           cd ${GITHUB_WORKSPACE}/pace
-          mpiexec -np 6 python -m pace.run examples/configs/baroclinic_c48_no_out.yaml
+          mpiexec --oversubscribe -np 6 python -m pace.run examples/configs/baroclinic_c48_no_out.yaml
