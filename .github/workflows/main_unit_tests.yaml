@@ -53,7 +53,7 @@ jobs:
       - name: Install pyFMS dependencies
         run: |
           sudo apt update
-          sudo apt install -y mpich gfortran libnetcdf-dev libnetcdff-dev netcdf-bin
+          sudo apt install -y libopenmpi-dev libyaml-dev gfortran libnetcdf-dev libnetcdff-dev netcdf-bin
 
         # need to build mpi4py from source to avoid mismatching mpich versions between os and pip
       - name: Install mpi (MPICH flavor)
