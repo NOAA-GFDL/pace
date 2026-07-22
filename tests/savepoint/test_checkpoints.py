@@ -220,7 +220,7 @@ def merge_thresholds(all_thresholds: list[SavepointThresholds]):
 
 def dycore_state_to_dict(state: DycoreState):
     return {
-        name: getattr(state, name).data
+        name: getattr(state, name)[:]
         for name in dir(state)
         if isinstance(getattr(state, name), Quantity)
     }

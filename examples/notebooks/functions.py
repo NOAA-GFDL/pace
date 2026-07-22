@@ -424,12 +424,12 @@ def get_lon_lat_edges(
     lon = init_quantity(
         dimensions, VariableGrid.CellCorners, VariableDims.XY, units=units["coord-deg"]
     )
-    lon.data[:] = domain_configuration["metric_terms"].lon.data * 180 / np.pi
+    lon[:] = domain_configuration["metric_terms"].lon[:] * 180 / np.pi
 
     lat = init_quantity(
         dimensions, VariableGrid.CellCorners, VariableDims.XY, units=units["coord-deg"]
     )
-    lat.data[:] = domain_configuration["metric_terms"].lat.data * 180 / np.pi
+    lat[:] = domain_configuration["metric_terms"].lat[:] * 180 / np.pi
 
     if gather:
         lon = domain_configuration["communicator"].gather(lon)
@@ -452,25 +452,25 @@ def check_get_data_from_quantity(field: Union[Quantity, np.ndarray]) -> np.ndarr
     Outputs:
     - field: array
     """
-    if isinstance(field.data, np.ndarray):
-        field = field.data
+    if isinstance(field, Quantity):
+        return field[:]
 
     return field
 
 
 def check_fill_data_to_quantity(
-    field: Union[Quantity, np.ndarray], data
+    field: Union[Quantity, np.ndarray], data: np.ndarray
 ) -> Union[Quantity, np.ndarray]:
     """
     Use:
     field = check_fill_data_to_quantity(field, data)
 
-    If field is a quantity, data gets stored inside field.data.
-    If field is an array, it remains an array.
+    If field is a quantity, data gets stored inside the Quantity,
+    otherwise the array is replaced with the new data.
 
     """
-    if isinstance(field.data, np.ndarray):
-        field.data[:] = data
+    if isinstance(field, Quantity):
+        field[:] = data
     else:
         field = data
 
@@ -644,7 +644,7 @@ def calculate_winds_from_streamfunction_grid(
     - D: streamfunction on center points, dx, dy on edge points, all with halos
     """
 
-    if isinstance(u_grid.data, np.ndarray) and isinstance(v_grid.data, np.ndarray):
+    if isinstance(u_grid, Quantity) and isinstance(v_grid, Quantity):
         if grid == GridType.AGrid:
             if not (
                 u_grid.metadata.dims == (I_DIM, J_DIM, K_DIM)
@@ -779,7 +779,7 @@ def create_initial_state_advection(
     delp = init_quantity(
         dimensions, VariableGrid.CellCenters, VariableDims.XYZ, units=units["pressure"]
     )
-    delp.data[:-1, :-1, :-1] = 10
+    delp[:-1, :-1, :-1] = 10
 
     # # # streamfunction
     psi_agrid = init_quantity(
@@ -901,11 +901,11 @@ def run_finite_volume_fluxprep(
     mfxd = init_quantity(
         dimensions, VariableGrid.StaggeredInX, VariableDims.XYZ, units=units["area"]
     )
-    mfxd.data[:] = x_area_flux.data[:] * initial_state["delp"].data[:] * density
+    mfxd[:] = x_area_flux[:] * initial_state["delp"][:] * density
     mfyd = init_quantity(
         dimensions, VariableGrid.StaggeredInY, VariableDims.XYZ, units=units["area"]
     )
-    mfyd.data[:] = y_area_flux.data[:] * initial_state["delp"].data[:] * density
+    mfyd[:] = y_area_flux[:] * initial_state["delp"][:] * density
 
     flux_prep = {
         "crx": crx,

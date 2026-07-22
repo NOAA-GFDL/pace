@@ -308,15 +308,15 @@ def _transform_horizontal_grid(
     """
     grid = metric_terms.grid
     lon_transform, lat_transform = direct_transform(
-        lon=grid.data[:, :, 0],
-        lat=grid.data[:, :, 1],
+        lon=grid[:, :, 0],
+        lat=grid[:, :, 1],
         stretch_factor=stretch_factor,
         lon_target=lon_target,
         lat_target=lat_target,
         np=grid.np,
     )
-    grid.data[:, :, 0] = lon_transform[:]
-    grid.data[:, :, 1] = lat_transform[:]
+    grid[:, :, 0] = lon_transform[:]
+    grid[:, :, 1] = lat_transform[:]
 
-    metric_terms._grid.data[:] = grid.data[:]  # type: ignore[attr-defined]
+    metric_terms._grid[:] = grid[:]  # type: ignore
     metric_terms._init_agrid()
