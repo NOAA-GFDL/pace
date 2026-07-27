@@ -6,12 +6,13 @@ from pathlib import Path
 
 import numpy as np
 
-from ndsl import Quantity
+from ndsl import DiagManagerMonitor, Quantity
 from ndsl.constants import K_DIM, K_INTERFACE_DIM, RGRAV
 from ndsl.dsl.dace.orchestration import dace_inhibitor
 from ndsl.dsl.typing import Float
 from ndsl.grid import GridData
 from ndsl.monitor import Monitor, ZarrMonitor
+from ndsl.monitor.diag_manager_monitor import register_diag_manager_fields
 from ndsl.monitor.netcdf_monitor import NetCDFMonitor
 from ndsl.typing import Communicator
 from pace.state import DriverState
@@ -89,13 +90,15 @@ class DiagnosticsConfig:
     precision: str = "Float"
 
     def __post_init__(self):
-        if (len(self.names) > 0 or len(self.derived_names) > 0) and self.path is None:
+        if (len(self.names) > 0 or len(self.derived_names) > 0) and (
+            self.path is None and self.output_format != "diag_manager"
+        ):
             raise ValueError(
                 "DiagnosticsConfig.path must be given to enable diagnostics"
             )
-        if self.output_format not in ["zarr", "netcdf"]:
+        if self.output_format not in ["zarr", "netcdf", "diag_manager"]:
             raise ValueError(
-                f"output_format must be one of 'zarr' or 'netcdf', got {self.output_format}"
+                f"output_format must be one of 'zarr', 'netcdf', or 'diag_manager', got {self.output_format}"
             )
         if self.precision not in ["Float", "float32", "float64"]:
             raise ValueError(
@@ -110,11 +113,12 @@ class DiagnosticsConfig:
             communicator: provides global communication e.g. to gather state
                 or to coordinate filesystem access between ranks
         """
-        if self.path is None:
+        if self.path is None and self.output_format != "diag_manager":
             return NullDiagnostics()
 
-        if not Path(self.path).exists():
-            Path(self.path).mkdir()
+        if self.output_format != "diag_manager":
+            if not Path(self.path).exists():
+                Path(self.path).mkdir()
 
         if self.output_format == "zarr":
             store = zarr_storage.DirectoryStore(path=self.path)
@@ -136,9 +140,11 @@ class DiagnosticsConfig:
                 time_chunk_size=self.time_chunk_size,
                 precision=precision,
             )
+        elif self.output_format == "diag_manager":
+            monitor = DiagManagerMonitor()
         else:
             raise ValueError(
-                f"output_format must be one of 'zarr' or 'netcdf', got {self.output_format}"
+                f"output_format must be one of 'zarr', 'netcdf', or 'diag_manager', got {self.output_format}"
             )
 
         return MonitorDiagnostics(

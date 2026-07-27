@@ -81,7 +81,9 @@ class DriverState:
         schemes: list[PHYSICS_PACKAGES],
     ) -> Self:
         comm = driver_config.comm_config.get_comm()
-        communicator = Communicator.from_layout(comm=comm, layout=driver_config.layout)
+        communicator: Communicator = Communicator.from_layout(
+            comm=comm, layout=driver_config.layout
+        )
         sizer = SubtileGridSizer.from_tile_params(
             nx_tile=driver_config.nx_tile,
             ny_tile=driver_config.nx_tile,

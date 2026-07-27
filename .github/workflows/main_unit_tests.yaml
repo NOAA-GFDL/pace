@@ -50,8 +50,19 @@ jobs:
         with:
           python-version: ${{ inputs.python_version && inputs.python_version || env.python_default }}
 
+      - name: Install pyFMS dependencies
+        run: |
+          sudo apt update
+          sudo apt install -y libopenmpi-dev libyaml-dev gfortran libnetcdf-dev libnetcdff-dev netcdf-bin
+
+        # need to build mpi4py from source to avoid mismatching mpich versions between os and pip
       - name: Install mpi (MPICH flavor)
-        run: pip install mpich
+        run: pip install mpi4py --no-cache-dir --no-binary mpi4py
+        env:
+          MPICC: mpicc
+          MPICXX: mpicxx
+          MPIFC: mpifort
+
 
       - name: "External trigger: Remove existing component in pace/develop"
         if: ${{ inputs.component_name }}
@@ -81,5 +92,9 @@ jobs:
 
       - name: Run baroclinic test case
         run: |
+          which mpiexec
+          which mpirun
+          mpicc --version
+          mpifort --version
           cd ${GITHUB_WORKSPACE}/pace
-          mpiexec -np 6 python -m pace.run examples/configs/baroclinic_c48_no_out.yaml
+          mpiexec --oversubscribe -np 6 python -m pace.run examples/configs/baroclinic_c48_no_out.yaml
