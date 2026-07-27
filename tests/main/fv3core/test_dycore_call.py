@@ -147,7 +147,7 @@ def copy_state(state1: DycoreState, state2: DycoreState):
             if issubclass(_field.type, Quantity):
                 attr = getattr(state1, attr_name)
                 if isinstance(attr, Quantity):
-                    getattr(state2, attr_name).data[:] = attr.data
+                    getattr(state2, attr_name)[:] = attr[:]
 
 
 def test_temporaries_are_deterministic():

@@ -53,7 +53,7 @@ class ZSelect:
                 )
             var_name = f"{name}_z{self.level}"
             output[var_name] = Quantity(
-                getattr(state, name).data[:, :, self.level],
+                getattr(state, name)[:, :, self.level],
                 dims=getattr(state, name).dims[0:2],
                 origin=getattr(state, name).origin[0:2],
                 extent=getattr(state, name).extent[0:2],
@@ -257,8 +257,7 @@ def _compute_column_integral(name: str, q_in: Quantity, delp: Quantity) -> Quant
 
     k_slice = slice(q_in.origin[2], q_in.origin[2] + q_in.extent[2])
     return Quantity(
-        RGRAV
-        * q_in.np.sum(q_in.data[:, :, k_slice] * delp.data[:, :, k_slice], axis=2),
+        RGRAV * q_in.np.sum(q_in[:, :, k_slice] * delp[:, :, k_slice], axis=2),
         dims=tuple(q_in.dims[:2]) + tuple(q_in.dims[3:]),
         origin=q_in.metadata.origin[0:2],
         extent=(q_in.metadata.extent[0], q_in.metadata.extent[1]),

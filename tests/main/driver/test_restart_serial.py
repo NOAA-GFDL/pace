@@ -88,7 +88,7 @@ def test_restart_save_to_disk():
         for var in driver_state.dycore_state.__dict__.keys():
             if isinstance(driver_state.dycore_state.__dict__[var], Quantity):
                 np.testing.assert_allclose(
-                    driver_state.dycore_state.__dict__[var].data,
+                    driver_state.dycore_state.__dict__[var][:],
                     restart_dycore[var].values,
                 )
             else:
@@ -108,7 +108,7 @@ def test_restart_save_to_disk():
                 driver_state.physics_state.__dict__[var], (np.ndarray, Quantity)
             ):
                 np.testing.assert_allclose(
-                    driver_state.physics_state.__dict__[var].data,
+                    driver_state.physics_state.__dict__[var][:],
                     restart_physics[var].values,
                 )
             else:

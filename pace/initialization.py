@@ -393,10 +393,10 @@ def _update_fortran_restart_pe_peln(state: DriverState) -> None:
     peln = state.dycore_state.peln
     delp = state.dycore_state.delp
 
-    for level in range(pe.data.shape[2]):
-        pe.data[:, :, level] = ptop + delp.np.sum(delp.data[:, :, :level], 2)
+    for level in range(pe.shape[2]):
+        pe[:, :, level] = ptop + delp.np.sum(delp[:, :, :level], 2)
 
-    peln.data[:] = pe.np.log(pe.data[:])
+    peln[:] = pe.np.log(pe[:])
 
     state.dycore_state.pe = pe
     state.dycore_state.peln = peln
