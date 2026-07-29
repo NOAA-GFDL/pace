@@ -81,7 +81,9 @@ class DriverState:
         schemes: list[PHYSICS_PACKAGES],
     ) -> Self:
         comm = driver_config.comm_config.get_comm()
-        communicator: Communicator = Communicator.from_layout(comm=comm, layout=driver_config.layout)
+        communicator: Communicator = (
+            Communicator.from_layout(comm=comm, layout=driver_config.layout)
+        )
         sizer = SubtileGridSizer.from_tile_params(
             nx_tile=driver_config.nx_tile,
             ny_tile=driver_config.nx_tile,
@@ -111,12 +113,8 @@ class DriverState:
     def save_state(self, comm, restart_path: str = "RESTART"):
         Path(restart_path).mkdir(parents=True, exist_ok=True)
         current_rank = str(comm.Get_rank())
-        self.dycore_state.xr_dataset.to_netcdf(
-            f"{restart_path}/restart_dycore_state_{current_rank}.nc"
-        )
-        self.physics_state.xr_dataset.to_netcdf(
-            f"{restart_path}/restart_physics_state_{current_rank}.nc"
-        )
+        self.dycore_state.xr_dataset.to_netcdf(f"{restart_path}/restart_dycore_state_{current_rank}.nc")
+        self.physics_state.xr_dataset.to_netcdf(f"{restart_path}/restart_physics_state_{current_rank}.nc")
         # we can also convert the state to Fortran's restart format using
         # code similar to this commented code. We don't need this feature right
         # now so we haven't implemented it, but this is a good starter.
@@ -196,9 +194,7 @@ def _restart_driver_state(
             "restart_dycore_state",
         )
 
-    physics_state = PhysicsState.init_zeros(
-        quantity_factory=quantity_factory, schemes=schemes
-    )
+    physics_state = PhysicsState.init_zeros(quantity_factory=quantity_factory, schemes=schemes)
 
     physics_state.__post_init__(quantity_factory, schemes)
     tendency_state = TendencyState.init_zeros(
