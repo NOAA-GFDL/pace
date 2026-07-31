@@ -18,6 +18,8 @@ def get_driver_config(
     nx_tile: int = 12,
     nz: int = 79,
     dt_atmos: int = 450,
+    years: int = 0,
+    months: int = 0,
     days: int = 0,
     hours: int = 0,
     minutes: int = 0,
@@ -37,6 +39,8 @@ def get_driver_config(
         nx_tile=nx_tile,
         nz=nz,
         dt_atmos=dt_atmos,
+        years=years,
+        months=months,
         days=days,
         hours=hours,
         minutes=minutes,
@@ -57,19 +61,23 @@ def get_driver_config(
 
 
 @pytest.mark.parametrize(
-    "days, hours, minutes, seconds, expected",
+    "years, months, days, hours, minutes, seconds, expected",
     [
-        pytest.param(1, 0, 0, 0, timedelta(days=1), id="day"),
-        pytest.param(0, 1, 0, 0, timedelta(hours=1), id="hour"),
-        pytest.param(0, 0, 1, 0, timedelta(minutes=1), id="minute"),
-        pytest.param(0, 0, 0, 1, timedelta(seconds=1), id="second"),
+        pytest.param(1, 0, 0, 0, 0, 0, timedelta(days=365), id="year"),
+        pytest.param(0, 1, 0, 0, 0, 0, timedelta(days=30), id="month"),
+        pytest.param(0, 0, 1, 0, 0, 0, timedelta(days=1), id="day"),
+        pytest.param(0, 0, 0, 1, 0, 0, timedelta(hours=1), id="hour"),
+        pytest.param(0, 0, 0, 0, 1, 0, timedelta(minutes=1), id="minute"),
+        pytest.param(0, 0, 0, 0, 0, 1, timedelta(seconds=1), id="second"),
         pytest.param(
-            1, 2, 3, 4, timedelta(days=1, hours=2, minutes=3, seconds=4), id="all"
+            1, 2, 3, 4, 5, 6, timedelta(days=365 + 60 + 3, hours=4, minutes=5, seconds=6), id="all"
         ),
     ],
 )
-def test_total_time(days, hours, minutes, seconds, expected):
-    config = get_driver_config(days=days, hours=hours, minutes=minutes, seconds=seconds)
+def test_total_time(years, months, days, hours, minutes, seconds, expected):
+    config = get_driver_config(
+        years=years, months=months, days=days, hours=hours, minutes=minutes, seconds=seconds
+    )
     assert config.total_time == expected
 
 

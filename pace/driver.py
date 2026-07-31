@@ -70,6 +70,8 @@ class DriverConfig:
         diagnostics_config: configuration for output diagnostics
         dycore_config: configuration for dynamical core
         physics_config: configuration for physics
+        years: years to add to total simulation time (365 days per year)
+        months: months to add to total simulation time (30 days per month)
         days: days to add to total simulation time
         hours: hours to add to total simulation time
         minutes: minutes to add to total simulation time
@@ -118,6 +120,8 @@ class DriverConfig:
     )
     physics_config: PhysicsConfig = dataclasses.field(default_factory=PhysicsConfig)
 
+    years: int = 0
+    months: int = 0
     days: int = 0
     hours: int = 0
     minutes: int = 0
@@ -142,8 +146,9 @@ class DriverConfig:
 
     @functools.cached_property
     def total_time(self) -> timedelta:
+        total_days = self.days + self.years * 365 + self.months * 30
         return timedelta(
-            days=self.days, hours=self.hours, minutes=self.minutes, seconds=self.seconds
+            days=total_days, hours=self.hours, minutes=self.minutes, seconds=self.seconds
         )
 
     def n_timesteps(self) -> int:
