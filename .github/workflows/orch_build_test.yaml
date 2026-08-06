@@ -46,14 +46,13 @@ jobs:
         with:
           python-version: ${{ env.python_default }}
 
-      - name: Install mpi (MPICH flavor)
-        run: pip install mpich
+      - name: Install mpi
+        run: pip install openmpi
 
       - name: Install packages
         run: pip install .
 
       - name: Build and run baroclinic test case
         env:
-          FV3_DACEMODE: BuildAndRun
           NDSL_LOGLEVEL: Info
-        run: mpiexec -np 6 python -m pace.run examples/configs/baroclinic_c12_orch_cpu.yaml
+        run: mpiexec -np 6 --oversubscribe python -m pace.run examples/configs/baroclinic_c12_orch_cpu.yaml

@@ -50,8 +50,8 @@ jobs:
         with:
           python-version: ${{ inputs.python_version && inputs.python_version || env.python_default }}
 
-      - name: Install mpi (MPICH flavor)
-        run: pip install mpich
+      - name: Install mpi
+        run: pip install openmpi
 
       - name: "External trigger: Remove existing component in pace/develop"
         if: ${{ inputs.component_name }}
@@ -82,4 +82,4 @@ jobs:
       - name: Run baroclinic test case
         run: |
           cd ${GITHUB_WORKSPACE}/pace
-          mpiexec -np 6 python -m pace.run examples/configs/baroclinic_c48_no_out.yaml
+          mpiexec -np 6 --oversubscribe python -m pace.run examples/configs/baroclinic_c48_no_out.yaml
