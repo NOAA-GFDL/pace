@@ -16,7 +16,6 @@ from ndsl.constants import I_INTERFACE_DIM, J_INTERFACE_DIM, PI, RADIUS
 from pace import Driver, DriverConfig
 from tests.paths import EXAMPLE_CONFIGS_DIR, REPO_ROOT
 
-
 TEST_CONFIG_FILE_RANKS = [
     ("test_external_C12_1x1.yaml", 6),
     ("test_external_C12_2x2.yaml", 24),

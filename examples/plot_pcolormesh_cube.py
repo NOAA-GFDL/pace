@@ -162,16 +162,12 @@ if __name__ == "__main__":
         sum(x is not None for x in [args.fortran_data_path, args.diff_python_path])
         + args.diff_init
     ) > 1:
-        raise RuntimeError(
-            "Script called with conflicting options between: \
-            Diff init, diff python and diff to fortran"
-        )
+        raise RuntimeError("Script called with conflicting options between: \
+            Diff init, diff python and diff to fortran")
     if args.fortran_data_path is not None:
         if args.fortran_var is None:
-            raise ValueError(
-                "You must specify the variable name (fortran_var) \
-                    to be subtracted in Fortran data."
-            )
+            raise ValueError("You must specify the variable name (fortran_var) \
+                    to be subtracted in Fortran data.")
         if args.fortran_from_wrapper:
             fortran = gather_fortran_wrapper_at_klevel(
                 args.fortran_data_path, args.size, args.fortran_var, args.zlevel, 20
@@ -202,10 +198,8 @@ if __name__ == "__main__":
     python_lon = ds["lon"].values * 180.0 / np.pi
     if args.diff_init:
         if args.fortran_data_path is not None:
-            raise ValueError(
-                "You cannot plot the difference from Fortran \
-                    when plotting the python difference from the first time step."
-            )
+            raise ValueError("You cannot plot the difference from Fortran \
+                    when plotting the python difference from the first time step.")
         if args.var2D:
             python_init = (
                 ds[args.variable][:, :, 0 : args.size, 0 : args.size]
