@@ -26,7 +26,6 @@ from pace import (
 from pyshield import PHYSICS_PACKAGES
 from tests.paths import EXAMPLE_CONFIGS_DIR
 
-
 DIR = os.path.dirname(os.path.abspath(__file__))
 
 
@@ -93,10 +92,8 @@ def test_restart_save_to_disk():
                 )
             else:
                 if var in restart_dycore.keys():
-                    raise KeyError(
-                        f"{var} is not a quantity and \
-                        should not be in dycore restart file"
-                    )
+                    raise KeyError(f"{var} is not a quantity and \
+                        should not be in dycore restart file")
 
         # TODO: the physics state isn't actually needed in the restart folders as
         # all prognostic state is in dycore state, we could refactor it out
@@ -113,10 +110,8 @@ def test_restart_save_to_disk():
                 )
             else:
                 if var in restart_physics.keys():
-                    raise KeyError(
-                        f"{var} is not a storage and \
-                            should not be in physics restart file"
-                    )
+                    raise KeyError(f"{var} is not a storage and \
+                            should not be in physics restart file")
         # test we can use the saved driver config in the restart to load it
         with open(Path("RESTART") / "restart.yaml", "r") as f:
             restart_config = DriverConfig.from_dict(yaml.safe_load(f))
