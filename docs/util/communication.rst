@@ -90,7 +90,7 @@ Given a Quantity, the Boundary object can tell us where the data on the boundary
 .. doctest::
 
     >>> quantity.view[:] = np.arange(4)[None, :] + np.arange(0, 40, 10)[:, None]
-    >>> quantity.data[:]
+    >>> quantity[:]
     array([[ 0.,  0.,  0.,  0.,  0.,  0.],
            [ 0.,  0.,  1.,  2.,  3.,  0.],
            [ 0., 10., 11., 12., 13.,  0.],
@@ -99,7 +99,7 @@ Given a Quantity, the Boundary object can tell us where the data on the boundary
            [ 0.,  0.,  0.,  0.,  0.,  0.]])
     >>> boundary.send_slice(quantity.halo_spec(n_halo=1))
     (slice(4, 5, None), slice(1, 5, None))
-    >>> quantity.data[boundary.send_slice(quantity.halo_spec(n_halo=1))]
+    >>> quantity[boundary.send_slice(quantity.halo_spec(n_halo=1))]
     array([[30., 31., 32., 33.]])
     >>> boundary.recv_slice(quantity.halo_spec(n_halo=1))
     (slice(5, 6, None), slice(1, 5, None))

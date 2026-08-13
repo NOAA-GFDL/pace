@@ -5,7 +5,6 @@ import zarr
 from cartopy import crs as ccrs
 from fv3viz import pcolormesh_cube
 
-
 ds = xr.open_zarr(store=zarr.DirectoryStore(path="output.zarr"), consolidated=False)
 fig, ax = plt.subplots(1, 1, subplot_kw={"projection": ccrs.Robinson()})
 lat = ds["lat"].values * 180.0 / np.pi

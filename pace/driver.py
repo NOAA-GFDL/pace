@@ -43,7 +43,6 @@ from pyfv3.tracers import default_ai2_tracers
 from pyshield import Physics, PhysicsConfig
 from pyshield.update import update_atmos_state
 
-
 try:
     import cupy as cp
 except ImportError:

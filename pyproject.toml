@@ -38,8 +38,7 @@ Repository = "https://github.com/NOAA-GFDL/pace"
 [tool.aliases]
 
 [tool.black]
-line-length = 88
-target_version = ['py311']
+target-version = ["py311", "py312"]
 
 [tool.bumpversion]
 commit = "True"
@@ -55,15 +54,10 @@ max-line-length = 88
 
 [tool.isort]
 default_section = "THIRDPARTY"
-force_grid_wrap = 0
-include_trailing_comma = true
 known_first_party = "ndsl,pyfv3,pyshield,fv3gfs,pace"
 known_third_party = "f90nml,pytest,xarray,numpy,mpi4py,gt4py"
-line_length = 88
-lines_after_imports = 2
-multi_line_output = 3
+profile = "black"
 sections = "FUTURE,STDLIB,THIRDPARTY,FIRSTPARTY,LOCALFOLDER"
-use_parentheses = true
 
 [tool.mypy]
 explicit_package_bases = true
@@ -79,7 +73,11 @@ ignore_errors = true
 module = [
   # We currently can't type stencils
   "pyfv3.stencils.*",
-  "pyshield.stencils.*"
+  "pyshield.stencils.*",
+  # NDSL 2026.07.00 ships with a type error in `ndsl.dsl.stencil.py`.
+  # The type error is already fixed and this ignore can be removed when
+  # updating pace to the next version of NDSL.
+  "ndsl.dsl.*"
 ]
 
 [tool.setuptools]

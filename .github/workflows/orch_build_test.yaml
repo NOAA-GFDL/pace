@@ -20,23 +20,23 @@ jobs:
 
     steps:
       - name: Checkout pace
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Checkout NDSL
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: NOAA-GFDL/NDSL
           path: NDSL
           submodules: recursive
 
       - name: Checkout pyFV3
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: NOAA-GFDL/pyFV3
           path: pyFV3
 
       - name: Checkout pySHiELD
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           repository: NOAA-GFDL/pySHiELD
           path: pySHiELD
@@ -46,14 +46,13 @@ jobs:
         with:
           python-version: ${{ env.python_default }}
 
-      - name: Install mpi (MPICH flavor)
-        run: pip install mpich
+      - name: Install mpi
+        run: pip install openmpi
 
       - name: Install packages
         run: pip install .
 
       - name: Build and run baroclinic test case
         env:
-          FV3_DACEMODE: BuildAndRun
           NDSL_LOGLEVEL: Info
-        run: mpiexec -np 6 python -m pace.run examples/configs/baroclinic_c12_orch_cpu.yaml
+        run: mpiexec -np 6 --oversubscribe python -m pace.run examples/configs/baroclinic_c12_orch_cpu.yaml
