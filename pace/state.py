@@ -164,8 +164,8 @@ def _overwrite_state_from_restart(
 
     for _field in dataclasses.fields(type(state)):
         if "units" in _field.metadata.keys():
-            state.__dict__[_field.name].data[:] = gt_utils.asarray(
-                ds[_field.name].data[:], to_type=state.__dict__[_field.name].np.ndarray
+            state.__dict__[_field.name][:] = gt_utils.asarray(
+                ds[_field.name][:], to_type=state.__dict__[_field.name].np.ndarray
             )
 
 

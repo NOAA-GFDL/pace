@@ -90,7 +90,7 @@ def setup_physics():
         array = getattr(physics_state, field.name)
         # check that it's a storage this way, because Field is not a class
         if isinstance(array, (np.ndarray, cp.ndarray)):
-            array[:] = random.uniform(-1, 1, size=array.data.shape)
+            array[:] = random.uniform(-1, 1, size=array.shape)
     return physics, physics_state
 
 

@@ -82,8 +82,8 @@ class SafetyChecker:
                 min_value = var.view[:].min()
                 max_value = var.view[:].max()
             else:
-                min_value = var.data.min()
-                max_value = var.data.max()
+                min_value = var[:].min()
+                max_value = var[:].max()
 
             if (
                 variable_bounds.minimum_value
