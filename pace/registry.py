@@ -3,7 +3,6 @@ from typing import Callable, Generic, TypeVar
 
 import dacite
 
-
 T = TypeVar("T")
 TT = TypeVar("TT", bound=type)
 

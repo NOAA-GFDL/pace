@@ -2,25 +2,25 @@ default_language_version:
   python: python3
 
 repos:
-  - repo: https://github.com/psf/black
-    rev: 25.9.0
+  # Use mypyc-compiled black, which is about 2x faster
+  - repo: https://github.com/psf/black-pre-commit-mirror
+    rev: 26.5.1
     hooks:
-      - id: black
+      - id: black-jupyter
+        additional_dependencies: ["black[jupyter]"]
 
-  - repo: https://github.com/pre-commit/mirrors-isort
-    rev: v5.10.1
+  - repo: https://github.com/pycqa/isort
+    rev: 8.0.1
     hooks:
       - id: isort
-        args: ["--profile", "black"]
 
   - repo: https://github.com/pre-commit/mirrors-mypy
-    rev: v1.18.2
+    rev: v2.3.0
     hooks:
       - id: mypy
         additional_dependencies: [types-PyYAML]
-        name: mypy-pace
-        files: pace
         args: ["--config-file", "pyproject.toml"]
+        files: pace
 
   - repo: https://github.com/pre-commit/pre-commit-hooks
     rev: v6.0.0
@@ -34,12 +34,11 @@ repos:
     rev: 7.3.0
     hooks:
       - id: flake8
-        name: flake8
         language_version: python3
         additional_dependencies: [Flake8-pyproject, flake8-bugbear]
 
   - repo: https://github.com/macisamuele/language-formatters-pre-commit-hooks
-    rev: v2.15.0
+    rev: v2.16.0
     hooks:
       - id: pretty-format-toml
         args: [--autofix, --indent, "2"]

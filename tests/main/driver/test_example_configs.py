@@ -7,7 +7,6 @@ import yaml
 from pace import DriverConfig
 from tests.paths import EXAMPLE_CONFIGS_DIR, JENKINS_CONFIGS_DIR
 
-
 TESTED_CONFIGS: list[str] = [
     "baroclinic_c12.yaml",
     "baroclinic_c12_dp.yaml",

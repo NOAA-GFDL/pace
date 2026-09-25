@@ -16,7 +16,6 @@ from ndsl import (
 from pace import DriverConfig, DriverState, NullComm
 from pyshield import PHYSICS_PACKAGES
 
-
 # The packages we import will import MPI, causing an MPI init, but we don't actually
 # want to use MPI under this script. We have to finalize so mpirun will work on
 # the test scripts we call that *do* need MPI.

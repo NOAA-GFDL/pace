@@ -3,7 +3,6 @@ import argparse
 import xarray as xr
 import zarr
 
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(
         description="Converts zarr directory stores to netcdf"

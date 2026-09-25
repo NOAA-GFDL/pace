@@ -6,7 +6,6 @@ import pytest
 
 import pyfv3._config
 
-
 CONFIG_CLASSES = [
     pyfv3._config.SatAdjustConfig,
     pyfv3._config.AcousticDynamicsConfig,

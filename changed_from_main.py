@@ -7,12 +7,12 @@ This is useful for running tests only on projects that have changed.
 
 This script should depend only on Python 3.6+ standard libraries.
 """
+
 import argparse
 import re
 import subprocess
 from pathlib import Path
 from typing import Any, Dict, Set
-
 
 DIRNAME = Path(__file__).parent
 DEPENDENCIES_DOTFILE = DIRNAME / "dependencies.dot"

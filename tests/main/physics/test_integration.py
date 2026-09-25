@@ -23,7 +23,6 @@ from ndsl.stencils.testing import assert_same_temporaries, copy_temporaries
 from pace import NullComm
 from pyshield import PHYSICS_PACKAGES, Physics, PhysicsConfig, PhysicsState
 
-
 try:
     import cupy as cp
 except ImportError:

@@ -8,7 +8,6 @@ from pyfv3 import DynamicalCoreConfig
 from pyfv3.initialization.analytic_init import AnalyticCase
 from tests.paths import EXAMPLE_CONFIGS_DIR
 
-
 # TODO: Location of test configurations will be changed after refactor,
 #       need to update after
 
