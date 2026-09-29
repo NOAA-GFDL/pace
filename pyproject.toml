@@ -3,7 +3,7 @@ build-backend = "setuptools.build_meta"
 requires = ["setuptools >= 77.0.3"]
 
 [project]
-authors = [{name = "NOAA", email = "oliver.elbert@noaa.gov"}]
+authors = [{ name = "NOAA", email = "oliver.elbert@noaa.gov" }]
 classifiers = [
   "Development Status :: 2 - Pre-Alpha",
   "Intended Audience :: Developers",
