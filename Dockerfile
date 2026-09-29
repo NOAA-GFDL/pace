@@ -1,4 +1,4 @@
-FROM python:3.11-slim-bookworm@sha256:7cd3fa11d619688317226bc93dc59bc8966e9aec6bc2a6abb847e8ab7d656706
+FROM python:3.12-slim-bookworm
 
 RUN apt-get update && apt-get install -y make \
     software-properties-common \
@@ -33,7 +33,7 @@ RUN python -m pip install \
     matplotlib==3.10.0 \
     ipyparallel==8.4.1 \
     jupyterlab==3.4.4 \
-    shapely==1.8.5 \
+    shapely==2.1.2 \
     cartopy==0.23.0 \
     jupyterlab_code_formatter==1.5.2 \
     isort==5.10.1 \
