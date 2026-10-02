@@ -122,6 +122,12 @@ class NullComm(Comm[T]):
     def Scatterv(self, sendbuf, recvbuf, root: int = 0, **kwargs: dict):  # type: ignore[no-untyped-def]
         pass
 
+    def Gatherv(self, sendbuf, recvbuf, root: int = 0, **kwargs: dict):  # type: ignore[no-untyped-def]
+        pass
+
+    def gather(self, sendobj, root: int = 0, **kwargs: dict):  # type: ignore[no-untyped-def]
+        pass
+
 
 class CreatesComm(abc.ABC):
     """
