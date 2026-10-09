@@ -16,7 +16,7 @@ requirements: list[str] = [
     "dacite",
     "f90nml",
     "numpy >= 2",
-    "xarray",
+    "xarray <= 2026.7.0",
     "zarr < 3.0.0",
 ]
 
