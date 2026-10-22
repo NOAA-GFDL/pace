@@ -4,8 +4,15 @@ on:
   push:
     branches:
       - 'develop'
+  pull_request: # run when a PR is opened / updated
+  merge_group:  # run when the PR is added to the merge queue
   schedule:
     - cron: '0 0 * * 0' # Sundays @ midnight
+
+# cancel running jobs if theres a newer push
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   test-container-builds:
