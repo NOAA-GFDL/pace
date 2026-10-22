@@ -8,6 +8,7 @@ RUN apt-get update && apt-get install -y make \
     libhdf5-serial-dev \
     netcdf-bin \
     libnetcdf-dev \
+    libnetcdff-dev \
     libproj-dev \
     proj-bin \
     proj-data \
