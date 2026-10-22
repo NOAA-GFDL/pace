@@ -47,7 +47,9 @@ jobs:
           python-version: ${{ env.python_default }}
 
       - name: Install pyFMS dependencies
-        run: sudo apt install -y libopenmpi-dev libyaml-dev gfortran libnetcdf-dev libnetcdff-dev netcdf-bin
+        run: |
+          sudo apt update
+          sudo apt install -y libopenmpi-dev libyaml-dev gfortran libnetcdf-dev libnetcdff-dev netcdf-bin
 
       - name: Install packages
         run: pip install .
