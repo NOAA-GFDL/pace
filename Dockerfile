@@ -11,6 +11,8 @@ RUN apt-get update && apt-get install -y make \
     libproj-dev \
     proj-bin \
     proj-data \
+    libyaml-dev \
+    gfortran \
     python3 \
     python3-pip \
     git
