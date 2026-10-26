@@ -9,7 +9,7 @@ def local_pkg(name: str, relative_path: str) -> str:
 
 
 requirements: list[str] = [
-    local_pkg("ndsl", "NDSL", extras="pyfms"),
+    local_pkg("ndsl", "NDSL"),
     local_pkg("pyfv3", "pyFV3"),
     local_pkg("pyshield", "pySHiELD"),
     "dacite",
