@@ -3,7 +3,7 @@ from pathlib import Path
 from setuptools import setup
 
 
-def local_pkg(name: str, relative_path: str, extras: Optional[str] = None) -> str:
+def local_pkg(name: str, relative_path: str, extras: str | None = None) -> str:
     """Returns an absolute path to a local package with optional extras."""
     path_str = f"{name} @ file://{Path(__file__).absolute().parent / relative_path}"
     if extras:
