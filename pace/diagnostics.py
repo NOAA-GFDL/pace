@@ -120,7 +120,7 @@ class DiagnosticsConfig:
                 Path(self.path).mkdir()
 
         if self.output_format == "zarr":
-            store = zarr_storage.DirectoryStore(path=self.path)
+            store = zarr_storage.LocalStore(root=Path(self.path))
             monitor: Monitor = ZarrMonitor(
                 store=store,
                 partitioner=communicator.partitioner,

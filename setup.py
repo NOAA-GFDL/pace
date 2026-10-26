@@ -3,10 +3,12 @@ from pathlib import Path
 from setuptools import setup
 
 
-def local_pkg(name: str, relative_path: str, extras: str = "") -> str:
-    """Returns an absolute path to a local package."""
-    extras_spec = f"[{extras}]" if extras else ""
-    return f"{name}{extras_spec} @ file://{Path(__file__).absolute().parent / relative_path} "
+def local_pkg(name: str, relative_path: str, extras: str | None = None) -> str:
+    """Returns an absolute path to a local package with optional extras."""
+    path_str = f"{name} @ file://{Path(__file__).absolute().parent / relative_path}"
+    if extras:
+        return f"{name}[{extras}] @ file://{Path(__file__).absolute().parent / relative_path}"
+    return path_str
 
 
 requirements: list[str] = [
@@ -16,8 +18,8 @@ requirements: list[str] = [
     "dacite",
     "f90nml",
     "numpy >= 2",
-    "xarray <= 2026.7.0",
-    "zarr < 3.0.0",
+    "xarray",
+    "zarr >= 3",
 ]
 
 setup(install_requires=requirements)
