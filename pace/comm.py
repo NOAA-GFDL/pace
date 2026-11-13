@@ -2,7 +2,7 @@ import abc
 import copy
 import dataclasses
 import os
-from typing import Any, ClassVar, List, Mapping, TypeVar, cast
+from typing import Any, ClassVar, Mapping, TypeVar, cast
 
 from ndsl import MPIComm
 from ndsl.comm import (
@@ -13,7 +13,6 @@ from ndsl.comm import (
     Request,
 )
 from pace.registry import Registry
-
 
 T = TypeVar("T")
 
@@ -119,6 +118,15 @@ class NullComm(Comm[T]):
 
     def Allreduce_inplace(self, obj: T, op: ReductionOperator) -> T:
         raise NotImplementedError("NullComm.Allreduce_inplace")
+
+    def Scatterv(self, sendbuf, recvbuf, root: int = 0, **kwargs: dict):  # type: ignore[no-untyped-def]
+        pass
+
+    def Gatherv(self, sendbuf, recvbuf, root: int = 0, **kwargs: dict):  # type: ignore[no-untyped-def]
+        pass
+
+    def gather(self, sendobj, root: int = 0, **kwargs: dict):  # type: ignore[no-untyped-def]
+        pass
 
 
 class CreatesComm(abc.ABC):
@@ -245,7 +253,7 @@ class WriterCommConfig(CreatesComm):
         path: directory to write data to
     """
 
-    ranks: List[int]
+    ranks: list[int]
     path: str = "."
 
     def get_comm(self) -> CachingCommWriter:

@@ -1,5 +1,3 @@
-from ndsl.performance import PerformanceConfig
-
 from .comm import (
     CreatesComm,
     CreatesCommSelector,
@@ -21,7 +19,6 @@ from .initialization import (
 from .registry import Registry
 from .safety_checks import SafetyChecker
 from .state import DriverState, TendencyState
-
 
 __version__ = "0.2.0"
 

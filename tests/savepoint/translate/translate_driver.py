@@ -11,7 +11,6 @@ from pyfv3.testing import TranslateFVDynamics
 from pyfv3.testing.validation import enable_selective_validation
 from pyshield import PHYSICS_PACKAGES, PhysicsConfig, PhysicsState
 
-
 enable_selective_validation()
 
 

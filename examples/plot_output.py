@@ -1,7 +1,6 @@
 import xarray as xr
 import zarr
 
-
 try:
     import matplotlib.pyplot as plt
 except ModuleNotFoundError:

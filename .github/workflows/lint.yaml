@@ -13,7 +13,7 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           submodules: 'recursive'
 
@@ -33,4 +33,4 @@ jobs:
         run: pip install pre-commit
 
       - name: Run lint via pre-commit
-        run: pre-commit run --all-files
+        run: pre-commit run --show-diff-on-failure --color=always --all-files

@@ -41,43 +41,43 @@ def test_cartesian_grid_generation(
         deglat=deglat,
         eta_file=Path("NDSL/tests/data/eta/eta79.nc"),
     )
-    assert np.all(grid_generator.lat_agrid.data == deglat * PI / 180.0)
-    assert np.all(grid_generator.lon_agrid.data == 0.0)
+    assert np.all(grid_generator.lat_agrid[:] == deglat * PI / 180.0)
+    assert np.all(grid_generator.lon_agrid[:] == 0.0)
     for prop in ("dx", "dxa", "dxc"):
         dx = getattr(grid_generator, prop)
-        assert np.all(dx.data == dx_const)
+        assert np.all(dx[:] == dx_const)
     for prop in ("dy", "dya", "dyc"):
         dy = getattr(grid_generator, prop)
-        assert np.all(dy.data == dy_const)
+        assert np.all(dy[:] == dy_const)
     for prop in ("rdx", "rdxa", "rdxc"):
         rdx = getattr(grid_generator, prop)
-        assert np.all(rdx.data == 1.0 / dx_const)
+        assert np.all(rdx[:] == 1.0 / dx_const)
     for prop in ("rdy", "rdya", "rdyc"):
         rdy = getattr(grid_generator, prop)
-        assert np.all(rdy.data == 1.0 / dy_const)
+        assert np.all(rdy[:] == 1.0 / dy_const)
     for prop in ("area", "area_c"):
         area = getattr(grid_generator, prop)
-        assert np.all(area.data == dx_const * dy_const)
+        assert np.all(area[:] == dx_const * dy_const)
     for prop in ("rarea", "rarea_c"):
         rarea = getattr(grid_generator, prop)
-        assert np.all(rarea.data == 1.0 / (dx_const * dy_const))
+        assert np.all(rarea[:] == 1.0 / (dx_const * dy_const))
     for prop in ("ec1", "ew1", "es1"):
         unit_x = getattr(grid_generator, prop)
-        assert np.all(unit_x.data[..., 0] == 1.0)
-        assert np.all(unit_x.data[..., 1:] == 0.0)
+        assert np.all(unit_x[..., 0] == 1.0)
+        assert np.all(unit_x[..., 1:] == 0.0)
     for prop in ("ec2", "ew2", "es2"):
         unit_y = getattr(grid_generator, prop)
-        assert np.all(unit_y.data[..., 0] == 0.0)
-        assert np.all(unit_y.data[..., 1] == 1.0)
-        assert np.all(unit_y.data[..., 2] == 0.0)
+        assert np.all(unit_y[..., 0] == 0.0)
+        assert np.all(unit_y[..., 1] == 1.0)
+        assert np.all(unit_y[..., 2] == 0.0)
     for i in range(1, 10):
         cos_sg = getattr(grid_generator, f"cos_sg{i}")
-        assert np.all(cos_sg.data == 0.0)
+        assert np.all(cos_sg[:] == 0.0)
         sin_sg = getattr(grid_generator, f"sin_sg{i}")
-        assert np.all(sin_sg.data == 1.0)
+        assert np.all(sin_sg[:] == 1.0)
     for prop in ("cosa", "cosa_u", "cosa_v", "cosa_s"):
         cos = getattr(grid_generator, prop)
-        assert np.all(cos.data == 0.0)
+        assert np.all(cos[:] == 0.0)
     for prop in ("sina", "sina_u", "sina_v", "rsina", "rsin_u", "rsin_v", "rsin2"):
         sin = getattr(grid_generator, prop)
-        assert np.all(sin.data == 1.0)
+        assert np.all(sin[:] == 1.0)

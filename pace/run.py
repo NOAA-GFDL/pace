@@ -1,6 +1,5 @@
 import dataclasses
 import gc
-from typing import Optional
 
 import click
 import yaml
@@ -16,16 +15,11 @@ from pace.driver import Driver, DriverConfig
     type=click.Path(exists=True, readable=True, dir_okay=False, resolve_path=True),
 )
 @click.option(
-    "--log-rank",
-    type=click.INT,
-    help="rank to log from, or all ranks by default, ignored if running without MPI",
-)
-@click.option(
     "--log-level",
     default="info",
     help="one of 'debug', 'info', 'warning', 'error', 'critical'",
 )
-def command_line(config_path: str, log_rank: Optional[int], log_level: str):
+def command_line(config_path: str, log_level: str) -> None:
     """
     Run the driver.
 
@@ -43,13 +37,12 @@ def command_line(config_path: str, log_rank: Optional[int], log_level: str):
     main(driver_config=driver_config)
 
 
-def main(driver_config: DriverConfig) -> Driver:
+def main(driver_config: DriverConfig) -> None:
     driver = Driver(config=driver_config)
     try:
         driver.step_all()
     finally:
         driver.cleanup()
-    return driver
 
 
 if __name__ == "__main__":

@@ -23,7 +23,6 @@ from ndsl.stencils.testing import assert_same_temporaries, copy_temporaries
 from pace import NullComm
 from pyshield import PHYSICS_PACKAGES, Physics, PhysicsConfig, PhysicsState
 
-
 try:
     import cupy as cp
 except ImportError:
@@ -90,7 +89,7 @@ def setup_physics():
         array = getattr(physics_state, field.name)
         # check that it's a storage this way, because Field is not a class
         if isinstance(array, (np.ndarray, cp.ndarray)):
-            array[:] = random.uniform(-1, 1, size=array.data.shape)
+            array[:] = random.uniform(-1, 1, size=array.shape)
     return physics, physics_state
 
 

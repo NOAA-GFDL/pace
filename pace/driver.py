@@ -3,16 +3,18 @@ import functools
 import warnings
 from datetime import datetime, timedelta
 from math import floor
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any
 
 import dace
 import dacite
+import numpy as np
 import yaml
 
 from ndsl import (
     CompilationConfig,
     CubedSphereCommunicator,
     DaceConfig,
+    DiagManagerMonitor,
     GridIndexing,
     PerformanceCollector,
     QuantityFactory,
@@ -29,24 +31,35 @@ from ndsl.constants import N_HALO_DEFAULT
 from ndsl.dsl.dace.orchestration import dace_inhibitor, orchestrate
 from ndsl.dsl.typing import Float
 from ndsl.grid import DampingCoefficients, DriverGridData, GridData
+from ndsl.monitor.diag_manager_monitor import initialize_pyfms
 from ndsl.performance import PerformanceConfig, Timer
 from ndsl.typing import Communicator
 from pace.comm import CreatesCommSelector
-from pace.diagnostics import DiagnosticsConfig
+from pace.diagnostics import (
+    DiagnosticsConfig,
+    MonitorDiagnostics,
+    register_diag_manager_fields,
+)
 from pace.grid import GeneratedGridConfig, GridInitializerSelector
 from pace.initialization import InitializerSelector
 from pace.safety_checks import SafetyChecker
 from pace.state import DriverState
 from pyfv3 import DynamicalCore, DynamicalCoreConfig
 from pyfv3.initialization.analytic_init import AnalyticCase
+from pyfv3.tracers import default_ai2_tracers
 from pyshield import Physics, PhysicsConfig
 from pyshield.update import update_atmos_state
-
 
 try:
     import cupy as cp
 except ImportError:
     cp = None
+
+try:
+    import pyfms
+except ImportError:
+    pyfms = None
+from pyfv3 import DycoreState
 
 
 @dataclasses.dataclass
@@ -95,9 +108,9 @@ class DriverConfig:
     initialization: InitializerSelector
     nx_tile: int
     nz: int
-    layout: Tuple[int, int]
+    layout: tuple[int, int]
     dt_atmos: float
-    grid_type: Optional[int] = 0
+    grid_type: int | None = 0
     grid_config: GridInitializerSelector = dataclasses.field(
         default_factory=lambda: GridInitializerSelector(
             type="generated", config=GeneratedGridConfig()
@@ -129,14 +142,14 @@ class DriverConfig:
     pair_debug: bool = False
     output_initial_state: bool = False
     output_frequency: int = 1
-    safety_check_frequency: Optional[int] = None
+    safety_check_frequency: int | None = None
 
     @functools.cached_property
     def timestep(self) -> timedelta:
         return timedelta(seconds=self.dt_atmos)
 
     @property
-    def start_time(self) -> Union[datetime, timedelta]:
+    def start_time(self) -> datetime | timedelta:
         return self.initialization.start_time
 
     @functools.cached_property
@@ -166,8 +179,8 @@ class DriverConfig:
     def get_grid(
         self,
         communicator: Communicator,
-        quantity_factory: Optional[QuantityFactory] = None,
-    ) -> Tuple[DampingCoefficients, DriverGridData, GridData]:
+        quantity_factory: QuantityFactory | None = None,
+    ) -> tuple[DampingCoefficients, DriverGridData, GridData]:
         if quantity_factory is None:
             sizer = SubtileGridSizer.from_tile_params(
                 nx_tile=self.nx_tile,
@@ -194,8 +207,8 @@ class DriverConfig:
         damping_coefficients: DampingCoefficients,
         driver_grid_data: DriverGridData,
         grid_data: GridData,
-        quantity_factory: Optional[QuantityFactory] = None,
-        stencil_factory: Optional[StencilFactory] = None,
+        quantity_factory: QuantityFactory | None = None,
+        stencil_factory: StencilFactory | None = None,
     ) -> DriverState:
         """Load the initial state of the driver."""
         if quantity_factory is None or stencil_factory is None:
@@ -231,7 +244,7 @@ class DriverConfig:
         )
 
     @classmethod
-    def from_dict(cls, kwargs: Dict[str, Any]) -> "DriverConfig":
+    def from_dict(cls, kwargs: dict[str, Any]) -> "DriverConfig":
         if isinstance(kwargs["dycore_config"], dict):
             for derived_name in ("dt_atmos", "layout", "npx", "npy", "npz", "ntiles"):
                 if derived_name in kwargs["dycore_config"]:
@@ -301,7 +314,7 @@ class DriverConfig:
 
     def write_for_restart(
         self,
-        time: Union[datetime, timedelta],
+        time: datetime | timedelta,
         restart_path: str,
     ):
         config_dict = dataclasses.asdict(self)
@@ -338,7 +351,7 @@ class DriverConfig:
 @dataclasses.dataclass()
 class RestartConfig:
     save_restart: bool = False
-    intermediate_restart: List[int] = dataclasses.field(default_factory=list)
+    intermediate_restart: list[int] = dataclasses.field(default_factory=list)
     save_intermediate_restart: bool = False
 
     def __post_init__(self):
@@ -368,7 +381,7 @@ class RestartConfig:
         *,
         step: int,
         comm: Comm,
-        time: Union[datetime, timedelta],
+        time: datetime | timedelta,
         driver_config: DriverConfig,
         restart_path: str,
     ):
@@ -407,6 +420,7 @@ class Driver:
             stencil_compare_comm = None
         self.performance_collector = self.config.performance_config.build(self.comm)
         self.profiler = self.config.performance_config.build_profiler()
+        pyfms_domain_id: int | None = None
         with self.performance_collector.total_timer.clock("initialization"):
             comm_timer = (
                 self.performance_collector.timestep_timer
@@ -493,6 +507,7 @@ class Driver:
 
             self._start_time = self.config.initialization.start_time
             ndsl_log.info("setting up dycore object started")
+            default_ai2_tracers(self.quantity_factory)
             self.dycore = DynamicalCore(
                 comm=communicator,
                 grid_data=self.state.grid_data,
@@ -543,10 +558,149 @@ class Driver:
                 self.end_of_step_update = None
             ndsl_log.info("setting up physics object done")
             ndsl_log.info("setting up diagnostics factory started")
+            if config.diagnostics_config.output_format == "diag_manager":
+                pyfms_domain_id = initialize_pyfms(
+                    nx_tile=self.config.nx_tile,
+                    layout=list(self.config.layout),
+                    ntiles=self.config.dycore_config.ntiles,
+                    halo=N_HALO_DEFAULT,
+                    use_cubic_mosaic=self.config.grid_type <= 3,
+                )
             self.diagnostics = config.diagnostics_config.diagnostics_factory(
-                communicator=communicator
+                communicator=communicator,
             )
             ndsl_log.info("setting up diagnostics factory done")
+            # diag_manager needs some additional set up steps after initialization via the monitor class
+            if config.diagnostics_config.output_format == "diag_manager":
+                if pyfms_domain_id is None:
+                    raise RuntimeError("pyFMS domain id was not initialized")
+                assert isinstance(self.diagnostics, MonitorDiagnostics)
+                assert isinstance(self.diagnostics.monitor, DiagManagerMonitor)
+                assert isinstance(self.time, datetime)
+                diag_manager_monitor = self.diagnostics.monitor
+                ndsl_log.info("setting up diag_manager axes and fields")
+                run_time = timedelta(
+                    days=config.days,
+                    hours=config.hours,
+                    minutes=config.minutes,
+                    seconds=config.seconds,
+                )
+                end_time = self.time + run_time
+                diag_manager_monitor.set_end_time(end_time)
+                diag_manager_monitor.set_timestep(timedelta(seconds=config.dt_atmos))
+                if self.config.diagnostics_config.precision == "Float":
+                    precision = Float
+                    if precision == np.float32:
+                        prec_str = "float32"
+                    elif precision == np.float64:
+                        prec_str = "float64"
+                    else:
+                        raise ValueError(
+                            f"precision {precision} not supported for diag_manager output format"
+                        )
+                elif self.config.diagnostics_config.precision == "float32":
+                    precision = np.float32
+                    prec_str = "float32"
+                elif self.config.diagnostics_config.precision == "float64":
+                    precision = np.float64
+                    prec_str = "float64"
+                # sets a string for the diag manager argument, in case 'Float' is set
+                i = np.arange(config.nx_tile, dtype=precision)
+                j = i  # square dims required by ndsl
+                i_interface = np.arange(config.nx_tile + 1, dtype=precision)
+                j_interface = i_interface
+                k = np.arange(config.nz, dtype=precision)
+                k_interface = np.arange(config.nz + 1, dtype=precision)
+                diag_manager_monitor.register_axis(
+                    name="i",
+                    long_name="i",
+                    axis_data=i,
+                    cart_name="x",
+                    domain_id=pyfms_domain_id,
+                    set_name="pyfv3",
+                    units="radians",
+                    not_xy=False,
+                )
+                diag_manager_monitor.register_axis(
+                    name="i_interface",
+                    long_name="i_interface",
+                    axis_data=i_interface,
+                    cart_name="x",
+                    domain_id=pyfms_domain_id,
+                    set_name="pyfv3",
+                    units="radians",
+                    not_xy=False,
+                    extend_domain_direction="east",
+                )
+                diag_manager_monitor.register_axis(
+                    name="j",
+                    long_name="j",
+                    axis_data=j,
+                    cart_name="y",
+                    domain_id=pyfms_domain_id,
+                    set_name="pyfv3",
+                    units="radians",
+                    not_xy=False,
+                )
+                diag_manager_monitor.register_axis(
+                    name="j_interface",
+                    long_name="j_interface",
+                    axis_data=j_interface,
+                    cart_name="y",
+                    domain_id=pyfms_domain_id,
+                    set_name="pyfv3",
+                    not_xy=False,
+                    units="radians",
+                    extend_domain_direction="north",
+                )
+                diag_manager_monitor.register_axis(
+                    name="k",
+                    long_name="k",
+                    axis_data=k,
+                    cart_name="z",
+                    set_name="pyfv3",
+                    not_xy=True,
+                    units="radians",
+                )
+                diag_manager_monitor.register_axis(
+                    name="k_interface",
+                    long_name="k_interface",
+                    axis_data=k_interface,
+                    cart_name="z",
+                    set_name="pyfv3",
+                    not_xy=True,
+                    units="radians",
+                )
+                fields_to_register = config.diagnostics_config.names.copy()
+                # Monitors check the dycore state first and then the physics
+                # state, so registration follows the same precedence.
+                # field names will be removed from the list as they are registered to avoid duplicates
+                register_diag_manager_fields(
+                    dataclass_fields=self.state.dycore_state.__class__.__dataclass_fields__,
+                    monitor=diag_manager_monitor,
+                    init_time=self.time,
+                    field_names=fields_to_register,
+                    module_name="pyfv3",
+                    dtype=prec_str,
+                )
+                if (
+                    fields_to_register
+                ):  # if there are still fields left to register, they must be in the physics state
+                    register_diag_manager_fields(
+                        dataclass_fields=self.state.physics_state.__class__.__dataclass_fields__,
+                        monitor=diag_manager_monitor,
+                        init_time=self.time,
+                        field_names=fields_to_register,
+                        module_name="pyfv3",
+                        dtype=prec_str,
+                    )
+                if fields_to_register:  # should be empty
+                    ndsl_log.warning(
+                        "Some fields requested for diagnostics were not found "
+                        "in either the physics or dycore state: "
+                        f"{fields_to_register}"
+                    )
+                ndsl_log.info("setting up diag_manager done")
         log_subtile_location(
             partitioner=communicator.partitioner.tile, rank=communicator.rank
         )
@@ -717,6 +871,8 @@ class Driver:
             driver_config=self.config,
             restart_path="RESTART",
         )
+        if self.config.diagnostics_config.output_format == "diag_manager":
+            pyfms.fms.end()
         self.comm_config.cleanup(self.comm)
 
 
@@ -734,7 +890,7 @@ def _setup_factories(
     config: DriverConfig,
     communicator: Communicator,
     stencil_compare_comm,
-) -> Tuple[QuantityFactory, StencilFactory]:
+) -> tuple[QuantityFactory, StencilFactory]:
     """
     Args:
         config: configuration of driver

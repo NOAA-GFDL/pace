@@ -81,7 +81,9 @@ class DriverState:
         schemes: list[PHYSICS_PACKAGES],
     ) -> Self:
         comm = driver_config.comm_config.get_comm()
-        communicator = Communicator.from_layout(comm=comm, layout=driver_config.layout)
+        communicator: Communicator = Communicator.from_layout(
+            comm=comm, layout=driver_config.layout
+        )
         sizer = SubtileGridSizer.from_tile_params(
             nx_tile=driver_config.nx_tile,
             ny_tile=driver_config.nx_tile,
@@ -164,8 +166,8 @@ def _overwrite_state_from_restart(
 
     for _field in dataclasses.fields(type(state)):
         if "units" in _field.metadata.keys():
-            state.__dict__[_field.name].data[:] = gt_utils.asarray(
-                ds[_field.name].data[:], to_type=state.__dict__[_field.name].np.ndarray
+            state.__dict__[_field.name][:] = gt_utils.asarray(
+                ds[_field.name][:], to_type=state.__dict__[_field.name].np.ndarray
             )
 
 

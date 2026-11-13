@@ -6,17 +6,17 @@ from pathlib import Path
 
 import numpy as np
 
-from ndsl import Quantity
+from ndsl import DiagManagerMonitor, Quantity
 from ndsl.constants import K_DIM, K_INTERFACE_DIM, RGRAV
 from ndsl.dsl.dace.orchestration import dace_inhibitor
 from ndsl.dsl.typing import Float
 from ndsl.grid import GridData
 from ndsl.monitor import Monitor, ZarrMonitor
+from ndsl.monitor.diag_manager_monitor import register_diag_manager_fields
 from ndsl.monitor.netcdf_monitor import NetCDFMonitor
 from ndsl.typing import Communicator
 from pace.state import DriverState
 from pyfv3 import DycoreState
-
 
 try:
     import zarr.storage as zarr_storage
@@ -53,7 +53,7 @@ class ZSelect:
                 )
             var_name = f"{name}_z{self.level}"
             output[var_name] = Quantity(
-                getattr(state, name).data[:, :, self.level],
+                getattr(state, name)[:, :, self.level],
                 dims=getattr(state, name).dims[0:2],
                 origin=getattr(state, name).origin[0:2],
                 extent=getattr(state, name).extent[0:2],
@@ -89,13 +89,15 @@ class DiagnosticsConfig:
     precision: str = "Float"
 
     def __post_init__(self):
-        if (len(self.names) > 0 or len(self.derived_names) > 0) and self.path is None:
+        if (len(self.names) > 0 or len(self.derived_names) > 0) and (
+            self.path is None and self.output_format != "diag_manager"
+        ):
             raise ValueError(
                 "DiagnosticsConfig.path must be given to enable diagnostics"
             )
-        if self.output_format not in ["zarr", "netcdf"]:
+        if self.output_format not in ["zarr", "netcdf", "diag_manager"]:
             raise ValueError(
-                f"output_format must be one of 'zarr' or 'netcdf', got {self.output_format}"
+                f"output_format must be one of 'zarr', 'netcdf', or 'diag_manager', got {self.output_format}"
             )
         if self.precision not in ["Float", "float32", "float64"]:
             raise ValueError(
@@ -110,14 +112,15 @@ class DiagnosticsConfig:
             communicator: provides global communication e.g. to gather state
                 or to coordinate filesystem access between ranks
         """
-        if self.path is None:
+        if self.path is None and self.output_format != "diag_manager":
             return NullDiagnostics()
 
-        if not Path(self.path).exists():
-            Path(self.path).mkdir()
+        if self.output_format != "diag_manager":
+            if not Path(self.path).exists():
+                Path(self.path).mkdir()
 
         if self.output_format == "zarr":
-            store = zarr_storage.DirectoryStore(path=self.path)
+            store = zarr_storage.LocalStore(root=Path(self.path))
             monitor: Monitor = ZarrMonitor(
                 store=store,
                 partitioner=communicator.partitioner,
@@ -136,9 +139,11 @@ class DiagnosticsConfig:
                 time_chunk_size=self.time_chunk_size,
                 precision=precision,
             )
+        elif self.output_format == "diag_manager":
+            monitor = DiagManagerMonitor()
         else:
             raise ValueError(
-                f"output_format must be one of 'zarr' or 'netcdf', got {self.output_format}"
+                f"output_format must be one of 'zarr', 'netcdf', or 'diag_manager', got {self.output_format}"
             )
 
         return MonitorDiagnostics(
@@ -257,8 +262,7 @@ def _compute_column_integral(name: str, q_in: Quantity, delp: Quantity) -> Quant
 
     k_slice = slice(q_in.origin[2], q_in.origin[2] + q_in.extent[2])
     return Quantity(
-        RGRAV
-        * q_in.np.sum(q_in.data[:, :, k_slice] * delp.data[:, :, k_slice], axis=2),
+        RGRAV * q_in.np.sum(q_in[:, :, k_slice] * delp[:, :, k_slice], axis=2),
         dims=tuple(q_in.dims[:2]) + tuple(q_in.dims[3:]),
         origin=q_in.metadata.origin[0:2],
         extent=(q_in.metadata.extent[0], q_in.metadata.extent[1]),

@@ -1,20 +1,28 @@
+name: "Container Build"
+
 on:
   push:
     branches:
       - 'develop'
-  schedule:
-    - cron: '0 0 * * 0' # sundays @ midnight
+  pull_request: # run when a PR is opened / updated
+  merge_group:  # run when the PR is added to the merge queue
+
+
+# cancel running jobs if theres a newer push
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
 
 jobs:
   test-container-builds:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout Files
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
         with:
           submodules: recursive
       - name: Build Dockerfile
-        uses: docker/build-push-action@v6.18.0
+        uses: docker/build-push-action@v7
         with:
           context: .
           push: false

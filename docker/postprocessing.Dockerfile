@@ -3,7 +3,7 @@ FROM ubuntu:22.04
 ENV DEBIAN_FRONTEND=noninteractive
 
 RUN apt-get update &&\
-    apt install -y --no-install-recommends \
+    apt-get install -y --no-install-recommends \
     software-properties-common
 
 RUN apt-get update -y && \
@@ -17,7 +17,7 @@ RUN apt-get update -y && \
     libgeos-dev
 
 RUN apt-get update -y && \
-    apt install -y --no-install-recommends \
+    apt-get install -y --no-install-recommends \
     git \
     python3-pip \
     python3.10 \
@@ -28,7 +28,7 @@ RUN apt-get update -y && \
 RUN update-alternatives --install /usr/bin/python python /usr/bin/python3.10 60
 
 RUN apt-get update -y &&\
-    apt install -y --no-install-recommends\
+    apt-get install -y --no-install-recommends\
     python3-pip
 
 RUN python -m pip --no-cache-dir install --upgrade pip && \

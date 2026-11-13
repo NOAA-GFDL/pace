@@ -7,7 +7,6 @@ import yaml
 from pace import DriverConfig
 from tests.paths import EXAMPLE_CONFIGS_DIR, JENKINS_CONFIGS_DIR
 
-
 TESTED_CONFIGS: list[str] = [
     "baroclinic_c12.yaml",
     "baroclinic_c12_dp.yaml",
@@ -16,6 +15,7 @@ TESTED_CONFIGS: list[str] = [
     "baroclinic_c12_comm_write.yaml",
     "baroclinic_c12_null_comm.yaml",
     "baroclinic_c12_write_restart.yaml",
+    "baroclinic_c12_diag_manager.yaml",
     "baroclinic_c48_6ranks_serialbox_test.yaml",
     "analytic_test.yaml",
 ]
@@ -29,6 +29,9 @@ EXCLUDED_CONFIGS: list[str] = [
     "tropicalcyclone_c128.yaml",
     "test_external_C12_1x1.yaml",
     "test_external_C12_2x2.yaml",
+    # This is a input file for pyFMS when using the baroclinic_c12_diag_manager.yaml config.
+    # It is not a config file itself
+    "diag_table.yaml",
 ]
 
 

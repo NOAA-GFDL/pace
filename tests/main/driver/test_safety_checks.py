@@ -27,8 +27,8 @@ def test_check_state():
     SafetyChecker.register_variable("u", minimum_value=10, maximum_value=20)
     checker = SafetyChecker()
     u = unittest.mock.MagicMock()
-    u.data.min.return_value = 11
-    u.data.max.return_value = 19
+    u.__getitem__.return_value.min.return_value = 11
+    u.__getitem__.return_value.max.return_value = 19
     dycore_state = unittest.mock.MagicMock(u=u)
     checker.check_state(dycore_state)
 
@@ -38,7 +38,7 @@ def test_check_state_failing_min():
     SafetyChecker.register_variable("u", minimum_value=10)
     checker = SafetyChecker()
     u = unittest.mock.MagicMock()
-    u.data.min.return_value = 9
+    u.__getitem__.return_value.min.return_value = 9
     dycore_state = unittest.mock.MagicMock(u=u)
     with pytest.raises(RuntimeError):
         checker.check_state(dycore_state)
@@ -49,7 +49,7 @@ def test_check_state_failing_max():
     SafetyChecker.register_variable("u", maximum_value=10)
     checker = SafetyChecker()
     u = unittest.mock.MagicMock()
-    u.data.max.return_value = 11
+    u.__getitem__.return_value.max.return_value = 11
     dycore_state = unittest.mock.MagicMock(u=u)
     with pytest.raises(RuntimeError):
         checker.check_state(dycore_state)

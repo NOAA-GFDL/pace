@@ -28,7 +28,7 @@ If you are interested in learning more, look up the "Ghost Cell Pattern" or "Hal
 Depending on optimization choices, it may also make sense to include filler data which serves only to align the computational domain into blocks within memory.
 
 If all of that sounded confusing, we agree!
-That's why :py:class:`pace.util.Quantity` abstracts away as much of this information as possible.
+That's why :py:class:`ndsl.Quantity` abstracts away as much of this information as possible.
 If you perform indexing on the ``view`` attribute of quantity, the index will be applied within the computational domain::
 
     quantity.view[:] = 0.  # set all data this rank is responsible for to 0
@@ -36,14 +36,13 @@ If you perform indexing on the ``view`` attribute of quantity, the index will be
     array = quantity.view[:]  # gives an array accessing just the compute domain
     new_array = np.copy(quantity.view[:])  # gives a copy of the compute domain
 
-If you want to access data in ghost cells, instead of ``.view`` you should access ``.data``, which is the underlying ``ndarray``-like object used by the ``Quantity``::
+By default, slicing a ``Quantity`` will access all data, including ghost cells:
 
-    quantity.data[:] = 0.  # set all data this rank has, including ghost cells, to zero
-    quantity.data[quantity.origin[0]-3:quantity.origin[0]] == 1.  # set the left three ghost cells to 1
-    array = quantity.data[quantity.origin[0]:quantity.origin[0]+quantity.extent[0]]  # same as quantity.view[:] for a 1D quantity
+    quantity[:] = 0.  # set all data this rank has, including ghost cells, to zero
+    quantity[quantity.origin[0]-3:quantity.origin[0]] == 1.  # set the left three ghost cells to 1
+    array = quantity[quantity.origin[0]:quantity.origin[0]+quantity.extent[0]]  # same as quantity.view[:] for a 1D quantity
 
-``data`` may be a numpy array or a cupy array. Both provide the same interface and can be used identically.
-If you would like to use the appropriate "numpy" package to manipulate your data, you can use ``quantity.np``.
+If you would like to use the appropriate ``numpy`` / ``cupy`` package to manipulate your data, you can use ``quantity.np``.
 For example, the following will give you the mean of your array, regardless of whether the data is on CPU or GPU, and regardless of whether halo values are present::
 
     quantity.np.mean(quantity.view[:])
