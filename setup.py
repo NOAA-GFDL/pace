@@ -5,14 +5,11 @@ from setuptools import setup
 
 def local_pkg(name: str, relative_path: str, extras: str | None = None) -> str:
     """Returns an absolute path to a local package with optional extras."""
-    path_str = f"{name} @ file://{Path(__file__).absolute().parent / relative_path}"
-    if extras:
-        return f"{name}[{extras}] @ file://{Path(__file__).absolute().parent / relative_path}"
-    return path_str
+    return f"{name} @ file://{Path(__file__).absolute().parent / relative_path}"
 
 
 requirements: list[str] = [
-    local_pkg("ndsl", "NDSL", extras="pyfms"),
+    local_pkg("ndsl", "NDSL"),
     local_pkg("pyfv3", "pyFV3"),
     local_pkg("pyshield", "pySHiELD"),
     "dacite",

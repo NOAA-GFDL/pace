@@ -68,7 +68,7 @@ jobs:
       - name: Install packages
         run: |
           cd ${GITHUB_WORKSPACE}/pace
-          pip install .[test]
+          pip install .[test,pyfms]
 
       - name: Print versions
         run: |
