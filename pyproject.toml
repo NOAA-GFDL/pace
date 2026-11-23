@@ -25,9 +25,7 @@ dev = [
   "pre-commit",
   "flake8-pyproject"
 ]
-pyfms = [
-  "ndsl[pyfms]"
-]
+pyfms = ["pyfms @ git+https://github.com/noaa-gfdl/pyfms.git"]
 test = [
   "mpi4py",
   "nbmake",
